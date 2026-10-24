@@ -1,0 +1,7 @@
+{
+  "name": "@aoc/eslint-config",
+  "version": "0.0.0",
+  "description": "Shared ESLint rules for every package.",
+  "private": true,
+  "type": "module"
+}

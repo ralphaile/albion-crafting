@@ -1,0 +1,22 @@
+{
+  "name": "@aoc/core",
+  "version": "0.0.0",
+  "description": "Crafting calculation engine: return rate, material cost, station fee, taxes, focus, profit and ranking. Pure TypeScript with no I/O.",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@aoc/typescript-config": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}

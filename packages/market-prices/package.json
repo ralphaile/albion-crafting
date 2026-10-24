@@ -1,0 +1,22 @@
+{
+  "name": "@aoc/market-prices",
+  "version": "0.0.0",
+  "description": "Client for the Albion Online Data Project (AODP) API: live market prices and price history.",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@aoc/typescript-config": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}

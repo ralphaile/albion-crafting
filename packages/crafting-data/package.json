@@ -1,0 +1,22 @@
+{
+  "name": "@aoc/crafting-data",
+  "version": "0.0.0",
+  "description": "Crafting data from the game files (ao-bin-dumps): recipes, item values, names, icons, locations and crafting bonuses.",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@aoc/typescript-config": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}
