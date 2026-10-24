@@ -18,30 +18,31 @@ pnpm dev   # http://localhost:5173
 
 ## Scripts
 
-| Command | What it does |
-|---|---|
-| `pnpm dev` | Starts the web app with live reload |
-| `pnpm build` | Builds all packages and the web app |
-| `pnpm typecheck` | Checks types in all packages |
-| `pnpm lint` | Lints all packages |
-| `pnpm test` | Runs the unit tests |
-| `pnpm e2e` | Runs the end-to-end tests |
-| `pnpm format` | Formats the code |
-| `pnpm data:update` | Downloads the game data |
+| Command             | What it does                             |
+| ------------------- | ---------------------------------------- |
+| `pnpm dev`          | Starts the web app with live reload      |
+| `pnpm build`        | Builds all packages and the web app      |
+| `pnpm typecheck`    | Checks types in all packages             |
+| `pnpm lint`         | Lints all packages                       |
+| `pnpm test`         | Runs the unit tests                      |
+| `pnpm e2e`          | Runs the end-to-end tests                |
+| `pnpm format`       | Formats the code                         |
+| `pnpm format:check` | Checks formatting without changing files |
+| `pnpm data:update`  | Downloads the game data                  |
 
-`lint`, `test`, `e2e`, `format` and `data:update` are placeholders until their tickets are done.
+`test`, `e2e` and `data:update` are placeholders until their tickets are done.
 
 ## Project layout
 
 A pnpm + Turborepo monorepo. The web app uses Vite and React.
 
-| Folder | What it is |
-|---|---|
-| `apps/web` | The website: pick a route and settings, and get a ranked list of the best crafts |
-| `packages/core` | The calculation engine: return rate, costs, fees, taxes, focus, profit and ranking. It has no network or storage code, so a future API and Discord bot can reuse it |
-| `packages/market-prices` | Fetches live market prices from the Albion Online Data Project (AODP) API |
-| `packages/crafting-data` | Recipes, item values, locations and crafting bonuses, extracted from the game files |
-| `packages/config-typescript` | Shared strict TypeScript settings |
-| `packages/config-eslint` | Shared lint rules |
+| Folder                       | What it is                                                                                                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web`                   | The website: pick a route and settings, and get a ranked list of the best crafts                                                                                    |
+| `packages/core`              | The calculation engine: return rate, costs, fees, taxes, focus, profit and ranking. It has no network or storage code, so a future API and Discord bot can reuse it |
+| `packages/market-prices`     | Fetches live market prices from the Albion Online Data Project (AODP) API                                                                                           |
+| `packages/crafting-data`     | Recipes, item values, locations and crafting bonuses, extracted from the game files                                                                                 |
+| `packages/config-typescript` | Shared strict TypeScript settings                                                                                                                                   |
+| `packages/config-eslint`     | Shared lint rules                                                                                                                                                   |
 
 Albion Crafting is a fan project and is not affiliated with or endorsed by Sandbox Interactive GmbH. Albion Online is their trademark.
