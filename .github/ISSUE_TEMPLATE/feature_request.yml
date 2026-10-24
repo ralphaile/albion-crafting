@@ -1,0 +1,40 @@
+name: Feature request
+description: Suggest a new feature or an improvement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Planned work is tracked in Jira (space AOC). Accepted requests become Jira tickets.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: For example, "I can't compare selling in Caerleon with selling to the Black Market".
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - ui
+        - calc
+        - data
+        - api
+        - discord
+        - infra
+        - quality
+        - not sure
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workarounds you've considered
