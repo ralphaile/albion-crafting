@@ -185,6 +185,9 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
     devDependencies:
+      '@aoc/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/config-eslint
       '@aoc/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config-typescript
@@ -197,6 +200,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 6.1.2
         version: 6.1.2(vite@8.3.4)
+      eslint:
+        specifier: 10.13.0
+        version: 10.13.0(supports-color@7.2.0)
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -248,27 +254,45 @@ importers:
 
   packages/core:
     devDependencies:
+      '@aoc/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
       '@aoc/typescript-config':
         specifier: workspace:*
         version: link:../config-typescript
+      eslint:
+        specifier: 10.13.0
+        version: 10.13.0(supports-color@7.2.0)
       typescript:
         specifier: 6.0.3
         version: 6.0.3
 
   packages/crafting-data:
     devDependencies:
+      '@aoc/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
       '@aoc/typescript-config':
         specifier: workspace:*
         version: link:../config-typescript
+      eslint:
+        specifier: 10.13.0
+        version: 10.13.0(supports-color@7.2.0)
       typescript:
         specifier: 6.0.3
         version: 6.0.3
 
   packages/market-prices:
     devDependencies:
+      '@aoc/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
       '@aoc/typescript-config':
         specifier: workspace:*
         version: link:../config-typescript
+      eslint:
+        specifier: 10.13.0
+        version: 10.13.0(supports-color@7.2.0)
       typescript:
         specifier: 6.0.3
         version: 6.0.3
