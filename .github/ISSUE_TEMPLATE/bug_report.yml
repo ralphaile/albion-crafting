@@ -1,0 +1,49 @@
+name: Bug report
+description: Something is calculated, shown or loaded incorrectly.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Planned work is tracked in Jira (space AOC). Use this form for defects in the app.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Include the item, tier and enchantment, and the route (craft location, buy market, sell market) if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: If a number is wrong, give the value the game shows (return rate, focus cost, price…).
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Select …
+        2. …
+    validations:
+      required: true
+  - type: dropdown
+    id: server
+    attributes:
+      label: Server
+      options:
+        - Americas (West)
+        - Europe
+        - Asia (East)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version or commit
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or console output
