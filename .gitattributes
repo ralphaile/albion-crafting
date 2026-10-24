@@ -1,0 +1,17 @@
+# LF everywhere, in the repo and in working trees (Prettier expects LF, also on Windows).
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files.
+*.gif binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.png binary
+*.webp binary
+*.woff binary
+*.woff2 binary
