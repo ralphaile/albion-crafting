@@ -7,6 +7,7 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "check:deps": "depcruise apps packages --config .dependency-cruiser.js",
     "data:update": "pnpm --filter @aoc/crafting-data run data:update",
     "dev": "turbo run dev",
     "e2e": "turbo run e2e",
@@ -17,8 +18,10 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "dependency-cruiser": "18.6.0",
     "prettier": "3.9.10",
-    "turbo": "2.11.9"
+    "turbo": "2.11.9",
+    "typescript": "6.0.3"
   },
   "packageManager": "pnpm@12.14.0+sha512.c18ba6d87993d3d164cb5e8948f32b2c06ee854487e06cd8d86781342fb3e5bb4634367034711e86802baa9c37bea906ce1929ad08d70884c97d801df13389a6"
 }

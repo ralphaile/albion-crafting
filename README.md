@@ -28,6 +28,7 @@ pnpm dev   # http://localhost:5173
 | `pnpm e2e`          | Runs the end-to-end tests                |
 | `pnpm format`       | Formats the code                         |
 | `pnpm format:check` | Checks formatting without changing files |
+| `pnpm check:deps`   | Checks which packages may import which   |
 | `pnpm data:update`  | Downloads the game data                  |
 
 `test`, `e2e` and `data:update` are placeholders until their tickets are done.
