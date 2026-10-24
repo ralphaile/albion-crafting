@@ -2,7 +2,15 @@ packages:
   - apps/*
   - packages/*
 
+allowBuilds:
+  unrs-resolver: false
+
 engineStrict: true
 
 # Minutes (7 days): skip versions published less than a week ago.
 minimumReleaseAge: 10080
+
+peerDependencyRules:
+  allowedVersions:
+    eslint-plugin-jsx-a11y>eslint: "10"
+    eslint-plugin-react>eslint: "10"
