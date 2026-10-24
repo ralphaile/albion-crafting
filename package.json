@@ -1,0 +1,22 @@
+{
+  "name": "albion-crafting",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^24.22.1"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "data:update": "pnpm --filter @aoc/crafting-data run data:update",
+    "dev": "turbo run dev",
+    "e2e": "turbo run e2e",
+    "format": "node -e \"console.error('format: Prettier is set up in AOC-13'); process.exit(1)\"",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "turbo": "2.11.9"
+  },
+  "packageManager": "pnpm@12.14.0+sha512.c18ba6d87993d3d164cb5e8948f32b2c06ee854487e06cd8d86781342fb3e5bb4634367034711e86802baa9c37bea906ce1929ad08d70884c97d801df13389a6"
+}

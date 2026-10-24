@@ -1,0 +1,8 @@
+packages:
+  - apps/*
+  - packages/*
+
+engineStrict: true
+
+# Minutes (7 days): skip versions published less than a week ago.
+minimumReleaseAge: 10080

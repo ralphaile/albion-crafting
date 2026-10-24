@@ -1,0 +1,6 @@
+{
+  "name": "@aoc/typescript-config",
+  "version": "0.0.0",
+  "description": "Shared strict TypeScript settings for every package.",
+  "private": true
+}

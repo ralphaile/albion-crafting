@@ -1,0 +1,3 @@
+{
+  "extends": "@aoc/typescript-config/library.json"
+}
