@@ -18,18 +18,19 @@ pnpm dev   # http://localhost:5173
 
 ## Scripts
 
-| Command             | What it does                             |
-| ------------------- | ---------------------------------------- |
-| `pnpm dev`          | Starts the web app with live reload      |
-| `pnpm build`        | Builds all packages and the web app      |
-| `pnpm typecheck`    | Checks types in all packages             |
-| `pnpm lint`         | Lints all packages                       |
-| `pnpm test`         | Runs the unit tests                      |
-| `pnpm e2e`          | Runs the end-to-end tests                |
-| `pnpm format`       | Formats the code                         |
-| `pnpm format:check` | Checks formatting without changing files |
-| `pnpm check:deps`   | Checks which packages may import which   |
-| `pnpm data:update`  | Downloads the game data                  |
+| Command             | What it does                                 |
+| ------------------- | -------------------------------------------- |
+| `pnpm dev`          | Starts the web app with live reload          |
+| `pnpm build`        | Builds all packages and the web app          |
+| `pnpm typecheck`    | Checks types in all packages                 |
+| `pnpm lint`         | Lints all packages                           |
+| `pnpm test`         | Runs the unit tests                          |
+| `pnpm e2e`          | Runs the end-to-end tests                    |
+| `pnpm format`       | Formats the code                             |
+| `pnpm format:check` | Checks formatting without changing files     |
+| `pnpm check:deps`   | Checks which packages may import which       |
+| `pnpm check:unused` | Finds unused files, exports and dependencies |
+| `pnpm data:update`  | Downloads the game data                      |
 
 `test`, `e2e` and `data:update` are placeholders until their tickets are done.
 
