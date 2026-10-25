@@ -26,6 +26,15 @@
 
 `git commit --no-verify` skips `pre-commit` and `commit-msg` for one commit, and `git push --no-verify` skips `pre-push`. CI still runs every check on the PR.
 
+## Branches
+
+Each ticket gets its own branch off an up-to-date `main`, named after the ticket:
+
+- `feature/AOC-<n>-<slug>` for new work, such as `feature/AOC-42-hideout-bonus`
+- `fix/AOC-<n>-<slug>` for a bug fix
+
+The slug is a few lower-case words joined by hyphens. GitHub deletes the branch once its PR is merged.
+
 ## Commit messages
 
 Messages follow [Conventional Commits](https://www.conventionalcommits.org):
@@ -58,6 +67,14 @@ A message that doesn't fit, such as `fixed stuff`, stops the commit. Merge and r
 
 ## Pull requests and CI
 
+A change gets from its branch to `main` like this:
+
+1. **Commit** on the branch. The hooks check each commit, and `pre-push` type-checks before anything leaves your machine.
+2. **Open a PR.** The template asks for a summary, the Jira key, testing notes and the [Definition of Done](#definition-of-done). The PR title follows the [commit message format](#commit-messages), because it becomes the commit on `main`.
+3. **CI runs**, as described below. `main` also needs an approving review. As the admin, you can merge your own PR without one, but never without CI.
+4. **Squash-merge.** The PR becomes one commit on `main`, titled after the PR, and `Deploy` publishes it.
+5. **Move the ticket to Done** in Jira.
+
 Every PR, and every push to `main`, runs `.github/workflows/ci.yml` on GitHub Actions. `Checks` and `E2E` run side by side. On `main`, `Deploy` follows once both pass:
 
 | Job      | What it runs                                                                                                                                      |
@@ -75,6 +92,19 @@ Every PR, and every push to `main`, runs `.github/workflows/ci.yml` on GitHub Ac
 A PR can only be merged when `Checks` and `E2E` pass and the branch is up to date with `main`. This rule has no bypass, not even for admins.
 
 The rules for `main` are kept in `.github/rulesets/`: `main.json` for reviews and squash merging, and `require-ci.json` for CI. After changing one, apply it with `gh api -X PUT repos/ralphaile/albion-crafting/rulesets/<id> --input <file>`. `gh api repos/ralphaile/albion-crafting/rulesets` lists the ids.
+
+## Definition of Done
+
+A ticket is done when its PR is merged with every box at the bottom of the PR description ticked. The boxes come from `.github/pull_request_template.md`:
+
+- The PR title is a Conventional Commit with the Jira key, and the branch is named after the ticket.
+- Every acceptance criterion on the ticket is met, or the PR explains the gap.
+- Tests are added or updated: unit tests for logic, component or E2E tests for UI.
+- CI is green: lint with 0 warnings, typecheck, tests with coverage, build and E2E.
+- Docs and [ADRs](adr/README.md) are updated where commands, behavior or conventions changed.
+- The diff has no secrets, tokens or personal data.
+
+A box that doesn't apply stays unticked, with the reason next to it, such as "(N/A: docs only)".
 
 ## Deployment
 
