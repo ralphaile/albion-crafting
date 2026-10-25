@@ -1,0 +1,43 @@
+{
+  "?xml": {
+    "@version": "1.0",
+    "@encoding": "utf-8"
+  },
+  "hideouts": {
+    "hideout": {
+      "@startingnutrition": "15000",
+      "powerlevels": {
+        "powerlevel": [
+          {
+            "@level": "1",
+            "@powerpointspool": "800",
+            "@decaydays": "3.5",
+            "@territorydecaydays": "8",
+            "@roadsdecaydays": "7",
+            "@hideoutbuff": "HIDEOUT_BONUS_LVL1"
+          },
+          {
+            "@level": "2",
+            "@powerpointspool": "1650",
+            "@decaydays": "3.5",
+            "@territorydecaydays": "8",
+            "@roadsdecaydays": "7",
+            "@generalistcraftingbonus": "0.06",
+            "@specialistcraftingbonus": "0.0375",
+            "@hideoutbuff": "HIDEOUT_BONUS_LVL2"
+          },
+          {
+            "@level": "9",
+            "@powerpointspool": "60000",
+            "@decaydays": "0.5",
+            "@territorydecaydays": "2",
+            "@roadsdecaydays": "1",
+            "@generalistcraftingbonus": "0.26",
+            "@specialistcraftingbonus": "0.3000",
+            "@hideoutbuff": "HIDEOUT_BONUS_LVL9"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "LocalizationNameVariable": "@ITEMS_T4_MAIN_SWORD",
+    "LocalizedNames": {
+      "EN-US": "Adept's Broadsword",
+      "DE-DE": "Breitschwert des Adepten"
+    },
+    "Index": "8610",
+    "UniqueName": "T4_MAIN_SWORD"
+  },
+  {
+    "LocalizationNameVariable": "@ITEMS_T4_MAIN_SWORD",
+    "LocalizedNames": {
+      "EN-US": "Adept's Broadsword",
+      "DE-DE": "Breitschwert des Adepten"
+    },
+    "Index": "8611",
+    "UniqueName": "T4_MAIN_SWORD@1"
+  },
+  {
+    "LocalizationNameVariable": "@ITEMS_T4_2H_BOW",
+    "LocalizedNames": {
+      "EN-US": "Adept's Bow",
+      "DE-DE": "Bogen des Adepten"
+    },
+    "Index": "6376",
+    "UniqueName": "T4_2H_BOW"
+  },
+  {
+    "LocalizationNameVariable": "@ITEMS_T4_HEAD_PLATE_SET1",
+    "LocalizedNames": {
+      "EN-US": "Adept's Soldier Helmet",
+      "DE-DE": "Soldatenhelm des Adepten"
+    },
+    "Index": "3445",
+    "UniqueName": "T4_HEAD_PLATE_SET1"
+  },
+  {
+    "LocalizationNameVariable": "@ITEMS_QUESTITEM_TUTORIAL_HERETIC_PLANS",
+    "LocalizedNames": null,
+    "Index": "211",
+    "UniqueName": "QUESTITEM_TUTORIAL_HERETIC_PLANS"
+  }
+]

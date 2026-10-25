@@ -14,13 +14,18 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "data:update": "node scripts/data-update.ts",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@aoc/eslint-config": "workspace:*",
     "@aoc/typescript-config": "workspace:*",
+    "@types/node": "24.19.2",
     "eslint": "10.13.0",
-    "typescript": "6.0.3"
+    "msw": "3.0.3",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5",
+    "zod": "4.6.7"
   }
 }

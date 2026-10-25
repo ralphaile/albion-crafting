@@ -13,6 +13,12 @@ export default {
       to: { path: "^apps/", pathNot: "^apps/$1/" },
     },
     {
+      name: "data-scripts-stay-in-node",
+      severity: "error",
+      from: { pathNot: "^packages/crafting-data/scripts/" },
+      to: { path: "^packages/crafting-data/scripts/" },
+    },
+    {
       name: "no-deep-imports",
       severity: "error",
       from: {},

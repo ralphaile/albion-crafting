@@ -11,6 +11,9 @@ coverage/
 .eslintcache
 *.tsbuildinfo
 
+# Game data downloaded by pnpm data:update
+packages/crafting-data/raw/
+
 # Playwright
 playwright-report/
 test-results/
