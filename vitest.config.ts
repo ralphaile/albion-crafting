@@ -10,7 +10,10 @@ export default defineConfig({
         "packages/crafting-data/scripts/**",
       ],
       reporter: ["text", "html", "json-summary"],
-      exclude: ["apps/web/src/main.tsx"],
+      exclude: [
+        "apps/web/src/main.tsx",
+        "packages/crafting-data/scripts/data-update.ts",
+      ],
       thresholds: {
         "packages/core/src/**": { lines: 90, branches: 90 },
         "packages/market-prices/src/**": { lines: 80, branches: 80 },
