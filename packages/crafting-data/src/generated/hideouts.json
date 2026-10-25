@@ -1,0 +1,29 @@
+{
+"biomes": [
+{"id":"SWAMP","name":"Swamp","cityId":"0000","specialties":["mace","naturestaff","firestaff","leather_armor","cloth_helmet"]},
+{"id":"FOREST","name":"Forest","cityId":"1000","specialties":["sword","bow","arcanestaff","leather_helmet","leather_shoes"]},
+{"id":"STEPPE","name":"Steppe","cityId":"2000","specialties":["crossbow","dagger","cursestaff","plate_armor","cloth_shoes"]},
+{"id":"HIGHLAND","name":"Highland","cityId":"3004","specialties":["axe","quarterstaff","froststaff","plate_shoes","offhand"]},
+{"id":"MOUNTAIN","name":"Mountain","cityId":"4000","specialties":["hammer","spear","holystaff","plate_helmet","cloth_armor"]}
+],
+"mapQualities": [
+{"quality":1,"specialtyBonus":0.01},
+{"quality":2,"specialtyBonus":0.06},
+{"quality":3,"specialtyBonus":0.11},
+{"quality":4,"specialtyBonus":0.16},
+{"quality":5,"specialtyBonus":0.21},
+{"quality":6,"specialtyBonus":0.26}
+],
+"powerLevels": [
+{"level":1,"generalBonus":0,"specialistBonus":0},
+{"level":2,"generalBonus":0.06,"specialistBonus":0.0375},
+{"level":3,"generalBonus":0.11,"specialistBonus":0.075},
+{"level":4,"generalBonus":0.15,"specialistBonus":0.1125},
+{"level":5,"generalBonus":0.18,"specialistBonus":0.15},
+{"level":6,"generalBonus":0.2,"specialistBonus":0.1875},
+{"level":7,"generalBonus":0.22,"specialistBonus":0.225},
+{"level":8,"generalBonus":0.24,"specialistBonus":0.2625},
+{"level":9,"generalBonus":0.26,"specialistBonus":0.3}
+],
+"refiningBonus": 0.15
+}
