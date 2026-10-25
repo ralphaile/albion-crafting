@@ -1,0 +1,605 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`the generated data > has the same crafting locations 1`] = `
+[
+  {
+    "craftingBonus": 0.18,
+    "id": "0000",
+    "name": "Thetford",
+    "specialties": {
+      "cloth_helmet": 0.15,
+      "firestaff": 0.15,
+      "leather_armor": 0.15,
+      "mace": 0.15,
+      "meat_pig": 0.1,
+      "naturestaff": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0.18,
+    "id": "1000",
+    "name": "Lymhurst",
+    "specialties": {
+      "arcanestaff": 0.15,
+      "bow": 0.15,
+      "leather_helmet": 0.15,
+      "leather_shoes": 0.15,
+      "meat_goose": 0.1,
+      "sword": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0.18,
+    "id": "2000",
+    "name": "Bridgewatch",
+    "specialties": {
+      "cloth_shoes": 0.15,
+      "crossbow": 0.15,
+      "cursestaff": 0.15,
+      "dagger": 0.15,
+      "meat_goat": 0.1,
+      "plate_armor": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0.18,
+    "id": "3004",
+    "name": "Martlock",
+    "specialties": {
+      "axe": 0.15,
+      "froststaff": 0.15,
+      "meat_cow": 0.1,
+      "offhand": 0.15,
+      "plate_shoes": 0.15,
+      "quarterstaff": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0.18,
+    "id": "4000",
+    "name": "Fort Sterling",
+    "specialties": {
+      "cloth_armor": 0.15,
+      "hammer": 0.15,
+      "holystaff": 0.15,
+      "meat_chicken": 0.1,
+      "meat_sheep": 0.1,
+      "plate_helmet": 0.15,
+      "spear": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0.18,
+    "id": "3003",
+    "name": "Caerleon",
+    "specialties": {
+      "food": 0.15,
+      "gatherergear": 0.15,
+      "knuckles": 0.15,
+      "shapeshifterstaff": 0.15,
+      "tools": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0.18,
+    "id": "5000",
+    "name": "Brecilien",
+    "specialties": {
+      "bag": 0.15,
+      "cape": 0.15,
+      "potion": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0.18,
+    "id": "4300",
+    "name": "Arthur's Rest",
+    "specialties": {
+      "axe": 0.15,
+      "crossbow": 0.15,
+      "hammer": 0.15,
+      "knuckles": 0.15,
+      "mace": 0.15,
+      "plate_armor": 0.15,
+      "plate_helmet": 0.15,
+      "plate_shoes": 0.15,
+      "sword": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0.18,
+    "id": "1012",
+    "name": "Merlyn's Rest",
+    "specialties": {
+      "bow": 0.15,
+      "dagger": 0.15,
+      "leather_armor": 0.15,
+      "leather_helmet": 0.15,
+      "leather_shoes": 0.15,
+      "naturestaff": 0.15,
+      "quarterstaff": 0.15,
+      "shapeshifterstaff": 0.15,
+      "spear": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0.18,
+    "id": "0008",
+    "name": "Morgana's Rest",
+    "specialties": {
+      "arcanestaff": 0.15,
+      "cloth_armor": 0.15,
+      "cloth_helmet": 0.15,
+      "cloth_shoes": 0.15,
+      "cursestaff": 0.15,
+      "firestaff": 0.15,
+      "froststaff": 0.15,
+      "holystaff": 0.15,
+    },
+  },
+  {
+    "craftingBonus": 0,
+    "id": "island",
+    "name": "Island",
+    "specialties": {},
+  },
+]
+`;
+
+exports[`the generated data > has the same number of items and recipes in each crafting category 1`] = `
+{
+  "arcanestaff": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "axe": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "bow": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "cloth_armor": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "cloth_helmet": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "cloth_shoes": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "crossbow": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "cursestaff": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "dagger": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "firestaff": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "froststaff": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "hammer": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "holystaff": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "knuckles": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "leather_armor": {
+    "items": 45,
+    "recipes": 225,
+  },
+  "leather_helmet": {
+    "items": 45,
+    "recipes": 225,
+  },
+  "leather_shoes": {
+    "items": 45,
+    "recipes": 225,
+  },
+  "mace": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "naturestaff": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "none": {
+    "items": 45,
+    "recipes": 225,
+  },
+  "offhand": {
+    "items": 90,
+    "recipes": 450,
+  },
+  "plate_armor": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "plate_helmet": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "plate_shoes": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "quarterstaff": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "shapeshifterstaff": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "spear": {
+    "items": 40,
+    "recipes": 200,
+  },
+  "sword": {
+    "items": 40,
+    "recipes": 200,
+  },
+}
+`;
+
+exports[`the generated data > has the same number of items and recipes in each shop category 1`] = `
+{
+  "armors": {
+    "items": 140,
+    "recipes": 700,
+  },
+  "head": {
+    "items": 140,
+    "recipes": 700,
+  },
+  "offhands": {
+    "items": 90,
+    "recipes": 450,
+  },
+  "shoes": {
+    "items": 140,
+    "recipes": 700,
+  },
+  "weapons": {
+    "items": 680,
+    "recipes": 3400,
+  },
+}
+`;
+
+exports[`the generated data > has the same recipe for T4_ARMOR_LEATHER_ROYAL 1`] = `
+{
+  "alternatives": [
+    {
+      "amountCrafted": 1,
+      "focus": 0,
+      "resources": [
+        {
+          "count": 1,
+          "id": "T4_ARMOR_LEATHER_SET2",
+          "returnable": false,
+        },
+        {
+          "count": 4,
+          "id": "QUESTITEM_TOKEN_ROYAL_T4",
+          "returnable": false,
+        },
+      ],
+      "silver": 0,
+    },
+    {
+      "amountCrafted": 1,
+      "focus": 0,
+      "resources": [
+        {
+          "count": 1,
+          "id": "T4_ARMOR_LEATHER_SET3",
+          "returnable": false,
+        },
+        {
+          "count": 4,
+          "id": "QUESTITEM_TOKEN_ROYAL_T4",
+          "returnable": false,
+        },
+      ],
+      "silver": 0,
+    },
+  ],
+  "amountCrafted": 1,
+  "baseId": "T4_ARMOR_LEATHER_ROYAL",
+  "enchant": 0,
+  "focus": 0,
+  "isArtifact": false,
+  "itemId": "T4_ARMOR_LEATHER_ROYAL",
+  "itemValue": 320,
+  "resources": [
+    {
+      "count": 1,
+      "id": "T4_ARMOR_LEATHER_SET1",
+      "returnable": false,
+    },
+    {
+      "count": 4,
+      "id": "QUESTITEM_TOKEN_ROYAL_T4",
+      "returnable": false,
+    },
+  ],
+  "shopCategory": "armors",
+  "shopSubcategory": "leather_armor",
+  "silver": 0,
+  "tier": 4,
+}
+`;
+
+exports[`the generated data > has the same recipe for T4_MAIN_SWORD 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T4_MAIN_SWORD",
+  "craftingCategory": "sword",
+  "enchant": 0,
+  "focus": 1286,
+  "isArtifact": false,
+  "itemId": "T4_MAIN_SWORD",
+  "itemValue": 384,
+  "resources": [
+    {
+      "count": 16,
+      "id": "T4_METALBAR",
+      "returnable": true,
+    },
+    {
+      "count": 8,
+      "id": "T4_LEATHER",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "weapons",
+  "shopSubcategory": "sword",
+  "silver": 0,
+  "tier": 4,
+}
+`;
+
+exports[`the generated data > has the same recipe for T4_OFF_SHIELD 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T4_OFF_SHIELD",
+  "craftingCategory": "offhand",
+  "enchant": 0,
+  "focus": 429,
+  "isArtifact": false,
+  "itemId": "T4_OFF_SHIELD",
+  "itemValue": 128,
+  "resources": [
+    {
+      "count": 4,
+      "id": "T4_PLANKS",
+      "returnable": true,
+    },
+    {
+      "count": 4,
+      "id": "T4_METALBAR",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "offhands",
+  "shopSubcategory": "shieldtype",
+  "silver": 0,
+  "tier": 4,
+}
+`;
+
+exports[`the generated data > has the same recipe for T5_2H_SHAPESHIFTER_SET1@1 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T5_2H_SHAPESHIFTER_SET1",
+  "craftingCategory": "shapeshifterstaff",
+  "enchant": 1,
+  "focus": 5252,
+  "isArtifact": false,
+  "itemId": "T5_2H_SHAPESHIFTER_SET1@1",
+  "resources": [
+    {
+      "count": 20,
+      "id": "T5_PLANKS_LEVEL1@1",
+      "returnable": true,
+    },
+    {
+      "count": 12,
+      "id": "T5_LEATHER_LEVEL1@1",
+      "returnable": true,
+    },
+    {
+      "count": 1,
+      "id": "T5_ALCHEMY_RARE_PANTHER",
+      "returnable": false,
+    },
+  ],
+  "shopCategory": "weapons",
+  "shopSubcategory": "shapeshifterstaff",
+  "silver": 0,
+  "tier": 5,
+}
+`;
+
+exports[`the generated data > has the same recipe for T5_ARMOR_PLATE_SET1 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T5_ARMOR_PLATE_SET1",
+  "craftingCategory": "plate_armor",
+  "enchant": 0,
+  "focus": 1501,
+  "isArtifact": false,
+  "itemId": "T5_ARMOR_PLATE_SET1",
+  "itemValue": 512,
+  "resources": [
+    {
+      "count": 16,
+      "id": "T5_METALBAR",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "armors",
+  "shopSubcategory": "plate_armor",
+  "silver": 0,
+  "tier": 5,
+}
+`;
+
+exports[`the generated data > has the same recipe for T6_HEAD_CLOTH_SET2@1 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T6_HEAD_CLOTH_SET2",
+  "craftingCategory": "cloth_helmet",
+  "enchant": 1,
+  "focus": 2298,
+  "isArtifact": false,
+  "itemId": "T6_HEAD_CLOTH_SET2@1",
+  "itemValue": 1024,
+  "resources": [
+    {
+      "count": 8,
+      "id": "T6_CLOTH_LEVEL1@1",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "head",
+  "shopSubcategory": "cloth_helmet",
+  "silver": 0,
+  "tier": 6,
+}
+`;
+
+exports[`the generated data > has the same recipe for T6_MAIN_SCIMITAR_MORGANA@2 1`] = `
+{
+  "alternatives": [
+    {
+      "amountCrafted": 1,
+      "focus": 12064,
+      "resources": [
+        {
+          "count": 16,
+          "id": "T6_METALBAR_LEVEL2@2",
+          "returnable": true,
+        },
+        {
+          "count": 8,
+          "id": "T6_LEATHER_LEVEL2@2",
+          "returnable": true,
+        },
+        {
+          "count": 1,
+          "id": "T6_ARTEFACT_TOKEN_FAVOR_1",
+          "returnable": false,
+        },
+      ],
+      "silver": 0,
+    },
+  ],
+  "amountCrafted": 1,
+  "baseId": "T6_MAIN_SCIMITAR_MORGANA",
+  "craftingCategory": "sword",
+  "enchant": 2,
+  "focus": 12064,
+  "isArtifact": true,
+  "itemId": "T6_MAIN_SCIMITAR_MORGANA@2",
+  "itemValue": 6528,
+  "resources": [
+    {
+      "count": 16,
+      "id": "T6_METALBAR_LEVEL2@2",
+      "returnable": true,
+    },
+    {
+      "count": 8,
+      "id": "T6_LEATHER_LEVEL2@2",
+      "returnable": true,
+    },
+    {
+      "count": 1,
+      "id": "T6_ARTEFACT_MAIN_SCIMITAR_MORGANA",
+      "returnable": false,
+    },
+  ],
+  "shopCategory": "weapons",
+  "shopSubcategory": "sword",
+  "silver": 0,
+  "tier": 6,
+}
+`;
+
+exports[`the generated data > has the same recipe for T7_SHOES_LEATHER_SET3@3 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T7_SHOES_LEATHER_SET3",
+  "craftingCategory": "leather_shoes",
+  "enchant": 3,
+  "focus": 12315,
+  "isArtifact": false,
+  "itemId": "T7_SHOES_LEATHER_SET3@3",
+  "itemValue": 8192,
+  "resources": [
+    {
+      "count": 8,
+      "id": "T7_LEATHER_LEVEL3@3",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "shoes",
+  "shopSubcategory": "leather_shoes",
+  "silver": 0,
+  "tier": 7,
+}
+`;
+
+exports[`the generated data > has the same recipe for T8_2H_BOW@4 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T8_2H_BOW",
+  "craftingCategory": "bow",
+  "enchant": 4,
+  "focus": 150858,
+  "isArtifact": false,
+  "itemId": "T8_2H_BOW@4",
+  "itemValue": 131072,
+  "resources": [
+    {
+      "count": 32,
+      "id": "T8_PLANKS_LEVEL4@4",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "weapons",
+  "shopSubcategory": "bow",
+  "silver": 0,
+  "tier": 8,
+}
+`;
