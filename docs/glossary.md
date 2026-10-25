@@ -36,7 +36,7 @@ The quality of the Black Zone map a hideout stands on. A better map gives the hi
 
 ## Item value
 
-A value the game gives every item, separate from its market price, worked out from the item values of its materials. The [station fee](#nutrition-and-station-fee) is based on it.
+A value the game gives every item, separate from its market price, worked out from the item values of its materials. Refined materials are worth 16 at T4 and double with each tier and enchantment level. [Artifacts](#artifact) count too. The [station fee](#nutrition-and-station-fee) is based on it.
 
 ## Nutrition and station fee
 

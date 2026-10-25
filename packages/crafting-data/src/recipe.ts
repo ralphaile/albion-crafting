@@ -21,4 +21,5 @@ export interface Recipe extends Alternative {
   shopSubcategory: string;
   isArtifact: boolean;
   alternatives: Alternative[];
+  itemValue?: number;
 }

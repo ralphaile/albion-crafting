@@ -87,6 +87,6 @@ function toResource(resource: CraftResource): Resource {
   };
 }
 
-function marketId(id: string, enchant: number): string {
+export function marketId(id: string, enchant: number): string {
   return enchant > 0 ? `${id}@${String(enchant)}` : id;
 }

@@ -54,9 +54,15 @@ function serveDumps(broken?: string) {
 
 let packageDir: string;
 let lines: string[];
+let warnings: string[];
 
 function run(latest: boolean) {
-  return update({ latest, packageDir, log: (line) => lines.push(line) });
+  return update({
+    latest,
+    packageDir,
+    log: (line) => lines.push(line),
+    warn: (line) => warnings.push(line),
+  });
 }
 
 function recipesPath() {
@@ -66,6 +72,7 @@ function recipesPath() {
 beforeEach(async () => {
   packageDir = await mkdtemp(join(tmpdir(), "aoc-update-"));
   lines = [];
+  warnings = [];
 });
 
 afterEach(async () => {
@@ -82,7 +89,7 @@ describe("update", () => {
     expect(lines).toEqual([
       "ao-data/ao-bin-dumps at 1a469e53de, committed 2026-10-12T11:25:12Z",
       "Downloaded the files to raw/",
-      "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 5 simple items, 5 names, 3 clusters, 4 crafting locations, 3 power levels",
+      "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 19 simple items, 5 names, 3 clusters, 4 crafting locations, 3 power levels",
       "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands",
     ]);
     expect(existsSync(join(packageDir, "raw", "hideouts.json"))).toBe(true);
@@ -107,6 +114,26 @@ describe("update", () => {
     );
     expect(lines.at(-1)).toBe("]");
     expect(JSON.parse(text)).toHaveLength(17);
+  });
+
+  it("writes each recipe's item value, and warns about the materials that have none", async () => {
+    serveDumps();
+    await writeSource(join(packageDir, "source.json"), pinned);
+
+    await run(false);
+
+    const recipes = JSON.parse(await readFile(recipesPath(), "utf8")) as {
+      itemId: string;
+      itemValue?: number;
+    }[];
+    expect(
+      recipes.find((recipe) => recipe.itemId === "T4_MAIN_SWORD")?.itemValue,
+    ).toBe(384);
+    expect(warnings).toEqual([
+      "Warning: No @itemvalue for T3_ALCHEMY_RARE_PANTHER, so these have no item value: T4_2H_SHAPESHIFTER_SET1, T4_2H_SHAPESHIFTER_SET1@1, T4_2H_SHAPESHIFTER_SET1@2",
+      "Warning: No @itemvalue for T4_HEAD_CLOTH_SET1, so these have no item value: T4_HEAD_CLOTH_ROYAL",
+      "Warning: No @itemvalue for T4_HEAD_CLOTH_SET1@1, so these have no item value: T4_HEAD_CLOTH_ROYAL@1",
+    ]);
   });
 
   it("with --latest, pins the newest commit once its files are valid", async () => {

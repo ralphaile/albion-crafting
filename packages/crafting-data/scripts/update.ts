@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 import { download } from "./download.ts";
+import { addItemValues } from "./item-value.ts";
 import { extractRecipes, SHOP_CATEGORIES } from "./recipes.ts";
 import { fetchLatestCommit, readSource, writeSource } from "./source.ts";
 import { validate } from "./validate.ts";
@@ -10,12 +11,14 @@ interface UpdateOptions {
   latest: boolean;
   packageDir: string;
   log: (line: string) => void;
+  warn: (line: string) => void;
 }
 
 export async function update({
   latest,
   packageDir,
   log,
+  warn,
 }: UpdateOptions): Promise<void> {
   const sourcePath = join(packageDir, "source.json");
   const rawDir = join(packageDir, "raw");
@@ -57,7 +60,13 @@ export async function update({
     ].join(", ")}`,
   );
 
-  const recipes = extractRecipes(items);
+  const { recipes, warnings } = addItemValues(
+    extractRecipes(items),
+    items.simpleitem,
+  );
+  for (const warning of warnings) {
+    warn(`Warning: ${warning}`);
+  }
   await writeJsonArray(
     join(packageDir, "src", "generated", "recipes.json"),
     recipes,

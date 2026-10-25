@@ -42,6 +42,10 @@ If `GITHUB_TOKEN` is set, it's sent when asking GitHub for the newest commit. Wi
   - An artifact item's first recipe uses the artifact, and its alternative uses a token such as `T6_ARTEFACT_TOKEN_FAVOR_1`.
   - A royal item is made from a regular SET1, SET2 or SET3 piece plus royal sigils. It has no crafting category and costs no focus.
 - **Returned or not:** a material with `@maxreturnamount="0"` is never returned. An item whose default recipe uses an `_ARTEFACT_` material is an artifact item.
+- **Item value:** `itemValue`, which the station fee is based on, is Σ(count × the material's `@itemvalue`) ÷ the amount crafted, from the default recipe. Refined materials are worth 16 at T4 and double with each tier and enchantment level, so Adept's Broadsword (`T4_MAIN_SWORD`) is 16 × 16 + 8 × 16 = 384.
+  - A royal item's base piece has no `@itemvalue`, so it takes the item value of its own recipe.
+  - An artifact counts too: the Master's Clarent Blade is 16 × 64 + 8 × 64 + 384 for its artifact = 1,920.
+  - If a material has no `@itemvalue`, `pnpm data:update` prints a warning and the recipe has no `itemValue`, rather than counting the material as 0. The shapeshifter staffs are like this, because their `ALCHEMY_RARE` materials have no value.
 
 ## When a check fails
 

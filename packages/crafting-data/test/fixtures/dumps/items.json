@@ -31,6 +31,115 @@
         "@itemvalue": "16"
       },
       {
+        "@uniquename": "T4_METALBAR_LEVEL1",
+        "@shopcategory": "crafting",
+        "@tier": "4",
+        "@enchantmentlevel": "1",
+        "@weight": "0.51",
+        "@itemvalue": "32"
+      },
+      {
+        "@uniquename": "T4_METALBAR_LEVEL2",
+        "@shopcategory": "crafting",
+        "@tier": "4",
+        "@enchantmentlevel": "2",
+        "@weight": "0.51",
+        "@itemvalue": "64"
+      },
+      {
+        "@uniquename": "T4_LEATHER_LEVEL1",
+        "@shopcategory": "crafting",
+        "@tier": "4",
+        "@enchantmentlevel": "1",
+        "@weight": "0.51",
+        "@itemvalue": "32"
+      },
+      {
+        "@uniquename": "T4_LEATHER_LEVEL2",
+        "@shopcategory": "crafting",
+        "@tier": "4",
+        "@enchantmentlevel": "2",
+        "@weight": "0.51",
+        "@itemvalue": "64"
+      },
+      {
+        "@uniquename": "T4_PLANKS_LEVEL1",
+        "@shopcategory": "crafting",
+        "@tier": "4",
+        "@enchantmentlevel": "1",
+        "@weight": "0.51",
+        "@itemvalue": "32"
+      },
+      {
+        "@uniquename": "T4_PLANKS_LEVEL2",
+        "@shopcategory": "crafting",
+        "@tier": "4",
+        "@enchantmentlevel": "2",
+        "@weight": "0.51",
+        "@itemvalue": "64"
+      },
+      {
+        "@uniquename": "T6_METALBAR",
+        "@shopcategory": "crafting",
+        "@tier": "6",
+        "@weight": "1.14",
+        "@itemvalue": "64",
+        "@enchantmentlevel": "0"
+      },
+      {
+        "@uniquename": "T6_METALBAR_LEVEL1",
+        "@shopcategory": "crafting",
+        "@tier": "6",
+        "@enchantmentlevel": "1",
+        "@weight": "1.14",
+        "@itemvalue": "128"
+      },
+      {
+        "@uniquename": "T6_METALBAR_LEVEL2",
+        "@shopcategory": "crafting",
+        "@tier": "6",
+        "@enchantmentlevel": "2",
+        "@weight": "1.14",
+        "@itemvalue": "256"
+      },
+      {
+        "@uniquename": "T6_LEATHER",
+        "@shopcategory": "crafting",
+        "@tier": "6",
+        "@weight": "1.14",
+        "@itemvalue": "64",
+        "@enchantmentlevel": "0"
+      },
+      {
+        "@uniquename": "T6_LEATHER_LEVEL1",
+        "@shopcategory": "crafting",
+        "@tier": "6",
+        "@enchantmentlevel": "1",
+        "@weight": "1.14",
+        "@itemvalue": "128"
+      },
+      {
+        "@uniquename": "T6_LEATHER_LEVEL2",
+        "@shopcategory": "crafting",
+        "@tier": "6",
+        "@enchantmentlevel": "2",
+        "@weight": "1.14",
+        "@itemvalue": "256"
+      },
+      {
+        "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+        "@shopcategory": "crafting",
+        "@tier": "4",
+        "@weight": "0.01",
+        "@itemvalue": "16"
+      },
+      {
+        "@uniquename": "T3_ALCHEMY_RARE_PANTHER",
+        "@tier": "3",
+        "@weight": "0.05",
+        "@shopcategory": "crafting"
+      },
+      {
         "@uniquename": "T6_ARTEFACT_MAIN_SCIMITAR_MORGANA",
         "@shopcategory": "artefacts",
         "@tier": "6",
