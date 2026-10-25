@@ -8,11 +8,23 @@
 | ------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `pre-commit` | `git commit` | [lint-staged](https://github.com/lint-staged/lint-staged) runs ESLint with `--fix` and then Prettier on staged JavaScript and TypeScript files in `apps/` and `packages/`, and Prettier alone on every other staged file |
 | `commit-msg` | `git commit` | [commitlint](https://commitlint.js.org) checks the message. See [Commit messages](#commit-messages)                                                                                                                      |
+| `pre-push`   | `git push`   | `turbo run typecheck --affected` type-checks the packages that changed compared to `main`, and the packages that depend on them                                                                                          |
+
+### pre-commit
 
 - Fixes are added to the commit. An ESLint error that can't be fixed stops the commit, and the files stay as they were.
 - Only staged changes are checked. Unstaged changes in the same file are set aside and put back afterwards.
 - If Prettier undoes every staged change, the commit stops because it would be empty.
-- `git commit --no-verify` skips the hooks for one commit. `pnpm lint` and `pnpm format:check` still have to pass.
+
+### pre-push
+
+- A type error stops the push, and only the failing package's errors are shown.
+- It checks the files on disk, so uncommitted changes count too.
+- A change to the root `package.json`, the lockfile or `packages/config-typescript` checks every package. A change to docs alone checks none.
+
+### Skipping the hooks
+
+`git commit --no-verify` skips `pre-commit` and `commit-msg` for one commit, and `git push --no-verify` skips `pre-push`. `pnpm lint`, `pnpm format:check` and `pnpm typecheck` still have to pass.
 
 ## Commit messages
 
