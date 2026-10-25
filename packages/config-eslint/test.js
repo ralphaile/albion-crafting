@@ -14,4 +14,10 @@ export const test = defineConfig(
       "@typescript-eslint/unbound-method": "off",
     },
   },
+  {
+    files: ["**/e2e/**"],
+    rules: {
+      "no-empty-pattern": ["error", { allowObjectPatternsAsParameters: true }],
+    },
+  },
 );
