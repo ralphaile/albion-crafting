@@ -1,0 +1,76 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "ignorePresets": [":semanticPrefixFixDepsChoreOthers"],
+  "schedule": ["* * * * 1"],
+  "minimumReleaseAge": "7 days",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "build",
+  "automergeStrategy": "squash",
+  "packageRules": [
+    {
+      "groupName": "ESLint",
+      "matchPackageNames": [
+        "eslint",
+        "@eslint/**",
+        "eslint-*",
+        "@vitest/eslint-plugin",
+        "typescript-eslint",
+        "globals"
+      ]
+    },
+    {
+      "groupName": "types",
+      "matchPackageNames": ["@types/**"]
+    },
+    {
+      "groupName": "testing",
+      "matchPackageNames": [
+        "vitest",
+        "@vitest/**",
+        "!@vitest/eslint-plugin",
+        "@playwright/test",
+        "@testing-library/**",
+        "jsdom",
+        "msw",
+        "fast-check"
+      ]
+    },
+    {
+      "groupName": "build tooling",
+      "matchPackageNames": [
+        "vite",
+        "@vitejs/**",
+        "turbo",
+        "typescript",
+        "prettier",
+        "husky",
+        "lint-staged",
+        "@commitlint/**",
+        "knip",
+        "syncpack",
+        "dependency-cruiser"
+      ]
+    },
+    {
+      "groupName": "GitHub Actions",
+      "matchManagers": ["github-actions"]
+    },
+    {
+      "groupName": "Node.js",
+      "matchDepNames": ["node"]
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    },
+    {
+      "matchFileNames": ["packages/config-eslint/package.json"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    }
+  ]
+}
