@@ -117,7 +117,7 @@ describe("validate", () => {
     });
     expect(locations[4]).toMatchObject({
       "@biome": "SWAMP",
-      "@clusterquality": "Q6",
+      "@clusterquality": 6,
     });
     expect(refiningcategory.item).toContainEqual({ "@category": "ore" });
     expect(
@@ -198,6 +198,20 @@ describe("parseDumps", () => {
 
     expect(() => parseDumps(files)).toThrow(
       'items.json: items.equipmentitem[0].@showinmarketplace: Invalid option: expected one of "true"|"false"',
+    );
+  });
+
+  it("rejects a map quality that isn't Q and a number", async () => {
+    const files = await readFixtures();
+    at(files, [
+      "craftingmodifiers.json",
+      "craftingmodifiers",
+      "craftinglocation",
+      3,
+    ])["@clusterquality"] = "high";
+
+    expect(() => parseDumps(files)).toThrow(
+      "craftingmodifiers.json: craftingmodifiers.craftinglocation[3].@clusterquality: expected Q and a number",
     );
   });
 
