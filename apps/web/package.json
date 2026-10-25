@@ -13,11 +13,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@aoc/crafting-data": "workspace:*",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@aoc/crafting-data": "workspace:*",
     "@aoc/eslint-config": "workspace:*",
     "@aoc/market-prices": "workspace:*",
     "@aoc/typescript-config": "workspace:*",
