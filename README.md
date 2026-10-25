@@ -14,7 +14,7 @@ nvm use 24.22.1
 corepack enable pnpm
 pnpm install
 pnpm --filter @aoc/web exec playwright install chromium   # browser for pnpm e2e
-pnpm dev   # http://localhost:5173
+pnpm dev   # http://localhost:5173/albion-crafting/
 ```
 
 `pnpm install` also sets up git hooks that check each commit. See [docs/git.md](docs/git.md).

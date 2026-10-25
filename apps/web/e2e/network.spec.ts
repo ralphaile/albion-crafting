@@ -21,7 +21,7 @@ test("blocks a request without a recorded response", async ({
   problems,
 }) => {
   const url = "https://aodp.invalid/api/v2/stats/prices/T4_BAG.json";
-  await page.goto("/");
+  await page.goto("./");
 
   const outcome = await page.evaluate(async (target) => {
     try {
@@ -42,7 +42,7 @@ for (const recorded of defaultRecordedResponses) {
   test(`answers ${new URL(url).pathname} from its recording`, async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("./");
 
     expect(await fetchInPage(page, url)).toEqual({
       status: recorded.status,
@@ -56,7 +56,7 @@ test("respondWith replaces the recorded response for the same request", async ({
   problems,
 }) => {
   await respondWith(page, rateLimited);
-  await page.goto("/");
+  await page.goto("./");
 
   expect(await fetchInPage(page, urlOf(rateLimited.request))).toEqual({
     status: 429,
