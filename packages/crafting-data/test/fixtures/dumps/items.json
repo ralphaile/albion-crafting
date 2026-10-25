@@ -53,6 +53,7 @@
         "@tier": "4",
         "@weight": "1.7",
         "@craftingcategory": "plate_helmet",
+        "@showinmarketplace": "true",
         "craftingrequirements": {
           "@silver": "0",
           "@time": "0.333",
@@ -102,6 +103,147 @@
               "upgraderequirements": {
                 "upgraderesource": {
                   "@uniquename": "T4_SOUL",
+                  "@count": "96"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "@uniquename": "T4_HEAD_CLOTH_ROYAL",
+        "@shopcategory": "head",
+        "@shopsubcategory1": "cloth_helmet",
+        "@tier": "4",
+        "@weight": "1.7",
+        "@showinmarketplace": "true",
+        "craftingrequirements": [
+          {
+            "@silver": "0",
+            "@time": "0.333",
+            "@craftingfocus": "0",
+            "craftresource": [
+              {
+                "@uniquename": "T4_HEAD_CLOTH_SET1",
+                "@count": "1",
+                "@maxreturnamount": "0",
+                "@enchantmentlevel": "0",
+                "@preservequality": "true"
+              },
+              {
+                "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                "@count": "2",
+                "@maxreturnamount": "0"
+              }
+            ]
+          },
+          {
+            "@silver": "0",
+            "@time": "0.333",
+            "@craftingfocus": "0",
+            "craftresource": [
+              {
+                "@uniquename": "T4_HEAD_CLOTH_SET2",
+                "@count": "1",
+                "@maxreturnamount": "0",
+                "@enchantmentlevel": "0",
+                "@preservequality": "true"
+              },
+              {
+                "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                "@count": "2",
+                "@maxreturnamount": "0"
+              }
+            ]
+          },
+          {
+            "@silver": "0",
+            "@time": "0.333",
+            "@craftingfocus": "0",
+            "craftresource": [
+              {
+                "@uniquename": "T4_HEAD_CLOTH_SET3",
+                "@count": "1",
+                "@maxreturnamount": "0",
+                "@enchantmentlevel": "0",
+                "@preservequality": "true"
+              },
+              {
+                "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                "@count": "2",
+                "@maxreturnamount": "0"
+              }
+            ]
+          }
+        ],
+        "enchantments": {
+          "enchantment": [
+            {
+              "@enchantmentlevel": "1",
+              "@itempower": "825",
+              "@durability": "16200",
+              "craftingrequirements": [
+                {
+                  "@silver": "0",
+                  "@time": "0.5",
+                  "@craftingfocus": "0",
+                  "craftresource": [
+                    {
+                      "@uniquename": "T4_HEAD_CLOTH_SET1",
+                      "@enchantmentlevel": "1",
+                      "@count": "1",
+                      "@maxreturnamount": "0",
+                      "@preservequality": "true"
+                    },
+                    {
+                      "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                      "@count": "2",
+                      "@maxreturnamount": "0"
+                    }
+                  ]
+                },
+                {
+                  "@silver": "0",
+                  "@time": "0.5",
+                  "@craftingfocus": "0",
+                  "craftresource": [
+                    {
+                      "@uniquename": "T4_HEAD_CLOTH_SET2",
+                      "@enchantmentlevel": "1",
+                      "@count": "1",
+                      "@maxreturnamount": "0",
+                      "@preservequality": "true"
+                    },
+                    {
+                      "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                      "@count": "2",
+                      "@maxreturnamount": "0"
+                    }
+                  ]
+                },
+                {
+                  "@silver": "0",
+                  "@time": "0.5",
+                  "@craftingfocus": "0",
+                  "craftresource": [
+                    {
+                      "@uniquename": "T4_HEAD_CLOTH_SET3",
+                      "@enchantmentlevel": "1",
+                      "@count": "1",
+                      "@maxreturnamount": "0",
+                      "@preservequality": "true"
+                    },
+                    {
+                      "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                      "@count": "2",
+                      "@maxreturnamount": "0"
+                    }
+                  ]
+                }
+              ],
+              "upgraderequirements": {
+                "upgraderesource": {
+                  "@uniquename": "T4_RUNE",
                   "@count": "96"
                 }
               }
@@ -427,6 +569,106 @@
                 "upgraderesource": {
                   "@uniquename": "T6_SOUL",
                   "@count": "288"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "transformationweapon": [
+      {
+        "@uniquename": "T4_2H_SHAPESHIFTER_SET1",
+        "@shopcategory": "weapons",
+        "@shopsubcategory1": "shapeshifterstaff",
+        "@tier": "4",
+        "@weight": "6.8",
+        "@craftingcategory": "shapeshifterstaff",
+        "craftingrequirements": {
+          "@silver": "0",
+          "@time": "1.333",
+          "@craftingfocus": "1715",
+          "craftresource": [
+            {
+              "@uniquename": "T4_PLANKS",
+              "@count": "20"
+            },
+            {
+              "@uniquename": "T4_LEATHER",
+              "@count": "12"
+            },
+            {
+              "@uniquename": "T3_ALCHEMY_RARE_PANTHER",
+              "@count": "2",
+              "@maxreturnamount": "0"
+            }
+          ]
+        },
+        "enchantments": {
+          "enchantment": [
+            {
+              "@enchantmentlevel": "1",
+              "@itempower": "800",
+              "@durability": "19059",
+              "craftingrequirements": {
+                "@silver": "0",
+                "@time": "2",
+                "@craftingfocus": "3001",
+                "craftresource": [
+                  {
+                    "@uniquename": "T4_PLANKS_LEVEL1",
+                    "@enchantmentlevel": "1",
+                    "@count": "20"
+                  },
+                  {
+                    "@uniquename": "T4_LEATHER_LEVEL1",
+                    "@enchantmentlevel": "1",
+                    "@count": "12"
+                  },
+                  {
+                    "@uniquename": "T3_ALCHEMY_RARE_PANTHER",
+                    "@count": "2",
+                    "@maxreturnamount": "0"
+                  }
+                ]
+              },
+              "upgraderequirements": {
+                "upgraderesource": {
+                  "@uniquename": "T4_RUNE",
+                  "@count": "384"
+                }
+              }
+            },
+            {
+              "@enchantmentlevel": "2",
+              "@itempower": "900",
+              "@durability": "28589",
+              "craftingrequirements": {
+                "@silver": "0",
+                "@time": "2.667",
+                "@craftingfocus": "5252",
+                "craftresource": [
+                  {
+                    "@uniquename": "T4_PLANKS_LEVEL2",
+                    "@enchantmentlevel": "2",
+                    "@count": "20"
+                  },
+                  {
+                    "@uniquename": "T4_LEATHER_LEVEL2",
+                    "@enchantmentlevel": "2",
+                    "@count": "12"
+                  },
+                  {
+                    "@uniquename": "T3_ALCHEMY_RARE_PANTHER",
+                    "@count": "2",
+                    "@maxreturnamount": "0"
+                  }
+                ]
+              },
+              "upgraderequirements": {
+                "upgraderesource": {
+                  "@uniquename": "T4_SOUL",
+                  "@count": "384"
                 }
               }
             }

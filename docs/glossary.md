@@ -2,6 +2,10 @@
 
 Albion Online terms used in the code and the app. The numbers are the ones the calculation engine in `packages/core` uses. If the game changes one, the engine and this page change together.
 
+## Artifact
+
+A special material that some weapons, armor and offhands need, found in the world rather than refined, such as the Bloodforged Blade that a Clarent Blade is made with. It's never returned after a craft. Many artifact items can be made with a token instead, such as a Crystallized Spirit. The game files spell it `ARTEFACT`.
+
 ## Black Market
 
 An NPC market in Caerleon that buys gear from players to stock the loot of monsters and chests. You can only sell to it, so its price is its highest buy order. Like any instant sale, it's taxed but has no [setup fee](#setup-fee).
@@ -9,6 +13,10 @@ An NPC market in Caerleon that buys gear from players to stock the loot of monst
 ## Daily bonus
 
 Extra [production bonus](#production-bonus) the game gives a few crafting categories each day: +0.10 or +0.20. The app takes up to two.
+
+## Enchantment
+
+Levels .1 to .4 of an item, written after its tier: 5.1 is a tier 5 item at enchantment 1. Each level is made from materials of the same level and costs more [focus](#focus). Market IDs add the level after an `@`: `T5_MAIN_SWORD@1` is made from `T5_METALBAR_LEVEL1@1`. Level .0 has no suffix.
 
 ## FCE
 

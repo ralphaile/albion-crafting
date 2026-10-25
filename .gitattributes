@@ -15,3 +15,5 @@
 *.webp binary
 *.woff binary
 *.woff2 binary
+
+packages/crafting-data/src/generated/** linguist-generated
