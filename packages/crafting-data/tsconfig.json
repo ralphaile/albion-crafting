@@ -1,3 +1,9 @@
 {
-  "extends": "@aoc/typescript-config/library.json"
+  "extends": "@aoc/typescript-config/library.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "types": ["node"]
+  },
+  "include": ["src", "scripts", "test", "vitest.config.ts"]
 }
