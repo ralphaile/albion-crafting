@@ -13,6 +13,7 @@ nvm install 24.22.1
 nvm use 24.22.1
 corepack enable pnpm
 pnpm install
+pnpm --filter @aoc/web exec playwright install chromium   # browser for pnpm e2e
 pnpm dev   # http://localhost:5173
 ```
 
@@ -27,7 +28,7 @@ pnpm dev   # http://localhost:5173
 | `pnpm test`           | Runs the unit and component tests once                                 |
 | `pnpm test:watch`     | Reruns the tests when files change                                     |
 | `pnpm coverage`       | Runs the tests and fails if a package drops below its coverage minimum |
-| `pnpm e2e`            | Runs the end-to-end tests                                              |
+| `pnpm e2e`            | Builds the web app and runs the end-to-end tests in Chromium           |
 | `pnpm format`         | Formats the code                                                       |
 | `pnpm format:check`   | Checks formatting without changing files                               |
 | `pnpm check:deps`     | Checks which packages may import which                                 |
@@ -35,7 +36,7 @@ pnpm dev   # http://localhost:5173
 | `pnpm check:versions` | Checks that shared dependencies use the same version everywhere        |
 | `pnpm data:update`    | Downloads the game data                                                |
 
-`e2e` and `data:update` are placeholders until their tickets are done.
+`data:update` is a placeholder until its ticket is done.
 
 ## Project layout
 
