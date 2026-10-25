@@ -27,7 +27,7 @@ const newest: Source = {
   committedAt: "2026-10-19T09:00:00Z",
 };
 
-function serveDumps(broken?: string) {
+function serveDumps(replaced: Record<string, string> = {}) {
   server.use(
     http.get(
       "https://api.github.com/repos/ao-data/ao-bin-dumps/commits/master",
@@ -45,7 +45,7 @@ function serveDumps(broken?: string) {
           .slice(4)
           .join("/");
         return HttpResponse.text(
-          file === broken ? "[]" : await readFile(join(fixtures, file), "utf8"),
+          replaced[file] ?? (await readFile(join(fixtures, file), "utf8")),
         );
       },
     ),
@@ -90,6 +90,7 @@ describe("update", () => {
       "ao-data/ao-bin-dumps at 1a469e53de, committed 2026-10-12T11:25:12Z",
       "Downloaded the files to raw/",
       "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 19 simple items, 7 names, 4 clusters, 5 crafting locations, 3 power levels",
+      "Extracted 3 crafting locations: Thetford, Arthur's Rest, Island",
       "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands",
       "Named 6 item IDs: 4 crafted, which the search covers, and 2 materials",
     ]);
@@ -97,6 +98,45 @@ describe("update", () => {
     await expect(readSource(join(packageDir, "source.json"))).resolves.toEqual(
       pinned,
     );
+  });
+
+  it("writes the crafting locations to src/generated/locations.json, one per line", async () => {
+    serveDumps();
+    await writeSource(join(packageDir, "source.json"), pinned);
+
+    await run(false);
+
+    const text = await readFile(
+      join(packageDir, "src", "generated", "locations.json"),
+      "utf8",
+    );
+    expect(text.split("\n")).toEqual([
+      "[",
+      '{"id":"0000","name":"Thetford","craftingBonus":0.18,"specialties":{"meat_pig":0.1,"mace":0.15,"naturestaff":0.15,"firestaff":0.15,"leather_armor":0.15,"cloth_helmet":0.15}},',
+      '{"id":"4300","name":"Arthur\'s Rest","craftingBonus":0.18,"specialties":{"axe":0.15,"crossbow":0.15,"hammer":0.15,"mace":0.15,"sword":0.15,"knuckles":0.15,"plate_helmet":0.15,"plate_armor":0.15,"plate_shoes":0.15}},',
+      '{"id":"island","name":"Island","craftingBonus":0,"specialties":{}}',
+      "]",
+      "",
+    ]);
+  });
+
+  it("writes nothing when the cities and Rests give islands different bonuses", async () => {
+    const modifiers = await readFile(
+      join(fixtures, "craftingmodifiers.json"),
+      "utf8",
+    );
+    serveDumps({
+      "craftingmodifiers.json": modifiers.replace(
+        /("craftingbonus": \{\s+"@value": "0.18",\s+"@islandvalue": )"0"/,
+        '$1"0.05"',
+      ),
+    });
+    await writeSource(join(packageDir, "source.json"), pinned);
+
+    await expect(run(false)).rejects.toThrow(
+      "Expected the cities and Rests to give islands one crafting bonus, but found 0.05, 0",
+    );
+    expect(existsSync(join(packageDir, "src", "generated"))).toBe(false);
   });
 
   it("writes the recipes to src/generated, one per line", async () => {
@@ -170,7 +210,7 @@ describe("update", () => {
   });
 
   it("with --latest, keeps the old pin when the newest files aren't valid", async () => {
-    serveDumps("hideouts.json");
+    serveDumps({ "hideouts.json": "[]" });
     await writeSource(join(packageDir, "source.json"), pinned);
 
     await expect(run(true)).rejects.toThrow("hideouts.json: ");

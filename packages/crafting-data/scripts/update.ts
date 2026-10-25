@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { download } from "./download.ts";
 import { addItemValues } from "./item-value.ts";
 import { extractItems } from "./items.ts";
+import { extractLocations } from "./locations.ts";
 import { extractRecipes, SHOP_CATEGORIES } from "./recipes.ts";
 import { fetchLatestCommit, readSource, writeSource } from "./source.ts";
 import { validate } from "./validate.ts";
@@ -59,6 +60,23 @@ export async function update({
         "power levels",
       ),
     ].join(", ")}`,
+  );
+
+  const located = extractLocations(
+    dumps["craftingmodifiers.json"].craftingmodifiers,
+    dumps["formatted/world.json"],
+  );
+  for (const warning of located.warnings) {
+    warn(`Warning: ${warning}`);
+  }
+  await writeJsonArray(
+    join(packageDir, "src", "generated", "locations.json"),
+    located.locations,
+  );
+  log(
+    `Extracted ${count(located.locations.length, "crafting locations")}: ${located.locations
+      .map(({ name }) => name)
+      .join(", ")}`,
   );
 
   const { recipes, warnings } = addItemValues(
