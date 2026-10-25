@@ -1,0 +1,23 @@
+{
+  "request": "GET https://west.albion-online-data.com/api/v2/stats/prices/T8_BAG_INSIGHT@4.json?locations=Thetford&qualities=5",
+  "source": "Recorded from the live API on 2026-10-25",
+  "status": 200,
+  "headers": {
+    "content-type": "application/json; charset=utf-8"
+  },
+  "body": [
+    {
+      "item_id": "T8_BAG_INSIGHT@4",
+      "city": "Thetford",
+      "quality": 5,
+      "sell_price_min": 0,
+      "sell_price_min_date": "0001-01-01T00:00:00",
+      "sell_price_max": 0,
+      "sell_price_max_date": "0001-01-01T00:00:00",
+      "buy_price_min": 0,
+      "buy_price_min_date": "0001-01-01T00:00:00",
+      "buy_price_max": 0,
+      "buy_price_max_date": "0001-01-01T00:00:00"
+    }
+  ]
+}

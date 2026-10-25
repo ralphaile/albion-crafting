@@ -1,0 +1,137 @@
+{
+  "request": "GET https://west.albion-online-data.com/api/v2/stats/history/T4_BAG.json?locations=Caerleon&qualities=1&time-scale=24",
+  "source": "Recorded from the live API on 2026-10-25",
+  "status": 200,
+  "headers": {
+    "content-type": "application/json; charset=utf-8"
+  },
+  "body": [
+    {
+      "location": "Caerleon",
+      "item_id": "T4_BAG",
+      "quality": 1,
+      "data": [
+        {
+          "item_count": 127,
+          "avg_price": 4670,
+          "timestamp": "2026-09-25T00:00:00"
+        },
+        {
+          "item_count": 156,
+          "avg_price": 4729,
+          "timestamp": "2026-09-26T00:00:00"
+        },
+        {
+          "item_count": 114,
+          "avg_price": 4408,
+          "timestamp": "2026-09-27T00:00:00"
+        },
+        {
+          "item_count": 160,
+          "avg_price": 4563,
+          "timestamp": "2026-09-28T00:00:00"
+        },
+        {
+          "item_count": 243,
+          "avg_price": 4678,
+          "timestamp": "2026-09-29T00:00:00"
+        },
+        {
+          "item_count": 190,
+          "avg_price": 4824,
+          "timestamp": "2026-09-30T00:00:00"
+        },
+        {
+          "item_count": 208,
+          "avg_price": 4844,
+          "timestamp": "2026-10-01T00:00:00"
+        },
+        {
+          "item_count": 94,
+          "avg_price": 4600,
+          "timestamp": "2026-10-02T00:00:00"
+        },
+        {
+          "item_count": 428,
+          "avg_price": 4253,
+          "timestamp": "2026-10-03T00:00:00"
+        },
+        {
+          "item_count": 240,
+          "avg_price": 4641,
+          "timestamp": "2026-10-04T00:00:00"
+        },
+        {
+          "item_count": 155,
+          "avg_price": 4319,
+          "timestamp": "2026-10-05T00:00:00"
+        },
+        {
+          "item_count": 159,
+          "avg_price": 2713,
+          "timestamp": "2026-10-06T00:00:00"
+        },
+        {
+          "item_count": 72,
+          "avg_price": 4028,
+          "timestamp": "2026-10-07T00:00:00"
+        },
+        {
+          "item_count": 124,
+          "avg_price": 4529,
+          "timestamp": "2026-10-08T00:00:00"
+        },
+        {
+          "item_count": 184,
+          "avg_price": 4555,
+          "timestamp": "2026-10-09T00:00:00"
+        },
+        {
+          "item_count": 172,
+          "avg_price": 4495,
+          "timestamp": "2026-10-10T00:00:00"
+        },
+        {
+          "item_count": 73,
+          "avg_price": 4070,
+          "timestamp": "2026-10-11T00:00:00"
+        },
+        {
+          "item_count": 316,
+          "avg_price": 4424,
+          "timestamp": "2026-10-12T00:00:00"
+        },
+        {
+          "item_count": 121,
+          "avg_price": 4366,
+          "timestamp": "2026-10-13T00:00:00"
+        },
+        {
+          "item_count": 132,
+          "avg_price": 4162,
+          "timestamp": "2026-10-14T00:00:00"
+        },
+        {
+          "item_count": 151,
+          "avg_price": 4306,
+          "timestamp": "2026-10-15T00:00:00"
+        },
+        {
+          "item_count": 174,
+          "avg_price": 4521,
+          "timestamp": "2026-10-16T00:00:00"
+        },
+        {
+          "item_count": 143,
+          "avg_price": 4381,
+          "timestamp": "2026-10-17T00:00:00"
+        },
+        {
+          "item_count": 48,
+          "avg_price": 5826,
+          "timestamp": "2026-10-18T00:00:00"
+        }
+      ]
+    }
+  ]
+}
