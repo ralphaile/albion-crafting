@@ -129,6 +129,8 @@ GitHub Pages answers every unknown path with `404.html`, which the build makes a
 - When one update merges, the other open ones fall behind `main`. Renovate updates them, which clears your approval, so approve them again.
 - The **Dependency Dashboard** issue lists every pending update. Ticking one there opens its PR without waiting for Monday.
 
+Game data gets the same treatment. Every Monday at 12:00 UTC, `.github/workflows/data-refresh.yml` opens or updates a PR from the `data-refresh` branch when ao-bin-dumps has new data. Like Renovate's PRs, it has no Jira key. See [Weekly refresh](game-data.md#weekly-refresh).
+
 Security checks:
 
 | Check                                   | When                                        | What happens                                                                                                                                     |
