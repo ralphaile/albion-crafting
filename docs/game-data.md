@@ -33,7 +33,7 @@ Every Monday at 12:00 UTC, after Albion's daily maintenance at 10:00, `.github/w
 
 - **When it stops early:** ao-bin-dumps is still at the pinned commit, or its new commit doesn't change the generated files. Either way, there's no PR.
 - **The PR:** from the `data-refresh` branch, labeled `data` and assigned to the repo owner. The description is the `pnpm data:diff` report, with `pnpm data:update`'s warnings collapsed underneath. If the PR is already open, the run updates it instead of opening another.
-- **Tests:** the run accepts the new snapshots, so the PR shows their diff. If a test still fails, the description starts with a warning, and the run fails after opening the PR, so GitHub emails you.
+- **Tests:** the run builds the packages, which the web app's tests import, then accepts the new snapshots, so the PR shows their diff. If the build or a test fails, the description starts with a warning, and the run fails after opening the PR, so GitHub emails you.
 - **Checks:** if the new files fail them, the run fails before any PR.
 - **Review:** the PR runs CI like any other and needs your approval.
 

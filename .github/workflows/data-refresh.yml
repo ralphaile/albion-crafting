@@ -55,11 +55,13 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "commit=$(jq -r '.commit[0:10]' packages/crafting-data/source.json)" >> "$GITHUB_OUTPUT"
           fi
-      - name: Accept the new snapshots and run the tests
+      - name: Build, accept the new snapshots and run the tests
         id: tests
         if: steps.data.outputs.changed == 'true'
         continue-on-error: true
-        run: pnpm test -u
+        run: |
+          pnpm build
+          pnpm test -u
       - name: Write the PR description
         if: steps.data.outputs.changed == 'true'
         env:
@@ -70,7 +72,7 @@ jobs:
           warnings=$(grep '^Warning: ' "$RUNNER_TEMP/update.log" || true)
           {
             if [ "$TESTS" != success ]; then
-              printf '> [!WARNING]\n> Some tests failed in [the refresh run](%s).\n\n' "$RUN_URL"
+              printf '> [!WARNING]\n> The build or the tests failed in [the refresh run](%s).\n\n' "$RUN_URL"
             fi
             cat packages/crafting-data/data-diff.md
             if [ -n "$warnings" ]; then
@@ -101,8 +103,8 @@ jobs:
           body-path: ${{ runner.temp }}/body.md
           labels: data
           assignees: ${{ github.repository_owner }}
-      - name: Fail the run when tests failed
+      - name: Fail the run when the build or the tests failed
         if: steps.tests.outcome == 'failure'
         run: |
-          echo "::error title=Tests failed::Some tests failed after the update. The PR is open, with a warning at the top."
+          echo "::error title=Build or tests failed::The build or the tests failed after the update. The PR is open, with a warning at the top."
           exit 1
