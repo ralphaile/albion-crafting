@@ -44,7 +44,21 @@ pnpm dev   # http://localhost:5173/albion-crafting/
 
 ## Project layout
 
-A pnpm + Turborepo monorepo. The web app uses Vite and React.
+A pnpm + Turborepo monorepo. The web app uses Vite and React. Dashed parts come in a later release. [ADR-001](docs/adr/001-monorepo-with-a-pure-core.md) explains the split.
+
+```mermaid
+flowchart LR
+  web["apps/web"] --> core["@aoc/core"]
+  web --> prices["@aoc/market-prices"]
+  web --> data["@aoc/crafting-data"]
+  prices --> aodp[("AODP API")]
+  dumps[("ao-bin-dumps")] -- "pnpm data:update" --> data
+  api["apps/api"] -.-> core
+  api -.-> prices
+  bot["apps/discord-bot"] -.-> core
+  classDef later stroke-dasharray: 5 5
+  class api,bot later
+```
 
 | Folder                       | What it is                                                                                                                                                          |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -55,6 +69,6 @@ A pnpm + Turborepo monorepo. The web app uses Vite and React.
 | `packages/config-typescript` | Shared strict TypeScript settings                                                                                                                                   |
 | `packages/config-eslint`     | Shared lint rules                                                                                                                                                   |
 | `.github`                    | The CI and CodeQL workflows, Renovate's settings, PR and issue templates, and the rules that protect `main`                                                         |
-| `docs`                       | Guides, starting with [how the tests are organized](docs/testing.md)                                                                                                |
+| `docs`                       | Guides: [tests](docs/testing.md), [git, CI and deployment](docs/git.md), the [glossary](docs/glossary.md) and the [architecture decisions](docs/adr/README.md)      |
 
 Albion Crafting is a fan project and is not affiliated with or endorsed by Sandbox Interactive GmbH. Albion Online is their trademark.
