@@ -85,7 +85,7 @@ server.use(
 
 ## E2E tests
 
-`pnpm e2e` builds the web app, starts it with `vite preview` on port 4173 and runs every `apps/web/e2e/*.spec.ts` file in headless Chromium. Every UI story adds or updates the scenarios for its journey.
+`pnpm e2e` builds the web app, starts it with `vite preview` at `http://localhost:4173/albion-crafting/` and runs every `apps/web/e2e/*.spec.ts` file in headless Chromium. Every UI story adds or updates the scenarios for its journey.
 
 ### Adding a scenario
 
