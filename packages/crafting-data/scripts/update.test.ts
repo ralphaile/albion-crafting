@@ -89,8 +89,9 @@ describe("update", () => {
     expect(lines).toEqual([
       "ao-data/ao-bin-dumps at 1a469e53de, committed 2026-10-12T11:25:12Z",
       "Downloaded the files to raw/",
-      "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 19 simple items, 5 names, 3 clusters, 4 crafting locations, 3 power levels",
+      "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 19 simple items, 7 names, 3 clusters, 4 crafting locations, 3 power levels",
       "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands",
+      "Named 6 item IDs: 4 crafted, which the search covers, and 2 materials",
     ]);
     expect(existsSync(join(packageDir, "raw", "hideouts.json"))).toBe(true);
     await expect(readSource(join(packageDir, "source.json"))).resolves.toEqual(
@@ -116,6 +117,26 @@ describe("update", () => {
     expect(JSON.parse(text)).toHaveLength(17);
   });
 
+  it("writes the item names to src/generated/items.json, one per line", async () => {
+    serveDumps();
+    await writeSource(join(packageDir, "source.json"), pinned);
+
+    await run(false);
+
+    const text = await readFile(
+      join(packageDir, "src", "generated", "items.json"),
+      "utf8",
+    );
+    expect(text.split("\n").slice(1, 3)).toEqual([
+      '{"id":"QUESTITEM_TOKEN_ROYAL_T4","name":"Adept\'s Royal Sigil"},',
+      '{"id":"T4_2H_BOW","name":"Adept\'s Bow 4.0","crafted":true},',
+    ]);
+    expect(JSON.parse(text)).toHaveLength(6);
+    expect(warnings).toContainEqual(
+      expect.stringMatching(/^Warning: No EN-US name for 36 item IDs, /),
+    );
+  });
+
   it("writes each recipe's item value, and warns about the materials that have none", async () => {
     serveDumps();
     await writeSource(join(packageDir, "source.json"), pinned);
@@ -129,7 +150,7 @@ describe("update", () => {
     expect(
       recipes.find((recipe) => recipe.itemId === "T4_MAIN_SWORD")?.itemValue,
     ).toBe(384);
-    expect(warnings).toEqual([
+    expect(warnings.filter((line) => line.includes("@itemvalue"))).toEqual([
       "Warning: No @itemvalue for T3_ALCHEMY_RARE_PANTHER, so these have no item value: T4_2H_SHAPESHIFTER_SET1, T4_2H_SHAPESHIFTER_SET1@1, T4_2H_SHAPESHIFTER_SET1@2",
       "Warning: No @itemvalue for T4_HEAD_CLOTH_SET1, so these have no item value: T4_HEAD_CLOTH_ROYAL",
       "Warning: No @itemvalue for T4_HEAD_CLOTH_SET1@1, so these have no item value: T4_HEAD_CLOTH_ROYAL@1",

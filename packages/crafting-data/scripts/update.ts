@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 
 import { download } from "./download.ts";
 import { addItemValues } from "./item-value.ts";
+import { extractItems } from "./items.ts";
 import { extractRecipes, SHOP_CATEGORIES } from "./recipes.ts";
 import { fetchLatestCommit, readSource, writeSource } from "./source.ts";
 import { validate } from "./validate.ts";
@@ -87,6 +88,19 @@ export async function update({
     ]
       .map(([category, baseIds]) => count(baseIds.size, category))
       .join(", ")}`,
+  );
+
+  const named = extractItems(recipes, dumps["formatted/items.json"]);
+  for (const warning of named.warnings) {
+    warn(`Warning: ${warning}`);
+  }
+  await writeJsonArray(
+    join(packageDir, "src", "generated", "items.json"),
+    named.items,
+  );
+  const crafted = named.items.filter((item) => item.crafted).length;
+  log(
+    `Named ${count(named.items.length, "item IDs")}: ${count(crafted, "crafted")}, which the search covers, and ${count(named.items.length - crafted, "materials")}`,
   );
 
   if (latest) {
