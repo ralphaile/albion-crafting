@@ -4,10 +4,10 @@ Recipes, item values, names, locations and crafting bonuses come from [ao-bin-du
 
 ## Updating
 
-| Command                     | What it does                                                                                                  |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `pnpm data:update`          | Downloads the pinned commit's files, checks them and generates the crafting locations, recipes and item names |
-| `pnpm data:update --latest` | Does the same for the newest commit on `master`, then pins that                                               |
+| Command                     | What it does                                                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm data:update`          | Downloads the pinned commit's files, checks them and generates the crafting locations, hideout bonuses, recipes and item names |
+| `pnpm data:update --latest` | Does the same for the newest commit on `master`, then pins that                                                                |
 
 With `--latest`, the pin only moves once the new files pass the checks. Commit the new `source.json` with the regenerated files.
 
@@ -26,7 +26,7 @@ If `GITHUB_TOKEN` is set, it's sent when asking GitHub for the newest commit. Wi
 | `hideouts.json`          | Hideout bonuses by power level                                |
 
 - `packages/crafting-data/raw/` holds the downloads. It's git-ignored, and reused until the pin changes.
-- `packages/crafting-data/src/generated/` holds what the app imports, built from `raw/` and committed. Each file is a JSON array with one entry per line, so a patch's diff shows one line per change. Recipes and names are sorted by ID, and crafting locations keep the game file's order. Prettier skips the folder, and GitHub collapses it in PR diffs.
+- `packages/crafting-data/src/generated/` holds what the app imports, built from `raw/` and committed. Each file has one entry per line, so a patch's diff shows one line per change: a JSON array, or for the hideout bonuses an object of arrays. Recipes and names are sorted by ID, crafting locations and biomes keep the game file's order, and map qualities and power levels go from lowest to highest. Prettier skips the folder, and GitHub collapses it in PR diffs.
 
 ## Recipes
 
@@ -62,13 +62,34 @@ If `GITHUB_TOKEN` is set, it's sent when asking GitHub for the newest commit. Wi
 `src/generated/locations.json` has the crafting bonuses of the 7 cities, the 3 Rests and the island. The app imports it as `craftingLocations` from `@aoc/crafting-data`, and `src/location.ts` has its type.
 
 - **Which locations:** the entries in `craftingmodifiers.json` with a cluster ID and a `craftingbonus`. The `id` is the cluster ID, and the `name` comes from `formatted/world.json`: `4300` is "Arthur's Rest". A cluster with no name prints a warning and keeps its ID as its name.
-- **Left out:** the 100 `TNL-…` clusters, Roads of Avalon zones such as Quatun-Nusas, which have no crafting bonus. The hideout entries, by biome and map quality, are read separately.
+- **Left out:** the 100 `TNL-…` clusters, Roads of Avalon zones such as Quatun-Nusas, which have no crafting bonus. The hideout entries, by biome and map quality, go into [Hideouts](#hideouts).
 - **`craftingBonus`** is the base bonus, 0.18 in every city and Rest.
 - **`specialties`** maps a crafting category to its bonus, such as `{ "sword": 0.15 }`, so a recipe's specialty bonus is `specialties[recipe.craftingCategory] ?? 0`.
   - The refining bonuses, such as `ore` 0.40, are left out. The file lists their categories in `refiningcategory`.
   - The royal cities' butcher bonuses, such as `meat_pig` 0.10, are kept for food crafting later.
 - **The island** has no specialties, and its bonus is the `@islandvalue` that every city and Rest gives, 0. If they ever disagree, `pnpm data:update` fails before writing anything.
 - **A test** checks that every recipe's crafting category is some location's specialty, so a category the game renames on one side shows up.
+
+## Hideouts
+
+`src/generated/hideouts.json` has the bonuses for crafting in a Black Zone hideout, as three small tables. The app imports it as `hideouts` from `@aoc/crafting-data`, and `src/hideout.ts` has its type.
+
+- **`biomes`:** Swamp, Forest, Steppe, Highland and Mountain, each with its 5 crafting categories and `cityId`, the cluster ID of its royal city. A biome's categories are exactly that city's gear specialties.
+  - The game files don't link a biome to its city, so `scripts/hideouts.ts` has that table: Swamp is Thetford, Forest Lymhurst, Steppe Bridgewatch, Highland Martlock and Mountain Fort Sterling.
+  - A test checks that each biome's categories still match its city's.
+- **`mapQualities`:** what the map quality, Q1 to Q6, adds for the biome's 5 categories: 0.01 to 0.26.
+- **`powerLevels`:** levels 1 to 9, from `hideouts.json`. The general bonus counts for everything crafted there, and the specialist bonus only for the biome's 5 categories. The file leaves both out at level 1, which means 0.
+- **`refiningBonus`:** 0.15 in every hideout, kept for refining later.
+- **Why tables:** `craftingmodifiers.json` has 30 hideout entries, one per biome and map quality, with the same numbers in every biome. If one ever differs, such as a single biome getting another bonus at Q3, `pnpm data:update` fails before writing anything and names the difference.
+- **Left out:** Roads of Avalon hideouts, which come in a later release.
+
+A hideout's production bonus for a crafting category:
+
+```text
+B = general bonus + (the biome's category ? map quality bonus + specialist bonus : 0) + daily bonus + 0.59 with focus
+```
+
+So a level 9 hideout on a Q6 map gives 0.26 + 0.26 + 0.30 = 0.82 for its biome's categories, and 0.26 for the rest.
 
 ## When a check fails
 

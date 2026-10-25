@@ -6,6 +6,10 @@ Albion Online terms used in the code and the app. The numbers are the ones the c
 
 A special material that some weapons, armor and offhands need, found in the world rather than refined, such as the Bloodforged Blade that a Clarent Blade is made with. It's never returned after a craft. Many artifact items can be made with a token instead, such as a Crystallized Spirit. The game files spell it `ARTEFACT`.
 
+## Biome
+
+The landscape of a Black Zone map: Swamp, Forest, Steppe, Highland or Mountain. A hideout's [map quality](#hideout-map-quality) bonus and specialist [power level](#power-level) bonus count only for its biome's 5 crafting categories. Those are the [specialties](#specialty-bonus) of the royal city with the same landscape, such as Thetford for Swamp.
+
 ## Black Market
 
 An NPC market in Caerleon that buys gear from players to stock the loot of monsters and chests. You can only sell to it, so its price is its highest buy order. Like any instant sale, it's taxed but has no [setup fee](#setup-fee).
@@ -32,7 +36,7 @@ Points you can spend on a craft to add 0.59 to its [production bonus](#productio
 
 ## Hideout map quality
 
-The quality of the Black Zone map a hideout stands on. A better map gives the hideout a larger [production bonus](#production-bonus). In a hideout, map quality and [power level](#power-level) take the place of a city's base and [specialty bonus](#specialty-bonus).
+The quality of the Black Zone map a hideout stands on, from Q1 to Q6. It adds 0.01, 0.06, 0.11, 0.16, 0.21 or 0.26 to the [production bonus](#production-bonus) for the 5 crafting categories of the map's [biome](#biome). In a hideout, map quality and [power level](#power-level) take the place of a city's base and [specialty bonus](#specialty-bonus).
 
 ## Item value
 
@@ -48,7 +52,7 @@ station fee = item value × 0.1125 × fee per 100 nutrition / 100
 
 ## Power level
 
-A hideout's power level adds to its [production bonus](#production-bonus) in two parts: a general bonus and a specialist bonus. A level 9 hideout on a quality 6 map, crafting its specialty, reaches a production bonus of 0.82, or 1.41 with [focus](#focus).
+A hideout's power level, from 1 to 9, adds to its [production bonus](#production-bonus) in two parts: a general bonus for everything crafted there, and a specialist bonus for its [biome](#biome)'s 5 crafting categories. At level 9 they're 0.26 and 0.30. A level 9 hideout on a quality 6 map, crafting its specialty, reaches a production bonus of 0.82, or 1.41 with [focus](#focus).
 
 ## Production bonus
 
@@ -56,7 +60,7 @@ The total crafting bonus where you craft, written as a fraction (0.18 is 18%). C
 
 - **City or [Rest](#rest):** a base of 0.18, plus 0.15 for its [specialty](#specialty-bonus), plus any [daily bonus](#daily-bonus), plus 0.59 with [focus](#focus).
 - **Island:** a base of 0, with no specialty.
-- **Hideout:** [map quality](#hideout-map-quality) and [power level](#power-level) instead of the base and specialty bonus.
+- **Hideout:** the [power level](#power-level)'s general bonus, plus, for its [biome](#biome)'s 5 categories, the [map quality](#hideout-map-quality) bonus and the power level's specialist bonus. Then any daily bonus, and 0.59 with focus.
 
 ## Rest
 
