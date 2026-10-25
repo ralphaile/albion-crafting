@@ -30,7 +30,7 @@
 
 Each ticket gets its own branch off an up-to-date `main`, named after the ticket:
 
-- `feature/AOC-<n>-<slug>` for new work, such as `feature/AOC-20-deploy-to-github-pages`
+- `feature/AOC-<n>-<slug>` for new work, such as `feature/AOC-42-hideout-bonus`
 - `fix/AOC-<n>-<slug>` for a bug fix
 
 The slug is a few lower-case words joined by hyphens. GitHub deletes the branch once its PR is merged.
