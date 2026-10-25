@@ -15,19 +15,51 @@ export const SHOP_CATEGORIES = new Set([
   "shoes",
   "offhands",
 ]);
+const GEAR_LISTS = ["weapon", "transformationweapon", "equipmentitem"] as const;
 const MIN_TIER = 4;
 const MAX_TIER = 8;
 const UNRELEASED_SUFFIX = "_PROTOTYPE";
 
 export function extractRecipes(items: Items): Recipe[] {
-  return [
-    ...items.weapon,
-    ...items.transformationweapon,
-    ...items.equipmentitem,
-  ]
+  return GEAR_LISTS.flatMap((list) => items[list])
     .filter(isIncluded)
     .flatMap(toRecipes)
     .sort((a, b) => (a.itemId < b.itemId ? -1 : 1));
+}
+
+export function findUnreadGear(items: Items): string[] {
+  const read = new Set<string>(GEAR_LISTS);
+  const lists = Object.entries(items).flatMap(([list, entries]) => {
+    const ids = read.has(list)
+      ? []
+      : (Array.isArray(entries) ? entries : [entries]).flatMap(gearId);
+    return ids.length === 0 ? [] : [{ list, ids }];
+  });
+  const [first] = lists;
+  if (first === undefined) {
+    return [];
+  }
+  const total = lists.reduce((sum, { ids }) => sum + ids.length, 0);
+  return [
+    `items.json has ${String(total)} gear items in lists the app doesn't take recipes from: ${lists
+      .map(({ list, ids }) => `${list} (${String(ids.length)})`)
+      .join(", ")}, such as ${String(first.ids[0])}`,
+  ];
+}
+
+function gearId(entry: unknown): string[] {
+  if (typeof entry !== "object" || entry === null) {
+    return [];
+  }
+  const { "@uniquename": id, "@shopcategory": category } = entry as Record<
+    string,
+    unknown
+  >;
+  return typeof id === "string" &&
+    typeof category === "string" &&
+    SHOP_CATEGORIES.has(category)
+    ? [id]
+    : [];
 }
 
 function isIncluded(item: GearItem): boolean {

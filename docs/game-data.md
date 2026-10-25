@@ -4,16 +4,26 @@ Recipes, item values, names, locations and crafting bonuses come from [ao-bin-du
 
 ## Updating
 
-| Command                     | What it does                                                                                                                   |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm data:update`          | Downloads the pinned commit's files, checks them and generates the crafting locations, hideout bonuses, recipes and item names |
-| `pnpm data:update --latest` | Does the same for the newest commit on `master`, then pins that                                                                |
+| Command                     | What it does                                                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm data:update`          | Downloads the pinned commit's files, checks them and generates the crafting locations, hideout bonuses, recipes and item names   |
+| `pnpm data:update --latest` | Does the same for the newest commit on `master`, then pins that                                                                  |
+| `pnpm data:diff`            | Compares the generated files with the committed ones and writes a report of the changes to `packages/crafting-data/data-diff.md` |
 
 With `--latest`, the pin only moves once the new files pass the checks. Commit the new `source.json` with the regenerated files.
 
 After changing the code that generates a file, run `pnpm data:update` and commit what it regenerates.
 
 If `GITHUB_TOKEN` is set, it's sent when asking GitHub for the newest commit. Without it, GitHub allows 60 of those requests an hour.
+
+### After a game patch
+
+1. Run `pnpm data:update --latest`, and read any warnings.
+2. Run `pnpm data:diff`, then read `packages/crafting-data/data-diff.md`. It compares the new files with the ones committed at `HEAD`, so run it before committing. It starts with the totals, then lists up to 50 changes: crafting bonuses first, then removed items, added items and changed recipes.
+3. Run `pnpm test`.
+   - The snapshot tests in `src/snapshot.test.ts` fail where the counts per category, the sample recipes or the crafting locations changed.
+   - The tests in `src/index.test.ts` hold values checked in the game. If one fails, check the game before changing the test.
+4. Run `pnpm test -u` to accept the new snapshots. Commit `source.json`, the generated files and `src/__snapshots__/` together, and use the report as the PR description.
 
 ## Files
 
@@ -32,7 +42,7 @@ If `GITHUB_TOKEN` is set, it's sent when asking GitHub for the newest commit. Wi
 
 `src/generated/recipes.json` has a recipe for every weapon, armor piece and offhand the app covers, at each enchantment level. The app imports it as `recipes` from `@aoc/crafting-data`, and `src/recipe.ts` has its type.
 
-- **Which items:** the shop categories `weapons`, `armors`, `head`, `shoes` and `offhands`, tiers 4 to 8. They come from three lists in `items.json`: `weapon`, `equipmentitem`, and `transformationweapon`, which holds the shapeshifter staffs.
+- **Which items:** the shop categories `weapons`, `armors`, `head`, `shoes` and `offhands`, tiers 4 to 8. They come from three lists in `items.json`: `weapon`, `equipmentitem`, and `transformationweapon`, which holds the shapeshifter staffs. If any other list holds gear, `pnpm data:update` prints a warning that names it, because the shapeshifter staffs arrived that way.
 - **Left out:**
   - items the market doesn't show (`@showinmarketplace="false"`)
   - unreleased items, whose IDs end in `_PROTOTYPE`

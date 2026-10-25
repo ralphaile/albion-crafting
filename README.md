@@ -38,6 +38,7 @@ pnpm dev   # http://localhost:5173/albion-crafting/
 | `pnpm check:deps`     | Checks which packages may import which                                                                                                                                               |
 | `pnpm check:unused`   | Finds unused files, exports and dependencies                                                                                                                                         |
 | `pnpm check:versions` | Checks that shared dependencies use the same version everywhere                                                                                                                      |
+| `pnpm data:diff`      | Compares the generated game data with the committed data and writes a report of the changes to `packages/crafting-data/data-diff.md`                                                 |
 | `pnpm data:update`    | Downloads and checks the game files at the pinned commit, then generates the crafting locations, hideout bonuses, recipes and item names. `--latest` moves the pin to the newest one |
 
 ## Project layout

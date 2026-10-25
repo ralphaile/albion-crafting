@@ -12,6 +12,7 @@
     "check:unused": "knip",
     "check:versions": "syncpack lint",
     "coverage": "vitest run --coverage",
+    "data:diff": "pnpm --filter @aoc/crafting-data run data:diff",
     "data:update": "pnpm --filter @aoc/crafting-data run data:update",
     "dev": "turbo run dev",
     "e2e": "turbo run e2e",

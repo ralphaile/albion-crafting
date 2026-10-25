@@ -6,7 +6,7 @@ import { extractHideouts } from "./hideouts.ts";
 import { addItemValues } from "./item-value.ts";
 import { extractItems } from "./items.ts";
 import { extractLocations } from "./locations.ts";
-import { extractRecipes, SHOP_CATEGORIES } from "./recipes.ts";
+import { extractRecipes, findUnreadGear, SHOP_CATEGORIES } from "./recipes.ts";
 import { fetchLatestCommit, readSource, writeSource } from "./source.ts";
 import { validate } from "./validate.ts";
 
@@ -97,7 +97,7 @@ export async function update({
     extractRecipes(items),
     items.simpleitem,
   );
-  for (const warning of warnings) {
+  for (const warning of [...findUnreadGear(items), ...warnings]) {
     warn(`Warning: ${warning}`);
   }
   await writeJson(
