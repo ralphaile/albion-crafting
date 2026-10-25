@@ -82,7 +82,7 @@ describe("update", () => {
     expect(lines).toEqual([
       "ao-data/ao-bin-dumps at 1a469e53de, committed 2026-10-12T11:25:12Z",
       "Downloaded the files to raw/",
-      "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 5 simple items, 5 names, 3 clusters, 4 crafting locations, 3 power levels",
+      "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 19 simple items, 5 names, 3 clusters, 4 crafting locations, 3 power levels",
       "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands",
     ]);
     expect(existsSync(join(packageDir, "raw", "hideouts.json"))).toBe(true);
