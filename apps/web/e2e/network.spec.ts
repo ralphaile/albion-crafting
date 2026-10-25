@@ -3,7 +3,13 @@ import type { Page } from "@playwright/test";
 import history from "@aoc/market-prices/fixtures/history.json" with { type: "json" };
 import rateLimited from "@aoc/market-prices/fixtures/rate-limited.json" with { type: "json" };
 
-import { defaultRecordedResponses, expect, respondWith, test } from "./test";
+import {
+  defaultRecordedResponses,
+  expect,
+  ICON_ORIGIN,
+  respondWith,
+  test,
+} from "./test";
 
 function urlOf(request: string) {
   return request.replace(/^GET /, "");
@@ -50,6 +56,20 @@ for (const recorded of defaultRecordedResponses) {
     });
   });
 }
+
+test("answers item icons with a stand-in image", async ({ page }) => {
+  await page.goto("./");
+
+  const icon = await page.evaluate(async (target) => {
+    const response = await fetch(target);
+    return {
+      status: response.status,
+      type: response.headers.get("content-type"),
+    };
+  }, `${ICON_ORIGIN}/v1/item/T4_BAG.png?quality=1&size=64`);
+
+  expect(icon).toEqual({ status: 200, type: "image/svg+xml" });
+});
 
 test("respondWith replaces the recorded response for the same request", async ({
   page,

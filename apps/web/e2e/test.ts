@@ -14,6 +14,11 @@ interface RecordedResponse {
   body: unknown;
 }
 
+export const ICON_ORIGIN = "https://render.albiononline.com";
+
+const STAND_IN_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"></svg>';
+
 export const defaultRecordedResponses: RecordedResponse[] = [
   prices,
   history,
@@ -79,6 +84,11 @@ export const test = base.extend<{ problems: string[] }>({
         problems.push(`${requestLine(route)} has no recorded response`);
         await route.abort("blockedbyclient");
       },
+    );
+    await page.route(
+      (url) => url.origin === ICON_ORIGIN,
+      (route) =>
+        route.fulfill({ contentType: "image/svg+xml", body: STAND_IN_ICON }),
     );
     await respondWith(page, ...defaultRecordedResponses);
 
