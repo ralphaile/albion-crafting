@@ -23,22 +23,22 @@ pnpm dev   # http://localhost:5173/albion-crafting/
 
 ## Scripts
 
-| Command               | What it does                                                                                         |
-| --------------------- | ---------------------------------------------------------------------------------------------------- |
-| `pnpm dev`            | Starts the web app with live reload                                                                  |
-| `pnpm build`          | Builds all packages and the web app                                                                  |
-| `pnpm typecheck`      | Checks types in all packages                                                                         |
-| `pnpm lint`           | Lints all packages                                                                                   |
-| `pnpm test`           | Runs the unit and component tests once                                                               |
-| `pnpm test:watch`     | Reruns the tests when files change                                                                   |
-| `pnpm coverage`       | Runs the tests and fails if a package drops below its coverage minimum                               |
-| `pnpm e2e`            | Builds the web app and runs the end-to-end tests in Chromium                                         |
-| `pnpm format`         | Formats the code                                                                                     |
-| `pnpm format:check`   | Checks formatting without changing files                                                             |
-| `pnpm check:deps`     | Checks which packages may import which                                                               |
-| `pnpm check:unused`   | Finds unused files, exports and dependencies                                                         |
-| `pnpm check:versions` | Checks that shared dependencies use the same version everywhere                                      |
-| `pnpm data:update`    | Downloads and checks the game files at the pinned commit. `--latest` moves the pin to the newest one |
+| Command               | What it does                                                                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`            | Starts the web app with live reload                                                                                              |
+| `pnpm build`          | Builds all packages and the web app                                                                                              |
+| `pnpm typecheck`      | Checks types in all packages                                                                                                     |
+| `pnpm lint`           | Lints all packages                                                                                                               |
+| `pnpm test`           | Runs the unit and component tests once                                                                                           |
+| `pnpm test:watch`     | Reruns the tests when files change                                                                                               |
+| `pnpm coverage`       | Runs the tests and fails if a package drops below its coverage minimum                                                           |
+| `pnpm e2e`            | Builds the web app and runs the end-to-end tests in Chromium                                                                     |
+| `pnpm format`         | Formats the code                                                                                                                 |
+| `pnpm format:check`   | Checks formatting without changing files                                                                                         |
+| `pnpm check:deps`     | Checks which packages may import which                                                                                           |
+| `pnpm check:unused`   | Finds unused files, exports and dependencies                                                                                     |
+| `pnpm check:versions` | Checks that shared dependencies use the same version everywhere                                                                  |
+| `pnpm data:update`    | Downloads and checks the game files at the pinned commit, then generates the recipes. `--latest` moves the pin to the newest one |
 
 ## Project layout
 
