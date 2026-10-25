@@ -12,6 +12,7 @@ export default defineConfig({
       reporter: ["text", "html", "json-summary"],
       exclude: [
         "apps/web/src/main.tsx",
+        "packages/crafting-data/scripts/data-diff.ts",
         "packages/crafting-data/scripts/data-update.ts",
       ],
       thresholds: {
