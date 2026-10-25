@@ -17,6 +17,8 @@ pnpm --filter @aoc/web exec playwright install chromium   # browser for pnpm e2e
 pnpm dev   # http://localhost:5173
 ```
 
+`pnpm install` also sets up git hooks that check each commit. See [docs/git.md](docs/git.md).
+
 ## Scripts
 
 | Command               | What it does                                                           |
