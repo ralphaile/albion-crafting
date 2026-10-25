@@ -1,0 +1,4 @@
+commitlint --edit "$1" || {
+  echo "Write it as type(scope): summary, for example: feat(AOC-42): add hideout bonus"
+  exit 1
+}
