@@ -1,0 +1,62 @@
+{
+  "request": "GET https://west.albion-online-data.com/api/v2/stats/prices/T4_BAG,T5_BAG.json?locations=Caerleon,Lymhurst&qualities=1",
+  "source": "Recorded from the live API on 2026-10-25",
+  "status": 200,
+  "headers": {
+    "content-type": "application/json; charset=utf-8"
+  },
+  "body": [
+    {
+      "item_id": "T4_BAG",
+      "city": "Caerleon",
+      "quality": 1,
+      "sell_price_min": 40000,
+      "sell_price_min_date": "2026-10-25T00:15:00",
+      "sell_price_max": 60000,
+      "sell_price_max_date": "2026-10-25T00:15:00",
+      "buy_price_min": 50,
+      "buy_price_min_date": "2026-10-25T00:15:00",
+      "buy_price_max": 3505,
+      "buy_price_max_date": "2026-10-25T00:15:00"
+    },
+    {
+      "item_id": "T4_BAG",
+      "city": "Lymhurst",
+      "quality": 1,
+      "sell_price_min": 3000,
+      "sell_price_min_date": "2026-10-24T23:15:00",
+      "sell_price_max": 3765,
+      "sell_price_max_date": "2026-10-24T23:15:00",
+      "buy_price_min": 13,
+      "buy_price_min_date": "2026-10-24T21:20:00",
+      "buy_price_max": 2131,
+      "buy_price_max_date": "2026-10-24T21:20:00"
+    },
+    {
+      "item_id": "T5_BAG",
+      "city": "Caerleon",
+      "quality": 1,
+      "sell_price_min": 21975,
+      "sell_price_min_date": "2026-10-24T23:45:00",
+      "sell_price_max": 21975,
+      "sell_price_max_date": "2026-10-24T23:45:00",
+      "buy_price_min": 100,
+      "buy_price_min_date": "2026-10-24T23:55:00",
+      "buy_price_max": 11101,
+      "buy_price_max_date": "2026-10-24T23:55:00"
+    },
+    {
+      "item_id": "T5_BAG",
+      "city": "Lymhurst",
+      "quality": 1,
+      "sell_price_min": 15393,
+      "sell_price_min_date": "2026-10-24T20:10:00",
+      "sell_price_max": 16300,
+      "sell_price_max_date": "2026-10-24T20:10:00",
+      "buy_price_min": 23,
+      "buy_price_min_date": "2026-10-24T20:10:00",
+      "buy_price_max": 12123,
+      "buy_price_max_date": "2026-10-24T20:10:00"
+    }
+  ]
+}

@@ -7,6 +7,7 @@
   "exports": {
     "./base": "./base.js",
     "./node": "./node.js",
+    "./pure": "./pure.js",
     "./react": "./react.js",
     "./test": "./test.js"
   },

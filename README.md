@@ -18,22 +18,24 @@ pnpm dev   # http://localhost:5173
 
 ## Scripts
 
-| Command               | What it does                                                    |
-| --------------------- | --------------------------------------------------------------- |
-| `pnpm dev`            | Starts the web app with live reload                             |
-| `pnpm build`          | Builds all packages and the web app                             |
-| `pnpm typecheck`      | Checks types in all packages                                    |
-| `pnpm lint`           | Lints all packages                                              |
-| `pnpm test`           | Runs the unit tests                                             |
-| `pnpm e2e`            | Runs the end-to-end tests                                       |
-| `pnpm format`         | Formats the code                                                |
-| `pnpm format:check`   | Checks formatting without changing files                        |
-| `pnpm check:deps`     | Checks which packages may import which                          |
-| `pnpm check:unused`   | Finds unused files, exports and dependencies                    |
-| `pnpm check:versions` | Checks that shared dependencies use the same version everywhere |
-| `pnpm data:update`    | Downloads the game data                                         |
+| Command               | What it does                                                           |
+| --------------------- | ---------------------------------------------------------------------- |
+| `pnpm dev`            | Starts the web app with live reload                                    |
+| `pnpm build`          | Builds all packages and the web app                                    |
+| `pnpm typecheck`      | Checks types in all packages                                           |
+| `pnpm lint`           | Lints all packages                                                     |
+| `pnpm test`           | Runs the unit and component tests once                                 |
+| `pnpm test:watch`     | Reruns the tests when files change                                     |
+| `pnpm coverage`       | Runs the tests and fails if a package drops below its coverage minimum |
+| `pnpm e2e`            | Runs the end-to-end tests                                              |
+| `pnpm format`         | Formats the code                                                       |
+| `pnpm format:check`   | Checks formatting without changing files                               |
+| `pnpm check:deps`     | Checks which packages may import which                                 |
+| `pnpm check:unused`   | Finds unused files, exports and dependencies                           |
+| `pnpm check:versions` | Checks that shared dependencies use the same version everywhere        |
+| `pnpm data:update`    | Downloads the game data                                                |
 
-`test`, `e2e` and `data:update` are placeholders until their tickets are done.
+`e2e` and `data:update` are placeholders until their tickets are done.
 
 ## Project layout
 
@@ -47,5 +49,6 @@ A pnpm + Turborepo monorepo. The web app uses Vite and React.
 | `packages/crafting-data`     | Recipes, item values, locations and crafting bonuses, extracted from the game files                                                                                 |
 | `packages/config-typescript` | Shared strict TypeScript settings                                                                                                                                   |
 | `packages/config-eslint`     | Shared lint rules                                                                                                                                                   |
+| `docs`                       | Guides, starting with [how the tests are organized](docs/testing.md)                                                                                                |
 
 Albion Crafting is a fan project and is not affiliated with or endorsed by Sandbox Interactive GmbH. Albion Online is their trademark.

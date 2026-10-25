@@ -1,6 +1,6 @@
 import { defineConfig } from "eslint/config";
 
-import { base } from "@aoc/eslint-config/base";
+import { pure } from "@aoc/eslint-config/pure";
 import { test } from "@aoc/eslint-config/test";
 
-export default defineConfig(base, test);
+export default defineConfig(pure, test);

@@ -5,5 +5,8 @@ import { base } from "./base.js";
 
 export const node = defineConfig(base, {
   languageOptions: { globals: globals.node },
-  rules: { "import-x/no-nodejs-modules": "off" },
+  rules: {
+    "import-x/no-nodejs-modules": "off",
+    "no-restricted-globals": "off",
+  },
 });
