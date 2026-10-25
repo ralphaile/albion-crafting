@@ -52,6 +52,7 @@ A pnpm + Turborepo monorepo. The web app uses Vite and React.
 | `packages/crafting-data`     | Recipes, item values, locations and crafting bonuses, extracted from the game files                                                                                 |
 | `packages/config-typescript` | Shared strict TypeScript settings                                                                                                                                   |
 | `packages/config-eslint`     | Shared lint rules                                                                                                                                                   |
+| `.github`                    | The CI workflow, PR and issue templates, and the rules that protect `main`                                                                                          |
 | `docs`                       | Guides, starting with [how the tests are organized](docs/testing.md)                                                                                                |
 
 Albion Crafting is a fan project and is not affiliated with or endorsed by Sandbox Interactive GmbH. Albion Online is their trademark.
