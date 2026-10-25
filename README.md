@@ -24,7 +24,8 @@ pnpm dev   # http://localhost:5173
 | `pnpm build`          | Builds all packages and the web app                             |
 | `pnpm typecheck`      | Checks types in all packages                                    |
 | `pnpm lint`           | Lints all packages                                              |
-| `pnpm test`           | Runs the unit tests                                             |
+| `pnpm test`           | Runs the unit and component tests once                          |
+| `pnpm test:watch`     | Reruns the tests when files change                              |
 | `pnpm e2e`            | Runs the end-to-end tests                                       |
 | `pnpm format`         | Formats the code                                                |
 | `pnpm format:check`   | Checks formatting without changing files                        |
@@ -33,7 +34,7 @@ pnpm dev   # http://localhost:5173
 | `pnpm check:versions` | Checks that shared dependencies use the same version everywhere |
 | `pnpm data:update`    | Downloads the game data                                         |
 
-`test`, `e2e` and `data:update` are placeholders until their tickets are done.
+`e2e` and `data:update` are placeholders until their tickets are done.
 
 ## Project layout
 
