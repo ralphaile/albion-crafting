@@ -23,6 +23,7 @@ describe("recipes", () => {
           { id: "T5_LEATHER", count: 8, returnable: true },
         ],
         alternatives: [],
+        itemValue: 768,
       },
     ],
     [
@@ -44,6 +45,7 @@ describe("recipes", () => {
           { id: "T5_LEATHER_LEVEL1@1", count: 8, returnable: true },
         ],
         alternatives: [],
+        itemValue: 1536,
       },
     ],
     [
@@ -81,11 +83,19 @@ describe("recipes", () => {
             ],
           },
         ],
+        itemValue: 1920,
       },
     ],
   ])("has the known recipe for the %s", (_, expected) => {
     expect(recipes.find((recipe) => recipe.itemId === expected.itemId)).toEqual(
       expected,
     );
+  });
+
+  it("values the Adept's Royal Jacket at 320, as the game does", () => {
+    expect(
+      recipes.find((recipe) => recipe.itemId === "T4_ARMOR_LEATHER_ROYAL")
+        ?.itemValue,
+    ).toBe(320);
   });
 });
