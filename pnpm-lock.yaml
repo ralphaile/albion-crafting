@@ -203,6 +203,9 @@ importers:
       '@aoc/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config-eslint
+      '@aoc/market-prices':
+        specifier: workspace:*
+        version: link:../../packages/market-prices
       '@aoc/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config-typescript
