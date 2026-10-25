@@ -2,9 +2,10 @@
 
 An architecture decision record (ADR) is a short note about one design decision: the problem, what was chosen, and what it costs. It keeps the reasons around after the code has moved on.
 
-| ADR                                     | Decision                                | Status   |
-| --------------------------------------- | --------------------------------------- | -------- |
-| [001](001-monorepo-with-a-pure-core.md) | A monorepo with a pure calculation core | Accepted |
+| ADR                                     | Decision                                                    | Status   |
+| --------------------------------------- | ----------------------------------------------------------- | -------- |
+| [001](001-monorepo-with-a-pure-core.md) | A monorepo with a pure calculation core                     | Accepted |
+| [002](002-local-first-storage.md)       | Everything the app saves stays in the browser, in IndexedDB | Accepted |
 
 ## Adding one
 
