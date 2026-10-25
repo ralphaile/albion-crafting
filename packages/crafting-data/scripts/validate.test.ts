@@ -87,10 +87,10 @@ describe("validate", () => {
     expect(equipmentitem[0]?.["@showinmarketplace"]).toBe(true);
   });
 
-  it("returns item values, names, clusters and bonuses", async () => {
+  it("returns item values, names, clusters, bonuses and refining categories", async () => {
     const dumps = await validate(fixtures);
-    const locations =
-      dumps["craftingmodifiers.json"].craftingmodifiers.craftinglocation;
+    const { craftinglocation: locations, refiningcategory } =
+      dumps["craftingmodifiers.json"].craftingmodifiers;
 
     expect(dumps["items.json"].items.simpleitem[0]).toEqual({
       "@uniquename": "T4_METALBAR",
@@ -115,10 +115,11 @@ describe("validate", () => {
       "@name": "mace",
       "@value": 0.15,
     });
-    expect(locations[3]).toMatchObject({
+    expect(locations[4]).toMatchObject({
       "@biome": "SWAMP",
       "@clusterquality": "Q6",
     });
+    expect(refiningcategory.item).toContainEqual({ "@category": "ore" });
     expect(
       dumps["hideouts.json"].hideouts.hideout.powerlevels.powerlevel,
     ).toEqual([

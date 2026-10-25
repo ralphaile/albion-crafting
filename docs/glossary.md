@@ -54,8 +54,13 @@ A hideout's power level adds to its [production bonus](#production-bonus) in two
 
 The total crafting bonus where you craft, written as a fraction (0.18 is 18%). Called _B_ in formulas. It decides the [return rate](#return-rate-rrr).
 
-- **City:** a base of 0.18, plus 0.15 for the city's [specialty](#specialty-bonus), plus any [daily bonus](#daily-bonus), plus 0.59 with [focus](#focus).
+- **City or [Rest](#rest):** a base of 0.18, plus 0.15 for its [specialty](#specialty-bonus), plus any [daily bonus](#daily-bonus), plus 0.59 with [focus](#focus).
+- **Island:** a base of 0, with no specialty.
 - **Hideout:** [map quality](#hideout-map-quality) and [power level](#power-level) instead of the base and specialty bonus.
+
+## Rest
+
+Arthur's, Merlyn's and Morgana's Rest: towns in the Black Zone with a market and crafting stations. Crafting there works like in a city, with its own [specialties](#specialty-bonus). AODP calls their markets "Arthurs Rest Smugglers Network" and so on, and has few prices for them.
 
 ## Return rate (RRR)
 
@@ -82,7 +87,7 @@ The engine's version is `returnRate()` in `packages/core/src/return-rate.ts`.
 
 ## Specialty bonus
 
-Each royal city specializes in some crafting categories. Crafting one of them there adds 0.15 to the [production bonus](#production-bonus).
+Each city and [Rest](#rest) specializes in some crafting categories, such as swords in Lymhurst. Crafting one of them there adds 0.15 to the [production bonus](#production-bonus). Islands have no specialty.
 
 ## Tax and premium
 

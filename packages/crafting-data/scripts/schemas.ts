@@ -69,7 +69,7 @@ const craftingLocation = z
     "@clusterid": z.string().optional(),
     "@biome": z.string().optional(),
     "@clusterquality": z.string().optional(),
-    craftingbonus: bonus.optional(),
+    craftingbonus: bonus.extend({ "@islandvalue": number }).optional(),
     refiningbonus: bonus,
     craftingmodifier: oneOrMany(
       z.object({ "@name": z.string(), "@value": number }),
@@ -109,6 +109,9 @@ export const dumpSchemas = {
   ),
   "craftingmodifiers.json": z.object({
     craftingmodifiers: z.object({
+      refiningcategory: z.object({
+        item: oneOrMany(z.object({ "@category": z.string() })),
+      }),
       craftinglocation: oneOrMany(craftingLocation),
     }),
   }),

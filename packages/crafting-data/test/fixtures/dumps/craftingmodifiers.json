@@ -66,6 +66,55 @@
         ]
       },
       {
+        "@clusterid": "4300",
+        "refiningbonus": {
+          "@value": "0.15",
+          "@islandvalue": "0"
+        },
+        "craftingbonus": {
+          "@value": "0.18",
+          "@islandvalue": "0"
+        },
+        "craftingmodifier": [
+          {
+            "@name": "axe",
+            "@value": "0.15"
+          },
+          {
+            "@name": "crossbow",
+            "@value": "0.15"
+          },
+          {
+            "@name": "hammer",
+            "@value": "0.15"
+          },
+          {
+            "@name": "mace",
+            "@value": "0.15"
+          },
+          {
+            "@name": "sword",
+            "@value": "0.15"
+          },
+          {
+            "@name": "knuckles",
+            "@value": "0.15"
+          },
+          {
+            "@name": "plate_helmet",
+            "@value": "0.15"
+          },
+          {
+            "@name": "plate_armor",
+            "@value": "0.15"
+          },
+          {
+            "@name": "plate_shoes",
+            "@value": "0.15"
+          }
+        ]
+      },
+      {
         "@clusterid": "TNL-154",
         "refiningbonus": {
           "@value": "0.10"
