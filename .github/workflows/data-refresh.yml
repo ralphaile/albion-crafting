@@ -1,0 +1,108 @@
+name: Data refresh
+
+on:
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: data-refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: "0"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  refresh:
+    name: Refresh
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Compare the pinned commit with the newest
+        id: newest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pinned=$(jq -r .commit packages/crafting-data/source.json)
+          newest=$(gh api repos/ao-data/ao-bin-dumps/commits/master --jq .sha)
+          if [ "$pinned" = "$newest" ]; then
+            echo "::notice title=No new game data::ao-bin-dumps is still at the pinned ${pinned:0:10}."
+          else
+            echo "moved=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: ./.github/actions/setup
+        if: steps.newest.outputs.moved == 'true'
+      - name: Update the game data
+        if: steps.newest.outputs.moved == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm data:update --latest 2>&1 | tee "$RUNNER_TEMP/update.log"
+      - name: Check whether the generated data changed
+        id: data
+        if: steps.newest.outputs.moved == 'true'
+        run: |
+          if git diff --quiet -- packages/crafting-data/src/generated; then
+            echo "::notice title=No changes::ao-bin-dumps moved, but the generated data is the same, so there's no PR."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "commit=$(jq -r '.commit[0:10]' packages/crafting-data/source.json)" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Accept the new snapshots and run the tests
+        id: tests
+        if: steps.data.outputs.changed == 'true'
+        continue-on-error: true
+        run: pnpm test -u
+      - name: Write the PR description
+        if: steps.data.outputs.changed == 'true'
+        env:
+          TESTS: ${{ steps.tests.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          pnpm data:diff
+          warnings=$(grep '^Warning: ' "$RUNNER_TEMP/update.log" || true)
+          {
+            if [ "$TESTS" != success ]; then
+              printf '> [!WARNING]\n> Some tests failed in [the refresh run](%s).\n\n' "$RUN_URL"
+            fi
+            cat packages/crafting-data/data-diff.md
+            if [ -n "$warnings" ]; then
+              printf '\n<details>\n<summary>%s warnings from pnpm data:update</summary>\n\n```text\n%s\n```\n\n</details>\n' \
+                "$(wc -l <<< "$warnings")" "$warnings"
+            fi
+          } > "$RUNNER_TEMP/body.md"
+          cat "$RUNNER_TEMP/body.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        id: app-token
+        if: steps.data.outputs.changed == 'true'
+        with:
+          client-id: ${{ vars.DATA_REFRESH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DATA_REFRESH_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        if: steps.data.outputs.changed == 'true'
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: data-refresh
+          add-paths: |
+            packages/crafting-data/source.json
+            packages/crafting-data/src/generated
+            packages/crafting-data/src/__snapshots__
+          commit-message: "build: update the game data to ao-bin-dumps ${{ steps.data.outputs.commit }}"
+          title: "build: update the game data to ao-bin-dumps ${{ steps.data.outputs.commit }}"
+          body-path: ${{ runner.temp }}/body.md
+          labels: data
+          assignees: ${{ github.repository_owner }}
+      - name: Fail the run when tests failed
+        if: steps.tests.outcome == 'failure'
+        run: |
+          echo "::error title=Tests failed::Some tests failed after the update. The PR is open, with a warning at the top."
+          exit 1
