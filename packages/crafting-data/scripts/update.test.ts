@@ -59,6 +59,10 @@ function run(latest: boolean) {
   return update({ latest, packageDir, log: (line) => lines.push(line) });
 }
 
+function recipesPath() {
+  return join(packageDir, "src", "generated", "recipes.json");
+}
+
 beforeEach(async () => {
   packageDir = await mkdtemp(join(tmpdir(), "aoc-update-"));
   lines = [];
@@ -79,11 +83,30 @@ describe("update", () => {
       "ao-data/ao-bin-dumps at 1a469e53de, committed 2026-10-12T11:25:12Z",
       "Downloaded the files to raw/",
       "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 5 simple items, 5 names, 3 clusters, 4 crafting locations, 3 power levels",
+      "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands",
     ]);
     expect(existsSync(join(packageDir, "raw", "hideouts.json"))).toBe(true);
     await expect(readSource(join(packageDir, "source.json"))).resolves.toEqual(
       pinned,
     );
+  });
+
+  it("writes the recipes to src/generated, one per line", async () => {
+    serveDumps();
+    await writeSource(join(packageDir, "source.json"), pinned);
+
+    await run(false);
+
+    const text = await readFile(recipesPath(), "utf8");
+    const lines = text.trimEnd().split("\n");
+    expect(lines).toHaveLength(17 + 2);
+    expect(lines[0]).toBe("[");
+    expect(lines[1]).toMatch(/^\{"itemId":"T4_2H_BOW",.*\},$/);
+    expect(lines.at(-2)).toMatch(
+      /^\{"itemId":"T6_MAIN_SCIMITAR_MORGANA@2",.*\}$/,
+    );
+    expect(lines.at(-1)).toBe("]");
+    expect(JSON.parse(text)).toHaveLength(17);
   });
 
   it("with --latest, pins the newest commit once its files are valid", async () => {
@@ -106,5 +129,6 @@ describe("update", () => {
     await expect(readSource(join(packageDir, "source.json"))).resolves.toEqual(
       pinned,
     );
+    expect(existsSync(recipesPath())).toBe(false);
   });
 });

@@ -8,7 +8,7 @@ type CraftingRequirements = NonNullable<
 >[number];
 type CraftResource = NonNullable<CraftingRequirements["craftresource"]>[number];
 
-const SHOP_CATEGORIES = new Set([
+export const SHOP_CATEGORIES = new Set([
   "weapons",
   "armors",
   "head",
