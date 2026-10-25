@@ -1,8 +1,12 @@
+import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
 import { returnRate } from "./return-rate.js";
 
 const asPercent = (rate: number) => `${(rate * 100).toFixed(2)}%`;
+
+const productionBonuses = fc.double({ min: 0, max: 10, noNaN: true });
+const bonusIncreases = fc.double({ min: 0.0001, max: 10, noNaN: true });
 
 describe("returnRate", () => {
   it.each([
@@ -18,4 +22,22 @@ describe("returnRate", () => {
       expect(asPercent(returnRate(productionBonus))).toBe(expected);
     },
   );
+
+  it("is at least 0 and always below 1", () => {
+    fc.assert(
+      fc.property(productionBonuses, (bonus) => {
+        const rate = returnRate(bonus);
+        expect(rate).toBeGreaterThanOrEqual(0);
+        expect(rate).toBeLessThan(1);
+      }),
+    );
+  });
+
+  it("rises as the production bonus rises", () => {
+    fc.assert(
+      fc.property(productionBonuses, bonusIncreases, (bonus, increase) => {
+        expect(returnRate(bonus + increase)).toBeGreaterThan(returnRate(bonus));
+      }),
+    );
+  });
 });
