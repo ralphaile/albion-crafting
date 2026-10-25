@@ -4,10 +4,10 @@ Recipes, item values, names, locations and crafting bonuses come from [ao-bin-du
 
 ## Updating
 
-| Command                     | What it does                                                               |
-| --------------------------- | -------------------------------------------------------------------------- |
-| `pnpm data:update`          | Downloads the pinned commit's files, checks them and generates the recipes |
-| `pnpm data:update --latest` | Does the same for the newest commit on `master`, then pins that            |
+| Command                     | What it does                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `pnpm data:update`          | Downloads the pinned commit's files, checks them and generates the recipes and item names |
+| `pnpm data:update --latest` | Does the same for the newest commit on `master`, then pins that                           |
 
 With `--latest`, the pin only moves once the new files pass the checks. Commit the new `source.json` with the regenerated files.
 
@@ -20,7 +20,7 @@ If `GITHUB_TOKEN` is set, it's sent when asking GitHub for the newest commit. Wi
 | File                     | Used for                                                      |
 | ------------------------ | ------------------------------------------------------------- |
 | `items.json`             | Recipes, tiers, categories and item values                    |
-| `formatted/items.json`   | Item names                                                    |
+| `formatted/items.json`   | Item names, in English only                                   |
 | `formatted/world.json`   | Cluster IDs, which identify the cities                        |
 | `craftingmodifiers.json` | Crafting bonuses in cities, Rests and hideouts by map quality |
 | `hideouts.json`          | Hideout bonuses by power level                                |
@@ -46,6 +46,16 @@ If `GITHUB_TOKEN` is set, it's sent when asking GitHub for the newest commit. Wi
   - A royal item's base piece has no `@itemvalue`, so it takes the item value of its own recipe.
   - An artifact counts too: the Master's Clarent Blade is 16 × 64 + 8 × 64 + 384 for its artifact = 1,920.
   - If a material has no `@itemvalue`, `pnpm data:update` prints a warning and the recipe has no `itemValue`, rather than counting the material as 0. The shapeshifter staffs are like this, because their `ALCHEMY_RARE` materials have no value.
+
+## Names, icons and search
+
+`src/generated/items.json` names every crafted item and every material its recipes use, and marks the crafted ones `"crafted": true`. The search covers only those, and builds its index when the app loads. The app uses them through `itemName`, `iconUrl` and `searchItems` from `@aoc/crafting-data`.
+
+- **Names** are the `EN-US` names from `formatted/items.json`, keyed by `UniqueName`, which includes the enchanted IDs such as `T5_MAIN_SWORD@1`. The other languages are left out, because some of them have encoding problems.
+- **Tier and enchantment** are added to the name: `T5_MAIN_SWORD@1` is "Expert's Broadsword 5.1", and `T5_MAIN_SWORD` is "Expert's Broadsword 5.0". An ID that doesn't start with a tier, such as `QUESTITEM_TOKEN_ROYAL_T4` ("Adept's Royal Sigil"), keeps its name as it is.
+- **A missing name:** `pnpm data:update` prints a warning, and the app shows the item's ID instead.
+- **Icons** come from the game's render service: `iconUrl("T5_MAIN_SWORD@1")` is `https://render.albiononline.com/v1/item/T5_MAIN_SWORD@1.png?quality=1&size=64`. The app lazy-loads them. The service draws icons on demand and sometimes answers 502 while it's busy, so when one fails to load the app shows a grey placeholder, tries again after 1 second and after 3 more, then keeps the placeholder.
+- **Search:** each entry holds the item's name and ID in lowercase, without apostrophes, such as `experts broadsword 5.1 t5_main_sword@1`. A query matches when each of its words appears somewhere in the entry, in any order, so `broad 5.1` and `experts broadsword` both find the Expert's Broadsword.
 
 ## When a check fails
 
