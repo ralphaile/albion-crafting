@@ -18,12 +18,30 @@ If `GITHUB_TOKEN` is set, it's sent when asking GitHub for the newest commit. Wi
 
 ### After a game patch
 
+The [weekly refresh](#weekly-refresh) does this and opens a PR. By hand:
+
 1. Run `pnpm data:update --latest`, and read any warnings.
 2. Run `pnpm data:diff`, then read `packages/crafting-data/data-diff.md`. It compares the new files with the ones committed at `HEAD`, so run it before committing. It starts with the totals, then lists up to 50 changes: crafting bonuses first, then removed items, added items and changed recipes.
 3. Run `pnpm test`.
    - The snapshot tests in `src/snapshot.test.ts` fail where the counts per category, the sample recipes or the crafting locations changed.
    - The tests in `src/index.test.ts` hold values checked in the game. If one fails, check the game before changing the test.
 4. Run `pnpm test -u` to accept the new snapshots. Commit `source.json`, the generated files and `src/__snapshots__/` together, and use the report as the PR description.
+
+### Weekly refresh
+
+Every Monday at 12:00 UTC, after Albion's daily maintenance at 10:00, `.github/workflows/data-refresh.yml` runs the steps above and opens a PR. To run it now, click **Run workflow** on its page in the Actions tab, or run `gh workflow run data-refresh.yml`.
+
+- **When it stops early:** ao-bin-dumps is still at the pinned commit, or its new commit doesn't change the generated files. Either way, there's no PR.
+- **The PR:** from the `data-refresh` branch, labeled `data` and assigned to the repo owner. The description is the `pnpm data:diff` report, with `pnpm data:update`'s warnings collapsed underneath. If the PR is already open, the run updates it instead of opening another.
+- **Tests:** the run accepts the new snapshots, so the PR shows their diff. If a test still fails, the description starts with a warning, and the run fails after opening the PR, so GitHub emails you.
+- **Checks:** if the new files fail them, the run fails before any PR.
+- **Review:** the PR runs CI like any other and needs your approval.
+
+The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR opened with a workflow's own token.
+
+- **The app** has read and write access to Contents and Pull requests, on this repository only, and no webhook.
+- **Its client ID** is the repository variable `DATA_REFRESH_APP_CLIENT_ID`, and **its private key** is the secret `DATA_REFRESH_APP_PRIVATE_KEY`.
+- **To replace the key:** generate a new one on the app's settings page, run `gh secret set DATA_REFRESH_APP_PRIVATE_KEY < key.pem`, then delete the old key there.
 
 ## Files
 
