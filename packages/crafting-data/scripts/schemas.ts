@@ -96,12 +96,14 @@ const powerLevel = z.object({
 
 export const dumpSchemas = {
   "items.json": z.object({
-    items: z.object({
-      weapon: z.array(gearItem),
-      equipmentitem: z.array(gearItem),
-      transformationweapon: z.array(gearItem),
-      simpleitem: z.array(simpleItem),
-    }),
+    items: z
+      .object({
+        weapon: z.array(gearItem),
+        equipmentitem: z.array(gearItem),
+        transformationweapon: z.array(gearItem),
+        simpleitem: z.array(simpleItem),
+      })
+      .catchall(z.unknown()),
   }),
   "formatted/items.json": z.array(
     z.object({

@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { extractRecipes } from "./recipes.ts";
+import { extractRecipes, findUnreadGear } from "./recipes.ts";
 import { type Dumps, validate } from "./validate.ts";
 import type { Recipe } from "../src/recipe.ts";
 
@@ -167,5 +167,32 @@ describe("extractRecipes", () => {
 
     expect(extractRecipes(only(helmet))).not.toEqual([]);
     expect(extractRecipes(only(change(helmet)))).toEqual([]);
+  });
+});
+
+describe("findUnreadGear", () => {
+  it("says nothing when the lists it doesn't read hold no gear", async () => {
+    const { items } = (await validate(fixtures))["items.json"];
+
+    expect(findUnreadGear(items)).toEqual([]);
+  });
+
+  it("warns about gear in a list it doesn't read", async () => {
+    const { items } = (await validate(fixtures))["items.json"];
+
+    expect(
+      findUnreadGear({
+        ...items,
+        whipitem: [
+          { "@uniquename": "T4_MAIN_WHIP", "@shopcategory": "weapons" },
+          { "@uniquename": "T5_MAIN_WHIP", "@shopcategory": "weapons" },
+        ],
+        mount: { "@uniquename": "T3_MOUNT_HORSE", "@shopcategory": "mounts" },
+        cape: { "@uniquename": "T4_CAPE", "@shopcategory": "accessories" },
+        gloves: { "@uniquename": "T4_GLOVES", "@shopcategory": "armors" },
+      }),
+    ).toEqual([
+      "items.json has 3 gear items in lists the app doesn't take recipes from: whipitem (2), gloves (1), such as T4_MAIN_WHIP",
+    ]);
   });
 });
