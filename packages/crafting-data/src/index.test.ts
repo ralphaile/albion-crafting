@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   type CraftingLocation,
   craftingLocations,
+  hideouts,
   iconUrl,
   itemName,
   type Recipe,
@@ -212,5 +213,85 @@ describe("craftingLocations", () => {
     expect(
       [...categories].filter((category) => !specialties.has(category)),
     ).toEqual([]);
+  });
+});
+
+describe("hideouts", () => {
+  it("has the bonus each map quality gives a biome's specialties", () => {
+    expect(hideouts.mapQualities).toEqual([
+      { quality: 1, specialtyBonus: 0.01 },
+      { quality: 2, specialtyBonus: 0.06 },
+      { quality: 3, specialtyBonus: 0.11 },
+      { quality: 4, specialtyBonus: 0.16 },
+      { quality: 5, specialtyBonus: 0.21 },
+      { quality: 6, specialtyBonus: 0.26 },
+    ]);
+  });
+
+  it("has the general and specialist bonuses at each power level", () => {
+    expect(hideouts.powerLevels).toEqual([
+      { level: 1, generalBonus: 0, specialistBonus: 0 },
+      { level: 2, generalBonus: 0.06, specialistBonus: 0.0375 },
+      { level: 3, generalBonus: 0.11, specialistBonus: 0.075 },
+      { level: 4, generalBonus: 0.15, specialistBonus: 0.1125 },
+      { level: 5, generalBonus: 0.18, specialistBonus: 0.15 },
+      { level: 6, generalBonus: 0.2, specialistBonus: 0.1875 },
+      { level: 7, generalBonus: 0.22, specialistBonus: 0.225 },
+      { level: 8, generalBonus: 0.24, specialistBonus: 0.2625 },
+      { level: 9, generalBonus: 0.26, specialistBonus: 0.3 },
+    ]);
+  });
+
+  it("names each biome's royal city and specialties", () => {
+    expect(
+      hideouts.biomes.map(({ name, cityId, specialties }) => [
+        name,
+        craftingLocations.find(({ id }) => id === cityId)?.name,
+        specialties,
+      ]),
+    ).toEqual([
+      [
+        "Swamp",
+        "Thetford",
+        ["mace", "naturestaff", "firestaff", "leather_armor", "cloth_helmet"],
+      ],
+      [
+        "Forest",
+        "Lymhurst",
+        ["sword", "bow", "arcanestaff", "leather_helmet", "leather_shoes"],
+      ],
+      [
+        "Steppe",
+        "Bridgewatch",
+        ["crossbow", "dagger", "cursestaff", "plate_armor", "cloth_shoes"],
+      ],
+      [
+        "Highland",
+        "Martlock",
+        ["axe", "quarterstaff", "froststaff", "plate_shoes", "offhand"],
+      ],
+      [
+        "Mountain",
+        "Fort Sterling",
+        ["hammer", "spear", "holystaff", "plate_helmet", "cloth_armor"],
+      ],
+    ]);
+  });
+
+  it.each(hideouts.biomes)(
+    "gives $name its royal city's gear specialties",
+    ({ cityId, specialties }) => {
+      const city = craftingLocations.find(({ id }) => id === cityId);
+
+      expect(
+        Object.keys(city?.specialties ?? {}).filter(
+          (category) => !category.startsWith("meat_"),
+        ),
+      ).toEqual(specialties);
+    },
+  );
+
+  it("gives hideouts a refining bonus of 15%", () => {
+    expect(hideouts.refiningBonus).toBe(0.15);
   });
 });

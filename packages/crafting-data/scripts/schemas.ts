@@ -11,6 +11,11 @@ const boolean = z
   .enum(["true", "false"])
   .transform((value) => value === "true");
 
+const mapQuality = z
+  .string()
+  .regex(/^Q\d+$/, "expected Q and a number")
+  .transform((quality) => Number(quality.slice(1)));
+
 function oneOrMany<T extends z.ZodType>(schema: T) {
   return z.preprocess(
     (value) => (value === undefined || Array.isArray(value) ? value : [value]),
@@ -68,7 +73,7 @@ const craftingLocation = z
   .object({
     "@clusterid": z.string().optional(),
     "@biome": z.string().optional(),
-    "@clusterquality": z.string().optional(),
+    "@clusterquality": mapQuality.optional(),
     craftingbonus: bonus.extend({ "@islandvalue": number }).optional(),
     refiningbonus: bonus,
     craftingmodifier: oneOrMany(

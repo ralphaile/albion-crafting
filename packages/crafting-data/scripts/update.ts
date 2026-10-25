@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 import { download } from "./download.ts";
+import { extractHideouts } from "./hideouts.ts";
 import { addItemValues } from "./item-value.ts";
 import { extractItems } from "./items.ts";
 import { extractLocations } from "./locations.ts";
@@ -66,10 +67,15 @@ export async function update({
     dumps["craftingmodifiers.json"].craftingmodifiers,
     dumps["formatted/world.json"],
   );
+  const hideouts = extractHideouts(
+    dumps["craftingmodifiers.json"].craftingmodifiers,
+    dumps["hideouts.json"].hideouts.hideout.powerlevels.powerlevel,
+    located.locations,
+  );
   for (const warning of located.warnings) {
     warn(`Warning: ${warning}`);
   }
-  await writeJsonArray(
+  await writeJson(
     join(packageDir, "src", "generated", "locations.json"),
     located.locations,
   );
@@ -77,6 +83,14 @@ export async function update({
     `Extracted ${count(located.locations.length, "crafting locations")}: ${located.locations
       .map(({ name }) => name)
       .join(", ")}`,
+  );
+  await writeJson(
+    join(packageDir, "src", "generated", "hideouts.json"),
+    hideouts,
+  );
+  const biomeNames = hideouts.biomes.map(({ name }) => name).join(", ");
+  log(
+    `Extracted the hideout bonuses for ${count(hideouts.biomes.length, "biomes")} (${biomeNames}), ${count(hideouts.mapQualities.length, "map qualities")} and ${count(hideouts.powerLevels.length, "power levels")}`,
   );
 
   const { recipes, warnings } = addItemValues(
@@ -86,7 +100,7 @@ export async function update({
   for (const warning of warnings) {
     warn(`Warning: ${warning}`);
   }
-  await writeJsonArray(
+  await writeJson(
     join(packageDir, "src", "generated", "recipes.json"),
     recipes,
   );
@@ -112,7 +126,7 @@ export async function update({
   for (const warning of named.warnings) {
     warn(`Warning: ${warning}`);
   }
-  await writeJsonArray(
+  await writeJson(
     join(packageDir, "src", "generated", "items.json"),
     named.items,
   );
@@ -127,10 +141,19 @@ export async function update({
   }
 }
 
-async function writeJsonArray(path: string, entries: unknown[]): Promise<void> {
+async function writeJson(path: string, data: unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(
-    path,
-    `[\n${entries.map((entry) => JSON.stringify(entry)).join(",\n")}\n]\n`,
-  );
+  await writeFile(path, `${oneRowPerLine(data)}\n`);
+}
+
+function oneRowPerLine(data: unknown): string {
+  if (Array.isArray(data)) {
+    return `[\n${data.map((entry) => JSON.stringify(entry)).join(",\n")}\n]`;
+  }
+  if (typeof data === "object" && data !== null) {
+    return `{\n${Object.entries(data)
+      .map(([key, value]) => `${JSON.stringify(key)}: ${oneRowPerLine(value)}`)
+      .join(",\n")}\n}`;
+  }
+  return JSON.stringify(data);
 }

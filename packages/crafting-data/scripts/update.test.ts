@@ -91,6 +91,7 @@ describe("update", () => {
       "Downloaded the files to raw/",
       "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 19 simple items, 7 names, 4 clusters, 5 crafting locations, 3 power levels",
       "Extracted 3 crafting locations: Thetford, Arthur's Rest, Island",
+      "Extracted the hideout bonuses for 1 biomes (Swamp), 2 map qualities and 3 power levels",
       "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands",
       "Named 6 item IDs: 4 crafted, which the search covers, and 2 materials",
     ]);
@@ -135,6 +136,55 @@ describe("update", () => {
 
     await expect(run(false)).rejects.toThrow(
       "Expected the cities and Rests to give islands one crafting bonus, but found 0.05, 0",
+    );
+    expect(existsSync(join(packageDir, "src", "generated"))).toBe(false);
+  });
+
+  it("writes the hideout bonuses to src/generated/hideouts.json, one row per line", async () => {
+    serveDumps();
+    await writeSource(join(packageDir, "source.json"), pinned);
+
+    await run(false);
+
+    const text = await readFile(
+      join(packageDir, "src", "generated", "hideouts.json"),
+      "utf8",
+    );
+    expect(text.split("\n")).toEqual([
+      "{",
+      '"biomes": [',
+      '{"id":"SWAMP","name":"Swamp","cityId":"0000","specialties":["mace","naturestaff","firestaff","leather_armor","cloth_helmet"]}',
+      "],",
+      '"mapQualities": [',
+      '{"quality":1,"specialtyBonus":0.01},',
+      '{"quality":6,"specialtyBonus":0.26}',
+      "],",
+      '"powerLevels": [',
+      '{"level":1,"generalBonus":0,"specialistBonus":0},',
+      '{"level":2,"generalBonus":0.06,"specialistBonus":0.0375},',
+      '{"level":9,"generalBonus":0.26,"specialistBonus":0.3}',
+      "],",
+      '"refiningBonus": 0.15',
+      "}",
+      "",
+    ]);
+  });
+
+  it("writes nothing when the hideouts stop fitting the tables", async () => {
+    const modifiers = await readFile(
+      join(fixtures, "craftingmodifiers.json"),
+      "utf8",
+    );
+    serveDumps({
+      "craftingmodifiers.json": modifiers.replace(
+        '"@value": "0.26"',
+        '"@value": "0.27"',
+      ),
+    });
+    await writeSource(join(packageDir, "source.json"), pinned);
+
+    await expect(run(false)).rejects.toThrow(
+      "Expected one specialty bonus at map quality Q6, but found 0.27; 0.26",
     );
     expect(existsSync(join(packageDir, "src", "generated"))).toBe(false);
   });
