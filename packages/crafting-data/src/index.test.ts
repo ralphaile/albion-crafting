@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  type CraftingLocation,
+  craftingLocations,
   iconUrl,
   itemName,
   type Recipe,
@@ -145,5 +147,70 @@ describe("searchItems", () => {
 
   it("leaves out the materials", () => {
     expect(searchItems("titanium steel bar")).toEqual([]);
+  });
+});
+
+describe("craftingLocations", () => {
+  it.each<[string, CraftingLocation]>([
+    [
+      "Lymhurst",
+      {
+        id: "1000",
+        name: "Lymhurst",
+        craftingBonus: 0.18,
+        specialties: {
+          meat_goose: 0.1,
+          sword: 0.15,
+          bow: 0.15,
+          arcanestaff: 0.15,
+          leather_helmet: 0.15,
+          leather_shoes: 0.15,
+        },
+      },
+    ],
+    [
+      "Arthur's Rest",
+      {
+        id: "4300",
+        name: "Arthur's Rest",
+        craftingBonus: 0.18,
+        specialties: {
+          axe: 0.15,
+          crossbow: 0.15,
+          hammer: 0.15,
+          mace: 0.15,
+          sword: 0.15,
+          knuckles: 0.15,
+          plate_helmet: 0.15,
+          plate_armor: 0.15,
+          plate_shoes: 0.15,
+        },
+      },
+    ],
+    [
+      "Island",
+      { id: "island", name: "Island", craftingBonus: 0, specialties: {} },
+    ],
+  ])("has the known bonuses for %s", (name, expected) => {
+    expect(
+      craftingLocations.find((location) => location.name === name),
+    ).toEqual(expected);
+  });
+
+  it("has a specialty for every recipe's crafting category", () => {
+    const specialties = new Set(
+      craftingLocations.flatMap((location) =>
+        Object.keys(location.specialties),
+      ),
+    );
+    const categories = new Set(
+      recipes.flatMap(({ craftingCategory }) =>
+        craftingCategory === undefined ? [] : [craftingCategory],
+      ),
+    );
+
+    expect(
+      [...categories].filter((category) => !specialties.has(category)),
+    ).toEqual([]);
   });
 });
