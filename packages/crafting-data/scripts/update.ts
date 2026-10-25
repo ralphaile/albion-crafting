@@ -38,6 +38,7 @@ export async function update({
   log(
     `Valid: ${[
       count(items.weapon.length, "weapons"),
+      count(items.transformationweapon.length, "shapeshifter staffs"),
       count(items.equipmentitem.length, "equipment items"),
       count(items.simpleitem.length, "simple items"),
       count(dumps["formatted/items.json"].length, "names"),

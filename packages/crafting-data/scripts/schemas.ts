@@ -7,6 +7,10 @@ const number = z
   .regex(/^-?\d+(\.\d+)?$/, "expected a number")
   .transform(Number);
 
+const boolean = z
+  .enum(["true", "false"])
+  .transform((value) => value === "true");
+
 function oneOrMany<T extends z.ZodType>(schema: T) {
   return z.preprocess(
     (value) => (value === undefined || Array.isArray(value) ? value : [value]),
@@ -34,6 +38,7 @@ const gearItem = z.object({
   "@shopcategory": z.string(),
   "@shopsubcategory1": z.string(),
   "@craftingcategory": z.string().optional(),
+  "@showinmarketplace": boolean.optional(),
   craftingrequirements: oneOrMany(craftingRequirements).optional(),
   enchantments: z
     .object({
@@ -89,6 +94,7 @@ export const dumpSchemas = {
     items: z.object({
       weapon: z.array(gearItem),
       equipmentitem: z.array(gearItem),
+      transformationweapon: z.array(gearItem),
       simpleitem: z.array(simpleItem),
     }),
   }),

@@ -78,7 +78,7 @@ describe("update", () => {
     expect(lines).toEqual([
       "ao-data/ao-bin-dumps at 1a469e53de, committed 2026-10-12T11:25:12Z",
       "Downloaded the files to raw/",
-      "Valid: 3 weapons, 1 equipment items, 5 simple items, 5 names, 3 clusters, 4 crafting locations, 3 power levels",
+      "Valid: 3 weapons, 1 shapeshifter staffs, 1 equipment items, 5 simple items, 5 names, 3 clusters, 4 crafting locations, 3 power levels",
     ]);
     expect(existsSync(join(packageDir, "raw", "hideouts.json"))).toBe(true);
     await expect(readSource(join(packageDir, "source.json"))).resolves.toEqual(

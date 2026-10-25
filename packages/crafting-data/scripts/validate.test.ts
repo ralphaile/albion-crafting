@@ -68,6 +68,25 @@ describe("validate", () => {
     });
   });
 
+  it("returns the shapeshifter staffs, and the marketplace flag as true or false", async () => {
+    const { equipmentitem, transformationweapon } = (await validate(fixtures))[
+      "items.json"
+    ].items;
+
+    expect(transformationweapon[0]).toMatchObject({
+      "@uniquename": "T4_2H_SHAPESHIFTER_SET1",
+      "@craftingcategory": "shapeshifterstaff",
+    });
+    expect(
+      transformationweapon[0]?.craftingrequirements?.[0]?.craftresource,
+    ).toContainEqual({
+      "@uniquename": "T3_ALCHEMY_RARE_PANTHER",
+      "@count": 2,
+      "@maxreturnamount": 0,
+    });
+    expect(equipmentitem[0]?.["@showinmarketplace"]).toBe(true);
+  });
+
   it("returns item values, names, clusters and bonuses", async () => {
     const dumps = await validate(fixtures);
     const locations =
@@ -167,6 +186,17 @@ describe("parseDumps", () => {
 
     expect(() => parseDumps(files)).toThrow(
       "items.json: items.simpleitem[0].@tier: expected a number",
+    );
+  });
+
+  it("rejects a marketplace flag that isn't true or false", async () => {
+    const files = await readFixtures();
+    at(files, ["items.json", "items", "equipmentitem", 0])[
+      "@showinmarketplace"
+    ] = "yes";
+
+    expect(() => parseDumps(files)).toThrow(
+      'items.json: items.equipmentitem[0].@showinmarketplace: Invalid option: expected one of "true"|"false"',
     );
   });
 
