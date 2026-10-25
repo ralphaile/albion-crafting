@@ -26,6 +26,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup
+      - name: Audit production dependencies
+        run: pnpm audit --prod || echo "::warning title=pnpm audit::pnpm audit --prod reported a problem. See its step in the Checks job."
       - run: pnpm format:check
       - run: pnpm check:deps
       - run: pnpm check:unused
