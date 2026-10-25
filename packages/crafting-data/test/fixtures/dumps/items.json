@@ -109,6 +109,147 @@
             }
           ]
         }
+      },
+      {
+        "@uniquename": "T4_HEAD_CLOTH_ROYAL",
+        "@shopcategory": "head",
+        "@shopsubcategory1": "cloth_helmet",
+        "@tier": "4",
+        "@weight": "1.7",
+        "@showinmarketplace": "true",
+        "craftingrequirements": [
+          {
+            "@silver": "0",
+            "@time": "0.333",
+            "@craftingfocus": "0",
+            "craftresource": [
+              {
+                "@uniquename": "T4_HEAD_CLOTH_SET1",
+                "@count": "1",
+                "@maxreturnamount": "0",
+                "@enchantmentlevel": "0",
+                "@preservequality": "true"
+              },
+              {
+                "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                "@count": "2",
+                "@maxreturnamount": "0"
+              }
+            ]
+          },
+          {
+            "@silver": "0",
+            "@time": "0.333",
+            "@craftingfocus": "0",
+            "craftresource": [
+              {
+                "@uniquename": "T4_HEAD_CLOTH_SET2",
+                "@count": "1",
+                "@maxreturnamount": "0",
+                "@enchantmentlevel": "0",
+                "@preservequality": "true"
+              },
+              {
+                "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                "@count": "2",
+                "@maxreturnamount": "0"
+              }
+            ]
+          },
+          {
+            "@silver": "0",
+            "@time": "0.333",
+            "@craftingfocus": "0",
+            "craftresource": [
+              {
+                "@uniquename": "T4_HEAD_CLOTH_SET3",
+                "@count": "1",
+                "@maxreturnamount": "0",
+                "@enchantmentlevel": "0",
+                "@preservequality": "true"
+              },
+              {
+                "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                "@count": "2",
+                "@maxreturnamount": "0"
+              }
+            ]
+          }
+        ],
+        "enchantments": {
+          "enchantment": [
+            {
+              "@enchantmentlevel": "1",
+              "@itempower": "825",
+              "@durability": "16200",
+              "craftingrequirements": [
+                {
+                  "@silver": "0",
+                  "@time": "0.5",
+                  "@craftingfocus": "0",
+                  "craftresource": [
+                    {
+                      "@uniquename": "T4_HEAD_CLOTH_SET1",
+                      "@enchantmentlevel": "1",
+                      "@count": "1",
+                      "@maxreturnamount": "0",
+                      "@preservequality": "true"
+                    },
+                    {
+                      "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                      "@count": "2",
+                      "@maxreturnamount": "0"
+                    }
+                  ]
+                },
+                {
+                  "@silver": "0",
+                  "@time": "0.5",
+                  "@craftingfocus": "0",
+                  "craftresource": [
+                    {
+                      "@uniquename": "T4_HEAD_CLOTH_SET2",
+                      "@enchantmentlevel": "1",
+                      "@count": "1",
+                      "@maxreturnamount": "0",
+                      "@preservequality": "true"
+                    },
+                    {
+                      "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                      "@count": "2",
+                      "@maxreturnamount": "0"
+                    }
+                  ]
+                },
+                {
+                  "@silver": "0",
+                  "@time": "0.5",
+                  "@craftingfocus": "0",
+                  "craftresource": [
+                    {
+                      "@uniquename": "T4_HEAD_CLOTH_SET3",
+                      "@enchantmentlevel": "1",
+                      "@count": "1",
+                      "@maxreturnamount": "0",
+                      "@preservequality": "true"
+                    },
+                    {
+                      "@uniquename": "QUESTITEM_TOKEN_ROYAL_T4",
+                      "@count": "2",
+                      "@maxreturnamount": "0"
+                    }
+                  ]
+                }
+              ],
+              "upgraderequirements": {
+                "upgraderesource": {
+                  "@uniquename": "T4_RUNE",
+                  "@count": "96"
+                }
+              }
+            }
+          ]
+        }
       }
     ],
     "weapon": [
