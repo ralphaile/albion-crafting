@@ -58,22 +58,36 @@ A message that doesn't fit, such as `fixed stuff`, stops the commit. Merge and r
 
 ## Pull requests and CI
 
-Every PR, and every push to `main`, runs `.github/workflows/ci.yml` on GitHub Actions. Its two jobs run side by side:
+Every PR, and every push to `main`, runs `.github/workflows/ci.yml` on GitHub Actions. `Checks` and `E2E` run side by side. On `main`, `Deploy` follows once both pass:
 
 | Job      | What it runs                                                                                                                                      |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Checks` | `pnpm audit --prod`, then `format:check`, `check:deps`, `check:unused` and `check:versions`, then lint, typecheck and build, then `pnpm coverage` |
 | `E2E`    | Installs headless Chromium and runs the E2E tests                                                                                                 |
+| `Deploy` | Publishes the site to GitHub Pages. See [Deployment](#deployment)                                                                                 |
 
 - On a PR, lint, typecheck, build and E2E only run for the packages that changed compared to `main`, and the packages that depend on them. A change in `.github/workflows` or `.github/actions` runs them all. The other checks and the unit tests always run in full.
 - The run's **Summary** page shows the test report and a coverage table per package, next to each minimum.
 - When an E2E test fails, its traces, screenshots and videos are attached to the run as `playwright-results-<attempt>` for 14 days.
-- A new push to a PR cancels that PR's run if it's still going. Runs on `main` always finish.
+- A new push to a PR cancels that PR's run if it's still going. On `main`, a run that has started always finishes. If more pushes arrive meanwhile, only the newest one waits to run next.
 - `pnpm audit --prod` never fails the job. When it reports a problem, the PR's checks show a warning. See [Dependency updates and security](#dependency-updates-and-security).
 
-A PR can only be merged when both jobs pass and the branch is up to date with `main`. This rule has no bypass, not even for admins.
+A PR can only be merged when `Checks` and `E2E` pass and the branch is up to date with `main`. This rule has no bypass, not even for admins.
 
 The rules for `main` are kept in `.github/rulesets/`: `main.json` for reviews and squash merging, and `require-ci.json` for CI. After changing one, apply it with `gh api -X PUT repos/ralphaile/albion-crafting/rulesets/<id> --input <file>`. `gh api repos/ralphaile/albion-crafting/rulesets` lists the ids.
+
+## Deployment
+
+The site is at https://ralphaile.github.io/albion-crafting/.
+
+- Every push to `main` deploys it once `Checks` and `E2E` pass. `Checks` packs `apps/web/dist`, and `Deploy` publishes it.
+- When anything fails, nothing is deployed and the previous version stays live.
+- Only `main` can deploy. The `github-pages` environment (**Settings → Environments**) refuses every other branch.
+- To undo a bad release, revert its commit through a PR. The deploy that follows puts the old version back.
+
+The app lives under `/albion-crafting/`, locally too: `pnpm dev` serves it at `http://localhost:5173/albion-crafting/`. If the repo is renamed or gets its own domain, change `base` in `apps/web/vite.config.ts` and `appURL` in `apps/web/playwright.config.ts`.
+
+GitHub Pages answers every unknown path with `404.html`, which the build makes as a copy of `index.html`. So a link to a page inside the app, or a refresh, still loads the app. Those pages come back with HTTP status 404, which only search engines notice.
 
 ## Dependency updates and security
 

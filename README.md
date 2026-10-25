@@ -2,6 +2,8 @@
 
 Find the most profitable items to craft in Albion Online for a route you choose: where you craft, where you buy materials and where you sell, including the Black Market. Market prices come from the [Albion Online Data Project](https://www.albion-online-data.com/), with manual entry where the data is missing. Recipes and crafting bonuses come from [ao-bin-dumps](https://github.com/ao-data/ao-bin-dumps).
 
+**Live at https://ralphaile.github.io/albion-crafting/.** Every change to `main` is deployed there automatically.
+
 > **Status:** early development. The project skeleton is in place, and features are added ticket by ticket.
 
 ## Getting started
@@ -14,7 +16,7 @@ nvm use 24.22.1
 corepack enable pnpm
 pnpm install
 pnpm --filter @aoc/web exec playwright install chromium   # browser for pnpm e2e
-pnpm dev   # http://localhost:5173
+pnpm dev   # http://localhost:5173/albion-crafting/
 ```
 
 `pnpm install` also sets up git hooks that check each commit. See [docs/git.md](docs/git.md).
