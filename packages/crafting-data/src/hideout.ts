@@ -17,8 +17,8 @@ export interface PowerLevel {
 }
 
 export interface Hideouts {
-  biomes: Biome[];
-  mapQualities: MapQuality[];
-  powerLevels: PowerLevel[];
+  biomes: readonly Biome[];
+  mapQualities: readonly MapQuality[];
+  powerLevels: readonly PowerLevel[];
   refiningBonus: number;
 }
