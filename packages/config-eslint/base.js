@@ -3,7 +3,12 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import prettier from "eslint-config-prettier/flat";
 import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
 import { importX } from "eslint-plugin-import-x";
+import globals from "globals";
 import { configs as typescriptConfigs } from "typescript-eslint";
+
+export const nodeOnlyGlobals = Object.keys(globals.node)
+  .filter((name) => !Object.hasOwn(globals.browser, name))
+  .map((name) => ({ name, message: "It only exists in Node." }));
 
 export const base = defineConfig(
   globalIgnores(["**/dist/", "**/coverage/"]),
@@ -45,6 +50,7 @@ export const base = defineConfig(
         },
       ],
       "no-console": "error",
+      "no-restricted-globals": ["error", ...nodeOnlyGlobals],
     },
   },
   {
@@ -56,6 +62,7 @@ export const base = defineConfig(
     rules: {
       "import-x/no-default-export": "off",
       "import-x/no-nodejs-modules": "off",
+      "no-restricted-globals": "off",
     },
   },
   {
