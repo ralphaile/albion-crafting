@@ -11,6 +11,7 @@
     "check:deps": "depcruise apps packages --config .dependency-cruiser.js",
     "check:unused": "knip",
     "check:versions": "syncpack lint",
+    "coverage": "vitest run --coverage",
     "data:update": "pnpm --filter @aoc/crafting-data run data:update",
     "dev": "turbo run dev",
     "e2e": "turbo run e2e",
@@ -22,6 +23,7 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "5.0.5",
     "dependency-cruiser": "18.6.0",
     "knip": "6.41.0",
     "prettier": "3.9.10",
