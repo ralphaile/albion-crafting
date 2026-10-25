@@ -44,6 +44,14 @@ A golden test checks a result against a value known to be right, from the game o
 - Compare at the precision of the source. The return rates are published as percentages with two decimals, so the test compares `"47.92%"`, not a long float.
 - Never change a golden value just to make a test pass. When one fails, find out whether the code or the value is wrong.
 
+## Snapshot tests
+
+A snapshot test saves a value to a file the first time it runs, and fails when the value later differs. `crafting-data` uses them on the generated game data in `src/snapshot.test.ts`, so a game patch shows up as a diff of `src/__snapshots__/`.
+
+- Check the change, then accept it with `pnpm test -u`. See [After a game patch](game-data.md#after-a-game-patch).
+- In CI, a missing or different snapshot fails instead of being written.
+- A snapshot only says that something changed, not that it's right. Values that must be right get golden tests.
+
 ## Property tests
 
 A property test states a rule that must hold for every input, and fast-check tries 100 random inputs on each run. Use them for rules such as "never negative" or "rises as the input rises". Example: the `returnRate` tests.
