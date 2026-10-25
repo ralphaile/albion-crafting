@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: "0"
+  AFFECTED: ${{ github.event_name == 'pull_request' && '--filter=...[origin/main]' || '' }}
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - run: pnpm format:check
+      - run: pnpm check:deps
+      - run: pnpm check:unused
+      - run: pnpm check:versions
+      - run: pnpm exec turbo run lint typecheck build $AFFECTED
+      - run: pnpm coverage
+      - name: Coverage summary
+        if: ${{ !cancelled() && hashFiles('coverage/coverage-summary.json') != '' }}
+        run: node .github/scripts/coverage-summary.js >> "$GITHUB_STEP_SUMMARY"

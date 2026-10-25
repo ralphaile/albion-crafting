@@ -1,5 +1,6 @@
 {
   "$schema": "./node_modules/turbo/schema.json",
+  "globalDependencies": [".github/actions/**", ".github/workflows/**"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

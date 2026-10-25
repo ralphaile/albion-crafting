@@ -5,6 +5,7 @@ export default defineConfig({
     projects: ["apps/*", "packages/*", "!packages/config-*"],
     coverage: {
       include: ["apps/*/src/**", "packages/*/src/**"],
+      reporter: ["text", "html", "json-summary"],
       exclude: ["apps/web/src/main.tsx"],
       thresholds: {
         "packages/core/src/**": { lines: 90, branches: 90 },
