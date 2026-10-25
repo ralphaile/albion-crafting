@@ -13,6 +13,9 @@ try {
     log: (line) => {
       console.log(line);
     },
+    warn: (line) => {
+      console.warn(line);
+    },
   });
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
