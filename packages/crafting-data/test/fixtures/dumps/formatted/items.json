@@ -36,6 +36,22 @@
     "UniqueName": "T4_HEAD_PLATE_SET1"
   },
   {
+    "LocalizationNameVariable": "@ITEMS_QUESTITEM_TOKEN_ROYAL_T4",
+    "LocalizedNames": {
+      "EN-US": "Adept's Royal Sigil"
+    },
+    "Index": "442",
+    "UniqueName": "QUESTITEM_TOKEN_ROYAL_T4"
+  },
+  {
+    "LocalizationNameVariable": "@ITEMS_T4_METALBAR_LEVEL1",
+    "LocalizedNames": {
+      "EN-US": "Uncommon Steel Bar"
+    },
+    "Index": "1121",
+    "UniqueName": "T4_METALBAR_LEVEL1@1"
+  },
+  {
     "LocalizationNameVariable": "@ITEMS_QUESTITEM_TUTORIAL_HERETIC_PLANS",
     "LocalizedNames": null,
     "Index": "211",
