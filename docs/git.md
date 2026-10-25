@@ -24,7 +24,7 @@
 
 ### Skipping the hooks
 
-`git commit --no-verify` skips `pre-commit` and `commit-msg` for one commit, and `git push --no-verify` skips `pre-push`. `pnpm lint`, `pnpm format:check` and `pnpm typecheck` still have to pass.
+`git commit --no-verify` skips `pre-commit` and `commit-msg` for one commit, and `git push --no-verify` skips `pre-push`. CI still runs every check on the PR.
 
 ## Commit messages
 
@@ -55,3 +55,21 @@ type(scope): summary
 Examples: `feat(AOC-42): add hideout bonus`, `test(AOC-16): add Playwright with a smoke test`.
 
 A message that doesn't fit, such as `fixed stuff`, stops the commit. Merge and revert messages that git writes itself aren't checked. PR titles use the same format, because squash merging turns the title into the commit on `main`.
+
+## Pull requests and CI
+
+Every PR, and every push to `main`, runs `.github/workflows/ci.yml` on GitHub Actions. Its two jobs run side by side:
+
+| Job      | What it runs                                                                                                            |
+| -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `Checks` | `format:check`, `check:deps`, `check:unused` and `check:versions`, then lint, typecheck and build, then `pnpm coverage` |
+| `E2E`    | Installs headless Chromium and runs the E2E tests                                                                       |
+
+- On a PR, lint, typecheck, build and E2E only run for the packages that changed compared to `main`, and the packages that depend on them. A change in `.github/workflows` or `.github/actions` runs them all. The other checks and the unit tests always run in full.
+- The run's **Summary** page shows the test report and a coverage table per package, next to each minimum.
+- When an E2E test fails, its traces, screenshots and videos are attached to the run as `playwright-results-<attempt>` for 14 days.
+- A new push to a PR cancels that PR's run if it's still going. Runs on `main` always finish.
+
+A PR can only be merged when both jobs pass and the branch is up to date with `main`. This rule has no bypass, not even for admins.
+
+The rules for `main` are kept in `.github/rulesets/`: `main.json` for reviews and squash merging, and `require-ci.json` for CI. After changing one, apply it with `gh api -X PUT repos/ralphaile/albion-crafting/rulesets/<id> --input <file>`. `gh api repos/ralphaile/albion-crafting/rulesets` lists the ids.

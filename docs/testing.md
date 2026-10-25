@@ -146,7 +146,7 @@ Playwright keeps a screenshot, a video and a trace of each failed test in `apps/
 pnpm --filter @aoc/web exec playwright show-trace test-results/<test>/trace.zip
 ```
 
-`test.only` is refused when `CI` is set, so a focused test can't silently skip the rest in CI.
+`test.only` is refused when `CI` is set, so a focused test can't silently skip the rest in CI. In CI, the files of failed tests are attached to the run. See [Pull requests and CI](git.md#pull-requests-and-ci).
 
 ## Coverage
 
@@ -158,4 +158,4 @@ pnpm --filter @aoc/web exec playwright show-trace test-results/<test>/trace.zip
 | `market-prices`, `crafting-data` | 80%     |
 | `web`                            | 60%     |
 
-Files that no test loads count as 0%. `apps/web/src/main.tsx` only starts the app, so it's left out and the E2E tests cover it. The full report is in `coverage/index.html`.
+Files that no test loads count as 0%. `apps/web/src/main.tsx` only starts the app, so it's left out and the E2E tests cover it. The full report is in `coverage/index.html`. In CI, the run's **Summary** page shows a table per package, next to each minimum.
