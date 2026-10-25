@@ -4,5 +4,9 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["${configDir}/src"]
+  "include": [
+    "${configDir}/src",
+    "${configDir}/test",
+    "${configDir}/vitest.config.ts"
+  ]
 }
