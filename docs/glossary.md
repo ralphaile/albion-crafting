@@ -1,0 +1,81 @@
+# Glossary
+
+Albion Online terms used in the code and the app. The numbers are the ones the calculation engine in `packages/core` uses. If the game changes one, the engine and this page change together.
+
+## Black Market
+
+An NPC market in Caerleon that buys gear from players to stock the loot of monsters and chests. You can only sell to it, so its price is its highest buy order. Like any instant sale, it's taxed but has no [setup fee](#setup-fee).
+
+## Daily bonus
+
+Extra [production bonus](#production-bonus) the game gives a few crafting categories each day: +0.10 or +0.20. The app takes up to two.
+
+## FCE
+
+Focus cost efficiency, which grows as you specialize in crafting an item. Every 10,000 FCE halves the [focus](#focus) a craft costs:
+
+```text
+focus cost = base focus × 0.5 ^ (FCE / 10000)
+```
+
+## Focus
+
+Points you can spend on a craft to add 0.59 to its [production bonus](#production-bonus), which raises the [return rate](#return-rate-rrr) a lot. How much focus a craft costs depends on the item and your [FCE](#fce). _Silver per focus_ (profit with focus ÷ focus cost) shows which crafts make the most of it.
+
+## Hideout map quality
+
+The quality of the Black Zone map a hideout stands on. A better map gives the hideout a larger [production bonus](#production-bonus). In a hideout, map quality and [power level](#power-level) take the place of a city's base and [specialty bonus](#specialty-bonus).
+
+## Item value
+
+A value the game gives every item, separate from its market price, worked out from the item values of its materials. The [station fee](#nutrition-and-station-fee) is based on it.
+
+## Nutrition and station fee
+
+Crafting stations run on nutrition. A craft uses `item value × 0.1125` nutrition, and the station's owner sets a price in silver per 100 nutrition:
+
+```text
+station fee = item value × 0.1125 × fee per 100 nutrition / 100
+```
+
+## Power level
+
+A hideout's power level adds to its [production bonus](#production-bonus) in two parts: a general bonus and a specialist bonus. A level 9 hideout on a quality 6 map, crafting its specialty, reaches a production bonus of 0.82, or 1.41 with [focus](#focus).
+
+## Production bonus
+
+The total crafting bonus where you craft, written as a fraction (0.18 is 18%). Called _B_ in formulas. It decides the [return rate](#return-rate-rrr).
+
+- **City:** a base of 0.18, plus 0.15 for the city's [specialty](#specialty-bonus), plus any [daily bonus](#daily-bonus), plus 0.59 with [focus](#focus).
+- **Hideout:** [map quality](#hideout-map-quality) and [power level](#power-level) instead of the base and specialty bonus.
+
+## Return rate (RRR)
+
+Resource return rate: the share of returnable materials you get back after a craft. Artifacts and tokens are never returned, so they always cost their full price.
+
+```text
+RRR = B / (1 + B)
+```
+
+| Where you craft                               | B    | RRR   |
+| --------------------------------------------- | ---- | ----- |
+| City                                          | 0.18 | 15.3% |
+| City, its specialty                           | 0.33 | 24.8% |
+| City, with focus                              | 0.77 | 43.5% |
+| City, its specialty, with focus               | 0.92 | 47.9% |
+| Level 9 hideout, quality 6 map, its specialty | 0.82 | 45.1% |
+| The same, with focus                          | 1.41 | 58.5% |
+
+The engine's version is `returnRate()` in `packages/core/src/return-rate.ts`.
+
+## Setup fee
+
+2.5% of an order's value, charged when you place a sell order or a buy order. Buying or selling instantly, including to the [Black Market](#black-market), has no setup fee.
+
+## Specialty bonus
+
+Each royal city specializes in some crafting categories. Crafting one of them there adds 0.15 to the [production bonus](#production-bonus).
+
+## Tax and premium
+
+Every market sale is taxed: 4% with premium, Albion's paid subscription, or 8% without.
