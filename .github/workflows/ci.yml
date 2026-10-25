@@ -37,6 +37,10 @@ jobs:
       - name: Coverage summary
         if: ${{ !cancelled() && hashFiles('coverage/coverage-summary.json') != '' }}
         run: node .github/scripts/coverage-summary.js >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: apps/web/dist/
 
   e2e:
     name: E2E
@@ -55,3 +59,19 @@ jobs:
           name: playwright-results-${{ github.run_attempt }}
           path: apps/web/test-results/
           retention-days: 14
+
+  deploy:
+    name: Deploy
+    if: github.ref == 'refs/heads/main'
+    needs: [checks, e2e]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
