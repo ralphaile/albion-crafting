@@ -24,6 +24,14 @@ export {
   summarizeHistory,
   type SummarizeOptions,
 } from "./history.js";
+export {
+  type HistoryOptions,
+  type HistoryResult,
+  type MarketData,
+  type MarketDataOptions,
+  openMarketData,
+  type PricesResult,
+} from "./market-data.js";
 export { type Market, markets } from "./markets.js";
 export {
   type CachedFetchOptions,
