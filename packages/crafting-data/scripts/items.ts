@@ -1,6 +1,6 @@
 import type { Dumps } from "./validate.ts";
 import type { Item } from "../src/item.ts";
-import type { Recipe } from "../src/recipe.ts";
+import type { GameRecipe } from "../src/recipe.ts";
 
 type Names = Dumps["formatted/items.json"];
 
@@ -9,7 +9,10 @@ interface ExtractedItems {
   warnings: string[];
 }
 
-export function extractItems(recipes: Recipe[], names: Names): ExtractedItems {
+export function extractItems(
+  recipes: GameRecipe[],
+  names: Names,
+): ExtractedItems {
   const englishNames = new Map(
     names.flatMap(({ UniqueName, LocalizedNames }) =>
       LocalizedNames === null

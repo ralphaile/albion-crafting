@@ -1,6 +1,7 @@
+import type { CraftingLocation } from "@aoc/core";
+
 import type { Dumps } from "./validate.ts";
 import type { Hideouts } from "../src/hideout.ts";
-import type { CraftingLocation } from "../src/location.ts";
 
 type CraftingModifiers = Dumps["craftingmodifiers.json"]["craftingmodifiers"];
 type PowerLevels =

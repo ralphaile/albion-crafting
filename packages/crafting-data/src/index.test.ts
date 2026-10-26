@@ -1,18 +1,19 @@
 import { describe, expect, it } from "vitest";
 
+import type { CraftingLocation } from "@aoc/core";
+
 import {
-  type CraftingLocation,
   craftingLocations,
   hideouts,
   iconUrl,
   itemName,
-  type Recipe,
+  type GameRecipe,
   recipes,
   searchItems,
 } from "./index.js";
 
 describe("recipes", () => {
-  it.each<[string, Recipe]>([
+  it.each<[string, GameRecipe]>([
     [
       "Expert's Broadsword",
       {

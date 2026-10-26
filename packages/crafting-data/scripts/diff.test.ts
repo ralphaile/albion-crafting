@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { type GeneratedData, diffData } from "./diff.ts";
-import type { Recipe } from "../src/recipe.ts";
+import type { GameRecipe } from "../src/recipe.ts";
 
-function recipe(itemId: string, changes: Partial<Recipe> = {}): Recipe {
+function recipe(itemId: string, changes: Partial<GameRecipe> = {}): GameRecipe {
   const [baseId = itemId, enchant = "0"] = itemId.split("@");
   return {
     itemId,

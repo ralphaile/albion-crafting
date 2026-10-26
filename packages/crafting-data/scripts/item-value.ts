@@ -1,16 +1,16 @@
 import { marketId } from "./recipes.ts";
 import type { Dumps } from "./validate.ts";
-import type { Recipe } from "../src/recipe.ts";
+import type { GameRecipe } from "../src/recipe.ts";
 
 type SimpleItem = Dumps["items.json"]["items"]["simpleitem"][number];
 
 interface ItemValues {
-  recipes: Recipe[];
+  recipes: GameRecipe[];
   warnings: string[];
 }
 
 export function addItemValues(
-  recipes: Recipe[],
+  recipes: GameRecipe[],
   simpleItems: SimpleItem[],
 ): ItemValues {
   const simpleItemValues = new Map(
@@ -29,7 +29,7 @@ export function addItemValues(
   const itemValues = new Map<string, number | undefined>();
   const unvalued = new Map<string, string[]>();
 
-  function itemValue(recipe: Recipe): number | undefined {
+  function itemValue(recipe: GameRecipe): number | undefined {
     if (!itemValues.has(recipe.itemId)) {
       const values = recipe.materials.map(({ id, count }) => {
         const value = materialValue(id, recipe.itemId);

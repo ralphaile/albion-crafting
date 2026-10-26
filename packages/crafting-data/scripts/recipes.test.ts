@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { extractRecipes, findUnreadGear } from "./recipes.ts";
 import { type Dumps, validate } from "./validate.ts";
-import type { Recipe } from "../src/recipe.ts";
+import type { GameRecipe } from "../src/recipe.ts";
 
 type Items = Dumps["items.json"]["items"];
 type GearItem = Items["weapon"][number];
@@ -13,11 +13,11 @@ const fixtures = fileURLToPath(
   new URL("../test/fixtures/dumps", import.meta.url),
 );
 
-async function fixtureRecipes(): Promise<Recipe[]> {
+async function fixtureRecipes(): Promise<GameRecipe[]> {
   return extractRecipes((await validate(fixtures))["items.json"].items);
 }
 
-function find(recipes: Recipe[], itemId: string): Recipe | undefined {
+function find(recipes: GameRecipe[], itemId: string): GameRecipe | undefined {
   return recipes.find((recipe) => recipe.itemId === itemId);
 }
 

@@ -1,10 +1,11 @@
+import type { CraftingLocation, RecipeAlternative } from "@aoc/core";
+
 import type { Hideouts } from "../src/hideout.ts";
 import type { Item } from "../src/item.ts";
-import type { CraftingLocation } from "../src/location.ts";
-import type { Alternative, Recipe } from "../src/recipe.ts";
+import type { GameRecipe } from "../src/recipe.ts";
 
 export interface GeneratedData {
-  recipes: readonly Recipe[];
+  recipes: readonly GameRecipe[];
   items: readonly Item[];
   locations: readonly CraftingLocation[];
   hideouts: Hideouts;
@@ -155,7 +156,7 @@ function bonusFacts({ locations, hideouts }: GeneratedData): Facts {
   return facts;
 }
 
-function recipeFacts(recipe: Recipe): Facts {
+function recipeFacts(recipe: GameRecipe): Facts {
   const facts: Facts = new Map();
   addAlternative(facts, "", recipe);
   recipe.alternatives.forEach((alternative, index) => {
@@ -174,7 +175,7 @@ function recipeFacts(recipe: Recipe): Facts {
 function addAlternative(
   facts: Facts,
   prefix: string,
-  { focus, silver, amountCrafted, materials }: Alternative,
+  { focus, silver, amountCrafted, materials }: RecipeAlternative,
 ): void {
   facts.set(`${prefix}focus`, String(focus));
   facts.set(`${prefix}silver`, String(silver));
