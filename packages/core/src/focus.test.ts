@@ -46,15 +46,17 @@ describe("focusCost", () => {
 });
 
 describe("silverPerFocus", () => {
-  it("divides the profit with focus by the focus cost", () => {
-    expect(silverPerFocus(20_000, 2000)).toBe(10);
-  });
-
-  it("is negative for a craft that loses silver", () => {
-    expect(silverPerFocus(-5000, 2000)).toBe(-2.5);
-  });
+  it.each([
+    ["a craft that's profitable anyway", 60_000, 50_000, 5],
+    ["a craft that only pays with focus", 20_000, -10_000, 15],
+  ])(
+    "divides what focus adds by the focus cost, for %s",
+    (_case, withFocus, withoutFocus, expected) => {
+      expect(silverPerFocus(withFocus, withoutFocus, 2000)).toBe(expected);
+    },
+  );
 
   it("is unknown for a craft that costs no focus", () => {
-    expect(silverPerFocus(20_000, 0)).toBeUndefined();
+    expect(silverPerFocus(20_000, 10_000, 0)).toBeUndefined();
   });
 });

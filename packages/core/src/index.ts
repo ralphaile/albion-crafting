@@ -1,4 +1,13 @@
 export {
+  type CraftingPlace,
+  type CraftRecipe,
+  evaluate,
+  type EvaluatePrices,
+  type EvaluateSettings,
+  type Evaluation,
+  type RecipeVariant,
+} from "./evaluate.js";
+export {
   FOCUS_PER_DAY,
   focusCost,
   MAX_STORED_FOCUS,
@@ -26,6 +35,7 @@ export {
   type ProductionBonus,
   type ProductionBonusOptions,
 } from "./production-bonus.js";
+export { defaultSortKey, rank, type SortKey } from "./rank.js";
 export { bonusForReturnRate, returnRate } from "./return-rate.js";
 export {
   revenue,

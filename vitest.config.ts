@@ -17,6 +17,7 @@ export default defineConfig({
       ],
       thresholds: {
         "packages/core/src/**": { lines: 90, branches: 90 },
+        "packages/core/src/{evaluate,rank}.ts": { lines: 100, branches: 100 },
         "packages/market-prices/src/**": { lines: 80, branches: 80 },
         "packages/crafting-data/{src,scripts}/**": { lines: 80, branches: 80 },
         "apps/web/src/**": { lines: 60, branches: 60 },

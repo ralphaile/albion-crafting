@@ -160,14 +160,19 @@ pnpm --filter @aoc/web exec playwright show-trace test-results/<test>/trace.zip
 
 `test.only` is refused when `CI` is set, so a focused test can't silently skip the rest in CI. In CI, the files of failed tests are attached to the run. See [Pull requests and CI](git.md#pull-requests-and-ci).
 
+## Speed
+
+`packages/core/src/performance.test.ts` evaluates and ranks 6,000 recipes shaped like the real ones, and fails if that takes 200 ms or more, the target for the browser. It takes about 20 ms. `core` has no browser or Node types, so it times with `Date.now()`.
+
 ## Coverage
 
 `pnpm coverage` fails when a package is below its minimum for lines or branches:
 
-| Package                          | Minimum |
-| -------------------------------- | ------- |
-| `core`                           | 90%     |
-| `market-prices`, `crafting-data` | 80%     |
-| `web`                            | 60%     |
+| Package                              | Minimum |
+| ------------------------------------ | ------- |
+| `core`                               | 90%     |
+| `core`'s `evaluate.ts` and `rank.ts` | 100%    |
+| `market-prices`, `crafting-data`     | 80%     |
+| `web`                                | 60%     |
 
-Files that no test loads count as 0%. `apps/web/src/main.tsx` only starts the app, so it's left out and the E2E tests cover it. The full report is in `coverage/index.html`. In CI, the run's **Summary** page shows a table per package, next to each minimum.
+The profit and ranking code needs 100%, because every branch of it changes what the app recommends. Files that no test loads count as 0%. `apps/web/src/main.tsx` only starts the app, so it's left out and the E2E tests cover it. The full report is in `coverage/index.html`. In CI, the run's **Summary** page shows a table per package, next to each minimum.
