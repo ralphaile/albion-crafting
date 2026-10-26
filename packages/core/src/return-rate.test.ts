@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { returnRate } from "./return-rate.js";
+import { bonusForReturnRate, returnRate } from "./return-rate.js";
 
 const asPercent = (rate: number) => `${(rate * 100).toFixed(2)}%`;
 
@@ -40,4 +40,21 @@ describe("returnRate", () => {
       }),
     );
   });
+});
+
+describe("bonusForReturnRate", () => {
+  it("gives back the production bonus a return rate came from", () => {
+    fc.assert(
+      fc.property(productionBonuses, (bonus) => {
+        expect(bonusForReturnRate(returnRate(bonus))).toBeCloseTo(bonus, 6);
+      }),
+    );
+  });
+
+  it.each([1, 1.5, -0.01, Number.NaN])(
+    "refuses a return rate of %s",
+    (rate) => {
+      expect(() => bonusForReturnRate(rate)).toThrow(RangeError);
+    },
+  );
 });
