@@ -68,6 +68,8 @@ The total crafting bonus where you craft, written as a fraction (0.18 is 18%). C
 
 The engine's version for cities, Rests and islands is `productionBonus()` in `packages/core/src/production-bonus.ts`. It returns each part on its own, for the UI to show. If you enter the production bonus or return rate the game shows for a location, that value is used instead, and the parts are kept so you can compare them.
 
+For hideouts it's `hideoutProductionBonus()` in `packages/core/src/hideout-bonus.ts`. It takes the hideout's [biome](#biome), [map quality](#hideout-map-quality) and [power level](#power-level) as their rows from `@aoc/crafting-data`, and works like `productionBonus()` otherwise.
+
 ## Quality
 
 How well a crafted item came out, from 1 to 5: Normal, Good, Outstanding, Excellent or Masterpiece. Crafting gives a random quality, and each quality has its own market price, so AODP prices are asked for per quality. Not the same as [hideout map quality](#hideout-map-quality).
@@ -92,6 +94,7 @@ RRR = B / (1 + B)
 | City, its specialty, with focus               | 0.92 | 47.9% |
 | Level 9 hideout, quality 6 map, its specialty | 0.82 | 45.1% |
 | The same, with focus                          | 1.41 | 58.5% |
+| Level 9 hideout, quality 6 map, another item  | 0.26 | 20.6% |
 
 The engine's version is `returnRate()` in `packages/core/src/return-rate.ts`. Next to it, `bonusForReturnRate()` turns a return rate back into the production bonus that gives it.
 
