@@ -62,6 +62,10 @@ The total crafting bonus where you craft, written as a fraction (0.18 is 18%). C
 - **Island:** a base of 0, with no specialty.
 - **Hideout:** the [power level](#power-level)'s general bonus, plus, for its [biome](#biome)'s 5 categories, the [map quality](#hideout-map-quality) bonus and the power level's specialist bonus. Then any daily bonus, and 0.59 with focus.
 
+## Quality
+
+How well a crafted item came out, from 1 to 5: Normal, Good, Outstanding, Excellent or Masterpiece. Crafting gives a random quality, and each quality has its own market price, so AODP prices are asked for per quality. Not the same as [hideout map quality](#hideout-map-quality).
+
 ## Rest
 
 Arthur's, Merlyn's and Morgana's Rest: towns in the Black Zone with a market and crafting stations. Crafting there works like in a city, with its own [specialties](#specialty-bonus). AODP calls their markets "Arthurs Rest Smugglers Network" and so on, and has few prices for them.
