@@ -35,6 +35,7 @@ export {
   type ProductionBonus,
   type ProductionBonusOptions,
 } from "./production-bonus.js";
+export { defaultSortKey, rank, type SortKey } from "./rank.js";
 export { bonusForReturnRate, returnRate } from "./return-rate.js";
 export {
   revenue,
