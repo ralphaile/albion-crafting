@@ -11,7 +11,7 @@ export type Price =
 
 export interface ItemPrices {
   itemId: string;
-  location: string;
+  marketId: string;
   quality: number;
   sellMin: Price;
   buyMax: Price;
@@ -45,7 +45,7 @@ export function normalizePrices(
 
   return rows.map((row) => ({
     itemId: row.item_id,
-    location: row.city,
+    marketId: row.city,
     quality: row.quality,
     sellMin: price(row.sell_price_min, row.sell_price_min_date),
     buyMax: price(row.buy_price_max, row.buy_price_max_date),

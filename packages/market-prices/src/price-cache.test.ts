@@ -46,11 +46,11 @@ function fakeAodp(region: Region = "west") {
 
   function answer<T>(
     itemIds: readonly string[],
-    locations: readonly string[],
+    marketIds: readonly string[],
     qualities: readonly number[],
     rowOf: (
       itemId: string,
-      location: string,
+      marketId: string,
       quality: number,
       value: number,
     ) => T,
@@ -62,8 +62,8 @@ function fakeAodp(region: Region = "west") {
       rows: itemIds
         .filter((itemId) => !failing.has(itemId) && !unanswered.has(itemId))
         .flatMap((itemId) =>
-          locations.flatMap((location) =>
-            qualities.map((quality) => rowOf(itemId, location, quality, value)),
+          marketIds.flatMap((marketId) =>
+            qualities.map((quality) => rowOf(itemId, marketId, quality, value)),
           ),
         ),
       failures:
@@ -76,16 +76,16 @@ function fakeAodp(region: Region = "west") {
   const client: AodpClient = {
     region,
     getPrices: vi.fn<AodpClient["getPrices"]>(
-      (itemIds, locations, qualities) => {
-        const { rows, failures } = answer(itemIds, locations, qualities, row);
+      (itemIds, marketIds, qualities) => {
+        const { rows, failures } = answer(itemIds, marketIds, qualities, row);
         return Promise.resolve({ prices: rows, failures });
       },
     ),
     getHistory: vi.fn<AodpClient["getHistory"]>(
-      (itemIds, locations, qualities) => {
+      (itemIds, marketIds, qualities) => {
         const { rows, failures } = answer(
           itemIds,
-          locations,
+          marketIds,
           qualities,
           series,
         );
@@ -367,7 +367,7 @@ describe("getPrices for what AODP sends nothing for", () => {
     expect(normalizePrices(result.prices)).toEqual([
       {
         itemId: "T4_BAG",
-        location: "Caerleon",
+        marketId: "Caerleon",
         quality: 1,
         sellMin: { status: "missing" },
         buyMax: { status: "missing" },

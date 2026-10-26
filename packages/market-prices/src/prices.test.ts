@@ -137,7 +137,7 @@ describe("normalizePrices", () => {
     expect(normalizePrices(prices.body, { now: recordedAt })).toEqual([
       {
         itemId: "T4_BAG",
-        location: "Caerleon",
+        marketId: "Caerleon",
         quality: 1,
         sellMin: {
           status: "fresh",
@@ -154,7 +154,7 @@ describe("normalizePrices", () => {
       },
       {
         itemId: "T4_BAG",
-        location: "Lymhurst",
+        marketId: "Lymhurst",
         quality: 1,
         sellMin: {
           status: "fresh",
@@ -171,7 +171,7 @@ describe("normalizePrices", () => {
       },
       {
         itemId: "T5_BAG",
-        location: "Caerleon",
+        marketId: "Caerleon",
         quality: 1,
         sellMin: {
           status: "fresh",
@@ -188,7 +188,7 @@ describe("normalizePrices", () => {
       },
       {
         itemId: "T5_BAG",
-        location: "Lymhurst",
+        marketId: "Lymhurst",
         quality: 1,
         sellMin: {
           status: "fresh",
@@ -210,7 +210,7 @@ describe("normalizePrices", () => {
     expect(normalizePrices(pricesNoData.body, { now: NOW })).toEqual([
       {
         itemId: "T8_BAG_INSIGHT@4",
-        location: "Thetford",
+        marketId: "Thetford",
         quality: 5,
         sellMin: { status: "missing" },
         buyMax: { status: "missing" },

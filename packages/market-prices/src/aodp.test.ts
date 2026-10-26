@@ -198,19 +198,19 @@ describe("getPrices", () => {
   });
 
   it.each([
-    { case: "no items", itemIds: [], locations: ["Caerleon"], qualities: [1] },
-    { case: "no markets", itemIds: ["T4_BAG"], locations: [], qualities: [1] },
+    { case: "no items", itemIds: [], marketIds: ["Caerleon"], qualities: [1] },
+    { case: "no markets", itemIds: ["T4_BAG"], marketIds: [], qualities: [1] },
     {
       case: "no qualities",
       itemIds: ["T4_BAG"],
-      locations: ["Caerleon"],
+      marketIds: ["Caerleon"],
       qualities: [],
     },
   ])(
     "returns nothing without a request for $case",
-    async ({ itemIds, locations, qualities }) => {
+    async ({ itemIds, marketIds, qualities }) => {
       await expect(
-        client.getPrices(itemIds, locations, qualities),
+        client.getPrices(itemIds, marketIds, qualities),
       ).resolves.toEqual({ prices: [], failures: [] });
     },
   );

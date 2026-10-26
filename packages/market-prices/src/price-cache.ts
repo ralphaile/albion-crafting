@@ -32,7 +32,7 @@ export interface CachedPrices {
 export interface PriceCache {
   getPrices(
     itemIds: readonly string[],
-    locations: readonly string[],
+    marketIds: readonly string[],
     qualities: readonly number[],
     options?: GetCachedPricesOptions,
   ): Promise<CachedPrices>;
@@ -47,7 +47,7 @@ export interface CachedHistory {
 export interface HistoryCache {
   getHistory(
     itemIds: readonly string[],
-    locations: readonly string[],
+    marketIds: readonly string[],
     qualities: readonly number[],
     options?: GetCachedPricesOptions,
   ): Promise<CachedHistory>;
@@ -64,19 +64,19 @@ export function createPriceCache({
     region: client.region,
     rows: store.prices,
     ttlMinutes,
-    fetch: async (itemIds, locations, qualities, options) => {
+    fetch: async (itemIds, marketIds, qualities, options) => {
       const { prices, failures } = await client.getPrices(
         itemIds,
-        locations,
+        marketIds,
         qualities,
         options,
       );
       return { rows: prices, failures };
     },
-    locationOf: (row) => row.city,
-    empty: (itemId, location, quality) => ({
+    marketIdOf: (row) => row.city,
+    empty: (itemId, marketId, quality) => ({
       item_id: itemId,
-      city: location,
+      city: marketId,
       quality,
       sell_price_min: 0,
       sell_price_min_date: NO_DATA_DATE,
@@ -90,10 +90,10 @@ export function createPriceCache({
   });
 
   return {
-    async getPrices(itemIds, locations, qualities, options) {
+    async getPrices(itemIds, marketIds, qualities, options) {
       const { rows, failures, fetchedAt } = await getRows(
         itemIds,
-        locations,
+        marketIds,
         qualities,
         options,
       );
@@ -111,18 +111,18 @@ export function createHistoryCache({
     region: client.region,
     rows: store.history,
     ttlMinutes,
-    fetch: async (itemIds, locations, qualities, options) => {
+    fetch: async (itemIds, marketIds, qualities, options) => {
       const { history, failures } = await client.getHistory(
         itemIds,
-        locations,
+        marketIds,
         qualities,
         options,
       );
       return { rows: history, failures };
     },
-    locationOf: (row) => row.location,
-    empty: (itemId, location, quality) => ({
-      location,
+    marketIdOf: (row) => row.location,
+    empty: (itemId, marketId, quality) => ({
+      location: marketId,
       item_id: itemId,
       quality,
       data: [],
@@ -130,10 +130,10 @@ export function createHistoryCache({
   });
 
   return {
-    async getHistory(itemIds, locations, qualities, options) {
+    async getHistory(itemIds, marketIds, qualities, options) {
       const { rows, failures, fetchedAt } = await getRows(
         itemIds,
-        locations,
+        marketIds,
         qualities,
         options,
       );
@@ -153,17 +153,17 @@ interface CachedRowsOptions<T> {
   ttlMinutes: number;
   fetch: (
     itemIds: readonly string[],
-    locations: readonly string[],
+    marketIds: readonly string[],
     qualities: readonly number[],
     options: GetPricesOptions,
   ) => Promise<{ rows: T[]; failures: BatchFailure[] }>;
-  locationOf: (row: T) => string;
-  empty: (itemId: string, location: string, quality: number) => T;
+  marketIdOf: (row: T) => string;
+  empty: (itemId: string, marketId: string, quality: number) => T;
 }
 
 // AODP matches market names in any case, so the cache does too.
-function comboId(itemId: string, location: string, quality: number): string {
-  return JSON.stringify([itemId, location.toLowerCase(), quality]);
+function comboId(itemId: string, marketId: string, quality: number): string {
+  return JSON.stringify([itemId, marketId.toLowerCase(), quality]);
 }
 
 function cachedRows<T extends { item_id: string; quality: number }>({
@@ -171,26 +171,26 @@ function cachedRows<T extends { item_id: string; quality: number }>({
   rows: store,
   ttlMinutes,
   fetch,
-  locationOf,
+  marketIdOf,
   empty,
 }: CachedRowsOptions<T>) {
   return async (
     itemIds: readonly string[],
-    locations: readonly string[],
+    marketIds: readonly string[],
     qualities: readonly number[],
     { force = false, ...options }: GetCachedPricesOptions = {},
   ) => {
     const now = Date.now();
     const items = [...new Set(itemIds)];
-    const markets = [...new Set(locations)];
+    const markets = [...new Set(marketIds)];
     const levels = [...new Set(qualities)];
     const cached = await store.get(
       items.flatMap((itemId) =>
-        markets.flatMap((location) =>
+        markets.flatMap((marketId) =>
           levels.map((quality): PriceKey => [
             region,
             itemId,
-            location,
+            marketId,
             quality,
           ]),
         ),
@@ -217,17 +217,17 @@ function cachedRows<T extends { item_id: string; quality: number }>({
     // AODP sends nothing for some of what it's asked, such as the history of an
     // item nobody bought. An empty row says so, until it's as old as any other.
     const answered = new Set(
-      rows.map((row) => comboId(row.item_id, locationOf(row), row.quality)),
+      rows.map((row) => comboId(row.item_id, marketIdOf(row), row.quality)),
     );
     const empties = toFetch
       .filter((itemId) => !failed.has(itemId))
       .flatMap((itemId) =>
-        markets.flatMap((location) =>
+        markets.flatMap((marketId) =>
           levels
             .filter(
-              (quality) => !answered.has(comboId(itemId, location, quality)),
+              (quality) => !answered.has(comboId(itemId, marketId, quality)),
             )
-            .map((quality) => empty(itemId, location, quality)),
+            .map((quality) => empty(itemId, marketId, quality)),
         ),
       );
     const fetched = [...rows, ...empties].map((row): T & Stamp => ({

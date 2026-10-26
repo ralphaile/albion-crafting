@@ -15,7 +15,7 @@ export interface StoredHistory extends AodpHistory {
 export type PriceKey = [
   region: Region,
   itemId: string,
-  location: string,
+  marketId: string,
   quality: number,
 ];
 
