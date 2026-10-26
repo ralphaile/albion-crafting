@@ -30,9 +30,13 @@ Focus cost efficiency, which grows as you specialize in crafting an item. Every 
 focus cost = base focus × 0.5 ^ (FCE / 10000)
 ```
 
+The engine's version is `focusCost()` in `packages/core/src/focus.ts`. Until you fill in your specializations, FCE is 0 and a craft costs its full base focus.
+
 ## Focus
 
-Points you can spend on a craft to add 0.59 to its [production bonus](#production-bonus), which raises the [return rate](#return-rate-rrr) a lot. How much focus a craft costs depends on the item and your [FCE](#fce). _Silver per focus_ (profit with focus ÷ focus cost) shows which crafts make the most of it.
+Points you can spend on a craft to add 0.59 to its [production bonus](#production-bonus), which raises the [return rate](#return-rate-rrr) a lot. How much focus a craft costs depends on the item and your [FCE](#fce). _Silver per focus_ (profit with focus ÷ focus cost) shows which crafts make the most of it. The engine's version is `silverPerFocus()` in `packages/core/src/focus.ts`. Royal items cost no focus, so they have no silver per focus.
+
+With premium you get 10,000 focus a day, and can store up to 30,000. The engine has these as `FOCUS_PER_DAY` and `MAX_STORED_FOCUS`.
 
 ## Fresh, stale and missing prices
 
