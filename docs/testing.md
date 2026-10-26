@@ -89,6 +89,8 @@ server.use(
 
 Code that waits, like the request limits and retries in `market-prices`, is tested with Vitest's fake timers (`vi.useFakeTimers()` and `vi.runAllTimersAsync()`), so 5 minutes of waiting takes no real time. When the wait is random, fix it with `vi.spyOn(Math, "random").mockReturnValue(0.5)`.
 
+The `market-prices` tests run in Tokyo time, set in its `vitest.config.ts`. AODP's dates are in UTC without saying so, and CI runs in UTC, so only a test in another zone catches a date read as local time.
+
 `test/setup.ts` fails unhandled requests itself instead of using MSW's `onUnhandledFrame: "error"` option, because that option lets URLs ending in `.json` through to the real server, and every AODP URL ends in `.json`. `test/network.test.ts` fails if this ever breaks.
 
 `packages/market-prices/test/fixtures` holds AODP responses: prices, history, a response with no data (`0` and `0001-01-01T00:00:00`) and a 429. Each file is a whole response: `request`, `source`, `status`, `headers` and `body`. To add one, request it once by hand with compression on (Node's `fetch` does this; plain `curl` doesn't, and AODP limits uncompressed requests to one every 5 minutes), save the body unchanged and keep only the `content-type` header. The E2E tests answer requests from the same files.

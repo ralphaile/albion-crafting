@@ -34,6 +34,10 @@ focus cost = base focus × 0.5 ^ (FCE / 10000)
 
 Points you can spend on a craft to add 0.59 to its [production bonus](#production-bonus), which raises the [return rate](#return-rate-rrr) a lot. How much focus a craft costs depends on the item and your [FCE](#fce). _Silver per focus_ (profit with focus ÷ focus cost) shows which crafts make the most of it.
 
+## Fresh, stale and missing prices
+
+How far an API price can be trusted. **Fresh** means AODP saw it in the last 12 hours, **stale** means it's older, and **missing** means AODP has none, because no player running its client has looked at that item in that market. The 12 hours are a setting. A [manual price](adr/003-price-data-strategy.md) counts as stale after 3 days.
+
 ## Hideout map quality
 
 The quality of the Black Zone map a hideout stands on, from Q1 to Q6. It adds 0.01, 0.06, 0.11, 0.16, 0.21 or 0.26 to the [production bonus](#production-bonus) for the 5 crafting categories of the map's [biome](#biome). In a hideout, map quality and [power level](#power-level) take the place of a city's base and [specialty bonus](#specialty-bonus).
