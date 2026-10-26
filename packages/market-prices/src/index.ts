@@ -39,5 +39,5 @@ export {
   type ItemPrices,
   type NormalizeOptions,
   normalizePrices,
-  type Price,
+  type ObservedPrice,
 } from "./prices.js";

@@ -363,6 +363,9 @@ importers:
 
   packages/market-prices:
     dependencies:
+      '@aoc/core':
+        specifier: workspace:*
+        version: link:../core
       dexie:
         specifier: 4.4.7
         version: 4.4.7

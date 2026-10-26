@@ -1,6 +1,8 @@
+import type { OrderPrices } from "@aoc/core";
+
 import type { AodpPrice } from "./aodp.js";
 
-export type Price =
+export type ObservedPrice =
   | { status: "missing" }
   | {
       status: "fresh" | "stale";
@@ -9,12 +11,12 @@ export type Price =
       ageMinutes: number;
     };
 
-export interface ItemPrices {
+export interface ItemPrices extends OrderPrices {
   itemId: string;
   marketId: string;
   quality: number;
-  sellMin: Price;
-  buyMax: Price;
+  sellMin: ObservedPrice;
+  buyMax: ObservedPrice;
 }
 
 export interface NormalizeOptions {
@@ -29,7 +31,7 @@ export function normalizePrices(
   rows: readonly AodpPrice[],
   { now = Date.now(), staleAfterMinutes = 12 * 60 }: NormalizeOptions = {},
 ): ItemPrices[] {
-  function price(value: number, date: string): Price {
+  function price(value: number, date: string): ObservedPrice {
     if (value === 0 || date === NO_DATA_DATE) {
       return { status: "missing" };
     }
