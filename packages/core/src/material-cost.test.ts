@@ -6,7 +6,7 @@ import {
   type Material,
   materialCost,
   type MaterialCost,
-  type MaterialPrices,
+  type OrderPrices,
 } from "./index.js";
 
 const fresh = (value: number): MarketPrice => ({ status: "fresh", value });
@@ -17,7 +17,7 @@ const astralStaff: Material[] = [
   { id: "T4_METALBAR", count: 12, returnable: true },
   { id: "T4_ARTEFACT_2H_ARCANESTAFF_CRYSTAL", count: 1, returnable: false },
 ];
-const prices = new Map<string, MaterialPrices>([
+const prices = new Map<string, OrderPrices>([
   ["T4_PLANKS", { sellMin: fresh(1000), buyMax: fresh(900) }],
   ["T4_METALBAR", { sellMin: fresh(1500), buyMax: fresh(1400) }],
   [

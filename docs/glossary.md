@@ -118,9 +118,21 @@ RRR = B / (1 + B)
 
 The engine's version is `returnRate()` in `packages/core/src/return-rate.ts`. Next to it, `bonusForReturnRate()` turns a return rate back into the production bonus that gives it.
 
+## Revenue
+
+The silver you keep from selling a crafted item, after the [tax](#tax-and-premium) and any [setup fee](#setup-fee). It depends on how you sell:
+
+| Sell mode    | Price                                                          | You keep                  |
+| ------------ | -------------------------------------------------------------- | ------------------------- |
+| Sell order   | The lowest sell order at the sell market, or 1 silver under it | price × (1 − tax − 0.025) |
+| Instant sale | The highest buy order at the sell market                       | price × (1 − tax)         |
+| Black Market | The [Black Market](#black-market)'s highest buy order          | price × (1 − tax)         |
+
+The engine's version is `revenue()` in `packages/core/src/revenue.ts`. It returns the price, the tax, the setup fee and what you keep. A [stale](#fresh-stale-and-missing-prices) price still counts, and stays flagged. If the price it needs is missing, so is the revenue, and the craft's result is incomplete.
+
 ## Setup fee
 
-2.5% of an order's value, charged when you place a sell order or a buy order. Buying or selling instantly, including to the [Black Market](#black-market), has no setup fee. Buying materials by buy order adds it to each material's [cost](#material-cost).
+2.5% of an order's value, charged when you place a sell order or a buy order. Buying or selling instantly, including to the [Black Market](#black-market), has no setup fee. Buying materials by buy order adds it to each material's [cost](#material-cost). It isn't refunded if you cancel the order.
 
 ## Specialty bonus
 

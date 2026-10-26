@@ -1,15 +1,9 @@
+import { type OrderPrices, SETUP_FEE } from "./market.js";
+
 export interface Material {
   id: string;
   count: number;
   returnable: boolean;
-}
-
-export type MarketPrice =
-  { status: "missing" } | { status: "fresh" | "stale"; value: number };
-
-export interface MaterialPrices {
-  sellMin: MarketPrice;
-  buyMax: MarketPrice;
 }
 
 export type BuyMode = "instant" | "order";
@@ -18,7 +12,7 @@ interface LineBase {
   itemId: string;
   count: number;
   effectiveCount: number;
-  source: keyof MaterialPrices;
+  source: keyof OrderPrices;
 }
 
 export type MaterialLine =
@@ -38,14 +32,12 @@ export interface MaterialCostOptions {
   buyMode: BuyMode;
 }
 
-const SETUP_FEE = 0.025;
-
 export function materialCost(
   materials: readonly Material[],
-  prices: ReadonlyMap<string, MaterialPrices>,
+  prices: ReadonlyMap<string, OrderPrices>,
   { returnRate, buyMode }: MaterialCostOptions,
 ): MaterialCost {
-  const source: keyof MaterialPrices =
+  const source: keyof OrderPrices =
     buyMode === "instant" ? "sellMin" : "buyMax";
   const lines = materials.map(({ id, count, returnable }): MaterialLine => {
     const base = {
