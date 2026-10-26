@@ -22,3 +22,4 @@ export {
   type ProductionBonusOptions,
 } from "./production-bonus.js";
 export { bonusForReturnRate, returnRate } from "./return-rate.js";
+export { stationFee } from "./station-fee.js";
