@@ -28,6 +28,7 @@ export {
   openPriceStore,
   type PriceKey,
   type PriceStore,
+  type RowStore,
   type StoredPrice,
 } from "./price-store.js";
 export {

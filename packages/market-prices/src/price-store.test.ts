@@ -52,17 +52,17 @@ describe.each([
   it("keeps one price for each region, item, market and quality", async () => {
     const store = await open();
 
-    await store.put([
+    await store.prices.put([
       stored(),
       stored({ region: "europe" }),
       stored({ item_id: "T5_BAG" }),
       stored({ city: "Lymhurst" }),
       stored({ quality: 2 }),
     ]);
-    await store.put([stored({ sell_price_min: 41000 })]);
+    await store.prices.put([stored({ sell_price_min: 41000 })]);
 
     expect(
-      await store.get([
+      await store.prices.get([
         KEY,
         ["europe", "T4_BAG", "Caerleon", 1],
         ["west", "T5_BAG", "Caerleon", 1],
@@ -80,32 +80,32 @@ describe.each([
 
   it("returns only the prices it has", async () => {
     const store = await open();
-    await store.put([stored()]);
+    await store.prices.put([stored()]);
 
-    expect(await store.get([["west", "T6_BAG", "Caerleon", 1], KEY])).toEqual([
-      stored(),
-    ]);
+    expect(
+      await store.prices.get([["west", "T6_BAG", "Caerleon", 1], KEY]),
+    ).toEqual([stored()]);
   });
 
   it("forgets every price when cleared", async () => {
     const store = await open();
-    await store.put([stored(), stored({ region: "east" })]);
+    await store.prices.put([stored(), stored({ region: "east" })]);
 
     await store.clear();
 
-    expect(await store.get([KEY, ["east", "T4_BAG", "Caerleon", 1]])).toEqual(
-      [],
-    );
+    expect(
+      await store.prices.get([KEY, ["east", "T4_BAG", "Caerleon", 1]]),
+    ).toEqual([]);
   });
 });
 
 describe("openPriceStore", () => {
   it("still has the prices after the page reloads", async () => {
     const before = await openPriceStore();
-    await before.put([stored()]);
+    await before.prices.put([stored()]);
 
     const after = await openPriceStore();
 
-    expect(await after.get([KEY])).toEqual([stored()]);
+    expect(await after.prices.get([KEY])).toEqual([stored()]);
   });
 });
