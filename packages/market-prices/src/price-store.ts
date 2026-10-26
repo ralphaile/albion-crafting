@@ -1,8 +1,13 @@
 import { Dexie, type Table } from "dexie";
 
-import type { AodpPrice, Region } from "./aodp.js";
+import type { AodpHistory, AodpPrice, Region } from "./aodp.js";
 
 export interface StoredPrice extends AodpPrice {
+  region: Region;
+  fetchedAt: number;
+}
+
+export interface StoredHistory extends AodpHistory {
   region: Region;
   fetchedAt: number;
 }
@@ -22,6 +27,7 @@ export interface RowStore<T> {
 export interface PriceStore {
   readonly persistent: boolean;
   readonly prices: RowStore<StoredPrice>;
+  readonly history: RowStore<StoredHistory>;
   clear(): Promise<void>;
 }
 
@@ -30,8 +36,12 @@ const DATABASE_NAME = "aoc-price-cache";
 export async function openPriceStore(): Promise<PriceStore> {
   const db = new Dexie(DATABASE_NAME) as Dexie & {
     prices: Table<StoredPrice, PriceKey>;
+    history: Table<StoredHistory, PriceKey>;
   };
-  db.version(1).stores({ prices: "[region+item_id+city+quality]" });
+  db.version(2).stores({
+    prices: "[region+item_id+city+quality]",
+    history: "[region+item_id+location+quality]",
+  });
   try {
     await db.open();
   } catch {
@@ -41,8 +51,9 @@ export async function openPriceStore(): Promise<PriceStore> {
   return {
     persistent: true,
     prices: tableRows(db.prices),
+    history: tableRows(db.history),
     async clear() {
-      await db.prices.clear();
+      await Promise.all([db.prices.clear(), db.history.clear()]);
     },
   };
 }
@@ -66,12 +77,20 @@ function createMemoryStore(): PriceStore {
     row.city,
     row.quality,
   ]);
+  const history = memoryRows<StoredHistory>((row) => [
+    row.region,
+    row.item_id,
+    row.location,
+    row.quality,
+  ]);
 
   return {
     persistent: false,
     prices,
+    history,
     clear() {
       prices.clear();
+      history.clear();
       return Promise.resolve();
     },
   };

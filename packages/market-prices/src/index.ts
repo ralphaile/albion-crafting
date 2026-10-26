@@ -18,9 +18,12 @@ export {
 } from "./history.js";
 export { type Market, markets } from "./markets.js";
 export {
+  type CachedHistory,
   type CachedPrices,
+  createHistoryCache,
   createPriceCache,
   type GetCachedPricesOptions,
+  type HistoryCache,
   type PriceCache,
   type PriceCacheOptions,
 } from "./price-cache.js";
@@ -29,6 +32,7 @@ export {
   type PriceKey,
   type PriceStore,
   type RowStore,
+  type StoredHistory,
   type StoredPrice,
 } from "./price-store.js";
 export {

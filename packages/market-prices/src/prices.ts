@@ -22,7 +22,7 @@ export interface NormalizeOptions {
   staleAfterMinutes?: number;
 }
 
-const NO_DATA_DATE = "0001-01-01T00:00:00";
+export const NO_DATA_DATE = "0001-01-01T00:00:00";
 const MINUTE_MS = 60_000;
 
 export function normalizePrices(

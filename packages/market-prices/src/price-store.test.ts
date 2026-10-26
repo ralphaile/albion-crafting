@@ -2,7 +2,12 @@ import "fake-indexeddb/auto";
 import { Dexie } from "dexie";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { openPriceStore, type PriceKey, type StoredPrice } from "./index.js";
+import {
+  openPriceStore,
+  type PriceKey,
+  type StoredHistory,
+  type StoredPrice,
+} from "./index.js";
 
 const NO_DATA = "0001-01-01T00:00:00";
 const KEY: PriceKey = ["west", "T4_BAG", "Caerleon", 1];
@@ -22,6 +27,20 @@ function stored(overrides: Partial<StoredPrice> = {}): StoredPrice {
     buy_price_min_date: NO_DATA,
     buy_price_max: 3505,
     buy_price_max_date: "2026-10-26T11:30:00",
+    ...overrides,
+  };
+}
+
+function storedSeries(overrides: Partial<StoredHistory> = {}): StoredHistory {
+  return {
+    region: "west",
+    fetchedAt: Date.UTC(2026, 9, 26, 12, 0),
+    location: "Caerleon",
+    item_id: "T4_BAG",
+    quality: 1,
+    data: [
+      { item_count: 48, avg_price: 5826, timestamp: "2026-10-18T00:00:00" },
+    ],
     ...overrides,
   };
 }
@@ -87,15 +106,30 @@ describe.each([
     ).toEqual([stored()]);
   });
 
-  it("forgets every price when cleared", async () => {
+  it("keeps history in a table of its own, one series per key", async () => {
+    const store = await open();
+
+    await store.prices.put([stored()]);
+    await store.history.put([storedSeries(), storedSeries({ quality: 2 })]);
+    await store.history.put([storedSeries({ data: [] })]);
+
+    expect(
+      await store.history.get([KEY, ["west", "T4_BAG", "Caerleon", 2]]),
+    ).toEqual([storedSeries({ data: [] }), storedSeries({ quality: 2 })]);
+    expect(await store.prices.get([KEY])).toEqual([stored()]);
+  });
+
+  it("forgets every price and all history when cleared", async () => {
     const store = await open();
     await store.prices.put([stored(), stored({ region: "east" })]);
+    await store.history.put([storedSeries()]);
 
     await store.clear();
 
     expect(
       await store.prices.get([KEY, ["east", "T4_BAG", "Caerleon", 1]]),
     ).toEqual([]);
+    expect(await store.history.get([KEY])).toEqual([]);
   });
 });
 
@@ -107,5 +141,18 @@ describe("openPriceStore", () => {
     const after = await openPriceStore();
 
     expect(await after.prices.get([KEY])).toEqual([stored()]);
+  });
+
+  it("keeps the prices saved before it had a history table", async () => {
+    const old = new Dexie("aoc-price-cache");
+    old.version(1).stores({ prices: "[region+item_id+city+quality]" });
+    await old.table("prices").put(stored());
+    old.close();
+
+    const store = await openPriceStore();
+    await store.history.put([storedSeries()]);
+
+    expect(await store.prices.get([KEY])).toEqual([stored()]);
+    expect(await store.history.get([KEY])).toEqual([storedSeries()]);
   });
 });

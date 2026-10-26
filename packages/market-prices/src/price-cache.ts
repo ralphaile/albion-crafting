@@ -8,8 +8,10 @@ import type {
   PriceKey,
   PriceStore,
   RowStore,
+  StoredHistory,
   StoredPrice,
 } from "./price-store.js";
+import { NO_DATA_DATE } from "./prices.js";
 
 export interface PriceCacheOptions {
   client: AodpClient;
@@ -36,6 +38,21 @@ export interface PriceCache {
   ): Promise<CachedPrices>;
 }
 
+export interface CachedHistory {
+  history: StoredHistory[];
+  failures: BatchFailure[];
+  fetchedAt: number | undefined;
+}
+
+export interface HistoryCache {
+  getHistory(
+    itemIds: readonly string[],
+    locations: readonly string[],
+    qualities: readonly number[],
+    options?: GetCachedPricesOptions,
+  ): Promise<CachedHistory>;
+}
+
 const MINUTE_MS = 60_000;
 
 export function createPriceCache({
@@ -56,6 +73,20 @@ export function createPriceCache({
       );
       return { rows: prices, failures };
     },
+    locationOf: (row) => row.city,
+    empty: (itemId, location, quality) => ({
+      item_id: itemId,
+      city: location,
+      quality,
+      sell_price_min: 0,
+      sell_price_min_date: NO_DATA_DATE,
+      sell_price_max: 0,
+      sell_price_max_date: NO_DATA_DATE,
+      buy_price_min: 0,
+      buy_price_min_date: NO_DATA_DATE,
+      buy_price_max: 0,
+      buy_price_max_date: NO_DATA_DATE,
+    }),
   });
 
   return {
@@ -67,6 +98,46 @@ export function createPriceCache({
         options,
       );
       return { prices: rows, failures, fetchedAt };
+    },
+  };
+}
+
+export function createHistoryCache({
+  client,
+  store,
+  ttlMinutes = 6 * 60,
+}: PriceCacheOptions): HistoryCache {
+  const getRows = cachedRows({
+    region: client.region,
+    rows: store.history,
+    ttlMinutes,
+    fetch: async (itemIds, locations, qualities, options) => {
+      const { history, failures } = await client.getHistory(
+        itemIds,
+        locations,
+        qualities,
+        options,
+      );
+      return { rows: history, failures };
+    },
+    locationOf: (row) => row.location,
+    empty: (itemId, location, quality) => ({
+      location,
+      item_id: itemId,
+      quality,
+      data: [],
+    }),
+  });
+
+  return {
+    async getHistory(itemIds, locations, qualities, options) {
+      const { rows, failures, fetchedAt } = await getRows(
+        itemIds,
+        locations,
+        qualities,
+        options,
+      );
+      return { history: rows, failures, fetchedAt };
     },
   };
 }
@@ -86,13 +157,22 @@ interface CachedRowsOptions<T> {
     qualities: readonly number[],
     options: GetPricesOptions,
   ) => Promise<{ rows: T[]; failures: BatchFailure[] }>;
+  locationOf: (row: T) => string;
+  empty: (itemId: string, location: string, quality: number) => T;
 }
 
-function cachedRows<T extends { item_id: string }>({
+// AODP matches market names in any case, so the cache does too.
+function comboId(itemId: string, location: string, quality: number): string {
+  return JSON.stringify([itemId, location.toLowerCase(), quality]);
+}
+
+function cachedRows<T extends { item_id: string; quality: number }>({
   region,
   rows: store,
   ttlMinutes,
   fetch,
+  locationOf,
+  empty,
 }: CachedRowsOptions<T>) {
   return async (
     itemIds: readonly string[],
@@ -132,7 +212,25 @@ function cachedRows<T extends { item_id: string }>({
       toFetch.length === 0
         ? { rows: [], failures: [] }
         : await fetch(toFetch, markets, levels, options);
-    const fetched = rows.map((row): T & Stamp => ({
+    const failed = new Set(failures.flatMap((failure) => failure.itemIds));
+
+    // AODP sends nothing for some of what it's asked, such as the history of an
+    // item nobody bought. An empty row says so, until it's as old as any other.
+    const answered = new Set(
+      rows.map((row) => comboId(row.item_id, locationOf(row), row.quality)),
+    );
+    const empties = toFetch
+      .filter((itemId) => !failed.has(itemId))
+      .flatMap((itemId) =>
+        markets.flatMap((location) =>
+          levels
+            .filter(
+              (quality) => !answered.has(comboId(itemId, location, quality)),
+            )
+            .map((quality) => empty(itemId, location, quality)),
+        ),
+      );
+    const fetched = [...rows, ...empties].map((row): T & Stamp => ({
       ...row,
       region,
       fetchedAt: now,
@@ -140,7 +238,6 @@ function cachedRows<T extends { item_id: string }>({
     await store.put(fetched);
 
     // Older rows of an item that failed to fetch beat no rows at all.
-    const failed = new Set(failures.flatMap((failure) => failure.itemIds));
     const used = [
       ...cached.filter(
         (row) => reusable(row.item_id) || failed.has(row.item_id),
