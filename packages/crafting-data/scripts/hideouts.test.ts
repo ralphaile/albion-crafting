@@ -2,10 +2,11 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import type { CraftingLocation } from "@aoc/core";
+
 import { extractHideouts } from "./hideouts.ts";
 import { extractLocations } from "./locations.ts";
 import { type Dumps, validate } from "./validate.ts";
-import type { CraftingLocation } from "../src/location.ts";
 
 type CraftingModifiers = Dumps["craftingmodifiers.json"]["craftingmodifiers"];
 type Location = CraftingModifiers["craftinglocation"][number];

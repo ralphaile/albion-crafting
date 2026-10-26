@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { type AodpHistory, summarizeHistory } from "./index.js";
+import type { AodpHistory } from "./aodp.js";
+import { summarizeHistory } from "./history.js";
 import history from "../test/fixtures/history.json" with { type: "json" };
 
 function seriesOf(
@@ -24,7 +25,7 @@ describe("summarizeHistory", () => {
 
     expect(summary).toMatchObject({
       itemId: "T4_BAG",
-      location: "Caerleon",
+      marketId: "Caerleon",
       quality: 1,
       averageDailyVolume: 155,
       newestDay: Date.UTC(2026, 9, 18),
@@ -60,7 +61,7 @@ describe("summarizeHistory", () => {
     expect(summarizeHistory([seriesOf()])).toEqual([
       {
         itemId: "T4_BAG",
-        location: "Caerleon",
+        marketId: "Caerleon",
         quality: 1,
         averagePrice: undefined,
         averageDailyVolume: 0,

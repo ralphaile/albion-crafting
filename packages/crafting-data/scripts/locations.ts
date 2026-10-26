@@ -1,5 +1,6 @@
+import type { CraftingLocation } from "@aoc/core";
+
 import type { Dumps } from "./validate.ts";
-import type { CraftingLocation } from "../src/location.ts";
 
 type CraftingModifiers = Dumps["craftingmodifiers.json"]["craftingmodifiers"];
 type Clusters = Dumps["formatted/world.json"];

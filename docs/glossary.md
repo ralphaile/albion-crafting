@@ -14,6 +14,10 @@ The landscape of a Black Zone map: Swamp, Forest, Steppe, Highland or Mountain. 
 
 An NPC market in Caerleon that buys gear from players to stock the loot of monsters and chests. You can only sell to it, so its price is its highest buy order. Like any instant sale, it's taxed but has no [setup fee](#setup-fee).
 
+## Crafting location
+
+Where you craft: one of the 7 cities, a [Rest](#rest) or an island. It gives a base [production bonus](#production-bonus) and its [specialty bonus](#specialty-bonus). A hideout is the other place you can craft, and its bonus comes from its [map quality](#hideout-map-quality) and [power level](#power-level). Where you craft is chosen separately from where you trade, the [market](#market). In the code, a crafting location is a `CraftingLocation`, and `CraftingPlace` is a crafting location or a hideout.
+
 ## Daily bonus
 
 Extra [production bonus](#production-bonus) the game gives a few crafting categories each day: +0.10 or +0.20. The app takes up to two, and adds them up if both are for the same category.
@@ -49,6 +53,10 @@ The quality of the Black Zone map a hideout stands on, from Q1 to Q6. It adds 0.
 ## Item value
 
 A value the game gives every item, separate from its market price, worked out from the item values of its materials. Refined materials are worth 16 at T4 and double with each tier and enchantment level. [Artifacts](#artifact) count too. The [station fee](#nutrition-and-station-fee) is based on it.
+
+## Market
+
+Where you buy and sell: the market of one of the 7 cities, of a [Rest](#rest), or the [Black Market](#black-market). A route has three parts: the market you buy the materials in, the [crafting location](#crafting-location), and the market you sell in. In the code, a market is its AODP ID from `markets` in `@aoc/market-prices`, such as `Arthurs Rest Smugglers Network`, and its name is what the app shows, such as Arthur's Rest.
 
 ## Material cost
 

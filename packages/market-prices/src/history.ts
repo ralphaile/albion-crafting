@@ -1,9 +1,8 @@
-import type { AodpHistory } from "./aodp.js";
-import { parseAodpDate } from "./prices.js";
+import { type AodpHistory, parseAodpDate } from "./aodp.js";
 
 export interface HistorySummary {
   itemId: string;
-  location: string;
+  marketId: string;
   quality: number;
   averagePrice: number | undefined;
   averageDailyVolume: number;
@@ -41,7 +40,7 @@ export function summarizeHistory(
     );
     return {
       itemId: item_id,
-      location,
+      marketId: location,
       quality,
       averagePrice: sold === 0 ? undefined : earned / sold,
       averageDailyVolume: sold / days,

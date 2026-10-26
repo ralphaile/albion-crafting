@@ -1,10 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  type AodpPrice,
-  type NormalizeOptions,
-  normalizePrices,
-} from "./index.js";
+import type { AodpPrice } from "./aodp.js";
+import { type NormalizeOptions, normalizePrices } from "./prices.js";
 import pricesNoData from "../test/fixtures/prices-no-data.json" with { type: "json" };
 import prices from "../test/fixtures/prices.json" with { type: "json" };
 
@@ -137,7 +134,7 @@ describe("normalizePrices", () => {
     expect(normalizePrices(prices.body, { now: recordedAt })).toEqual([
       {
         itemId: "T4_BAG",
-        location: "Caerleon",
+        marketId: "Caerleon",
         quality: 1,
         sellMin: {
           status: "fresh",
@@ -154,7 +151,7 @@ describe("normalizePrices", () => {
       },
       {
         itemId: "T4_BAG",
-        location: "Lymhurst",
+        marketId: "Lymhurst",
         quality: 1,
         sellMin: {
           status: "fresh",
@@ -171,7 +168,7 @@ describe("normalizePrices", () => {
       },
       {
         itemId: "T5_BAG",
-        location: "Caerleon",
+        marketId: "Caerleon",
         quality: 1,
         sellMin: {
           status: "fresh",
@@ -188,7 +185,7 @@ describe("normalizePrices", () => {
       },
       {
         itemId: "T5_BAG",
-        location: "Lymhurst",
+        marketId: "Lymhurst",
         quality: 1,
         sellMin: {
           status: "fresh",
@@ -210,7 +207,7 @@ describe("normalizePrices", () => {
     expect(normalizePrices(pricesNoData.body, { now: NOW })).toEqual([
       {
         itemId: "T8_BAG_INSIGHT@4",
-        location: "Thetford",
+        marketId: "Thetford",
         quality: 5,
         sellMin: { status: "missing" },
         buyMax: { status: "missing" },

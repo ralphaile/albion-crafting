@@ -294,7 +294,7 @@ exports[`the generated data > has the same recipe for T4_ARMOR_LEATHER_ROYAL 1`]
     {
       "amountCrafted": 1,
       "focus": 0,
-      "resources": [
+      "materials": [
         {
           "count": 1,
           "id": "T4_ARMOR_LEATHER_SET2",
@@ -311,7 +311,7 @@ exports[`the generated data > has the same recipe for T4_ARMOR_LEATHER_ROYAL 1`]
     {
       "amountCrafted": 1,
       "focus": 0,
-      "resources": [
+      "materials": [
         {
           "count": 1,
           "id": "T4_ARMOR_LEATHER_SET3",
@@ -333,7 +333,7 @@ exports[`the generated data > has the same recipe for T4_ARMOR_LEATHER_ROYAL 1`]
   "isArtifact": false,
   "itemId": "T4_ARMOR_LEATHER_ROYAL",
   "itemValue": 320,
-  "resources": [
+  "materials": [
     {
       "count": 1,
       "id": "T4_ARMOR_LEATHER_SET1",
@@ -363,7 +363,7 @@ exports[`the generated data > has the same recipe for T4_MAIN_SWORD 1`] = `
   "isArtifact": false,
   "itemId": "T4_MAIN_SWORD",
   "itemValue": 384,
-  "resources": [
+  "materials": [
     {
       "count": 16,
       "id": "T4_METALBAR",
@@ -393,7 +393,7 @@ exports[`the generated data > has the same recipe for T4_OFF_SHIELD 1`] = `
   "isArtifact": false,
   "itemId": "T4_OFF_SHIELD",
   "itemValue": 128,
-  "resources": [
+  "materials": [
     {
       "count": 4,
       "id": "T4_PLANKS",
@@ -422,7 +422,7 @@ exports[`the generated data > has the same recipe for T5_2H_SHAPESHIFTER_SET1@1 
   "focus": 5252,
   "isArtifact": false,
   "itemId": "T5_2H_SHAPESHIFTER_SET1@1",
-  "resources": [
+  "materials": [
     {
       "count": 20,
       "id": "T5_PLANKS_LEVEL1@1",
@@ -457,7 +457,7 @@ exports[`the generated data > has the same recipe for T5_ARMOR_PLATE_SET1 1`] = 
   "isArtifact": false,
   "itemId": "T5_ARMOR_PLATE_SET1",
   "itemValue": 512,
-  "resources": [
+  "materials": [
     {
       "count": 16,
       "id": "T5_METALBAR",
@@ -482,7 +482,7 @@ exports[`the generated data > has the same recipe for T6_HEAD_CLOTH_SET2@1 1`] =
   "isArtifact": false,
   "itemId": "T6_HEAD_CLOTH_SET2@1",
   "itemValue": 1024,
-  "resources": [
+  "materials": [
     {
       "count": 8,
       "id": "T6_CLOTH_LEVEL1@1",
@@ -502,7 +502,7 @@ exports[`the generated data > has the same recipe for T6_MAIN_SCIMITAR_MORGANA@2
     {
       "amountCrafted": 1,
       "focus": 12064,
-      "resources": [
+      "materials": [
         {
           "count": 16,
           "id": "T6_METALBAR_LEVEL2@2",
@@ -530,7 +530,7 @@ exports[`the generated data > has the same recipe for T6_MAIN_SCIMITAR_MORGANA@2
   "isArtifact": true,
   "itemId": "T6_MAIN_SCIMITAR_MORGANA@2",
   "itemValue": 6528,
-  "resources": [
+  "materials": [
     {
       "count": 16,
       "id": "T6_METALBAR_LEVEL2@2",
@@ -565,7 +565,7 @@ exports[`the generated data > has the same recipe for T7_SHOES_LEATHER_SET3@3 1`
   "isArtifact": false,
   "itemId": "T7_SHOES_LEATHER_SET3@3",
   "itemValue": 8192,
-  "resources": [
+  "materials": [
     {
       "count": 8,
       "id": "T7_LEATHER_LEVEL3@3",
@@ -590,7 +590,7 @@ exports[`the generated data > has the same recipe for T8_2H_BOW@4 1`] = `
   "isArtifact": false,
   "itemId": "T8_2H_BOW@4",
   "itemValue": 131072,
-  "resources": [
+  "materials": [
     {
       "count": 32,
       "id": "T8_PLANKS_LEVEL4@4",

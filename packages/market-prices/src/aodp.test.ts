@@ -1,7 +1,7 @@
 import { delay, http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type AodpClient, type AodpEvent, createAodpClient } from "./index.js";
+import { type AodpClient, type AodpEvent, createAodpClient } from "./aodp.js";
 import history from "../test/fixtures/history.json" with { type: "json" };
 import pricesNoData from "../test/fixtures/prices-no-data.json" with { type: "json" };
 import prices from "../test/fixtures/prices.json" with { type: "json" };
@@ -67,13 +67,6 @@ function idsFillingUrl(length: number, emptyUrl = EMPTY_URL): string[] {
 function soloId(name: string): string {
   return `${name}_${"X".repeat(3000)}`;
 }
-
-describe("createAodpClient", () => {
-  it("says which server it asks, west unless another is picked", () => {
-    expect(client.region).toBe("west");
-    expect(createAodpClient({ region: "europe" }).region).toBe("europe");
-  });
-});
 
 describe("getPrices", () => {
   it("asks the west server, as the recorded request did", async () => {
@@ -198,19 +191,19 @@ describe("getPrices", () => {
   });
 
   it.each([
-    { case: "no items", itemIds: [], locations: ["Caerleon"], qualities: [1] },
-    { case: "no markets", itemIds: ["T4_BAG"], locations: [], qualities: [1] },
+    { case: "no items", itemIds: [], marketIds: ["Caerleon"], qualities: [1] },
+    { case: "no markets", itemIds: ["T4_BAG"], marketIds: [], qualities: [1] },
     {
       case: "no qualities",
       itemIds: ["T4_BAG"],
-      locations: ["Caerleon"],
+      marketIds: ["Caerleon"],
       qualities: [],
     },
   ])(
     "returns nothing without a request for $case",
-    async ({ itemIds, locations, qualities }) => {
+    async ({ itemIds, marketIds, qualities }) => {
       await expect(
-        client.getPrices(itemIds, locations, qualities),
+        client.getPrices(itemIds, marketIds, qualities),
       ).resolves.toEqual({ prices: [], failures: [] });
     },
   );

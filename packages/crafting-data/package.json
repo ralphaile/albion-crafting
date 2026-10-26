@@ -19,6 +19,9 @@
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@aoc/core": "workspace:*"
+  },
   "devDependencies": {
     "@aoc/eslint-config": "workspace:*",
     "@aoc/typescript-config": "workspace:*",

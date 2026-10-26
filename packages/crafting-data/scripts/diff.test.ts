@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { type GeneratedData, diffData } from "./diff.ts";
-import type { Recipe } from "../src/recipe.ts";
+import type { GameRecipe } from "../src/recipe.ts";
 
-function recipe(itemId: string, changes: Partial<Recipe> = {}): Recipe {
+function recipe(itemId: string, changes: Partial<GameRecipe> = {}): GameRecipe {
   const [baseId = itemId, enchant = "0"] = itemId.split("@");
   return {
     itemId,
@@ -17,7 +17,7 @@ function recipe(itemId: string, changes: Partial<Recipe> = {}): Recipe {
     focus: 1286,
     silver: 0,
     amountCrafted: 1,
-    resources: [
+    materials: [
       { id: "T4_METALBAR", count: 16, returnable: true },
       { id: "T4_LEATHER", count: 8, returnable: true },
     ],
@@ -90,7 +90,7 @@ describe("diffData", () => {
   it("describes what changed in a recipe", () => {
     const changed = recipe("T4_MAIN_SWORD", {
       focus: 1200,
-      resources: [
+      materials: [
         { id: "T4_METALBAR", count: 20, returnable: true },
         { id: "T4_CLOTH", count: 8, returnable: true },
       ],
@@ -118,7 +118,7 @@ describe("diffData", () => {
             focus: 1286,
             silver: 0,
             amountCrafted: 1,
-            resources: [
+            materials: [
               { id: "T4_ARTEFACT_TOKEN_FAVOR_1", count, returnable: false },
             ],
           },

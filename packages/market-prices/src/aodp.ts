@@ -4,7 +4,7 @@ import { createLimiter, type Limiter } from "./limiter.js";
 
 export type Region = "west" | "europe" | "east";
 
-export interface AodpClientOptions {
+interface AodpClientOptions {
   region?: Region;
 }
 
@@ -18,33 +18,32 @@ export type AodpEvent =
   | { type: "waiting"; seconds: number }
   | ({ type: "error" } & BatchFailure);
 
-export interface GetPricesOptions {
+export interface FetchOptions {
   onEvent?: (event: AodpEvent) => void;
 }
 
-export interface FetchedPrices {
+interface FetchedPrices {
   prices: AodpPrice[];
   failures: BatchFailure[];
 }
 
-export interface FetchedHistory {
+interface FetchedHistory {
   history: AodpHistory[];
   failures: BatchFailure[];
 }
 
 export interface AodpClient {
-  readonly region: Region;
   getPrices(
     itemIds: readonly string[],
-    locations: readonly string[],
+    marketIds: readonly string[],
     qualities: readonly number[],
-    options?: GetPricesOptions,
+    options?: FetchOptions,
   ): Promise<FetchedPrices>;
   getHistory(
     itemIds: readonly string[],
-    locations: readonly string[],
+    marketIds: readonly string[],
     qualities: readonly number[],
-    options?: GetPricesOptions,
+    options?: FetchOptions,
   ): Promise<FetchedHistory>;
 }
 
@@ -55,6 +54,8 @@ const MINUTE_MS = 60_000;
 const CLOCK_MARGIN_MS = 1000;
 
 const date = z.iso.datetime({ local: true });
+
+export const NO_DATA_DATE = "0001-01-01T00:00:00";
 
 const pricesSchema = z.array(
   z.object({
@@ -96,7 +97,7 @@ interface Endpoint<T> {
   extraQuery: string;
   label: string;
   schema: z.ZodType<T[]>;
-  locationOf: (row: T) => string;
+  marketIdOf: (row: T) => string;
 }
 
 const pricesEndpoint: Endpoint<AodpPrice> = {
@@ -104,7 +105,7 @@ const pricesEndpoint: Endpoint<AodpPrice> = {
   extraQuery: "",
   label: "prices",
   schema: pricesSchema,
-  locationOf: (row) => row.city,
+  marketIdOf: (row) => row.city,
 };
 
 const historyEndpoint: Endpoint<AodpHistory> = {
@@ -112,7 +113,7 @@ const historyEndpoint: Endpoint<AodpHistory> = {
   extraQuery: "&time-scale=24",
   label: "price history",
   schema: historySchema,
-  locationOf: (row) => row.location,
+  marketIdOf: (row) => row.location,
 };
 
 export function createAodpClient({
@@ -124,21 +125,21 @@ export function createAodpClient({
   async function getRows<T>(
     endpoint: Endpoint<T>,
     itemIds: readonly string[],
-    locations: readonly string[],
+    marketIds: readonly string[],
     qualities: readonly number[],
     onEvent: (event: AodpEvent) => void,
   ): Promise<{ rows: T[]; failures: BatchFailure[] }> {
     if (
       itemIds.length === 0 ||
-      locations.length === 0 ||
+      marketIds.length === 0 ||
       qualities.length === 0
     ) {
       return { rows: [], failures: [] };
     }
-    const query = `locations=${locations
-      .map((location) => encodeURIComponent(location))
+    const query = `locations=${marketIds
+      .map((marketId) => encodeURIComponent(marketId))
       .join(",")}&qualities=${qualities.join(",")}${endpoint.extraQuery}`;
-    const asked = new Set(locations.map((location) => location.toLowerCase()));
+    const asked = new Set(marketIds.map((marketId) => marketId.toLowerCase()));
 
     const batches = splitIntoBatches(
       `${host}${endpoint.path}/`,
@@ -163,23 +164,22 @@ export function createAodpClient({
     return {
       rows: results
         .flat()
-        .filter((row) => asked.has(endpoint.locationOf(row).toLowerCase())),
+        .filter((row) => asked.has(endpoint.marketIdOf(row).toLowerCase())),
       failures,
     };
   }
 
   return {
-    region,
     async getPrices(
       itemIds,
-      locations,
+      marketIds,
       qualities,
       { onEvent = () => undefined } = {},
     ) {
       const { rows, failures } = await getRows(
         pricesEndpoint,
         itemIds,
-        locations,
+        marketIds,
         qualities,
         onEvent,
       );
@@ -187,14 +187,14 @@ export function createAodpClient({
     },
     async getHistory(
       itemIds,
-      locations,
+      marketIds,
       qualities,
       { onEvent = () => undefined } = {},
     ) {
       const { rows, failures } = await getRows(
         historyEndpoint,
         itemIds,
-        locations,
+        marketIds,
         qualities,
         onEvent,
       );
@@ -327,4 +327,9 @@ function sleep(ms: number): Promise<void> {
 
 function toError(reason: unknown): Error {
   return reason instanceof Error ? reason : new Error(String(reason));
+}
+
+// AODP's dates are in UTC but don't say so, and a date without a zone reads as local time.
+export function parseAodpDate(date: string): number {
+  return Date.parse(date.endsWith("Z") ? date : `${date}Z`);
 }

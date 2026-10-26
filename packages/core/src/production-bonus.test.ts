@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  type CraftingSite,
+  type CraftingLocation,
   productionBonus,
   type ProductionBonusOptions,
   returnRate,
@@ -9,15 +9,28 @@ import {
 
 const asPercent = (rate: number) => `${(rate * 100).toFixed(2)}%`;
 
-const lymhurst: CraftingSite = {
+const lymhurst: CraftingLocation = {
+  id: "1000",
+  name: "Lymhurst",
   craftingBonus: 0.18,
   specialties: { sword: 0.15, bow: 0.15, meat_goose: 0.1 },
 };
-const island: CraftingSite = { craftingBonus: 0, specialties: {} };
+const island: CraftingLocation = {
+  id: "island",
+  name: "Island",
+  craftingBonus: 0,
+  specialties: {},
+};
 
 describe("productionBonus", () => {
   it.each<
-    [string, CraftingSite, string | undefined, ProductionBonusOptions, string]
+    [
+      string,
+      CraftingLocation,
+      string | undefined,
+      ProductionBonusOptions,
+      string,
+    ]
   >([
     ["city", lymhurst, "plate_armor", {}, "15.25%"],
     ["city, its specialty", lymhurst, "sword", {}, "24.81%"],
@@ -61,9 +74,11 @@ describe("productionBonus", () => {
     ],
   ])(
     "%s gives a return rate of %s",
-    (_case, site, category, options, expected) => {
+    (_case, location, category, options, expected) => {
       expect(
-        asPercent(returnRate(productionBonus(site, category, options).total)),
+        asPercent(
+          returnRate(productionBonus(location, category, options).total),
+        ),
       ).toBe(expected);
     },
   );

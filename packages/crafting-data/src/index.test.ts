@@ -1,18 +1,19 @@
 import { describe, expect, it } from "vitest";
 
+import type { CraftingLocation } from "@aoc/core";
+
 import {
-  type CraftingLocation,
   craftingLocations,
   hideouts,
   iconUrl,
   itemName,
-  type Recipe,
+  type GameRecipe,
   recipes,
   searchItems,
 } from "./index.js";
 
 describe("recipes", () => {
-  it.each<[string, Recipe]>([
+  it.each<[string, GameRecipe]>([
     [
       "Expert's Broadsword",
       {
@@ -27,7 +28,7 @@ describe("recipes", () => {
         focus: 2251,
         silver: 0,
         amountCrafted: 1,
-        resources: [
+        materials: [
           { id: "T5_METALBAR", count: 16, returnable: true },
           { id: "T5_LEATHER", count: 8, returnable: true },
         ],
@@ -49,7 +50,7 @@ describe("recipes", () => {
         focus: 3939,
         silver: 0,
         amountCrafted: 1,
-        resources: [
+        materials: [
           { id: "T5_METALBAR_LEVEL1@1", count: 16, returnable: true },
           { id: "T5_LEATHER_LEVEL1@1", count: 8, returnable: true },
         ],
@@ -71,7 +72,7 @@ describe("recipes", () => {
         focus: 3939,
         silver: 0,
         amountCrafted: 1,
-        resources: [
+        materials: [
           { id: "T6_METALBAR", count: 16, returnable: true },
           { id: "T6_LEATHER", count: 8, returnable: true },
           {
@@ -85,7 +86,7 @@ describe("recipes", () => {
             focus: 3939,
             silver: 0,
             amountCrafted: 1,
-            resources: [
+            materials: [
               { id: "T6_METALBAR", count: 16, returnable: true },
               { id: "T6_LEATHER", count: 8, returnable: true },
               { id: "T6_ARTEFACT_TOKEN_FAVOR_1", count: 1, returnable: false },

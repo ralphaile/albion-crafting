@@ -1,6 +1,8 @@
 import { bonusForReturnRate } from "./return-rate.js";
 
-export interface CraftingSite {
+export interface CraftingLocation {
+  id: string;
+  name: string;
   craftingBonus: number;
   specialties: Readonly<Record<string, number>>;
 }
@@ -31,17 +33,17 @@ export interface ProductionBonus {
 const FOCUS_BONUS = 0.59;
 
 export function productionBonus(
-  site: CraftingSite,
+  location: CraftingLocation,
   craftingCategory: string | undefined,
   options: ProductionBonusOptions = {},
 ): ProductionBonus {
   return withTotal(
     {
-      base: site.craftingBonus,
+      base: location.craftingBonus,
       specialty:
         craftingCategory === undefined
           ? 0
-          : (site.specialties[craftingCategory] ?? 0),
+          : (location.specialties[craftingCategory] ?? 0),
       ...dailyAndFocus(craftingCategory, options),
     },
     options.override,

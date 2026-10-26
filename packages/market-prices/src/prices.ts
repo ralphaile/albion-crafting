@@ -1,6 +1,8 @@
-import type { AodpPrice } from "./aodp.js";
+import type { OrderPrices } from "@aoc/core";
 
-export type Price =
+import { type AodpPrice, NO_DATA_DATE, parseAodpDate } from "./aodp.js";
+
+export type ObservedPrice =
   | { status: "missing" }
   | {
       status: "fresh" | "stale";
@@ -9,12 +11,12 @@ export type Price =
       ageMinutes: number;
     };
 
-export interface ItemPrices {
+export interface ItemPrices extends OrderPrices {
   itemId: string;
-  location: string;
+  marketId: string;
   quality: number;
-  sellMin: Price;
-  buyMax: Price;
+  sellMin: ObservedPrice;
+  buyMax: ObservedPrice;
 }
 
 export interface NormalizeOptions {
@@ -22,14 +24,13 @@ export interface NormalizeOptions {
   staleAfterMinutes?: number;
 }
 
-export const NO_DATA_DATE = "0001-01-01T00:00:00";
 const MINUTE_MS = 60_000;
 
 export function normalizePrices(
   rows: readonly AodpPrice[],
   { now = Date.now(), staleAfterMinutes = 12 * 60 }: NormalizeOptions = {},
 ): ItemPrices[] {
-  function price(value: number, date: string): Price {
+  function price(value: number, date: string): ObservedPrice {
     if (value === 0 || date === NO_DATA_DATE) {
       return { status: "missing" };
     }
@@ -45,14 +46,9 @@ export function normalizePrices(
 
   return rows.map((row) => ({
     itemId: row.item_id,
-    location: row.city,
+    marketId: row.city,
     quality: row.quality,
     sellMin: price(row.sell_price_min, row.sell_price_min_date),
     buyMax: price(row.buy_price_max, row.buy_price_max_date),
   }));
-}
-
-// AODP's dates are in UTC but don't say so, and a date without a zone reads as local time.
-export function parseAodpDate(date: string): number {
-  return Date.parse(date.endsWith("Z") ? date : `${date}Z`);
 }

@@ -9,6 +9,7 @@
 | E2E       | Playwright and Chromium                 | A few key journeys through the built app in a real browser, with AODP responses faked                       | `apps/web/e2e/`                             |
 
 - Logic belongs in the packages, where unit tests are fast and simple. Components stay thin.
+- Test a package through its entry point, `src/index.ts`, the way the app uses it. A file behind it gets tests of its own only for what's hard to reach from there, such as how the AODP client splits a long list of items, and those tests import that file: `./aodp.js`.
 - Test at the lowest level that can catch the bug. E2E tests are slow, so keep them for whole journeys.
 - Component tests find elements the way a user does: by role, label or visible text, such as `screen.getByRole("heading", { name: "Albion Crafting" })`. Not by CSS class or component internals.
 - No test calls a real server. See [HTTP and fixtures](#http-and-fixtures).
@@ -97,7 +98,7 @@ The `market-prices` tests run in Tokyo time, set in its `vitest.config.ts`. AODP
 
 ## IndexedDB
 
-Node has no IndexedDB, so tests that save prices import `fake-indexeddb/auto`, which provides one in memory. Each test deletes the database afterwards with `new Dexie("aoc-price-cache").delete()`, so the next one starts empty. Example: `packages/market-prices/src/price-cache.test.ts`.
+Node has no IndexedDB, so tests that save prices import `fake-indexeddb/auto`, which provides one in memory. Each test deletes the database afterwards with `new Dexie("aoc-price-cache").delete()`, so the next one starts empty. Example: `packages/market-prices/src/market-data.test.ts`.
 
 To move the clock in these tests, fake only `Date`, with `vi.useFakeTimers({ toFake: ["Date"] })` and `vi.setSystemTime(...)`. fake-indexeddb runs its work with `setImmediate`, so faking every timer stops it.
 

@@ -2,10 +2,12 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import type { Material } from "@aoc/core";
+
 import { addItemValues } from "./item-value.ts";
 import { extractRecipes } from "./recipes.ts";
 import { validate } from "./validate.ts";
-import type { Recipe, Resource } from "../src/recipe.ts";
+import type { GameRecipe } from "../src/recipe.ts";
 
 const fixtures = fileURLToPath(
   new URL("../test/fixtures/dumps", import.meta.url),
@@ -16,15 +18,15 @@ async function fixtureItemValues() {
   return addItemValues(extractRecipes(items), items.simpleitem);
 }
 
-function valueOf(recipes: Recipe[], itemId: string): number | undefined {
+function valueOf(recipes: GameRecipe[], itemId: string): number | undefined {
   return recipes.find((recipe) => recipe.itemId === itemId)?.itemValue;
 }
 
 function recipe(
   itemId: string,
-  resources: Omit<Resource, "returnable">[],
+  materials: Omit<Material, "returnable">[],
   amountCrafted = 1,
-): Recipe {
+): GameRecipe {
   return {
     itemId,
     baseId: itemId,
@@ -36,8 +38,8 @@ function recipe(
     focus: 0,
     silver: 0,
     amountCrafted,
-    resources: resources.map((resource) => ({
-      ...resource,
+    materials: materials.map((material) => ({
+      ...material,
       returnable: true,
     })),
     alternatives: [],

@@ -1,25 +1,10 @@
-export interface Resource {
-  id: string;
-  count: number;
-  returnable: boolean;
-}
+import type { Recipe } from "@aoc/core";
 
-export interface Alternative {
-  focus: number;
-  silver: number;
-  amountCrafted: number;
-  resources: Resource[];
-}
-
-export interface Recipe extends Alternative {
-  itemId: string;
+export interface GameRecipe extends Recipe {
   baseId: string;
   tier: number;
   enchant: number;
-  craftingCategory?: string;
   shopCategory: string;
   shopSubcategory: string;
   isArtifact: boolean;
-  alternatives: Alternative[];
-  itemValue?: number;
 }

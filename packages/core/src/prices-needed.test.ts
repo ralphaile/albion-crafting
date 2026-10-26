@@ -1,22 +1,22 @@
 import { describe, expect, it } from "vitest";
 
-import { type CraftRecipe, pricesNeeded } from "./index.js";
+import { pricesNeeded, type Recipe } from "./index.js";
 
 function recipe(
   itemId: string,
-  resources: string[],
+  materials: string[],
   alternatives: string[][] = [],
-): CraftRecipe {
-  const variant = (ids: string[]) => ({
+): Recipe {
+  const alternative = (ids: string[]) => ({
     focus: 0,
     silver: 0,
     amountCrafted: 1,
-    resources: ids.map((id) => ({ id, count: 1, returnable: true })),
+    materials: ids.map((id) => ({ id, count: 1, returnable: true })),
   });
   return {
     itemId,
-    ...variant(resources),
-    alternatives: alternatives.map(variant),
+    ...alternative(materials),
+    alternatives: alternatives.map(alternative),
   };
 }
 

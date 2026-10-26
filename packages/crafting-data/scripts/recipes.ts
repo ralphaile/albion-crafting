@@ -1,5 +1,7 @@
+import type { Material, RecipeAlternative } from "@aoc/core";
+
 import type { Dumps } from "./validate.ts";
-import type { Alternative, Recipe, Resource } from "../src/recipe.ts";
+import type { GameRecipe } from "../src/recipe.ts";
 
 type Items = Dumps["items.json"]["items"];
 type GearItem = Items["weapon"][number];
@@ -20,7 +22,7 @@ const MIN_TIER = 4;
 const MAX_TIER = 8;
 const UNRELEASED_SUFFIX = "_PROTOTYPE";
 
-export function extractRecipes(items: Items): Recipe[] {
+export function extractRecipes(items: Items): GameRecipe[] {
   return GEAR_LISTS.flatMap((list) => items[list])
     .filter(isIncluded)
     .flatMap(toRecipes)
@@ -72,7 +74,7 @@ function isIncluded(item: GearItem): boolean {
   );
 }
 
-function toRecipes(item: GearItem): Recipe[] {
+function toRecipes(item: GearItem): GameRecipe[] {
   const levels = [
     { enchant: 0, requirements: item.craftingrequirements ?? [] },
     ...(item.enchantments?.enchantment ?? []).map((enchantment) => ({
@@ -95,23 +97,23 @@ function toRecipes(item: GearItem): Recipe[] {
         : { craftingCategory: item["@craftingcategory"] }),
       shopCategory: item["@shopcategory"],
       shopSubcategory: item["@shopsubcategory1"],
-      isArtifact: recipe.resources.some(({ id }) => id.includes("_ARTEFACT_")),
+      isArtifact: recipe.materials.some(({ id }) => id.includes("_ARTEFACT_")),
       ...recipe,
       alternatives,
     };
   });
 }
 
-function toAlternative(requirements: CraftingRequirements): Alternative {
+function toAlternative(requirements: CraftingRequirements): RecipeAlternative {
   return {
     focus: requirements["@craftingfocus"],
     silver: requirements["@silver"] ?? 0,
     amountCrafted: requirements["@amountcrafted"] ?? 1,
-    resources: (requirements.craftresource ?? []).map(toResource),
+    materials: (requirements.craftresource ?? []).map(toMaterial),
   };
 }
 
-function toResource(resource: CraftResource): Resource {
+function toMaterial(resource: CraftResource): Material {
   return {
     id: marketId(resource["@uniquename"], resource["@enchantmentlevel"] ?? 0),
     count: resource["@count"],
