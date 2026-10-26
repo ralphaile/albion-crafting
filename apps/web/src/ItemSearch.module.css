@@ -1,0 +1,53 @@
+.search {
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+}
+
+.label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.input {
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  letter-spacing: normal;
+}
+
+.note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.results {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius);
+}
+
+.result:hover {
+  background: var(--surface-hover);
+}
+
+.result img {
+  width: 36px;
+  height: 36px;
+}
