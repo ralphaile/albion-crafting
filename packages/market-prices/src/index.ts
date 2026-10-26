@@ -11,6 +11,11 @@ export {
   type GetPricesOptions,
   type Region,
 } from "./aodp.js";
+export {
+  type HistorySummary,
+  summarizeHistory,
+  type SummarizeOptions,
+} from "./history.js";
 export { type Market, markets } from "./markets.js";
 export {
   type CachedPrices,
