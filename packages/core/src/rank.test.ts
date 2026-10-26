@@ -14,10 +14,17 @@ const template = evaluate(
     focus: 0,
     silver: 0,
     amountCrafted: 1,
-    resources: [],
+    materials: [],
     alternatives: [],
   },
-  { location: { craftingBonus: 0, specialties: {} } },
+  {
+    location: {
+      id: "island",
+      name: "Island",
+      craftingBonus: 0,
+      specialties: {},
+    },
+  },
   {
     focus: false,
     premium: true,

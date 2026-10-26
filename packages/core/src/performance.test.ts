@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  type CraftRecipe,
   evaluate,
   type EvaluatePrices,
   type EvaluateSettings,
   type OrderPrices,
   rank,
+  type Recipe,
 } from "./index.js";
 
 const RECIPES = 6000;
@@ -18,12 +18,12 @@ const priced = (value: number): OrderPrices => ({
 
 // Shaped like the real recipes: two refined materials and an artifact, which
 // half of them can swap for a token.
-const recipes: CraftRecipe[] = Array.from({ length: RECIPES }, (_, i) => {
-  const variant = (extra: string) => ({
+const recipes: Recipe[] = Array.from({ length: RECIPES }, (_, i) => {
+  const alternative = (extra: string) => ({
     focus: 1715,
     silver: 0,
     amountCrafted: 1,
-    resources: [
+    materials: [
       { id: "T4_PLANKS", count: 20, returnable: true },
       { id: "T4_METALBAR", count: 12, returnable: true },
       { id: extra, count: 1, returnable: false },
@@ -33,8 +33,8 @@ const recipes: CraftRecipe[] = Array.from({ length: RECIPES }, (_, i) => {
     itemId: `ITEM_${String(i)}`,
     craftingCategory: i % 2 === 0 ? "sword" : "bow",
     itemValue: 2432,
-    ...variant(`ARTIFACT_${String(i)}`),
-    alternatives: i % 2 === 0 ? [variant(`TOKEN_${String(i)}`)] : [],
+    ...alternative(`ARTIFACT_${String(i)}`),
+    alternatives: i % 2 === 0 ? [alternative(`TOKEN_${String(i)}`)] : [],
   };
 });
 const prices: EvaluatePrices = {
@@ -60,7 +60,12 @@ const settings: EvaluateSettings = {
   fce: () => 5000,
 };
 const lymhurst = {
-  location: { craftingBonus: 0.18, specialties: { sword: 0.15, bow: 0.15 } },
+  location: {
+    id: "1000",
+    name: "Lymhurst",
+    craftingBonus: 0.18,
+    specialties: { sword: 0.15, bow: 0.15 },
+  },
 };
 
 function evaluateAndRank() {

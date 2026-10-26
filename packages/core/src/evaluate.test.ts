@@ -2,13 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   type CraftingPlace,
-  type CraftRecipe,
   evaluate,
   type EvaluatePrices,
   type EvaluateSettings,
   type Evaluation,
   type MarketPrice,
   type OrderPrices,
+  type Recipe,
 } from "./index.js";
 
 const fresh = (value: number): MarketPrice => ({ status: "fresh", value });
@@ -18,13 +18,13 @@ const instantOnly = (value: number): OrderPrices => ({
   buyMax: missing,
 });
 
-const astralStaff: CraftRecipe = {
+const astralStaff: Recipe = {
   itemId: "T4_2H_ARCANESTAFF_CRYSTAL",
   craftingCategory: "arcanestaff",
   focus: 1715,
   silver: 0,
   amountCrafted: 1,
-  resources: [
+  materials: [
     { id: "T4_PLANKS", count: 20, returnable: true },
     { id: "T4_METALBAR", count: 12, returnable: true },
     { id: "T4_ARTEFACT_2H_ARCANESTAFF_CRYSTAL", count: 1, returnable: false },
@@ -32,12 +32,12 @@ const astralStaff: CraftRecipe = {
   alternatives: [],
   itemValue: 2432,
 };
-const royalRobe: CraftRecipe = {
+const royalRobe: Recipe = {
   itemId: "T4_ARMOR_CLOTH_ROYAL",
   focus: 0,
   silver: 0,
   amountCrafted: 1,
-  resources: [
+  materials: [
     { id: "T4_ARMOR_CLOTH_SET1", count: 1, returnable: false },
     { id: "QUESTITEM_TOKEN_ROYAL_T4", count: 4, returnable: false },
   ],
@@ -46,7 +46,7 @@ const royalRobe: CraftRecipe = {
       focus: 0,
       silver: 0,
       amountCrafted: 1,
-      resources: [
+      materials: [
         { id: "T4_ARMOR_CLOTH_SET2", count: 1, returnable: false },
         { id: "QUESTITEM_TOKEN_ROYAL_T4", count: 4, returnable: false },
       ],
@@ -55,7 +55,7 @@ const royalRobe: CraftRecipe = {
       focus: 0,
       silver: 0,
       amountCrafted: 1,
-      resources: [
+      materials: [
         { id: "T4_ARMOR_CLOTH_SET3", count: 1, returnable: false },
         { id: "QUESTITEM_TOKEN_ROYAL_T4", count: 4, returnable: false },
       ],
@@ -66,10 +66,20 @@ const royalRobe: CraftRecipe = {
 
 // Production bonuses that give round return rates: 25% without focus, 50% with it.
 const rrr25: CraftingPlace = {
-  location: { craftingBonus: 1 / 3, specialties: {} },
+  location: {
+    id: "rrr25",
+    name: "25% return rate",
+    craftingBonus: 1 / 3,
+    specialties: {},
+  },
 };
 const rrr50WithFocus: CraftingPlace = {
-  location: { craftingBonus: 0.41, specialties: {} },
+  location: {
+    id: "rrr50",
+    name: "50% return rate with focus",
+    craftingBonus: 0.41,
+    specialties: {},
+  },
 };
 
 const settings: EvaluateSettings = {
@@ -230,7 +240,7 @@ describe("evaluate", () => {
   });
 
   it("is incomplete without an item value at a paid station, and complete at a free one", () => {
-    const withoutItemValue: CraftRecipe = { ...astralStaff };
+    const withoutItemValue: Recipe = { ...astralStaff };
     delete withoutItemValue.itemValue;
 
     expect(evaluate(withoutItemValue, rrr25, settings, prices)).toMatchObject({
@@ -244,7 +254,7 @@ describe("evaluate", () => {
   });
 
   it("works out the profit per item when a craft makes several", () => {
-    const twoAtOnce: CraftRecipe = { ...astralStaff, amountCrafted: 2 };
+    const twoAtOnce: Recipe = { ...astralStaff, amountCrafted: 2 };
 
     expect(
       complete(evaluate(twoAtOnce, rrr25, settings, prices)).profit,
@@ -252,7 +262,7 @@ describe("evaluate", () => {
   });
 
   it("has no margin when the craft costs nothing", () => {
-    const free: CraftRecipe = { ...astralStaff, resources: [] };
+    const free: Recipe = { ...astralStaff, materials: [] };
 
     const result = complete(
       evaluate(free, rrr25, { ...settings, stationFee: 0 }, prices),

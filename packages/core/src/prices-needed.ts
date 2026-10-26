@@ -1,18 +1,18 @@
-import type { CraftRecipe } from "./evaluate.js";
+import type { Recipe } from "./evaluate.js";
 
 export interface PricesNeeded {
   products: string[];
   materials: string[];
 }
 
-export function pricesNeeded(recipes: readonly CraftRecipe[]): PricesNeeded {
+export function pricesNeeded(recipes: readonly Recipe[]): PricesNeeded {
   const products = new Set<string>();
   const materials = new Set<string>();
   for (const recipe of recipes) {
     products.add(recipe.itemId);
-    for (const variant of [recipe, ...recipe.alternatives]) {
-      for (const resource of variant.resources) {
-        materials.add(resource.id);
+    for (const alternative of [recipe, ...recipe.alternatives]) {
+      for (const material of alternative.materials) {
+        materials.add(material.id);
       }
     }
   }

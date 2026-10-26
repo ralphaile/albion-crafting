@@ -1,11 +1,11 @@
 export {
   type CraftingPlace,
-  type CraftRecipe,
   evaluate,
   type EvaluatePrices,
   type EvaluateSettings,
   type Evaluation,
-  type RecipeVariant,
+  type Recipe,
+  type RecipeAlternative,
 } from "./evaluate.js";
 export {
   FOCUS_PER_DAY,
@@ -29,7 +29,7 @@ export {
 } from "./material-cost.js";
 export {
   type BonusOverride,
-  type CraftingSite,
+  type CraftingLocation,
   type DailyBonus,
   productionBonus,
   type ProductionBonus,

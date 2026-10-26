@@ -12,7 +12,7 @@ import {
   type MaterialCost,
 } from "./material-cost.js";
 import {
-  type CraftingSite,
+  type CraftingLocation,
   type DailyBonus,
   productionBonus,
   type ProductionBonus,
@@ -22,21 +22,22 @@ import { returnRate } from "./return-rate.js";
 import { revenue, type Revenue, type SellMode } from "./revenue.js";
 import { stationFee } from "./station-fee.js";
 
-export interface RecipeVariant {
+export interface RecipeAlternative {
   focus: number;
   silver: number;
   amountCrafted: number;
-  resources: readonly Material[];
+  materials: readonly Material[];
 }
 
-export interface CraftRecipe extends RecipeVariant {
+export interface Recipe extends RecipeAlternative {
   itemId: string;
   craftingCategory?: string;
   itemValue?: number;
-  alternatives: readonly RecipeVariant[];
+  alternatives: readonly RecipeAlternative[];
 }
 
-export type CraftingPlace = { location: CraftingSite } | { hideout: Hideout };
+export type CraftingPlace =
+  { location: CraftingLocation } | { hideout: Hideout };
 
 export interface EvaluateSettings {
   focus: boolean;
@@ -87,7 +88,7 @@ function bonusAt(
 }
 
 export function evaluate(
-  recipe: CraftRecipe,
+  recipe: Recipe,
   place: CraftingPlace,
   settings: EvaluateSettings,
   prices: EvaluatePrices,
@@ -110,23 +111,23 @@ export function evaluate(
     undercut: settings.undercut ?? false,
   });
 
-  function evaluateVariant(
-    variant: RecipeVariant,
-    alternative: number,
+  function evaluateAlternative(
+    alternative: RecipeAlternative,
+    index: number,
   ): Evaluation {
     const costAt = (rate: number) =>
-      materialCost(variant.resources, prices.materials, {
+      materialCost(alternative.materials, prices.materials, {
         returnRate: rate,
         buyMode: settings.buyMode,
       });
     const cost = costAt(rrr);
     const costWithoutFocus = settings.focus ? costAt(rrrWithoutFocus) : cost;
     const focusSpent = settings.focus
-      ? focusCost(variant.focus, settings.fce?.(recipe.itemId) ?? 0)
+      ? focusCost(alternative.focus, settings.fce?.(recipe.itemId) ?? 0)
       : undefined;
     const base = {
       itemId: recipe.itemId,
-      alternative,
+      alternative: index,
       missingPrices: [
         ...cost.lines
           .filter((line) => line.status === "missing")
@@ -137,7 +138,7 @@ export function evaluate(
       rrr,
       materialCost: cost,
       stationFee: fee,
-      silverCost: variant.silver,
+      silverCost: alternative.silver,
       revenue: sale,
       ...(focusSpent === undefined ? {} : { focusCost: focusSpent }),
     };
@@ -151,7 +152,7 @@ export function evaluate(
     }
 
     const spentPerItem = (materials: number) =>
-      (materials + fee + variant.silver) / variant.amountCrafted;
+      (materials + fee + alternative.silver) / alternative.amountCrafted;
     const spent = spentPerItem(cost.total);
     const profit = sale.net - spent;
     const perFocus =
@@ -172,9 +173,9 @@ export function evaluate(
   }
 
   return [
-    evaluateVariant(recipe, 0),
-    ...recipe.alternatives.map((variant, index) =>
-      evaluateVariant(variant, index + 1),
+    evaluateAlternative(recipe, 0),
+    ...recipe.alternatives.map((alternative, index) =>
+      evaluateAlternative(alternative, index + 1),
     ),
   ].reduce((best, next) =>
     next.status === "complete" &&
