@@ -12,7 +12,8 @@ export function focusCost(baseFocus: number, fce = 0): number {
 
 export function silverPerFocus(
   profitWithFocus: number,
+  profitWithoutFocus: number,
   cost: number,
 ): number | undefined {
-  return cost > 0 ? profitWithFocus / cost : undefined;
+  return cost > 0 ? (profitWithFocus - profitWithoutFocus) / cost : undefined;
 }
