@@ -43,13 +43,15 @@ pnpm dev   # http://localhost:5173/albion-crafting/
 
 ## Project layout
 
-A pnpm + Turborepo monorepo. The web app uses Vite and React. Dashed parts come in a later release. [ADR-001](docs/adr/001-monorepo-with-a-pure-core.md) explains the split.
+A pnpm + Turborepo monorepo. The web app uses Vite and React. Dashed parts come in a later release. [ADR-001](docs/adr/001-monorepo-with-a-pure-core.md) explains the split, and [ADR-004](docs/adr/004-core-owns-the-shared-types.md) why the packages use core's types.
 
 ```mermaid
 flowchart LR
   web["apps/web"] --> core["@aoc/core"]
   web --> prices["@aoc/market-prices"]
   web --> data["@aoc/crafting-data"]
+  prices --> core
+  data --> core
   prices --> aodp[("AODP API")]
   dumps[("ao-bin-dumps")] -- "pnpm data:update" --> data
   api["apps/api"] -.-> core
@@ -59,15 +61,15 @@ flowchart LR
   class api,bot later
 ```
 
-| Folder                       | What it is                                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/web`                   | The website: pick a route and settings, and get a ranked list of the best crafts                                                                                                                                                                                                                                                               |
-| `packages/core`              | The calculation engine: production bonus in cities, Rests, islands and hideouts, return rate, material cost, station fee, revenue after taxes, focus cost, profit, ranking and the prices a set of recipes needs. It has no network or storage code, so a future API and Discord bot can reuse it                                              |
-| `packages/market-prices`     | The markets the app trades in, and a client for their live prices and price history from the Albion Online Data Project (AODP) API that keeps to its request limits, marking each price fresh, stale or missing, the 7-day average price and daily volume, and a cache that keeps prices in the browser for 15 minutes and history for 6 hours |
-| `packages/crafting-data`     | Recipes, item values, names, icons, locations and crafting bonuses, extracted from the game files                                                                                                                                                                                                                                              |
-| `packages/config-typescript` | Shared strict TypeScript settings                                                                                                                                                                                                                                                                                                              |
-| `packages/config-eslint`     | Shared lint rules                                                                                                                                                                                                                                                                                                                              |
-| `.github`                    | The CI and CodeQL workflows, Renovate's settings, PR and issue templates, and the rules that protect `main`                                                                                                                                                                                                                                    |
-| `docs`                       | Guides: [tests](docs/testing.md), [git, CI and deployment](docs/git.md), [game data](docs/game-data.md), [market prices](docs/market-prices.md), the [glossary](docs/glossary.md) and the [architecture decisions](docs/adr/README.md)                                                                                                         |
+| Folder                       | What it is                                                                                                                                                                                                                                                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web`                   | The website: pick a route and settings, and get a ranked list of the best crafts                                                                                                                                                                                                                                  |
+| `packages/core`              | The calculation engine: production bonus in cities, Rests, islands and hideouts, return rate, material cost, station fee, revenue after taxes, focus cost, profit, ranking and the prices a set of recipes needs. It has no network or storage code, so a future API and Discord bot can reuse it                 |
+| `packages/market-prices`     | The markets the app trades in, and `openMarketData`, which fetches their live prices and price history from the Albion Online Data Project (AODP) API within its request limits: each price fresh, stale or missing, and the 7-day average price and daily volume, kept in the browser for 15 minutes and 6 hours |
+| `packages/crafting-data`     | Recipes, item values, names, icons, locations and crafting bonuses, extracted from the game files into core's types                                                                                                                                                                                               |
+| `packages/config-typescript` | Shared strict TypeScript settings                                                                                                                                                                                                                                                                                 |
+| `packages/config-eslint`     | Shared lint rules                                                                                                                                                                                                                                                                                                 |
+| `.github`                    | The CI and CodeQL workflows, Renovate's settings, PR and issue templates, and the rules that protect `main`                                                                                                                                                                                                       |
+| `docs`                       | Guides: [tests](docs/testing.md), [git, CI and deployment](docs/git.md), [game data](docs/game-data.md), [market prices](docs/market-prices.md), the [glossary](docs/glossary.md) and the [architecture decisions](docs/adr/README.md)                                                                            |
 
 Albion Crafting is a fan project and is not affiliated with or endorsed by Sandbox Interactive GmbH. Albion Online is their trademark.

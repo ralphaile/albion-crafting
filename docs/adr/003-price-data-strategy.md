@@ -31,13 +31,13 @@ A result is only worth trusting if every price in it is real, and you can tell w
 - A `0` price or the `0001-01-01` date means **missing**.
 - Each price keeps its value, when it was seen, and how old it is.
 - A price older than 12 hours is **stale**. The threshold is a setting.
-- Two prices are kept for each item, location and quality:
+- Two prices are kept for each item, market and quality:
   - `sellMin`, the cheapest sell order: what you pay to buy instantly, and the reference for a sell order.
   - `buyMax`, the best buy order: what you get for selling instantly, the reference for a buy order, and the Black Market price.
 
 **Manual prices**
 
-- You can type a price for any item, location, quality and side (buy or sell). It's saved with the time you entered it.
+- You can type a price for any item, market, quality and side (buy or sell). It's saved with the time you entered it.
 - A manual price older than 3 days counts as stale. That's a setting too.
 
 **Which price is used**
