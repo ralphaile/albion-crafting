@@ -265,6 +265,20 @@ describe.each([
       expect(result.fetchedAt).toBe(START);
     });
 
+    it("counts a price as stale once it's older than it's told to", async () => {
+      fakeAodp();
+      const marketData = await openMarketData();
+
+      const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1], {
+        staleAfterMinutes: 10,
+      });
+
+      expect(result.prices[0]?.sellMin).toMatchObject({
+        status: "stale",
+        ageMinutes: 15,
+      });
+    });
+
     it("fetches prices again once they're 15 minutes old", async () => {
       const { requests } = fakeAodp();
       const marketData = await openMarketData();

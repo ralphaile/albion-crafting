@@ -17,7 +17,9 @@ export interface MarketDataOptions {
   region?: Region;
 }
 
-export type PricesOptions = CachedFetchOptions;
+export interface PricesOptions extends CachedFetchOptions {
+  staleAfterMinutes?: number;
+}
 
 export type HistoryOptions = CachedFetchOptions & SummarizeOptions;
 
@@ -117,7 +119,7 @@ export async function openMarketData({
         qualities,
         options,
       );
-      return { prices: normalizePrices(rows), failures, fetchedAt };
+      return { prices: normalizePrices(rows, options), failures, fetchedAt };
     },
     async getHistory(itemIds, marketIds, qualities, options) {
       const { rows, failures, fetchedAt } = await cachedHistory(
