@@ -60,6 +60,7 @@ function fakeAodp(region: Region = "west") {
         });
       },
     ),
+    getHistory: vi.fn<AodpClient["getHistory"]>(),
   };
   return { client, requests, failing };
 }

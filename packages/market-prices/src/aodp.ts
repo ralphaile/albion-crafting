@@ -27,6 +27,11 @@ export interface FetchedPrices {
   failures: BatchFailure[];
 }
 
+export interface FetchedHistory {
+  history: AodpHistory[];
+  failures: BatchFailure[];
+}
+
 export interface AodpClient {
   readonly region: Region;
   getPrices(
@@ -35,6 +40,12 @@ export interface AodpClient {
     qualities: readonly number[],
     options?: GetPricesOptions,
   ): Promise<FetchedPrices>;
+  getHistory(
+    itemIds: readonly string[],
+    locations: readonly string[],
+    qualities: readonly number[],
+    options?: GetPricesOptions,
+  ): Promise<FetchedHistory>;
 }
 
 const MAX_URL_LENGTH = 4096;
@@ -63,6 +74,23 @@ const pricesSchema = z.array(
 
 export type AodpPrice = z.output<typeof pricesSchema>[number];
 
+const historySchema = z.array(
+  z.object({
+    location: z.string(),
+    item_id: z.string(),
+    quality: z.int(),
+    data: z.array(
+      z.object({
+        item_count: z.int(),
+        avg_price: z.number(),
+        timestamp: date,
+      }),
+    ),
+  }),
+);
+
+export type AodpHistory = z.output<typeof historySchema>[number];
+
 interface Endpoint<T> {
   path: string;
   extraQuery: string;
@@ -77,6 +105,14 @@ const pricesEndpoint: Endpoint<AodpPrice> = {
   label: "prices",
   schema: pricesSchema,
   locationOf: (row) => row.city,
+};
+
+const historyEndpoint: Endpoint<AodpHistory> = {
+  path: "history",
+  extraQuery: "&time-scale=24",
+  label: "price history",
+  schema: historySchema,
+  locationOf: (row) => row.location,
 };
 
 export function createAodpClient({
@@ -148,6 +184,21 @@ export function createAodpClient({
         onEvent,
       );
       return { prices: rows, failures };
+    },
+    async getHistory(
+      itemIds,
+      locations,
+      qualities,
+      { onEvent = () => undefined } = {},
+    ) {
+      const { rows, failures } = await getRows(
+        historyEndpoint,
+        itemIds,
+        locations,
+        qualities,
+        onEvent,
+      );
+      return { history: rows, failures };
     },
   };
 }

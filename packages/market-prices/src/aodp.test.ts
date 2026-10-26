@@ -2,12 +2,14 @@ import { delay, http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { type AodpClient, type AodpEvent, createAodpClient } from "./index.js";
+import history from "../test/fixtures/history.json" with { type: "json" };
 import pricesNoData from "../test/fixtures/prices-no-data.json" with { type: "json" };
 import prices from "../test/fixtures/prices.json" with { type: "json" };
 import rateLimited from "../test/fixtures/rate-limited.json" with { type: "json" };
 import { server } from "../test/setup.js";
 
 const PRICES = "https://*.albion-online-data.com/api/v2/stats/prices/*";
+const HISTORY = "https://*.albion-online-data.com/api/v2/stats/history/*";
 const NO_DATA = "0001-01-01T00:00:00";
 const EMPTY_URL =
   "https://west.albion-online-data.com/api/v2/stats/prices/.json?locations=Caerleon&qualities=1";
@@ -59,6 +61,11 @@ function idsFillingUrl(length: number, emptyUrl = EMPTY_URL): string[] {
     (_, index) => `T4_ITEM_${String(index).padStart(3, "0")}`,
   );
   return [...ids, `T4_LAST${"X".repeat(room - 12 * count - 7)}`];
+}
+
+// So long that each one needs its own request
+function soloId(name: string): string {
+  return `${name}_${"X".repeat(3000)}`;
 }
 
 describe("createAodpClient", () => {
@@ -245,11 +252,6 @@ describe("getPrices when AODP fails", () => {
     return times;
   }
 
-  // So long that each one needs its own request
-  function soloId(name: string): string {
-    return `${name}_${"X".repeat(3000)}`;
-  }
-
   async function getT4Bag(options = {}) {
     const result = aodp.getPrices(["T4_BAG"], ["Caerleon"], [1], options);
     await vi.runAllTimersAsync();
@@ -426,6 +428,72 @@ describe("getPrices when AODP fails", () => {
     await vi.runAllTimersAsync();
 
     await expect(result).resolves.toEqual({ prices: [], failures: [] });
+    expect(most).toBe(3);
+  });
+});
+
+describe("getHistory", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("asks for the daily history, as the recorded request did", async () => {
+    const requested: string[] = [];
+    server.use(
+      http.get(HISTORY, ({ request }) => {
+        requested.push(request.url);
+        return HttpResponse.json(history.body);
+      }),
+    );
+
+    await expect(
+      client.getHistory(["T4_BAG"], ["Caerleon"], [1]),
+    ).resolves.toEqual({ history: history.body, failures: [] });
+
+    expect(requested).toEqual([urlOf(history)]);
+  });
+
+  it("says it was the price history that failed", async () => {
+    server.use(
+      http.get(HISTORY, () => new HttpResponse(null, { status: 404 })),
+    );
+
+    await expect(
+      client.getHistory(["T4_BAG"], ["Caerleon"], [1]),
+    ).resolves.toEqual({
+      history: [],
+      failures: [
+        {
+          itemIds: ["T4_BAG"],
+          error: new Error(
+            `Fetching price history failed: HTTP 404 from ${urlOf(history)}`,
+          ),
+        },
+      ],
+    });
+  });
+
+  it("shares the client's request limits with getPrices", async () => {
+    vi.useFakeTimers();
+    let running = 0;
+    let most = 0;
+    const slowly = async () => {
+      running += 1;
+      most = Math.max(most, running);
+      await delay(1000);
+      running -= 1;
+      return HttpResponse.json([]);
+    };
+    server.use(http.get(PRICES, slowly), http.get(HISTORY, slowly));
+    const aodp = createAodpClient();
+
+    const both = Promise.all([
+      aodp.getPrices(["A", "B"].map(soloId), ["Caerleon"], [1]),
+      aodp.getHistory(["C", "D"].map(soloId), ["Caerleon"], [1]),
+    ]);
+    await vi.runAllTimersAsync();
+    await both;
+
     expect(most).toBe(3);
   });
 });
