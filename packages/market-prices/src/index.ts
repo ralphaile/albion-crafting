@@ -11,6 +11,12 @@ export {
 } from "./aodp.js";
 export { type Market, markets } from "./markets.js";
 export {
+  openPriceStore,
+  type PriceKey,
+  type PriceStore,
+  type StoredPrice,
+} from "./price-store.js";
+export {
   type ItemPrices,
   type NormalizeOptions,
   normalizePrices,
