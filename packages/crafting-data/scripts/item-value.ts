@@ -31,8 +31,8 @@ export function addItemValues(
 
   function itemValue(recipe: Recipe): number | undefined {
     if (!itemValues.has(recipe.itemId)) {
-      const values = recipe.resources.map(({ id, count }) => {
-        const value = resourceValue(id, recipe.itemId);
+      const values = recipe.materials.map(({ id, count }) => {
+        const value = materialValue(id, recipe.itemId);
         return value === undefined ? undefined : count * value;
       });
       itemValues.set(
@@ -46,7 +46,7 @@ export function addItemValues(
     return itemValues.get(recipe.itemId);
   }
 
-  function resourceValue(id: string, usedBy: string): number | undefined {
+  function materialValue(id: string, usedBy: string): number | undefined {
     const ingredient = recipesById.get(id);
     if (ingredient) {
       return itemValue(ingredient);

@@ -22,7 +22,7 @@ function valueOf(recipes: Recipe[], itemId: string): number | undefined {
 
 function recipe(
   itemId: string,
-  resources: Omit<Resource, "returnable">[],
+  materials: Omit<Resource, "returnable">[],
   amountCrafted = 1,
 ): Recipe {
   return {
@@ -36,8 +36,8 @@ function recipe(
     focus: 0,
     silver: 0,
     amountCrafted,
-    resources: resources.map((resource) => ({
-      ...resource,
+    materials: materials.map((material) => ({
+      ...material,
       returnable: true,
     })),
     alternatives: [],

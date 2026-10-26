@@ -70,7 +70,7 @@ describe("extractRecipes", () => {
       focus: 2251,
       silver: 0,
       amountCrafted: 1,
-      resources: [
+      materials: [
         { id: "T4_METALBAR_LEVEL1@1", count: 16, returnable: true },
         { id: "T4_LEATHER_LEVEL1@1", count: 8, returnable: true },
       ],
@@ -93,7 +93,7 @@ describe("extractRecipes", () => {
       focus: 3939,
       silver: 0,
       amountCrafted: 1,
-      resources: [
+      materials: [
         { id: "T6_METALBAR", count: 16, returnable: true },
         { id: "T6_LEATHER", count: 8, returnable: true },
         {
@@ -107,7 +107,7 @@ describe("extractRecipes", () => {
           focus: 3939,
           silver: 0,
           amountCrafted: 1,
-          resources: [
+          materials: [
             { id: "T6_METALBAR", count: 16, returnable: true },
             { id: "T6_LEATHER", count: 8, returnable: true },
             { id: "T6_ARTEFACT_TOKEN_FAVOR_1", count: 1, returnable: false },
@@ -121,7 +121,7 @@ describe("extractRecipes", () => {
     const staff = find(await fixtureRecipes(), "T4_2H_SHAPESHIFTER_SET1");
 
     expect(staff?.isArtifact).toBe(false);
-    expect(staff?.resources).toContainEqual({
+    expect(staff?.materials).toContainEqual({
       id: "T3_ALCHEMY_RARE_PANTHER",
       count: 2,
       returnable: false,
@@ -132,12 +132,12 @@ describe("extractRecipes", () => {
     const royal = find(await fixtureRecipes(), "T4_HEAD_CLOTH_ROYAL@1");
 
     expect(royal).not.toHaveProperty("craftingCategory");
-    expect(royal?.resources).toEqual([
+    expect(royal?.materials).toEqual([
       { id: "T4_HEAD_CLOTH_SET1@1", count: 1, returnable: false },
       { id: "QUESTITEM_TOKEN_ROYAL_T4", count: 2, returnable: false },
     ]);
     expect(
-      royal?.alternatives.map((alternative) => alternative.resources[0]?.id),
+      royal?.alternatives.map((alternative) => alternative.materials[0]?.id),
     ).toEqual(["T4_HEAD_CLOTH_SET2@1", "T4_HEAD_CLOTH_SET3@1"]);
   });
 

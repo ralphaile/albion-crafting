@@ -21,8 +21,8 @@ export function extractItems(recipes: Recipe[], names: Names): ExtractedItems {
   const ids = new Set([
     ...craftedIds,
     ...recipes.flatMap((recipe) =>
-      [recipe, ...recipe.alternatives].flatMap(({ resources }) =>
-        resources.map(({ id }) => id),
+      [recipe, ...recipe.alternatives].flatMap(({ materials }) =>
+        materials.map(({ id }) => id),
       ),
     ),
   ]);

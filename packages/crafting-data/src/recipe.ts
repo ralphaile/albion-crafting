@@ -8,7 +8,7 @@ export interface Alternative {
   focus: number;
   silver: number;
   amountCrafted: number;
-  resources: Resource[];
+  materials: Resource[];
 }
 
 export interface Recipe extends Alternative {

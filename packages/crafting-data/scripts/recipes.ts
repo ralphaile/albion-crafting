@@ -95,7 +95,7 @@ function toRecipes(item: GearItem): Recipe[] {
         : { craftingCategory: item["@craftingcategory"] }),
       shopCategory: item["@shopcategory"],
       shopSubcategory: item["@shopsubcategory1"],
-      isArtifact: recipe.resources.some(({ id }) => id.includes("_ARTEFACT_")),
+      isArtifact: recipe.materials.some(({ id }) => id.includes("_ARTEFACT_")),
       ...recipe,
       alternatives,
     };
@@ -107,7 +107,7 @@ function toAlternative(requirements: CraftingRequirements): Alternative {
     focus: requirements["@craftingfocus"],
     silver: requirements["@silver"] ?? 0,
     amountCrafted: requirements["@amountcrafted"] ?? 1,
-    resources: (requirements.craftresource ?? []).map(toResource),
+    materials: (requirements.craftresource ?? []).map(toResource),
   };
 }
 

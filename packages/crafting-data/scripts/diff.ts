@@ -174,12 +174,12 @@ function recipeFacts(recipe: Recipe): Facts {
 function addAlternative(
   facts: Facts,
   prefix: string,
-  { focus, silver, amountCrafted, resources }: Alternative,
+  { focus, silver, amountCrafted, materials }: Alternative,
 ): void {
   facts.set(`${prefix}focus`, String(focus));
   facts.set(`${prefix}silver`, String(silver));
   facts.set(`${prefix}amount crafted`, String(amountCrafted));
-  for (const { id, count, returnable } of resources) {
+  for (const { id, count, returnable } of materials) {
     facts.set(
       `${prefix}\`${id}\``,
       returnable ? String(count) : `${String(count)} (not returned)`,
