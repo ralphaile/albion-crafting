@@ -58,7 +58,7 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 
 ## Recipes
 
-`src/generated/recipes.json` has a recipe for every weapon, armor piece and offhand the app covers, at each enchantment level. The app imports it as `recipes` from `@aoc/crafting-data`, and `src/recipe.ts` has its type.
+`src/generated/recipes.json` has a recipe for every weapon, armor piece and offhand the app covers, at each enchantment level. The app imports it as `recipes` from `@aoc/crafting-data`. Its type, `GameRecipe` in `src/recipe.ts`, is core's `Recipe` plus the item's tier, enchantment, shop category and whether it's an artifact item.
 
 - **Which items:** the shop categories `weapons`, `armors`, `head`, `shoes` and `offhands`, tiers 4 to 8. They come from three lists in `items.json`: `weapon`, `equipmentitem`, and `transformationweapon`, which holds the shapeshifter staffs. If any other list holds gear, `pnpm data:update` prints a warning that names it, because the shapeshifter staffs arrived that way.
 - **Left out:**
@@ -87,7 +87,7 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 
 ## Crafting locations
 
-`src/generated/locations.json` has the crafting bonuses of the 7 cities, the 3 Rests and the island. The app imports it as `craftingLocations` from `@aoc/crafting-data`, and `src/location.ts` has its type.
+`src/generated/locations.json` has the crafting bonuses of the 7 cities, the 3 Rests and the island. The app imports it as `craftingLocations` from `@aoc/crafting-data`, and its type is `CraftingLocation` from `@aoc/core`.
 
 - **Which locations:** the entries in `craftingmodifiers.json` with a cluster ID and a `craftingbonus`. The `id` is the cluster ID, and the `name` comes from `formatted/world.json`: `4300` is "Arthur's Rest". A cluster with no name prints a warning and keeps its ID as its name.
 - **Left out:** the 100 `TNL-…` clusters, Roads of Avalon zones such as Quatun-Nusas, which have no crafting bonus. The hideout entries, by biome and map quality, go into [Hideouts](#hideouts).
