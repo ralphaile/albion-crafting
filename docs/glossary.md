@@ -72,6 +72,8 @@ Crafting stations run on nutrition. A craft uses `item value × 0.1125` nutritio
 station fee = item value × 0.1125 × fee per 100 nutrition / 100
 ```
 
+The engine's version is `stationFee()` in `packages/core/src/station-fee.ts`. It gives the fee for one craft, and every recipe crafts one item. A fee of 0, such as on your own island, costs nothing. The shapeshifter staffs have no [item value](#item-value), so at a paid station their fee is unknown. The settings panel will let you set the fee for each kind of location. Its defaults wait for the in-game check of what fees are typical.
+
 ## Power level
 
 A hideout's power level, from 1 to 9, adds to its [production bonus](#production-bonus) in two parts: a general bonus for everything crafted there, and a specialist bonus for its [biome](#biome)'s 5 crafting categories. At level 9 they're 0.26 and 0.30. A level 9 hideout on a quality 6 map, crafting its specialty, reaches a production bonus of 0.82, or 1.41 with [focus](#focus).
