@@ -19,12 +19,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "dexie": "4.4.7",
     "zod": "4.6.7"
   },
   "devDependencies": {
     "@aoc/eslint-config": "workspace:*",
     "@aoc/typescript-config": "workspace:*",
     "eslint": "10.13.0",
+    "fake-indexeddb": "6.2.6",
     "msw": "3.0.3",
     "typescript": "6.0.3",
     "vitest": "5.0.5"

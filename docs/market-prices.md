@@ -27,7 +27,7 @@ const { prices, failures } = await aodp.getPrices(
 );
 ```
 
-- **`region`** is the game server: `west` (Americas, the default), `europe` or `east` (Asia). Each has its own host, such as `https://europe.albion-online-data.com`.
+- **`region`** is the game server: `west` (Americas, the default), `europe` or `east` (Asia). Each has its own host, such as `https://europe.albion-online-data.com`. The client's `region` says which one it asks.
 - **Markets** are given by their `id`, and **qualities** by number, from 1 to 5. See [quality](glossary.md#quality).
 - **Batches:** AODP asks to keep each URL under 4,096 characters, so the item IDs are split across requests, about 170 per request for one market. The server did answer longer URLs in a test, up to 8,193 characters, but the client keeps to AODP's limit.
 - **`prices`:** one row per item, market and quality, with AODP's own fields, such as `sell_price_min` and `sell_price_min_date`. Zod checks every row. A missing price is still `0`, dated `0001-01-01T00:00:00`.
@@ -71,6 +71,42 @@ const itemPrices = normalizePrices(prices, { staleAfterMinutes: 12 * 60 });
 - **Missing:** a price of `0`, or the date `0001-01-01T00:00:00`, becomes `{ status: "missing" }`, with no value to use by mistake.
 - **Dates:** AODP's dates have no timezone and are in UTC. `observedAt` is in milliseconds since 1970, like `Date.now()`.
 - **Age and status:** `ageMinutes` counts from `now`, the current time by default, and is never negative. A price is `stale` when it's older than `staleAfterMinutes`, 12 hours by default, and `fresh` otherwise. Both hold for that `now`, so call `normalizePrices` again to bring them up to date.
+
+## Caching prices
+
+The app keeps the prices it fetches in the browser, so it doesn't ask AODP again on every visit. [ADR-002](adr/002-local-first-storage.md) explains why.
+
+```ts
+import { pricesNeeded } from "@aoc/core";
+import {
+  createAodpClient,
+  createPriceCache,
+  normalizePrices,
+  openPriceStore,
+} from "@aoc/market-prices";
+
+const { products, materials } = pricesNeeded(recipes);
+const store = await openPriceStore();
+const cache = createPriceCache({
+  client: createAodpClient({ region: "europe" }),
+  store,
+});
+
+const { prices, failures, fetchedAt } = await cache.getPrices(
+  materials,
+  ["Lymhurst"],
+  [1],
+);
+const itemPrices = normalizePrices(prices);
+```
+
+- **What to fetch:** `pricesNeeded` from `@aoc/core` lists what a set of recipes makes (`products`) and what they use, alternative recipes included (`materials`). Fetch the materials where you buy and the products where you sell, never the whole catalog.
+- **Store:** `openPriceStore` saves prices in IndexedDB, in a database of their own called `aoc-price-cache`, with one row per server, item, market and quality. Clearing it can't touch anything else the app saves.
+- **No IndexedDB:** when the browser won't open it, as in some private windows, the store keeps prices in memory until the page closes. `store.persistent` is then `false`, so the app can say so.
+- **Reuse:** `getPrices` takes the same arguments as the client's. It reuses an item's prices when every market and quality asked for was fetched less than 15 minutes ago, and fetches the other items. `ttlMinutes` changes the 15 minutes. `force: true` fetches everything, for **Refresh prices**.
+- **Failures:** when an item's batch fails, its older saved prices are returned anyway, however old, and the batch is in `failures`. `normalizePrices` marks them stale once they're older than 12 hours.
+- **Result:** each price is AODP's row plus its `region` and `fetchedAt`, the time it was fetched. The result's `fetchedAt` is the oldest of them, for **Last refreshed**, or `undefined` when there are no prices.
+- **`store.clear()`** forgets every saved price, on every server.
 
 ## AODP quirks
 

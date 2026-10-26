@@ -28,6 +28,7 @@ export interface FetchedPrices {
 }
 
 export interface AodpClient {
+  readonly region: Region;
   getPrices(
     itemIds: readonly string[],
     locations: readonly string[],
@@ -69,6 +70,7 @@ export function createAodpClient({
   const limiter = createLimiter();
 
   return {
+    region,
     async getPrices(
       itemIds,
       locations,

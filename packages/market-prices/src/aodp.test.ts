@@ -61,6 +61,13 @@ function idsFillingUrl(length: number, emptyUrl = EMPTY_URL): string[] {
   return [...ids, `T4_LAST${"X".repeat(room - 12 * count - 7)}`];
 }
 
+describe("createAodpClient", () => {
+  it("says which server it asks, west unless another is picked", () => {
+    expect(client.region).toBe("west");
+    expect(createAodpClient({ region: "europe" }).region).toBe("europe");
+  });
+});
+
 describe("getPrices", () => {
   it("asks the west server, as the recorded request did", async () => {
     const requested = serve(prices.body);
