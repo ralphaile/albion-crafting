@@ -8,9 +8,17 @@ export {
   createAodpClient,
   type FetchedHistory,
   type FetchedPrices,
-  type GetPricesOptions,
+  type FetchOptions,
   type Region,
 } from "./aodp.js";
+export {
+  type CacheStore,
+  openCacheStore,
+  type RowKey,
+  type RowStore,
+  type StoredHistory,
+  type StoredPrice,
+} from "./cache-store.js";
 export {
   type HistorySummary,
   summarizeHistory,
@@ -18,23 +26,15 @@ export {
 } from "./history.js";
 export { type Market, markets } from "./markets.js";
 export {
+  type CachedFetchOptions,
   type CachedHistory,
   type CachedPrices,
+  type CacheOptions,
   createHistoryCache,
   createPriceCache,
-  type GetCachedPricesOptions,
   type HistoryCache,
   type PriceCache,
-  type PriceCacheOptions,
 } from "./price-cache.js";
-export {
-  openPriceStore,
-  type PriceKey,
-  type PriceStore,
-  type RowStore,
-  type StoredHistory,
-  type StoredPrice,
-} from "./price-store.js";
 export {
   type ItemPrices,
   type NormalizeOptions,

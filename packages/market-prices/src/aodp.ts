@@ -18,7 +18,7 @@ export type AodpEvent =
   | { type: "waiting"; seconds: number }
   | ({ type: "error" } & BatchFailure);
 
-export interface GetPricesOptions {
+export interface FetchOptions {
   onEvent?: (event: AodpEvent) => void;
 }
 
@@ -38,13 +38,13 @@ export interface AodpClient {
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    options?: GetPricesOptions,
+    options?: FetchOptions,
   ): Promise<FetchedPrices>;
   getHistory(
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    options?: GetPricesOptions,
+    options?: FetchOptions,
   ): Promise<FetchedHistory>;
 }
 
@@ -55,6 +55,8 @@ const MINUTE_MS = 60_000;
 const CLOCK_MARGIN_MS = 1000;
 
 const date = z.iso.datetime({ local: true });
+
+export const NO_DATA_DATE = "0001-01-01T00:00:00";
 
 const pricesSchema = z.array(
   z.object({
@@ -327,4 +329,9 @@ function sleep(ms: number): Promise<void> {
 
 function toError(reason: unknown): Error {
   return reason instanceof Error ? reason : new Error(String(reason));
+}
+
+// AODP's dates are in UTC but don't say so, and a date without a zone reads as local time.
+export function parseAodpDate(date: string): number {
+  return Date.parse(date.endsWith("Z") ? date : `${date}Z`);
 }

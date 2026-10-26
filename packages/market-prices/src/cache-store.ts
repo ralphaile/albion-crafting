@@ -12,7 +12,7 @@ export interface StoredHistory extends AodpHistory {
   fetchedAt: number;
 }
 
-export type PriceKey = [
+export type RowKey = [
   region: Region,
   itemId: string,
   marketId: string,
@@ -20,11 +20,11 @@ export type PriceKey = [
 ];
 
 export interface RowStore<T> {
-  get(keys: readonly PriceKey[]): Promise<T[]>;
+  get(keys: readonly RowKey[]): Promise<T[]>;
   put(rows: readonly T[]): Promise<void>;
 }
 
-export interface PriceStore {
+export interface CacheStore {
   readonly persistent: boolean;
   readonly prices: RowStore<StoredPrice>;
   readonly history: RowStore<StoredHistory>;
@@ -33,10 +33,10 @@ export interface PriceStore {
 
 const DATABASE_NAME = "aoc-price-cache";
 
-export async function openPriceStore(): Promise<PriceStore> {
+export async function openCacheStore(): Promise<CacheStore> {
   const db = new Dexie(DATABASE_NAME) as Dexie & {
-    prices: Table<StoredPrice, PriceKey>;
-    history: Table<StoredHistory, PriceKey>;
+    prices: Table<StoredPrice, RowKey>;
+    history: Table<StoredHistory, RowKey>;
   };
   db.version(2).stores({
     prices: "[region+item_id+city+quality]",
@@ -58,7 +58,7 @@ export async function openPriceStore(): Promise<PriceStore> {
   };
 }
 
-function tableRows<T>(table: Table<T, PriceKey>): RowStore<T> {
+function tableRows<T>(table: Table<T, RowKey>): RowStore<T> {
   return {
     async get(keys) {
       const found = await table.bulkGet([...keys]);
@@ -70,7 +70,7 @@ function tableRows<T>(table: Table<T, PriceKey>): RowStore<T> {
   };
 }
 
-function createMemoryStore(): PriceStore {
+function createMemoryStore(): CacheStore {
   const prices = memoryRows<StoredPrice>((row) => [
     row.region,
     row.item_id,
@@ -97,10 +97,10 @@ function createMemoryStore(): PriceStore {
 }
 
 function memoryRows<T>(
-  keyOf: (row: T) => PriceKey,
+  keyOf: (row: T) => RowKey,
 ): RowStore<T> & { clear(): void } {
   const rows = new Map<string, T>();
-  const id = (key: PriceKey) => JSON.stringify(key);
+  const id = (key: RowKey) => JSON.stringify(key);
 
   return {
     get(keys) {

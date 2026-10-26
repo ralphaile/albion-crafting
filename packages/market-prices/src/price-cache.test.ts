@@ -7,11 +7,11 @@ import {
   type AodpHistory,
   type AodpPrice,
   type CachedPrices,
+  type CacheStore,
   createHistoryCache,
   createPriceCache,
   normalizePrices,
-  openPriceStore,
-  type PriceStore,
+  openCacheStore,
   type Region,
 } from "./index.js";
 
@@ -19,12 +19,12 @@ const NO_DATA = "0001-01-01T00:00:00";
 const START = Date.UTC(2026, 9, 26, 12, 0);
 const MINUTE_MS = 60_000;
 
-let store: PriceStore;
+let store: CacheStore;
 
 beforeEach(async () => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(START);
-  store = await openPriceStore();
+  store = await openCacheStore();
 });
 
 afterEach(async () => {
@@ -178,7 +178,7 @@ describe("getPrices", () => {
     minutesLater(14.9);
     const reloaded = createPriceCache({
       client,
-      store: await openPriceStore(),
+      store: await openCacheStore(),
     });
     const result = await reloaded.getPrices(["T4_BAG"], ["Caerleon"], [1]);
 

@@ -1,25 +1,25 @@
-import type {
-  AodpClient,
-  BatchFailure,
-  GetPricesOptions,
-  Region,
+import {
+  type AodpClient,
+  type BatchFailure,
+  type FetchOptions,
+  NO_DATA_DATE,
+  type Region,
 } from "./aodp.js";
 import type {
-  PriceKey,
-  PriceStore,
+  CacheStore,
+  RowKey,
   RowStore,
   StoredHistory,
   StoredPrice,
-} from "./price-store.js";
-import { NO_DATA_DATE } from "./prices.js";
+} from "./cache-store.js";
 
-export interface PriceCacheOptions {
+export interface CacheOptions {
   client: AodpClient;
-  store: PriceStore;
+  store: CacheStore;
   ttlMinutes?: number;
 }
 
-export interface GetCachedPricesOptions extends GetPricesOptions {
+export interface CachedFetchOptions extends FetchOptions {
   force?: boolean;
 }
 
@@ -34,7 +34,7 @@ export interface PriceCache {
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    options?: GetCachedPricesOptions,
+    options?: CachedFetchOptions,
   ): Promise<CachedPrices>;
 }
 
@@ -49,7 +49,7 @@ export interface HistoryCache {
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    options?: GetCachedPricesOptions,
+    options?: CachedFetchOptions,
   ): Promise<CachedHistory>;
 }
 
@@ -59,7 +59,7 @@ export function createPriceCache({
   client,
   store,
   ttlMinutes = 15,
-}: PriceCacheOptions): PriceCache {
+}: CacheOptions): PriceCache {
   const getRows = cachedRows({
     region: client.region,
     rows: store.prices,
@@ -106,7 +106,7 @@ export function createHistoryCache({
   client,
   store,
   ttlMinutes = 6 * 60,
-}: PriceCacheOptions): HistoryCache {
+}: CacheOptions): HistoryCache {
   const getRows = cachedRows({
     region: client.region,
     rows: store.history,
@@ -155,7 +155,7 @@ interface CachedRowsOptions<T> {
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    options: GetPricesOptions,
+    options: FetchOptions,
   ) => Promise<{ rows: T[]; failures: BatchFailure[] }>;
   marketIdOf: (row: T) => string;
   empty: (itemId: string, marketId: string, quality: number) => T;
@@ -178,7 +178,7 @@ function cachedRows<T extends { item_id: string; quality: number }>({
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    { force = false, ...options }: GetCachedPricesOptions = {},
+    { force = false, ...options }: CachedFetchOptions = {},
   ) => {
     const now = Date.now();
     const items = [...new Set(itemIds)];
@@ -187,12 +187,7 @@ function cachedRows<T extends { item_id: string; quality: number }>({
     const cached = await store.get(
       items.flatMap((itemId) =>
         markets.flatMap((marketId) =>
-          levels.map((quality): PriceKey => [
-            region,
-            itemId,
-            marketId,
-            quality,
-          ]),
+          levels.map((quality): RowKey => [region, itemId, marketId, quality]),
         ),
       ),
     );

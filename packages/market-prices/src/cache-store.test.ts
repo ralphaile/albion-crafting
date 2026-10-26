@@ -3,14 +3,14 @@ import { Dexie } from "dexie";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
-  openPriceStore,
-  type PriceKey,
+  openCacheStore,
+  type RowKey,
   type StoredHistory,
   type StoredPrice,
 } from "./index.js";
 
 const NO_DATA = "0001-01-01T00:00:00";
-const KEY: PriceKey = ["west", "T4_BAG", "Caerleon", 1];
+const KEY: RowKey = ["west", "T4_BAG", "Caerleon", 1];
 
 function stored(overrides: Partial<StoredPrice> = {}): StoredPrice {
   return {
@@ -50,7 +50,7 @@ function openWithoutIndexedDb() {
   vi.spyOn(Dexie.prototype, "open").mockRejectedValueOnce(
     new DOMException("IndexedDB is not available", "InvalidStateError"),
   );
-  return openPriceStore();
+  return openCacheStore();
 }
 
 afterEach(async () => {
@@ -59,9 +59,9 @@ afterEach(async () => {
 });
 
 describe.each([
-  { storage: "IndexedDB", open: openPriceStore, persistent: true },
+  { storage: "IndexedDB", open: openCacheStore, persistent: true },
   { storage: "memory", open: openWithoutIndexedDb, persistent: false },
-])("openPriceStore in $storage", ({ open, persistent }) => {
+])("openCacheStore in $storage", ({ open, persistent }) => {
   it("says whether its prices survive a reload", async () => {
     const store = await open();
 
@@ -133,12 +133,12 @@ describe.each([
   });
 });
 
-describe("openPriceStore", () => {
+describe("openCacheStore", () => {
   it("still has the prices after the page reloads", async () => {
-    const before = await openPriceStore();
+    const before = await openCacheStore();
     await before.prices.put([stored()]);
 
-    const after = await openPriceStore();
+    const after = await openCacheStore();
 
     expect(await after.prices.get([KEY])).toEqual([stored()]);
   });
@@ -149,7 +149,7 @@ describe("openPriceStore", () => {
     await old.table("prices").put(stored());
     old.close();
 
-    const store = await openPriceStore();
+    const store = await openCacheStore();
     await store.history.put([storedSeries()]);
 
     expect(await store.prices.get([KEY])).toEqual([stored()]);
