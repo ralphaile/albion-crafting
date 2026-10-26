@@ -33,23 +33,41 @@ const FOCUS_BONUS = 0.59;
 export function productionBonus(
   site: CraftingSite,
   craftingCategory: string | undefined,
-  { focus = false, dailyBonuses = [], override }: ProductionBonusOptions = {},
+  options: ProductionBonusOptions = {},
 ): ProductionBonus {
-  const parts = {
-    base: site.craftingBonus,
-    specialty:
-      craftingCategory === undefined
-        ? 0
-        : (site.specialties[craftingCategory] ?? 0),
+  return withTotal(
+    {
+      base: site.craftingBonus,
+      specialty:
+        craftingCategory === undefined
+          ? 0
+          : (site.specialties[craftingCategory] ?? 0),
+      ...dailyAndFocus(craftingCategory, options),
+    },
+    options.override,
+  );
+}
+
+export function dailyAndFocus(
+  craftingCategory: string | undefined,
+  { focus = false, dailyBonuses = [] }: ProductionBonusOptions,
+) {
+  return {
     daily: dailyBonuses
       .filter(({ category }) => category === craftingCategory)
       .reduce((sum, { bonus }) => sum + bonus, 0),
     focus: focus ? FOCUS_BONUS : 0,
   };
+}
+
+export function withTotal<Parts extends Record<string, number>>(
+  parts: Parts,
+  override: BonusOverride | undefined,
+): Parts & { override?: number; total: number } {
   if (override === undefined) {
     return {
       ...parts,
-      total: parts.base + parts.specialty + parts.daily + parts.focus,
+      total: Object.values(parts).reduce((sum, part) => sum + part, 0),
     };
   }
   const total =

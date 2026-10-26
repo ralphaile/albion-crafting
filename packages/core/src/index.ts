@@ -1,4 +1,9 @@
 export {
+  type Hideout,
+  hideoutProductionBonus,
+  type HideoutProductionBonus,
+} from "./hideout-bonus.js";
+export {
   type BonusOverride,
   type CraftingSite,
   type DailyBonus,
