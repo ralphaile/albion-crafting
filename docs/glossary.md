@@ -46,6 +46,24 @@ The quality of the Black Zone map a hideout stands on, from Q1 to Q6. It adds 0.
 
 A value the game gives every item, separate from its market price, worked out from the item values of its materials. Refined materials are worth 16 at T4 and double with each tier and enchantment level. [Artifacts](#artifact) count too. The [station fee](#nutrition-and-station-fee) is based on it.
 
+## Material cost
+
+What one craft's materials cost after the [return rate](#return-rate-rrr). Returnable materials count as `count × (1 − RRR)`, and [artifacts](#artifact) and tokens count in full:
+
+```text
+material cost = Σ returnable: count × (1 − RRR) × unit price
+              + Σ others:     count × unit price
+```
+
+The unit price depends on how you buy at the buy market:
+
+- **Instant buy:** the lowest sell order.
+- **Buy order:** the highest buy order, plus the [setup fee](#setup-fee).
+
+The cost is per craft, so it scales to a batch. A staff that needs 8 metal bars, crafted at a 24.81% return rate, uses 8 × 0.7519 ≈ 6.02 bars per craft on average. So 100 staffs use about 602 bars, not 800, because the returned bars go into the next crafts. They still need all 100 artifacts.
+
+The engine's version is `materialCost()` in `packages/core/src/material-cost.ts`. It returns a line per material, with its count after returns, the price it used, its unit price and its cost. A [stale](#fresh-stale-and-missing-prices) price still counts, and its line stays flagged. If any price is missing, the result is incomplete and has no total.
+
 ## Nutrition and station fee
 
 Crafting stations run on nutrition. A craft uses `item value × 0.1125` nutrition, and the station's owner sets a price in silver per 100 nutrition:
@@ -100,7 +118,7 @@ The engine's version is `returnRate()` in `packages/core/src/return-rate.ts`. Ne
 
 ## Setup fee
 
-2.5% of an order's value, charged when you place a sell order or a buy order. Buying or selling instantly, including to the [Black Market](#black-market), has no setup fee.
+2.5% of an order's value, charged when you place a sell order or a buy order. Buying or selling instantly, including to the [Black Market](#black-market), has no setup fee. Buying materials by buy order adds it to each material's [cost](#material-cost).
 
 ## Specialty bonus
 
