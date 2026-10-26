@@ -16,7 +16,7 @@ An NPC market in Caerleon that buys gear from players to stock the loot of monst
 
 ## Daily bonus
 
-Extra [production bonus](#production-bonus) the game gives a few crafting categories each day: +0.10 or +0.20. The app takes up to two.
+Extra [production bonus](#production-bonus) the game gives a few crafting categories each day: +0.10 or +0.20. The app takes up to two, and adds them up if both are for the same category.
 
 ## Enchantment
 
@@ -66,6 +66,8 @@ The total crafting bonus where you craft, written as a fraction (0.18 is 18%). C
 - **Island:** a base of 0, with no specialty.
 - **Hideout:** the [power level](#power-level)'s general bonus, plus, for its [biome](#biome)'s 5 categories, the [map quality](#hideout-map-quality) bonus and the power level's specialist bonus. Then any daily bonus, and 0.59 with focus.
 
+The engine's version for cities, Rests and islands is `productionBonus()` in `packages/core/src/production-bonus.ts`. It returns each part on its own, for the UI to show. If you enter the production bonus or return rate the game shows for a location, that value is used instead, and the parts are kept so you can compare them.
+
 ## Quality
 
 How well a crafted item came out, from 1 to 5: Normal, Good, Outstanding, Excellent or Masterpiece. Crafting gives a random quality, and each quality has its own market price, so AODP prices are asked for per quality. Not the same as [hideout map quality](#hideout-map-quality).
@@ -91,7 +93,7 @@ RRR = B / (1 + B)
 | Level 9 hideout, quality 6 map, its specialty | 0.82 | 45.1% |
 | The same, with focus                          | 1.41 | 58.5% |
 
-The engine's version is `returnRate()` in `packages/core/src/return-rate.ts`.
+The engine's version is `returnRate()` in `packages/core/src/return-rate.ts`. Next to it, `bonusForReturnRate()` turns a return rate back into the production bonus that gives it.
 
 ## Setup fee
 

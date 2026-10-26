@@ -33,6 +33,8 @@ jobs:
       - run: pnpm check:unused
       - run: pnpm check:versions
       - run: pnpm exec turbo run lint typecheck build $AFFECTED
+      - name: Build every package, since the tests of all workspaces import them
+        run: pnpm exec turbo run build --filter="./packages/*"
       - run: pnpm coverage
       - name: Coverage summary
         if: ${{ !cancelled() && hashFiles('coverage/coverage-summary.json') != '' }}

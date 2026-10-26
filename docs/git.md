@@ -83,7 +83,7 @@ Every PR, and every push to `main`, runs `.github/workflows/ci.yml` on GitHub Ac
 | `E2E`    | Installs headless Chromium and runs the E2E tests                                                                                                 |
 | `Deploy` | Publishes the site to GitHub Pages. See [Deployment](#deployment)                                                                                 |
 
-- On a PR, lint, typecheck, build and E2E only run for the packages that changed compared to `main`, and the packages that depend on them. A change in `.github/workflows` or `.github/actions` runs them all. The other checks and the unit tests always run in full.
+- On a PR, lint, typecheck, build and E2E only run for the packages that changed compared to `main`, and the packages that depend on them. A change in `.github/workflows` or `.github/actions` runs them all. The other checks and the unit tests always run in full, so `Checks` builds every package before `pnpm coverage`: the tests import them from their `dist/` folders.
 - The run's **Summary** page shows the test report and a coverage table per package, next to each minimum.
 - When an E2E test fails, its traces, screenshots and videos are attached to the run as `playwright-results-<attempt>` for 14 days.
 - A new push to a PR cancels that PR's run if it's still going. On `main`, a run that has started always finishes. If more pushes arrive meanwhile, only the newest one waits to run next.
