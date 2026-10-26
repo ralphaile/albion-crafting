@@ -1,7 +1,7 @@
-import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { delay, http, HttpResponse } from "msw";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createAodpClient } from "./index.js";
+import { type AodpClient, type AodpEvent, createAodpClient } from "./index.js";
 import pricesNoData from "../test/fixtures/prices-no-data.json" with { type: "json" };
 import prices from "../test/fixtures/prices.json" with { type: "json" };
 import rateLimited from "../test/fixtures/rate-limited.json" with { type: "json" };
@@ -67,7 +67,7 @@ describe("getPrices", () => {
 
     await expect(
       client.getPrices(["T4_BAG", "T5_BAG"], ["Caerleon", "Lymhurst"], [1]),
-    ).resolves.toEqual(prices.body);
+    ).resolves.toEqual({ prices: prices.body, failures: [] });
 
     expect(requested).toEqual([urlOf(prices)]);
   });
@@ -94,7 +94,7 @@ describe("getPrices", () => {
 
     await expect(
       client.getPrices(["T8_BAG_INSIGHT@4"], ["Thetford"], [5]),
-    ).resolves.toEqual(pricesNoData.body);
+    ).resolves.toEqual({ prices: pricesNoData.body, failures: [] });
 
     expect(requested).toEqual([urlOf(pricesNoData)]);
   });
@@ -119,7 +119,7 @@ describe("getPrices", () => {
       ].map(priceAt),
     );
 
-    const result = await client.getPrices(
+    const { prices: result } = await client.getPrices(
       ["T4_BAG"],
       ["Arthurs Rest Smugglers Network", "Arthur's Rest", "caerleon"],
       [1],
@@ -197,40 +197,228 @@ describe("getPrices", () => {
     async ({ itemIds, locations, qualities }) => {
       await expect(
         client.getPrices(itemIds, locations, qualities),
-      ).resolves.toEqual([]);
+      ).resolves.toEqual({ prices: [], failures: [] });
     },
   );
+});
 
-  it("fails with the status when AODP refuses the request", async () => {
-    server.use(
-      http.get(
-        PRICES,
-        () =>
-          new HttpResponse(rateLimited.body, {
-            status: rateLimited.status,
-            headers: rateLimited.headers,
-          }),
-      ),
-    );
+describe("getPrices when AODP fails", () => {
+  const T4_BAG_URL = EMPTY_URL.replace("/.json", "/T4_BAG.json");
+  const ok = () => HttpResponse.json([priceAt("Caerleon")]);
+  const status = (code: number) => () =>
+    new HttpResponse(null, { status: code });
+  const throttled =
+    (headers: Record<string, string> = {}) =>
+    () =>
+      new HttpResponse(rateLimited.body, { status: 429, headers });
 
-    await expect(
-      client.getPrices(["T4_BAG", "T5_BAG"], ["Caerleon", "Lymhurst"], [1]),
-    ).rejects.toThrow(
-      `Fetching prices failed: HTTP 429 from ${urlOf(rateLimited)}`,
-    );
+  let aodp: AodpClient;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    aodp = createAodpClient();
   });
 
-  it("fails when a row doesn't have the expected fields", async () => {
-    serve([{ ...priceAt("Caerleon"), buy_price_max: "17999" }]);
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
 
-    const error: unknown = await client
-      .getPrices(["T4_BAG"], ["Caerleon"], [1])
-      .catch((reason: unknown) => reason);
-
-    expect(error).toHaveProperty(
-      "message",
-      `Fetching prices failed: unexpected fields in the response from ${EMPTY_URL.replace("/.json", "/T4_BAG.json")}`,
+  // Answers each request with the next response, and returns when each came, in ms
+  function serveInTurn(...responses: (() => Response)[]): number[] {
+    const startedAt = Date.now();
+    const times: number[] = [];
+    server.use(
+      http.get(PRICES, () => {
+        times.push(Date.now() - startedAt);
+        return (responses[times.length - 1] ?? status(418))();
+      }),
     );
-    expect(error).toHaveProperty("cause.issues.0.path", [0, "buy_price_max"]);
+    return times;
+  }
+
+  // So long that each one needs its own request
+  function soloId(name: string): string {
+    return `${name}_${"X".repeat(3000)}`;
+  }
+
+  async function getT4Bag(options = {}) {
+    const result = aodp.getPrices(["T4_BAG"], ["Caerleon"], [1], options);
+    await vi.runAllTimersAsync();
+    return result;
+  }
+
+  it("retries a server error after a random wait that doubles", async () => {
+    const times = serveInTurn(status(503), status(502), ok);
+
+    await expect(getT4Bag()).resolves.toEqual({
+      prices: [priceAt("Caerleon")],
+      failures: [],
+    });
+
+    expect(times).toEqual([0, 750, 2250]);
+  });
+
+  it("retries when the request doesn't reach AODP", async () => {
+    const times = serveInTurn(() => HttpResponse.error(), ok);
+
+    await expect(getT4Bag()).resolves.toEqual({
+      prices: [priceAt("Caerleon")],
+      failures: [],
+    });
+
+    expect(times).toEqual([0, 750]);
+  });
+
+  it("gives up on a batch after 3 attempts, keeps the other batches and reports both", async () => {
+    const failing = soloId("T4_FAILING");
+    const working = soloId("T4_WORKING");
+    let attempts = 0;
+    server.use(
+      http.get(PRICES, ({ request }) => {
+        if (request.url.includes(failing)) {
+          attempts += 1;
+          return new HttpResponse(null, { status: 503 });
+        }
+        return ok();
+      }),
+    );
+    const events: AodpEvent[] = [];
+
+    const result = aodp.getPrices([working, failing], ["Caerleon"], [1], {
+      onEvent: (event) => events.push(event),
+    });
+    await vi.runAllTimersAsync();
+
+    const error = new Error(
+      `Fetching prices failed after 3 attempts: HTTP 503 from ${EMPTY_URL.replace("/.json", `/${failing}.json`)}`,
+    );
+    await expect(result).resolves.toEqual({
+      prices: [priceAt("Caerleon")],
+      failures: [{ itemIds: [failing], error }],
+    });
+    expect(attempts).toBe(3);
+    expect(events).toEqual([
+      { type: "progress", done: 0, total: 2 },
+      { type: "progress", done: 1, total: 2 },
+      { type: "error", itemIds: [failing], error },
+      { type: "progress", done: 2, total: 2 },
+    ]);
+  });
+
+  it("doesn't retry other client errors", async () => {
+    const times = serveInTurn(status(404));
+
+    const { failures } = await getT4Bag();
+
+    expect(failures).toEqual([
+      {
+        itemIds: ["T4_BAG"],
+        error: new Error(`Fetching prices failed: HTTP 404 from ${T4_BAG_URL}`),
+      },
+    ]);
+    expect(times).toEqual([0]);
+  });
+
+  it.each([
+    {
+      case: "a row with a price as text",
+      body: () =>
+        HttpResponse.json([{ ...priceAt("Caerleon"), buy_price_max: "17999" }]),
+      path: [0, "buy_price_max"],
+    },
+    {
+      case: "a page that isn't JSON",
+      body: () => HttpResponse.text("<html>"),
+      path: [],
+    },
+  ])("doesn't retry $case", async ({ body, path }) => {
+    const times = serveInTurn(body);
+
+    const { failures } = await getT4Bag();
+
+    expect(failures[0]?.error).toHaveProperty(
+      "message",
+      `Fetching prices failed: unexpected response from ${T4_BAG_URL}`,
+    );
+    expect(failures[0]?.error).toHaveProperty("cause.issues.0.path", path);
+    expect(times).toEqual([0]);
+  });
+
+  it("waits until RateLimit-Reset after a 429, here the 5-minute limit's", async () => {
+    vi.setSystemTime(Date.UTC(2026, 9, 25, 12, 2, 0));
+    const reset = Date.UTC(2026, 9, 25, 12, 5, 0) / 1000;
+    const times = serveInTurn(
+      throttled({ ...rateLimited.headers, "ratelimit-reset": String(reset) }),
+      ok,
+    );
+    const events: AodpEvent[] = [];
+
+    await expect(
+      getT4Bag({ onEvent: (event: AodpEvent) => events.push(event) }),
+    ).resolves.toEqual({ prices: [priceAt("Caerleon")], failures: [] });
+
+    expect(times).toEqual([0, 181_000]);
+    expect(events).toContainEqual({ type: "waiting", seconds: 181 });
+  });
+
+  it("waits for the next minute after a 429 whose reset it can't read, as in a browser", async () => {
+    vi.setSystemTime(Date.UTC(2026, 9, 25, 12, 0, 20));
+    const times = serveInTurn(throttled(), ok);
+
+    await getT4Bag();
+
+    expect(times).toEqual([0, 41_000]);
+  });
+
+  it("holds back the client's other requests until the limit resets", async () => {
+    vi.setSystemTime(Date.UTC(2026, 9, 25, 12, 0, 20));
+    const startedAt = Date.now();
+    const requests: string[] = [];
+    server.use(
+      http.get(PRICES, ({ request }) => {
+        requests.push(
+          `${askedIds(request.url).join()} at ${String((Date.now() - startedAt) / 1000)} s`,
+        );
+        return requests.length === 1 ? throttled()() : HttpResponse.json([]);
+      }),
+    );
+
+    const first = aodp.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+    await vi.advanceTimersByTimeAsync(500);
+    const second = aodp.getPrices(["T5_BAG"], ["Caerleon"], [1]);
+    await vi.runAllTimersAsync();
+    await Promise.all([first, second]);
+
+    expect(requests).toEqual([
+      "T4_BAG at 0 s",
+      "T5_BAG at 41 s",
+      "T4_BAG at 41 s",
+    ]);
+  });
+
+  it("runs at most 3 requests at once", async () => {
+    let running = 0;
+    let most = 0;
+    server.use(
+      http.get(PRICES, async () => {
+        running += 1;
+        most = Math.max(most, running);
+        await delay(1000);
+        running -= 1;
+        return HttpResponse.json([]);
+      }),
+    );
+
+    const result = aodp.getPrices(
+      ["A", "B", "C", "D", "E"].map(soloId),
+      ["Caerleon"],
+      [1],
+    );
+    await vi.runAllTimersAsync();
+
+    await expect(result).resolves.toEqual({ prices: [], failures: [] });
+    expect(most).toBe(3);
   });
 });
