@@ -29,6 +29,85 @@ function requestLine(route: Route) {
   return `${route.request().method()} ${route.request().url()}`;
 }
 
+export interface FakePrice {
+  itemId: string;
+  marketId: string;
+  quality?: number;
+  sellMin?: number;
+  buyMax?: number;
+  ageMinutes?: number;
+}
+
+const NO_DATA_DATE = "0001-01-01T00:00:00";
+
+const AODP_PRICES =
+  /^https:\/\/[a-z]+\.albion-online-data\.com\/api\/v2\/stats\/prices\/([^/]+)\.json$/;
+
+function aodpDate(ageMinutes: number) {
+  return new Date(Date.now() - ageMinutes * 60_000).toISOString().slice(0, 19);
+}
+
+function aodpPriceRow(
+  itemId: string,
+  marketId: string,
+  quality: number,
+  price: FakePrice | undefined,
+) {
+  const date = aodpDate(price?.ageMinutes ?? 30);
+  const sell = price?.sellMin ?? 0;
+  const buy = price?.buyMax ?? 0;
+  const sellDate = sell === 0 ? NO_DATA_DATE : date;
+  const buyDate = buy === 0 ? NO_DATA_DATE : date;
+  return {
+    item_id: itemId,
+    city: marketId,
+    quality,
+    sell_price_min: sell,
+    sell_price_min_date: sellDate,
+    sell_price_max: sell,
+    sell_price_max_date: sellDate,
+    buy_price_min: buy,
+    buy_price_min_date: buyDate,
+    buy_price_max: buy,
+    buy_price_max_date: buyDate,
+  };
+}
+
+export async function answerPrices(page: Page, prices: readonly FakePrice[]) {
+  await page.route(
+    (url) => AODP_PRICES.test(url.origin + url.pathname),
+    async (route) => {
+      const url = new URL(route.request().url());
+      const [, path = ""] = AODP_PRICES.exec(url.origin + url.pathname) ?? [];
+      const marketIds = (url.searchParams.get("locations") ?? "").split(",");
+      const qualities = (url.searchParams.get("qualities") ?? "1")
+        .split(",")
+        .map(Number);
+      const rows = path
+        .split(",")
+        .map(decodeURIComponent)
+        .flatMap((itemId) =>
+          marketIds.flatMap((marketId) =>
+            qualities.map((quality) =>
+              aodpPriceRow(
+                itemId,
+                marketId,
+                quality,
+                prices.find(
+                  (price) =>
+                    price.itemId === itemId &&
+                    price.marketId === marketId &&
+                    (price.quality ?? 1) === quality,
+                ),
+              ),
+            ),
+          ),
+        );
+      await route.fulfill({ json: rows });
+    },
+  );
+}
+
 export async function respondWith(
   page: Page,
   ...recordedResponses: RecordedResponse[]
@@ -90,6 +169,7 @@ export const test = base.extend<{ problems: string[] }>({
       (route) =>
         route.fulfill({ contentType: "image/svg+xml", body: STAND_IN_ICON }),
     );
+    await answerPrices(page, []);
     await respondWith(page, ...defaultRecordedResponses);
 
     await runTest(page);
