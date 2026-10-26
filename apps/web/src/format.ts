@@ -1,4 +1,4 @@
-const MINUS_SIGN = "−";
+const MINUS_SIGN = "\u2212";
 
 function formatter(options: Intl.NumberFormatOptions) {
   const format = new Intl.NumberFormat("en-US", {
@@ -9,6 +9,8 @@ function formatter(options: Intl.NumberFormatOptions) {
 }
 
 export const formatSilver = formatter({ maximumFractionDigits: 0 });
+
+export const formatCount = formatter({ maximumFractionDigits: 0 });
 
 export const formatPercent = formatter({
   style: "percent",

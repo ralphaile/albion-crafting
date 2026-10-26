@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatAge,
+  formatCount,
   formatPercent,
   formatSilver,
   formatSilverPerFocus,
@@ -19,7 +20,13 @@ describe("formatSilver", () => {
   });
 
   it("uses a true minus sign, not a hyphen", () => {
-    expect(formatSilver(-5)).toBe("−5");
+    expect(formatSilver(-5)).toBe("\u22125");
+  });
+});
+
+describe("formatCount", () => {
+  it("shows a count with thousands separators", () => {
+    expect(formatCount(5950)).toBe("5,950");
   });
 });
 
