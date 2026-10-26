@@ -1,3 +1,6 @@
 {
-  "extends": "@aoc/typescript-config/library-build.json"
+  "extends": "@aoc/typescript-config/library-build.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"]
+  }
 }
