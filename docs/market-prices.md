@@ -13,7 +13,7 @@ Live prices come from the [Albion Online Data Project](https://www.albion-online
 
 ## Fetching prices
 
-`createAodpClient` from `@aoc/market-prices` fetches current prices from AODP. It only uses `fetch`, so it runs in the browser and in Node.
+`createAodpClient` from `@aoc/market-prices` fetches current prices and their history from AODP. It only uses `fetch`, so it runs in the browser and in Node.
 
 ```ts
 import { createAodpClient } from "@aoc/market-prices";
@@ -51,7 +51,7 @@ Each batch gets up to 3 attempts:
 
 - A 5xx response, or a request that never reaches AODP, is retried after a random wait of 0.5–1 s, then 1–2 s. The randomness keeps clients that failed together from retrying together.
 - A 429 pauses all of the client's requests until AODP's limit resets, plus 1 s in case the clocks differ. In Node, the reset time comes from the `RateLimit-Reset` header. Browsers can't read it, because AODP doesn't share it with other sites, so they wait until the next minute, the earliest time a limit can reset.
-- Any other HTTP error, or a response that isn't the expected prices, fails at once.
+- Any other HTTP error, or a response that isn't the expected prices or history, fails at once.
 
 ## Reading prices
 
@@ -71,6 +71,27 @@ const itemPrices = normalizePrices(prices, { staleAfterMinutes: 12 * 60 });
 - **Missing:** a price of `0`, or the date `0001-01-01T00:00:00`, becomes `{ status: "missing" }`, with no value to use by mistake.
 - **Dates:** AODP's dates have no timezone and are in UTC. `observedAt` is in milliseconds since 1970, like `Date.now()`.
 - **Age and status:** `ageMinutes` counts from `now`, the current time by default, and is never negative. A price is `stale` when it's older than `staleAfterMinutes`, 12 hours by default, and `fresh` otherwise. Both hold for that `now`, so call `normalizePrices` again to bring them up to date.
+
+## Price history
+
+`getHistory` takes the same arguments as `getPrices` and returns `{ history, failures }`. It goes through the same batches, request limits and retries.
+
+```ts
+import { summarizeHistory } from "@aoc/market-prices";
+
+const { history } = await aodp.getHistory(["T4_BAG"], ["Caerleon"], [1]);
+const [summary] = summarizeHistory(history);
+// { itemId: "T4_BAG", location: "Caerleon", quality: 1,
+//   averagePrice: 4441.15, averageDailyVolume: 155, newestDay: 1792281600000 }
+```
+
+- **`history`:** one series per item, market and quality, with a point a day (`time-scale=24`): `item_count`, how many sold that day, `avg_price`, their average price, and `timestamp`, the day in UTC.
+- **`summarizeHistory`** averages each series over its newest 7 days. `days` changes the 7.
+  - `averageDailyVolume`: how many sold in those days, divided by 7. A day without a point counts as none sold.
+  - `averagePrice`: the average sale price, weighted by how many sold each day, or `undefined` when none sold.
+  - `newestDay`: the newest day AODP has, in milliseconds since 1970, or `undefined` for an empty series.
+- **The newest 7 days, not the last 7:** AODP only learns a market's history when a player opens it in the game, so it can be days behind. On 2026-10-26, the newest day for T4_BAG in Caerleon was 10-18. Counting back from today would read that as nothing sold. Compare `newestDay` with today to tell how old the history is.
+- **Up to about 3 weeks:** AODP keeps about 30 days of history, counted back from today rather than from the newest day. A longer window can reach past what AODP still has, and those days would count as none sold.
 
 ## Caching prices
 
@@ -101,16 +122,19 @@ const itemPrices = normalizePrices(prices);
 ```
 
 - **What to fetch:** `pricesNeeded` from `@aoc/core` lists what a set of recipes makes (`products`) and what they use, alternative recipes included (`materials`). Fetch the materials where you buy and the products where you sell, never the whole catalog.
-- **Store:** `openPriceStore` saves prices in IndexedDB, in a database of their own called `aoc-price-cache`, with one row per server, item, market and quality. Clearing it can't touch anything else the app saves.
+- **Store:** `openPriceStore` saves prices and price history in IndexedDB, in a database of their own called `aoc-price-cache`. Its `prices` and `history` tables each have one row per server, item, market and quality. Clearing it can't touch anything else the app saves.
 - **No IndexedDB:** when the browser won't open it, as in some private windows, the store keeps prices in memory until the page closes. `store.persistent` is then `false`, so the app can say so.
 - **Reuse:** `getPrices` takes the same arguments as the client's. It reuses an item's prices when every market and quality asked for was fetched less than 15 minutes ago, and fetches the other items. `ttlMinutes` changes the 15 minutes. `force: true` fetches everything, for **Refresh prices**.
 - **Failures:** when an item's batch fails, its older saved prices are returned anyway, however old, and the batch is in `failures`. `normalizePrices` marks them stale once they're older than 12 hours.
 - **Result:** each price is AODP's row plus its `region` and `fetchedAt`, the time it was fetched. The result's `fetchedAt` is the oldest of them, for **Last refreshed**, or `undefined` when there are no prices.
-- **`store.clear()`** forgets every saved price, on every server.
+- **Nothing back:** when AODP sends nothing for an item, market and quality it was asked about, the cache saves an empty row instead: a price with no data, or a series with no points. It's reused like any other row, so an item nobody buys isn't asked for on every call. A failed batch gets no empty row.
+- **History:** `createHistoryCache` does the same for `getHistory`, reusing history for 6 hours, and returns `{ history, failures, fetchedAt }`. Ask for history only for the results on screen, such as the top 100, not for every recipe. Give both caches the same client, so they share its request limits.
+- **`store.clear()`** forgets every saved price and all history, on every server.
 
 ## AODP quirks
 
 - Asking for one Rest's market returns all 38 Black Zone markets, the Smuggler's Dens included. The client keeps only the markets it asked for.
 - An unknown market name, such as `Arthur's Rest`, comes back as a row with `city` `"0"` and no prices. The client drops it too.
-- Market names aren't case-sensitive: asking for `caerleon` returns `Caerleon`. The client compares them the same way.
+- Market names aren't case-sensitive: asking for `caerleon` returns `Caerleon`. The client and the cache compare them the same way.
+- History has no series for an item, market and quality where nothing sold: asking for `T8_BAG_INSIGHT@4` in Thetford returns an empty list, not a series of zeros.
 - A request that doesn't accept gzip gets throttled. Browsers and Node's `fetch` always accept it; with `curl`, pass `--compressed`.

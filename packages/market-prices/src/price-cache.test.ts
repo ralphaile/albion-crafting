@@ -4,9 +4,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   type AodpClient,
+  type AodpHistory,
   type AodpPrice,
   type CachedPrices,
+  createHistoryCache,
   createPriceCache,
+  normalizePrices,
   openPriceStore,
   type PriceStore,
   type Region,
@@ -35,33 +38,78 @@ function minutesLater(minutes: number) {
 
 // Answers each request with a row per item, market and quality, priced at 1000
 // times the request's number, so each result shows which request it came from.
+// Like AODP, it sends nothing for the items in `unanswered`.
 function fakeAodp(region: Region = "west") {
   const requests: string[][] = [];
   const failing = new Set<string>();
+  const unanswered = new Set<string>();
+
+  function answer<T>(
+    itemIds: readonly string[],
+    locations: readonly string[],
+    qualities: readonly number[],
+    rowOf: (
+      itemId: string,
+      location: string,
+      quality: number,
+      value: number,
+    ) => T,
+  ) {
+    requests.push([...itemIds]);
+    const value = 1000 * requests.length;
+    const failed = itemIds.filter((itemId) => failing.has(itemId));
+    return {
+      rows: itemIds
+        .filter((itemId) => !failing.has(itemId) && !unanswered.has(itemId))
+        .flatMap((itemId) =>
+          locations.flatMap((location) =>
+            qualities.map((quality) => rowOf(itemId, location, quality, value)),
+          ),
+        ),
+      failures:
+        failed.length === 0
+          ? []
+          : [{ itemIds: failed, error: new Error("HTTP 503") }],
+    };
+  }
+
   const client: AodpClient = {
     region,
     getPrices: vi.fn<AodpClient["getPrices"]>(
       (itemIds, locations, qualities) => {
-        requests.push([...itemIds]);
-        const value = 1000 * requests.length;
-        const failed = itemIds.filter((itemId) => failing.has(itemId));
-        return Promise.resolve({
-          prices: itemIds
-            .filter((itemId) => !failing.has(itemId))
-            .flatMap((itemId) =>
-              locations.flatMap((city) =>
-                qualities.map((quality) => row(itemId, city, quality, value)),
-              ),
-            ),
-          failures:
-            failed.length === 0
-              ? []
-              : [{ itemIds: failed, error: new Error("HTTP 503") }],
-        });
+        const { rows, failures } = answer(itemIds, locations, qualities, row);
+        return Promise.resolve({ prices: rows, failures });
+      },
+    ),
+    getHistory: vi.fn<AodpClient["getHistory"]>(
+      (itemIds, locations, qualities) => {
+        const { rows, failures } = answer(
+          itemIds,
+          locations,
+          qualities,
+          series,
+        );
+        return Promise.resolve({ history: rows, failures });
       },
     ),
   };
-  return { client, requests, failing };
+  return { client, requests, failing, unanswered };
+}
+
+function series(
+  itemId: string,
+  location: string,
+  quality: number,
+  value: number,
+): AodpHistory {
+  return {
+    location,
+    item_id: itemId,
+    quality,
+    data: [
+      { item_count: 10, avg_price: value, timestamp: "2026-10-25T00:00:00" },
+    ],
+  };
 }
 
 function row(
@@ -303,5 +351,109 @@ describe("getPrices", () => {
       [1],
       { onEvent },
     );
+  });
+});
+
+describe("getPrices for what AODP sends nothing for", () => {
+  it("saves it as missing, so it doesn't ask again", async () => {
+    const { client, requests, unanswered } = fakeAodp();
+    unanswered.add("T4_BAG");
+    const cache = createPriceCache({ client, store });
+
+    const result = await cache.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+    await cache.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+    expect(requests).toHaveLength(1);
+    expect(normalizePrices(result.prices)).toEqual([
+      {
+        itemId: "T4_BAG",
+        location: "Caerleon",
+        quality: 1,
+        sellMin: { status: "missing" },
+        buyMax: { status: "missing" },
+      },
+    ]);
+  });
+
+  it("takes a market AODP spells differently as answered", async () => {
+    const { client } = fakeAodp();
+    vi.mocked(client.getPrices).mockResolvedValueOnce({
+      prices: [row("T4_BAG", "Caerleon", 1, 1000)],
+      failures: [],
+    });
+
+    const result = await createPriceCache({ client, store }).getPrices(
+      ["T4_BAG"],
+      ["caerleon"],
+      [1],
+    );
+
+    expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 1000"]);
+  });
+});
+
+describe("getHistory", () => {
+  it("reuses history fetched less than 6 hours ago", async () => {
+    const { client, requests } = fakeAodp();
+    const cache = createHistoryCache({ client, store });
+    await cache.getHistory(["T4_BAG"], ["Caerleon"], [1]);
+
+    minutesLater(359.9);
+    const reused = await cache.getHistory(["T4_BAG"], ["Caerleon"], [1]);
+    minutesLater(360);
+    const refetched = await cache.getHistory(["T4_BAG"], ["Caerleon"], [1]);
+
+    expect(requests).toEqual([["T4_BAG"], ["T4_BAG"]]);
+    expect(reused.history).toEqual([
+      {
+        ...series("T4_BAG", "Caerleon", 1, 1000),
+        region: "west",
+        fetchedAt: START,
+      },
+    ]);
+    expect(refetched.fetchedAt).toBe(START + 360 * MINUTE_MS);
+  });
+
+  it("saves an empty history for an item nobody bought, so it doesn't ask again", async () => {
+    const { client, requests, unanswered } = fakeAodp();
+    unanswered.add("T8_BAG_INSIGHT@4");
+    const cache = createHistoryCache({ client, store });
+
+    await cache.getHistory(["T8_BAG_INSIGHT@4"], ["Thetford"], [5]);
+    const result = await cache.getHistory(
+      ["T8_BAG_INSIGHT@4"],
+      ["Thetford"],
+      [5],
+    );
+
+    expect(requests).toHaveLength(1);
+    expect(result.history).toEqual([
+      {
+        location: "Thetford",
+        item_id: "T8_BAG_INSIGHT@4",
+        quality: 5,
+        data: [],
+        region: "west",
+        fetchedAt: START,
+      },
+    ]);
+  });
+
+  it("doesn't take prices for history", async () => {
+    const { client, requests } = fakeAodp();
+    await createPriceCache({ client, store }).getPrices(
+      ["T4_BAG"],
+      ["Caerleon"],
+      [1],
+    );
+
+    await createHistoryCache({ client, store }).getHistory(
+      ["T4_BAG"],
+      ["Caerleon"],
+      [1],
+    );
+
+    expect(requests).toEqual([["T4_BAG"], ["T4_BAG"]]);
+    expect(client.getHistory).toHaveBeenCalledOnce();
   });
 });
