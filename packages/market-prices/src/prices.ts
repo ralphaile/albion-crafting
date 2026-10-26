@@ -1,0 +1,54 @@
+import type { AodpPrice } from "./aodp.js";
+
+export type Price =
+  | { status: "missing" }
+  | {
+      status: "fresh" | "stale";
+      value: number;
+      observedAt: number;
+      ageMinutes: number;
+    };
+
+export interface ItemPrices {
+  itemId: string;
+  location: string;
+  quality: number;
+  sellMin: Price;
+  buyMax: Price;
+}
+
+export interface NormalizeOptions {
+  now?: number;
+  staleAfterMinutes?: number;
+}
+
+const NO_DATA_DATE = "0001-01-01T00:00:00";
+const MINUTE_MS = 60_000;
+
+export function normalizePrices(
+  rows: readonly AodpPrice[],
+  { now = Date.now(), staleAfterMinutes = 12 * 60 }: NormalizeOptions = {},
+): ItemPrices[] {
+  function price(value: number, date: string): Price {
+    if (value === 0 || date === NO_DATA_DATE) {
+      return { status: "missing" };
+    }
+    // AODP's dates are in UTC but don't say so, and a date without a zone reads as local time.
+    const observedAt = Date.parse(date.endsWith("Z") ? date : `${date}Z`);
+    const ageMs = Math.max(0, now - observedAt);
+    return {
+      status: ageMs > staleAfterMinutes * MINUTE_MS ? "stale" : "fresh",
+      value,
+      observedAt,
+      ageMinutes: Math.floor(ageMs / MINUTE_MS),
+    };
+  }
+
+  return rows.map((row) => ({
+    itemId: row.item_id,
+    location: row.city,
+    quality: row.quality,
+    sellMin: price(row.sell_price_min, row.sell_price_min_date),
+    buyMax: price(row.buy_price_max, row.buy_price_max_date),
+  }));
+}
