@@ -63,11 +63,74 @@ const pricesSchema = z.array(
 
 export type AodpPrice = z.output<typeof pricesSchema>[number];
 
+interface Endpoint<T> {
+  path: string;
+  extraQuery: string;
+  label: string;
+  schema: z.ZodType<T[]>;
+  locationOf: (row: T) => string;
+}
+
+const pricesEndpoint: Endpoint<AodpPrice> = {
+  path: "prices",
+  extraQuery: "",
+  label: "prices",
+  schema: pricesSchema,
+  locationOf: (row) => row.city,
+};
+
 export function createAodpClient({
   region = "west",
 }: AodpClientOptions = {}): AodpClient {
-  const prefix = `https://${region}.albion-online-data.com/api/v2/stats/prices/`;
+  const host = `https://${region}.albion-online-data.com/api/v2/stats/`;
   const limiter = createLimiter();
+
+  async function getRows<T>(
+    endpoint: Endpoint<T>,
+    itemIds: readonly string[],
+    locations: readonly string[],
+    qualities: readonly number[],
+    onEvent: (event: AodpEvent) => void,
+  ): Promise<{ rows: T[]; failures: BatchFailure[] }> {
+    if (
+      itemIds.length === 0 ||
+      locations.length === 0 ||
+      qualities.length === 0
+    ) {
+      return { rows: [], failures: [] };
+    }
+    const query = `locations=${locations
+      .map((location) => encodeURIComponent(location))
+      .join(",")}&qualities=${qualities.join(",")}${endpoint.extraQuery}`;
+    const asked = new Set(locations.map((location) => location.toLowerCase()));
+
+    const batches = splitIntoBatches(
+      `${host}${endpoint.path}/`,
+      itemIds,
+      `.json?${query}`,
+    );
+    const failures: BatchFailure[] = [];
+    let done = 0;
+    onEvent({ type: "progress", done, total: batches.length });
+    const results = await Promise.all(
+      batches.map(async (batch) => {
+        const result = await fetchRows(batch.url, endpoint, limiter, onEvent);
+        done += 1;
+        if (result instanceof Error) {
+          failures.push({ itemIds: batch.itemIds, error: result });
+          onEvent({ type: "error", itemIds: batch.itemIds, error: result });
+        }
+        onEvent({ type: "progress", done, total: batches.length });
+        return result instanceof Error ? [] : result;
+      }),
+    );
+    return {
+      rows: results
+        .flat()
+        .filter((row) => asked.has(endpoint.locationOf(row).toLowerCase())),
+      failures,
+    };
+  }
 
   return {
     region,
@@ -77,42 +140,14 @@ export function createAodpClient({
       qualities,
       { onEvent = () => undefined } = {},
     ) {
-      if (
-        itemIds.length === 0 ||
-        locations.length === 0 ||
-        qualities.length === 0
-      ) {
-        return { prices: [], failures: [] };
-      }
-      const query = `locations=${locations
-        .map((location) => encodeURIComponent(location))
-        .join(",")}&qualities=${qualities.join(",")}`;
-      const asked = new Set(
-        locations.map((location) => location.toLowerCase()),
+      const { rows, failures } = await getRows(
+        pricesEndpoint,
+        itemIds,
+        locations,
+        qualities,
+        onEvent,
       );
-
-      const batches = splitIntoBatches(prefix, itemIds, `.json?${query}`);
-      const failures: BatchFailure[] = [];
-      let done = 0;
-      onEvent({ type: "progress", done, total: batches.length });
-      const results = await Promise.all(
-        batches.map(async (batch) => {
-          const result = await fetchPrices(batch.url, limiter, onEvent);
-          done += 1;
-          if (result instanceof Error) {
-            failures.push({ itemIds: batch.itemIds, error: result });
-            onEvent({ type: "error", itemIds: batch.itemIds, error: result });
-          }
-          onEvent({ type: "progress", done, total: batches.length });
-          return result instanceof Error ? [] : result;
-        }),
-      );
-      return {
-        prices: results
-          .flat()
-          .filter(({ city }) => asked.has(city.toLowerCase())),
-        failures,
-      };
+      return { prices: rows, failures };
     },
   };
 }
@@ -156,18 +191,23 @@ function encodeItemId(id: string): string {
   return encodeURIComponent(id).replaceAll("%40", "@");
 }
 
-async function fetchPrices(
+async function fetchRows<T>(
   url: string,
+  endpoint: Endpoint<T>,
   limiter: Limiter,
   onEvent: (event: AodpEvent) => void,
-): Promise<AodpPrice[] | Error> {
+): Promise<T[] | Error> {
   const onWait = (ms: number) => {
     onEvent({ type: "waiting", seconds: Math.ceil(ms / 1000) });
   };
   for (let attempt = 1; ; attempt += 1) {
     const response = await limiter.run(() => fetch(url).catch(toError), onWait);
     if (!(response instanceof Error) && response.ok) {
-      return parsePrices(await response.json().catch(() => undefined), url);
+      return parseRows(
+        await response.json().catch(() => undefined),
+        url,
+        endpoint,
+      );
     }
     const problem =
       response instanceof Error
@@ -175,11 +215,13 @@ async function fetchPrices(
         : `HTTP ${String(response.status)}`;
     const cause = response instanceof Error ? response : undefined;
     if (!isTemporary(response)) {
-      return new Error(`Fetching prices failed: ${problem} from ${url}`);
+      return new Error(
+        `Fetching ${endpoint.label} failed: ${problem} from ${url}`,
+      );
     }
     if (attempt === MAX_ATTEMPTS) {
       return new Error(
-        `Fetching prices failed after ${String(MAX_ATTEMPTS)} attempts: ${problem} from ${url}`,
+        `Fetching ${endpoint.label} failed after ${String(MAX_ATTEMPTS)} attempts: ${problem} from ${url}`,
         { cause },
       );
     }
@@ -190,13 +232,18 @@ async function fetchPrices(
   }
 }
 
-function parsePrices(body: unknown, url: string): AodpPrice[] | Error {
-  const result = pricesSchema.safeParse(body);
+function parseRows<T>(
+  body: unknown,
+  url: string,
+  endpoint: Endpoint<T>,
+): T[] | Error {
+  const result = endpoint.schema.safeParse(body);
   return result.success
     ? result.data
-    : new Error(`Fetching prices failed: unexpected response from ${url}`, {
-        cause: result.error,
-      });
+    : new Error(
+        `Fetching ${endpoint.label} failed: unexpected response from ${url}`,
+        { cause: result.error },
+      );
 }
 
 function isTemporary(response: Response | Error): boolean {
