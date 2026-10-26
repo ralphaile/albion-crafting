@@ -6,10 +6,10 @@ export function defaultSortKey(focus: boolean): SortKey {
   return focus ? "silverPerFocus" : "profit";
 }
 
-export function rank(
-  results: readonly Evaluation[],
+export function rank<T extends Evaluation>(
+  results: readonly T[],
   sortKey: SortKey,
-): Evaluation[] {
+): T[] {
   return results
     .map((result) => {
       const value = result.status === "complete" ? result[sortKey] : undefined;

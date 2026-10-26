@@ -93,6 +93,18 @@ describe("rank", () => {
     ).toEqual(["X", "Y"]);
   });
 
+  it("returns the results it was given, with anything added to them", () => {
+    const named = [
+      { ...complete("B", 1000), name: "Broadsword" },
+      { ...complete("C", 5000), name: "Claymore" },
+    ];
+
+    expect(rank(named, "profit").map(({ name }) => name)).toEqual([
+      "Claymore",
+      "Broadsword",
+    ]);
+  });
+
   it("leaves the results it was given as they were", () => {
     const given = [complete("B", 1000), complete("C", 5000)];
 
