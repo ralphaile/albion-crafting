@@ -53,6 +53,25 @@ Each batch gets up to 3 attempts:
 - A 429 pauses all of the client's requests until AODP's limit resets, plus 1 s in case the clocks differ. In Node, the reset time comes from the `RateLimit-Reset` header. Browsers can't read it, because AODP doesn't share it with other sites, so they wait until the next minute, the earliest time a limit can reset.
 - Any other HTTP error, or a response that isn't the expected prices, fails at once.
 
+## Reading prices
+
+`normalizePrices` turns the rows from `getPrices` into the prices the app uses, as [ADR-003](adr/003-price-data-strategy.md) describes:
+
+```ts
+import { normalizePrices } from "@aoc/market-prices";
+
+const itemPrices = normalizePrices(prices, { staleAfterMinutes: 12 * 60 });
+// [{ itemId: "T4_BAG", location: "Caerleon", quality: 1,
+//    sellMin: { status: "fresh", value: 40000, observedAt: 1792887300000, ageMinutes: 90 },
+//    buyMax: { status: "missing" } }]
+```
+
+- **`sellMin`** is the cheapest sell order: what you pay to buy instantly, and the reference for a sell order.
+- **`buyMax`** is the best buy order: what you get for selling instantly, the reference for a buy order, and the Black Market price.
+- **Missing:** a price of `0`, or the date `0001-01-01T00:00:00`, becomes `{ status: "missing" }`, with no value to use by mistake.
+- **Dates:** AODP's dates have no timezone and are in UTC. `observedAt` is in milliseconds since 1970, like `Date.now()`.
+- **Age and status:** `ageMinutes` counts from `now`, the current time by default, and is never negative. A price is `stale` when it's older than `staleAfterMinutes`, 12 hours by default, and `fresh` otherwise. Both hold for that `now`, so call `normalizePrices` again to bring them up to date.
+
 ## AODP quirks
 
 - Asking for one Rest's market returns all 38 Black Zone markets, the Smuggler's Dens included. The client keeps only the markets it asked for.
