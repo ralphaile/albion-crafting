@@ -95,6 +95,12 @@ The `market-prices` tests run in Tokyo time, set in its `vitest.config.ts`. AODP
 
 `packages/market-prices/test/fixtures` holds AODP responses: prices, history, a response with no data (`0` and `0001-01-01T00:00:00`) and a 429. Each file is a whole response: `request`, `source`, `status`, `headers` and `body`. To add one, request it once by hand with compression on (Node's `fetch` does this; plain `curl` doesn't, and AODP limits uncompressed requests to one every 5 minutes), save the body unchanged and keep only the `content-type` header. The E2E tests answer requests from the same files.
 
+## IndexedDB
+
+Node has no IndexedDB, so tests that save prices import `fake-indexeddb/auto`, which provides one in memory. Each test deletes the database afterwards with `new Dexie("aoc-price-cache").delete()`, so the next one starts empty. Example: `packages/market-prices/src/price-cache.test.ts`.
+
+To move the clock in these tests, fake only `Date`, with `vi.useFakeTimers({ toFake: ["Date"] })` and `vi.setSystemTime(...)`. fake-indexeddb runs its work with `setImmediate`, so faking every timer stops it.
+
 ## E2E tests
 
 `pnpm e2e` builds the web app, starts it with `vite preview` at `http://localhost:4173/albion-crafting/` and runs every `apps/web/e2e/*.spec.ts` file in headless Chromium. Every UI story adds or updates the scenarios for its journey.
