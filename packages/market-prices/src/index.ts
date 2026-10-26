@@ -11,6 +11,13 @@ export {
 } from "./aodp.js";
 export { type Market, markets } from "./markets.js";
 export {
+  type CachedPrices,
+  createPriceCache,
+  type GetCachedPricesOptions,
+  type PriceCache,
+  type PriceCacheOptions,
+} from "./price-cache.js";
+export {
   openPriceStore,
   type PriceKey,
   type PriceStore,
