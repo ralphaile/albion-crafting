@@ -1,146 +1,11 @@
-import {
-  type AodpClient,
-  type BatchFailure,
-  type FetchOptions,
-  NO_DATA_DATE,
-  type Region,
-} from "./aodp.js";
-import type {
-  CacheStore,
-  RowKey,
-  RowStore,
-  StoredHistory,
-  StoredPrice,
-} from "./cache-store.js";
-
-export interface CacheOptions {
-  client: AodpClient;
-  store: CacheStore;
-  ttlMinutes?: number;
-}
+import type { BatchFailure, FetchOptions, Region } from "./aodp.js";
+import type { RowKey, RowStore } from "./cache-store.js";
 
 export interface CachedFetchOptions extends FetchOptions {
   force?: boolean;
 }
 
-export interface CachedPrices {
-  prices: StoredPrice[];
-  failures: BatchFailure[];
-  fetchedAt: number | undefined;
-}
-
-export interface PriceCache {
-  getPrices(
-    itemIds: readonly string[],
-    marketIds: readonly string[],
-    qualities: readonly number[],
-    options?: CachedFetchOptions,
-  ): Promise<CachedPrices>;
-}
-
-export interface CachedHistory {
-  history: StoredHistory[];
-  failures: BatchFailure[];
-  fetchedAt: number | undefined;
-}
-
-export interface HistoryCache {
-  getHistory(
-    itemIds: readonly string[],
-    marketIds: readonly string[],
-    qualities: readonly number[],
-    options?: CachedFetchOptions,
-  ): Promise<CachedHistory>;
-}
-
 const MINUTE_MS = 60_000;
-
-export function createPriceCache({
-  client,
-  store,
-  ttlMinutes = 15,
-}: CacheOptions): PriceCache {
-  const getRows = cachedRows({
-    region: client.region,
-    rows: store.prices,
-    ttlMinutes,
-    fetch: async (itemIds, marketIds, qualities, options) => {
-      const { prices, failures } = await client.getPrices(
-        itemIds,
-        marketIds,
-        qualities,
-        options,
-      );
-      return { rows: prices, failures };
-    },
-    marketIdOf: (row) => row.city,
-    empty: (itemId, marketId, quality) => ({
-      item_id: itemId,
-      city: marketId,
-      quality,
-      sell_price_min: 0,
-      sell_price_min_date: NO_DATA_DATE,
-      sell_price_max: 0,
-      sell_price_max_date: NO_DATA_DATE,
-      buy_price_min: 0,
-      buy_price_min_date: NO_DATA_DATE,
-      buy_price_max: 0,
-      buy_price_max_date: NO_DATA_DATE,
-    }),
-  });
-
-  return {
-    async getPrices(itemIds, marketIds, qualities, options) {
-      const { rows, failures, fetchedAt } = await getRows(
-        itemIds,
-        marketIds,
-        qualities,
-        options,
-      );
-      return { prices: rows, failures, fetchedAt };
-    },
-  };
-}
-
-export function createHistoryCache({
-  client,
-  store,
-  ttlMinutes = 6 * 60,
-}: CacheOptions): HistoryCache {
-  const getRows = cachedRows({
-    region: client.region,
-    rows: store.history,
-    ttlMinutes,
-    fetch: async (itemIds, marketIds, qualities, options) => {
-      const { history, failures } = await client.getHistory(
-        itemIds,
-        marketIds,
-        qualities,
-        options,
-      );
-      return { rows: history, failures };
-    },
-    marketIdOf: (row) => row.location,
-    empty: (itemId, marketId, quality) => ({
-      location: marketId,
-      item_id: itemId,
-      quality,
-      data: [],
-    }),
-  });
-
-  return {
-    async getHistory(itemIds, marketIds, qualities, options) {
-      const { rows, failures, fetchedAt } = await getRows(
-        itemIds,
-        marketIds,
-        qualities,
-        options,
-      );
-      return { history: rows, failures, fetchedAt };
-    },
-  };
-}
 
 interface Stamp {
   region: Region;
@@ -166,7 +31,7 @@ function comboId(itemId: string, marketId: string, quality: number): string {
   return JSON.stringify([itemId, marketId.toLowerCase(), quality]);
 }
 
-function cachedRows<T extends { item_id: string; quality: number }>({
+export function cachedRows<T extends { item_id: string; quality: number }>({
   region,
   rows: store,
   ttlMinutes,

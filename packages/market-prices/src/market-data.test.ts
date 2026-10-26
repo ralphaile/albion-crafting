@@ -135,21 +135,6 @@ describe("openMarketData", () => {
     expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 1000"]);
   });
 
-  it("keeps prices in memory when the browser can't save them", async () => {
-    // Firefox's private windows used to refuse IndexedDB this way.
-    vi.spyOn(Dexie.prototype, "open").mockRejectedValueOnce(
-      new DOMException("IndexedDB is not available", "InvalidStateError"),
-    );
-    const { requests } = fakeAodp();
-    const marketData = await openMarketData();
-
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-
-    expect(marketData.persistent).toBe(false);
-    expect(requests).toHaveLength(1);
-  });
-
   it("still has the prices saved before it kept history", async () => {
     const { requests } = fakeAodp();
     const old = new Dexie("aoc-price-cache");
@@ -192,6 +177,30 @@ describe("openMarketData", () => {
 
     expect(mostInFlight).toBe(3);
   });
+});
+
+// Firefox's private windows used to refuse IndexedDB this way.
+function refuseIndexedDb() {
+  vi.spyOn(Dexie.prototype, "open").mockRejectedValue(
+    new DOMException("IndexedDB is not available", "InvalidStateError"),
+  );
+}
+
+describe.each([
+  { storage: "IndexedDB", persistent: true },
+  { storage: "memory", persistent: false },
+])("openMarketData in $storage", ({ persistent }) => {
+  beforeEach(() => {
+    if (!persistent) {
+      refuseIndexedDb();
+    }
+  });
+
+  it("says whether its prices survive a reload", async () => {
+    const marketData = await openMarketData();
+
+    expect(marketData.persistent).toBe(persistent);
+  });
 
   it("forgets prices and history when cleared", async () => {
     const { requests } = fakeAodp();
@@ -210,304 +219,313 @@ describe("openMarketData", () => {
       "west history T4_BAG",
     ]);
   });
-});
 
-describe("getPrices", () => {
-  it("fetches prices it doesn't have, says how old each one is, and notes when it fetched them", async () => {
-    fakeAodp();
-    const marketData = await openMarketData();
+  describe("getPrices", () => {
+    it("fetches prices it doesn't have, says how old each one is, and notes when it fetched them", async () => {
+      fakeAodp();
+      const marketData = await openMarketData();
 
-    const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1, 2]);
-
-    expect(result).toEqual({
-      prices: [1, 2].map((quality) => ({
-        itemId: "T4_BAG",
-        marketId: "Caerleon",
-        quality,
-        sellMin: {
-          status: "fresh",
-          value: 1000,
-          observedAt: SEEN,
-          ageMinutes: 15,
-        },
-        buyMax: { status: "missing" },
-      })),
-      failures: [],
-      fetchedAt: START,
-    });
-  });
-
-  it("reuses prices fetched less than 15 minutes ago, which keep ageing", async () => {
-    const { requests } = fakeAodp();
-    const marketData = await openMarketData();
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-
-    minutesLater(14.9);
-    const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-
-    expect(requests).toHaveLength(1);
-    expect(result.prices[0]?.sellMin).toMatchObject({
-      value: 1000,
-      ageMinutes: 29,
-    });
-    expect(result.fetchedAt).toBe(START);
-  });
-
-  it("fetches prices again once they're 15 minutes old", async () => {
-    const { requests } = fakeAodp();
-    const marketData = await openMarketData();
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-
-    minutesLater(15);
-    const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-
-    expect(requests).toEqual(["west prices T4_BAG", "west prices T4_BAG"]);
-    expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 2000"]);
-    expect(result.fetchedAt).toBe(START + 15 * MINUTE_MS);
-  });
-
-  it("fetches only the items it has no recent prices for", async () => {
-    const { requests } = fakeAodp();
-    const marketData = await openMarketData();
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-
-    minutesLater(5);
-    const result = await marketData.getPrices(
-      ["T4_BAG", "T5_BAG"],
-      ["Caerleon"],
-      [1],
-    );
-
-    expect(requests).toEqual(["west prices T4_BAG", "west prices T5_BAG"]);
-    expect(summary(result)).toEqual([
-      "T4_BAG Caerleon q1: 1000",
-      "T5_BAG Caerleon q1: 2000",
-    ]);
-    expect(result.fetchedAt).toBe(START);
-  });
-
-  it("fetches an item again when a market or quality asked for is missing", async () => {
-    const { requests } = fakeAodp();
-    const marketData = await openMarketData();
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-
-    const result = await marketData.getPrices(
-      ["T4_BAG"],
-      ["Caerleon", "Lymhurst"],
-      [1],
-    );
-
-    expect(requests).toEqual(["west prices T4_BAG", "west prices T4_BAG"]);
-    expect(summary(result)).toEqual([
-      "T4_BAG Caerleon q1: 2000",
-      "T4_BAG Lymhurst q1: 2000",
-    ]);
-  });
-
-  it("counts an item, market or quality asked for twice once", async () => {
-    const { requests } = fakeAodp();
-    const marketData = await openMarketData();
-    const ask = () =>
-      marketData.getPrices(
-        ["T4_BAG", "T4_BAG"],
-        ["Caerleon", "Caerleon"],
-        [1, 1],
+      const result = await marketData.getPrices(
+        ["T4_BAG"],
+        ["Caerleon"],
+        [1, 2],
       );
 
-    await ask();
-    const result = await ask();
-
-    expect(requests).toEqual(["west prices T4_BAG"]);
-    expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 1000"]);
-  });
-
-  it("fetches everything again when forced to, as Refresh prices does", async () => {
-    const { requests } = fakeAodp();
-    const marketData = await openMarketData();
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-
-    minutesLater(1);
-    const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1], {
-      force: true,
+      expect(result).toEqual({
+        prices: [1, 2].map((quality) => ({
+          itemId: "T4_BAG",
+          marketId: "Caerleon",
+          quality,
+          sellMin: {
+            status: "fresh",
+            value: 1000,
+            observedAt: SEEN,
+            ageMinutes: 15,
+          },
+          buyMax: { status: "missing" },
+        })),
+        failures: [],
+        fetchedAt: START,
+      });
     });
 
-    expect(requests).toEqual(["west prices T4_BAG", "west prices T4_BAG"]);
-    expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 2000"]);
-    expect(result.fetchedAt).toBe(START + MINUTE_MS);
-  });
+    it("reuses prices fetched less than 15 minutes ago, which keep ageing", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
 
-  it("keeps the older prices of items that fail to fetch, and reports the failure", async () => {
-    const { failing } = fakeAodp();
-    const marketData = await openMarketData();
-    await marketData.getPrices(["T4_BAG", "T5_BAG"], ["Caerleon"], [1]);
+      minutesLater(14.9);
+      const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
 
-    minutesLater(20);
-    failing.add("T4_BAG");
-    const result = await marketData.getPrices(
-      ["T4_BAG", "T5_BAG"],
-      ["Caerleon"],
-      [1],
-    );
+      expect(requests).toHaveLength(1);
+      expect(result.prices[0]?.sellMin).toMatchObject({
+        value: 1000,
+        ageMinutes: 29,
+      });
+      expect(result.fetchedAt).toBe(START);
+    });
 
-    expect(summary(result)).toEqual([
-      "T4_BAG Caerleon q1: 1000",
-      "T5_BAG Caerleon q1: 1000",
-    ]);
-    expect(result.failures).toMatchObject([
-      {
-        itemIds: ["T4_BAG", "T5_BAG"],
-        error: { message: expect.stringContaining("HTTP 404") as string },
-      },
-    ]);
-    expect(result.fetchedAt).toBe(START);
-  });
+    it("fetches prices again once they're 15 minutes old", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
 
-  it("has no fetch time when it has no prices", async () => {
-    const { failing } = fakeAodp();
-    failing.add("T4_BAG");
-    const marketData = await openMarketData();
+      minutesLater(15);
+      const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
 
-    const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+      expect(requests).toEqual(["west prices T4_BAG", "west prices T4_BAG"]);
+      expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 2000"]);
+      expect(result.fetchedAt).toBe(START + 15 * MINUTE_MS);
+    });
 
-    expect(result.prices).toEqual([]);
-    expect(result.fetchedAt).toBeUndefined();
-  });
+    it("fetches only the items it has no recent prices for", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
 
-  it("keeps each server's prices apart", async () => {
-    const { requests } = fakeAodp();
-    const west = await openMarketData({ region: "west" });
-    await west.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+      minutesLater(5);
+      const result = await marketData.getPrices(
+        ["T4_BAG", "T5_BAG"],
+        ["Caerleon"],
+        [1],
+      );
 
-    const europe = await openMarketData({ region: "europe" });
-    const result = await europe.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+      expect(requests).toEqual(["west prices T4_BAG", "west prices T5_BAG"]);
+      expect(summary(result)).toEqual([
+        "T4_BAG Caerleon q1: 1000",
+        "T5_BAG Caerleon q1: 2000",
+      ]);
+      expect(result.fetchedAt).toBe(START);
+    });
 
-    expect(requests).toEqual(["west prices T4_BAG", "europe prices T4_BAG"]);
-    expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 2000"]);
-  });
+    it("fetches an item again when a market or quality asked for is missing", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
 
-  it("says how the fetch is going", async () => {
-    fakeAodp();
-    const marketData = await openMarketData();
-    const onEvent = vi.fn();
+      const result = await marketData.getPrices(
+        ["T4_BAG"],
+        ["Caerleon", "Lymhurst"],
+        [1],
+      );
 
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1], { onEvent });
+      expect(requests).toEqual(["west prices T4_BAG", "west prices T4_BAG"]);
+      expect(summary(result)).toEqual([
+        "T4_BAG Caerleon q1: 2000",
+        "T4_BAG Lymhurst q1: 2000",
+      ]);
+    });
 
-    expect(onEvent.mock.calls).toEqual([
-      [{ type: "progress", done: 0, total: 1 }],
-      [{ type: "progress", done: 1, total: 1 }],
-    ]);
-  });
+    it("counts an item, market or quality asked for twice once", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      const ask = () =>
+        marketData.getPrices(
+          ["T4_BAG", "T4_BAG"],
+          ["Caerleon", "Caerleon"],
+          [1, 1],
+        );
 
-  it("saves what AODP sends nothing for as missing, so it doesn't ask again", async () => {
-    const { requests, unanswered } = fakeAodp();
-    unanswered.add("T4_BAG");
-    const marketData = await openMarketData();
+      await ask();
+      const result = await ask();
 
-    const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+      expect(requests).toEqual(["west prices T4_BAG"]);
+      expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 1000"]);
+    });
 
-    expect(requests).toHaveLength(1);
-    expect(result.prices).toEqual([
-      {
-        itemId: "T4_BAG",
-        marketId: "Caerleon",
-        quality: 1,
-        sellMin: { status: "missing" },
-        buyMax: { status: "missing" },
-      },
-    ]);
-  });
+    it("fetches everything again when forced to, as Refresh prices does", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
 
-  it("takes a market AODP spells differently as answered", async () => {
-    server.use(
-      http.get(PRICES, () =>
-        HttpResponse.json([priceRow("T4_BAG", "Caerleon", 1, 1000)]),
-      ),
-    );
-    const marketData = await openMarketData();
+      minutesLater(1);
+      const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1], {
+        force: true,
+      });
 
-    const result = await marketData.getPrices(["T4_BAG"], ["caerleon"], [1]);
+      expect(requests).toEqual(["west prices T4_BAG", "west prices T4_BAG"]);
+      expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 2000"]);
+      expect(result.fetchedAt).toBe(START + MINUTE_MS);
+    });
 
-    expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 1000"]);
-  });
-});
+    it("keeps the older prices of items that fail to fetch, and reports the failure", async () => {
+      const { failing } = fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getPrices(["T4_BAG", "T5_BAG"], ["Caerleon"], [1]);
 
-describe("getHistory", () => {
-  it("sums up the newest 7 days, and reuses history fetched less than 6 hours ago", async () => {
-    const { requests } = fakeAodp();
-    const marketData = await openMarketData();
-    await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1]);
+      minutesLater(20);
+      failing.add("T4_BAG");
+      const result = await marketData.getPrices(
+        ["T4_BAG", "T5_BAG"],
+        ["Caerleon"],
+        [1],
+      );
 
-    minutesLater(359.9);
-    const reused = await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1]);
-    minutesLater(360);
-    const refetched = await marketData.getHistory(
-      ["T4_BAG"],
-      ["Caerleon"],
-      [1],
-    );
+      expect(summary(result)).toEqual([
+        "T4_BAG Caerleon q1: 1000",
+        "T5_BAG Caerleon q1: 1000",
+      ]);
+      expect(result.failures).toMatchObject([
+        {
+          itemIds: ["T4_BAG", "T5_BAG"],
+          error: { message: expect.stringContaining("HTTP 404") as string },
+        },
+      ]);
+      expect(result.fetchedAt).toBe(START);
+    });
 
-    expect(requests).toEqual(["west history T4_BAG", "west history T4_BAG"]);
-    expect(reused).toEqual({
-      history: [
+    it("has no fetch time when it has no prices", async () => {
+      const { failing } = fakeAodp();
+      failing.add("T4_BAG");
+      const marketData = await openMarketData();
+
+      const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+      expect(result.prices).toEqual([]);
+      expect(result.fetchedAt).toBeUndefined();
+    });
+
+    it("keeps each server's prices apart", async () => {
+      const { requests } = fakeAodp();
+      const west = await openMarketData({ region: "west" });
+      await west.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+      const europe = await openMarketData({ region: "europe" });
+      const result = await europe.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+      expect(requests).toEqual(["west prices T4_BAG", "europe prices T4_BAG"]);
+      expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 2000"]);
+    });
+
+    it("says how the fetch is going", async () => {
+      fakeAodp();
+      const marketData = await openMarketData();
+      const onEvent = vi.fn();
+
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1], { onEvent });
+
+      expect(onEvent.mock.calls).toEqual([
+        [{ type: "progress", done: 0, total: 1 }],
+        [{ type: "progress", done: 1, total: 1 }],
+      ]);
+    });
+
+    it("saves what AODP sends nothing for as missing, so it doesn't ask again", async () => {
+      const { requests, unanswered } = fakeAodp();
+      unanswered.add("T4_BAG");
+      const marketData = await openMarketData();
+
+      const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+      expect(requests).toHaveLength(1);
+      expect(result.prices).toEqual([
         {
           itemId: "T4_BAG",
           marketId: "Caerleon",
           quality: 1,
-          averagePrice: 1000,
-          averageDailyVolume: 10,
-          newestDay: Date.UTC(2026, 9, 25),
+          sellMin: { status: "missing" },
+          buyMax: { status: "missing" },
         },
-      ],
-      failures: [],
-      fetchedAt: START,
-    });
-    expect(refetched.fetchedAt).toBe(START + 360 * MINUTE_MS);
-  });
-
-  it("averages over as many days as it's told to", async () => {
-    fakeAodp();
-    const marketData = await openMarketData();
-
-    const result = await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1], {
-      days: 1,
+      ]);
     });
 
-    expect(result.history[0]?.averageDailyVolume).toBe(70);
+    it("takes a market AODP spells differently as answered", async () => {
+      server.use(
+        http.get(PRICES, () =>
+          HttpResponse.json([priceRow("T4_BAG", "Caerleon", 1, 1000)]),
+        ),
+      );
+      const marketData = await openMarketData();
+
+      const result = await marketData.getPrices(["T4_BAG"], ["caerleon"], [1]);
+
+      expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 1000"]);
+    });
   });
 
-  it("sums up an item nobody bought as none sold, and doesn't ask again", async () => {
-    const { requests, unanswered } = fakeAodp();
-    unanswered.add("T8_BAG_INSIGHT@4");
-    const marketData = await openMarketData();
+  describe("getHistory", () => {
+    it("sums up the newest 7 days, and reuses history fetched less than 6 hours ago", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1]);
 
-    await marketData.getHistory(["T8_BAG_INSIGHT@4"], ["Thetford"], [5]);
-    const result = await marketData.getHistory(
-      ["T8_BAG_INSIGHT@4"],
-      ["Thetford"],
-      [5],
-    );
+      minutesLater(359.9);
+      const reused = await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1]);
+      minutesLater(360);
+      const refetched = await marketData.getHistory(
+        ["T4_BAG"],
+        ["Caerleon"],
+        [1],
+      );
 
-    expect(requests).toHaveLength(1);
-    expect(result.history).toEqual([
-      {
-        itemId: "T8_BAG_INSIGHT@4",
-        marketId: "Thetford",
-        quality: 5,
-        averagePrice: undefined,
-        averageDailyVolume: 0,
-        newestDay: undefined,
-      },
-    ]);
-  });
+      expect(requests).toEqual(["west history T4_BAG", "west history T4_BAG"]);
+      expect(reused).toEqual({
+        history: [
+          {
+            itemId: "T4_BAG",
+            marketId: "Caerleon",
+            quality: 1,
+            averagePrice: 1000,
+            averageDailyVolume: 10,
+            newestDay: Date.UTC(2026, 9, 25),
+          },
+        ],
+        failures: [],
+        fetchedAt: START,
+      });
+      expect(refetched.fetchedAt).toBe(START + 360 * MINUTE_MS);
+    });
 
-  it("doesn't take prices for history", async () => {
-    const { requests } = fakeAodp();
-    const marketData = await openMarketData();
-    await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+    it("averages over as many days as it's told to", async () => {
+      fakeAodp();
+      const marketData = await openMarketData();
 
-    await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1]);
+      const result = await marketData.getHistory(
+        ["T4_BAG"],
+        ["Caerleon"],
+        [1],
+        {
+          days: 1,
+        },
+      );
 
-    expect(requests).toEqual(["west prices T4_BAG", "west history T4_BAG"]);
+      expect(result.history[0]?.averageDailyVolume).toBe(70);
+    });
+
+    it("sums up an item nobody bought as none sold, and doesn't ask again", async () => {
+      const { requests, unanswered } = fakeAodp();
+      unanswered.add("T8_BAG_INSIGHT@4");
+      const marketData = await openMarketData();
+
+      await marketData.getHistory(["T8_BAG_INSIGHT@4"], ["Thetford"], [5]);
+      const result = await marketData.getHistory(
+        ["T8_BAG_INSIGHT@4"],
+        ["Thetford"],
+        [5],
+      );
+
+      expect(requests).toHaveLength(1);
+      expect(result.history).toEqual([
+        {
+          itemId: "T8_BAG_INSIGHT@4",
+          marketId: "Thetford",
+          quality: 5,
+          averagePrice: undefined,
+          averageDailyVolume: 0,
+          newestDay: undefined,
+        },
+      ]);
+    });
+
+    it("doesn't take prices for history", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+      await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1]);
+
+      expect(requests).toEqual(["west prices T4_BAG", "west history T4_BAG"]);
+    });
   });
 });

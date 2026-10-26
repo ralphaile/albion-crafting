@@ -4,7 +4,7 @@ import { createLimiter, type Limiter } from "./limiter.js";
 
 export type Region = "west" | "europe" | "east";
 
-export interface AodpClientOptions {
+interface AodpClientOptions {
   region?: Region;
 }
 
@@ -22,18 +22,17 @@ export interface FetchOptions {
   onEvent?: (event: AodpEvent) => void;
 }
 
-export interface FetchedPrices {
+interface FetchedPrices {
   prices: AodpPrice[];
   failures: BatchFailure[];
 }
 
-export interface FetchedHistory {
+interface FetchedHistory {
   history: AodpHistory[];
   failures: BatchFailure[];
 }
 
 export interface AodpClient {
-  readonly region: Region;
   getPrices(
     itemIds: readonly string[],
     marketIds: readonly string[],
@@ -171,7 +170,6 @@ export function createAodpClient({
   }
 
   return {
-    region,
     async getPrices(
       itemIds,
       marketIds,

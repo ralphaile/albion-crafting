@@ -2,12 +2,12 @@ import { Dexie, type Table } from "dexie";
 
 import type { AodpHistory, AodpPrice, Region } from "./aodp.js";
 
-export interface StoredPrice extends AodpPrice {
+interface StoredPrice extends AodpPrice {
   region: Region;
   fetchedAt: number;
 }
 
-export interface StoredHistory extends AodpHistory {
+interface StoredHistory extends AodpHistory {
   region: Region;
   fetchedAt: number;
 }
@@ -24,7 +24,7 @@ export interface RowStore<T> {
   put(rows: readonly T[]): Promise<void>;
 }
 
-export interface CacheStore {
+interface CacheStore {
   readonly persistent: boolean;
   readonly prices: RowStore<StoredPrice>;
   readonly history: RowStore<StoredHistory>;
