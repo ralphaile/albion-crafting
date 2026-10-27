@@ -58,7 +58,7 @@ A value the game gives every item, separate from its market price, worked out fr
 
 ## Market
 
-Where you buy and sell: the market of one of the 7 cities, of a [Rest](#rest), or the [Black Market](#black-market). A route has three parts: the market you buy the materials in, the [crafting location](#crafting-location), and the market you sell in. In the code, a market is its AODP ID from `markets` in `@aoc/market-prices`, such as `Arthurs Rest Smugglers Network`, and its name is what the app shows, such as Arthur's Rest.
+Where you buy and sell. You buy materials in one of the 7 cities, and sell in one of them, a [Rest](#rest) or the [Black Market](#black-market). A route has three parts: the market you buy the materials in, the [crafting location](#crafting-location), and the market you sell in ([where you craft, buy and sell](route.md)). In the code, a market is its AODP ID from `markets` in `@aoc/market-prices`, such as `Arthurs Rest Smugglers Network`, and its name is what the app shows, such as Arthur's Rest.
 
 ## Material cost
 
@@ -100,7 +100,7 @@ The total crafting bonus where you craft, written as a fraction (0.18 is 18%). C
 - **Island:** a base of 0, with no specialty.
 - **Hideout:** the [power level](#power-level)'s general bonus, plus, for its [biome](#biome)'s 5 categories, the [map quality](#hideout-map-quality) bonus and the power level's specialist bonus. Then any daily bonus, and 0.59 with focus.
 
-The engine's version for cities, Rests and islands is `productionBonus()` in `packages/core/src/production-bonus.helpers.ts`. It returns each part on its own, for the UI to show. If you enter the production bonus or return rate the game shows for a location, that value is used instead, and the parts are kept so you can compare them.
+The engine's version for cities, Rests and islands is `productionBonus()` in `packages/core/src/production-bonus.helpers.ts`. It returns each part on its own.
 
 For hideouts it's `hideoutProductionBonus()` in `packages/core/src/hideout-bonus.helpers.ts`. It takes the hideout's [biome](#biome), [map quality](#hideout-map-quality) and [power level](#power-level) as their rows from `@aoc/crafting-data`, and works like `productionBonus()` otherwise.
 
