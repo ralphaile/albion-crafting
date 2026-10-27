@@ -15,7 +15,7 @@ import {
 import { itemName } from "@aoc/crafting-data";
 import type { ObservedPrice } from "@aoc/market-prices";
 
-import type { Craft } from "./best-crafts";
+import type { Craft } from "./best-crafts.types";
 import styles from "./CraftsTable.module.css";
 import {
   formatAge,
@@ -23,7 +23,7 @@ import {
   formatPercent,
   formatSilver,
   formatSilverPerFocus,
-} from "./format";
+} from "./format.helpers";
 import { ItemIcon } from "./ItemIcon";
 
 export const PAGE_SIZE = 50;

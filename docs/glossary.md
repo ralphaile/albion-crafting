@@ -34,11 +34,11 @@ Focus cost efficiency, which grows as you specialize in crafting an item. Every 
 focus cost = base focus × 0.5 ^ (FCE / 10000)
 ```
 
-The engine's version is `focusCost()` in `packages/core/src/focus.ts`. Until you fill in your specializations, FCE is 0 and a craft costs its full base focus.
+The engine's version is `focusCost()` in `packages/core/src/focus.helpers.ts`. Until you fill in your specializations, FCE is 0 and a craft costs its full base focus.
 
 ## Focus
 
-Points you can spend on a craft to add 0.59 to its [production bonus](#production-bonus), which raises the [return rate](#return-rate-rrr) a lot. How much focus a craft costs depends on the item and your [FCE](#fce). _Silver per focus_ is the extra profit focus brings, per focus point: (profit with focus − profit without) ÷ focus cost. It shows where focus adds the most, so a craft that only pays with focus can rank above one that's profitable anyway. The engine's version is `silverPerFocus()` in `packages/core/src/focus.ts`. Royal items cost no focus, so they have no silver per focus.
+Points you can spend on a craft to add 0.59 to its [production bonus](#production-bonus), which raises the [return rate](#return-rate-rrr) a lot. How much focus a craft costs depends on the item and your [FCE](#fce). _Silver per focus_ is the extra profit focus brings, per focus point: (profit with focus − profit without) ÷ focus cost. It shows where focus adds the most, so a craft that only pays with focus can rank above one that's profitable anyway. The engine's version is `silverPerFocus()` in `packages/core/src/focus.helpers.ts`. Royal items cost no focus, so they have no silver per focus.
 
 With premium you get 10,000 focus a day, and can store up to 30,000. The engine has these as `FOCUS_PER_DAY` and `MAX_STORED_FOCUS`.
 
@@ -76,7 +76,7 @@ The unit price depends on how you buy at the buy market:
 
 The cost is per craft, so it scales to a batch. A staff that needs 8 metal bars, crafted at a 24.81% return rate, uses 8 × 0.7519 ≈ 6.02 bars per craft on average. So 100 staffs use about 602 bars, not 800, because the returned bars go into the next crafts. They still need all 100 artifacts.
 
-The engine's version is `materialCost()` in `packages/core/src/material-cost.ts`. It returns a line per material, with its count after returns, the price it used, its unit price and its cost. A [stale](#fresh-stale-and-missing-prices) price still counts, and its line stays flagged. If any price is missing, the result is incomplete and has no total.
+The engine's version is `materialCost()` in `packages/core/src/material-cost.helpers.ts`. It returns a line per material, with its count after returns, the price it used, its unit price and its cost. A [stale](#fresh-stale-and-missing-prices) price still counts, and its line stays flagged. If any price is missing, the result is incomplete and has no total.
 
 ## Nutrition and station fee
 
@@ -86,7 +86,7 @@ Crafting stations run on nutrition. A craft uses `item value × 0.1125` nutritio
 station fee = item value × 0.1125 × fee per 100 nutrition / 100
 ```
 
-The engine's version is `stationFee()` in `packages/core/src/station-fee.ts`. It gives the fee for one craft, and every recipe crafts one item. A fee of 0, such as on your own island, costs nothing. The shapeshifter staffs have no [item value](#item-value), so at a paid station their fee is unknown. The settings panel will let you set the fee for each kind of location. Its defaults wait for the in-game check of what fees are typical.
+The engine's version is `stationFee()` in `packages/core/src/station-fee.helpers.ts`. It gives the fee for one craft, and every recipe crafts one item. A fee of 0, such as on your own island, costs nothing. The shapeshifter staffs have no [item value](#item-value), so at a paid station their fee is unknown. The settings panel will let you set the fee for each kind of location. Its defaults wait for the in-game check of what fees are typical.
 
 ## Power level
 
@@ -100,9 +100,9 @@ The total crafting bonus where you craft, written as a fraction (0.18 is 18%). C
 - **Island:** a base of 0, with no specialty.
 - **Hideout:** the [power level](#power-level)'s general bonus, plus, for its [biome](#biome)'s 5 categories, the [map quality](#hideout-map-quality) bonus and the power level's specialist bonus. Then any daily bonus, and 0.59 with focus.
 
-The engine's version for cities, Rests and islands is `productionBonus()` in `packages/core/src/production-bonus.ts`. It returns each part on its own, for the UI to show. If you enter the production bonus or return rate the game shows for a location, that value is used instead, and the parts are kept so you can compare them.
+The engine's version for cities, Rests and islands is `productionBonus()` in `packages/core/src/production-bonus.helpers.ts`. It returns each part on its own, for the UI to show. If you enter the production bonus or return rate the game shows for a location, that value is used instead, and the parts are kept so you can compare them.
 
-For hideouts it's `hideoutProductionBonus()` in `packages/core/src/hideout-bonus.ts`. It takes the hideout's [biome](#biome), [map quality](#hideout-map-quality) and [power level](#power-level) as their rows from `@aoc/crafting-data`, and works like `productionBonus()` otherwise.
+For hideouts it's `hideoutProductionBonus()` in `packages/core/src/hideout-bonus.helpers.ts`. It takes the hideout's [biome](#biome), [map quality](#hideout-map-quality) and [power level](#power-level) as their rows from `@aoc/crafting-data`, and works like `productionBonus()` otherwise.
 
 ## Profit and margin
 
@@ -115,13 +115,13 @@ margin = profit / ((material cost + station fee + silver) / amount crafted)
 
 Every recipe crafts one item, so the amount crafted is always 1 for now. The [revenue](#revenue), [material cost](#material-cost) and [station fee](#nutrition-and-station-fee) are the entries above.
 
-The engine's version is `evaluate()` in `packages/core/src/evaluate.ts`. It works out a recipe for where you craft, your settings, and the prices at your buy and sell markets:
+The engine's version is `evaluate()` in `packages/core/src/evaluate.helpers.ts`. It works out a recipe for where you craft, your settings, and the prices at your buy and sell markets:
 
 - An item with alternative recipes, such as a token instead of its [artifact](#artifact) or another base piece for a royal item, is evaluated with each, and the most profitable one with all its prices is kept.
 - A missing price, or a missing [item value](#item-value) at a paid station, makes the result incomplete. It lists the missing prices and has no profit.
 - With focus on, it also gives the focus cost and [silver per focus](#focus).
 
-`rank()` in `packages/core/src/rank.ts` sorts the results by profit, margin or silver per focus, highest first, with incomplete ones last. By default it sorts by silver per focus when focus is on, and by profit otherwise.
+`rank()` in `packages/core/src/rank.helpers.ts` sorts the results by profit, margin or silver per focus, highest first, with incomplete ones last. By default it sorts by silver per focus when focus is on, and by profit otherwise.
 
 ## Quality
 
@@ -149,7 +149,7 @@ RRR = B / (1 + B)
 | The same, with focus                          | 1.41 | 58.5% |
 | Level 9 hideout, quality 6 map, another item  | 0.26 | 20.6% |
 
-The engine's version is `returnRate()` in `packages/core/src/return-rate.ts`. Next to it, `bonusForReturnRate()` turns a return rate back into the production bonus that gives it.
+The engine's version is `returnRate()` in `packages/core/src/return-rate.helpers.ts`. Next to it, `bonusForReturnRate()` turns a return rate back into the production bonus that gives it.
 
 ## Revenue
 
@@ -161,7 +161,7 @@ The silver you keep from selling a crafted item, after the [tax](#tax-and-premiu
 | Instant sale | The highest buy order at the sell market                       | price × (1 − tax)         |
 | Black Market | The [Black Market](#black-market)'s highest buy order          | price × (1 − tax)         |
 
-The engine's version is `revenue()` in `packages/core/src/revenue.ts`. It returns the price, the tax, the setup fee and what you keep. A [stale](#fresh-stale-and-missing-prices) price still counts, and stays flagged. If the price it needs is missing, so is the revenue, and the craft's result is incomplete.
+The engine's version is `revenue()` in `packages/core/src/revenue.helpers.ts`. It returns the price, the tax, the setup fee and what you keep. A [stale](#fresh-stale-and-missing-prices) price still counts, and stays flagged. If the price it needs is missing, so is the revenue, and the craft's result is incomplete.
 
 ## Setup fee
 
@@ -169,7 +169,7 @@ The engine's version is `revenue()` in `packages/core/src/revenue.ts`. It return
 
 ## Specialty bonus
 
-Each city and [Rest](#rest) specializes in some crafting categories, such as swords in Lymhurst. Crafting one of them there adds 0.15 to the [production bonus](#production-bonus). Islands have no specialty. A hideout's specialties are its [biome](#biome)'s 5 categories, which get its [map quality](#hideout-map-quality) and specialist [power level](#power-level) bonuses. `hasSpecialty()` in `packages/core/src/specialty.ts` says whether a place gives a category its specialty, and the table marks those crafts **Specialty**.
+Each city and [Rest](#rest) specializes in some crafting categories, such as swords in Lymhurst. Crafting one of them there adds 0.15 to the [production bonus](#production-bonus). Islands have no specialty. A hideout's specialties are its [biome](#biome)'s 5 categories, which get its [map quality](#hideout-map-quality) and specialist [power level](#power-level) bonuses. `hasSpecialty()` in `packages/core/src/specialty.helpers.ts` says whether a place gives a category its specialty, and the table marks those crafts **Specialty**.
 
 ## Tax and premium
 

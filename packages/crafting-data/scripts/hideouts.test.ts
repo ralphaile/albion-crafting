@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 
 import type { CraftingLocation } from "@aoc/core";
 
-import { extractHideouts } from "./hideouts.ts";
-import { extractLocations } from "./locations.ts";
-import { type Dumps, validate } from "./validate.ts";
+import { type Dumps, validate } from "./dumps.schema.ts";
+import { extractHideouts } from "./hideouts.helpers.ts";
+import { extractLocations } from "./locations.helpers.ts";
 
 type CraftingModifiers = Dumps["craftingmodifiers.json"]["craftingmodifiers"];
 type Location = CraftingModifiers["craftinglocation"][number];

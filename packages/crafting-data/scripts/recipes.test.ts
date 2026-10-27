@@ -2,9 +2,9 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { extractRecipes, findUnreadGear } from "./recipes.ts";
-import { type Dumps, validate } from "./validate.ts";
-import type { GameRecipe } from "../src/recipe.ts";
+import { type Dumps, validate } from "./dumps.schema.ts";
+import { extractRecipes, findUnreadGear } from "./recipes.helpers.ts";
+import type { GameRecipe } from "../src/recipe.types.ts";
 
 type Items = Dumps["items.json"]["items"];
 type GearItem = Items["weapon"][number];

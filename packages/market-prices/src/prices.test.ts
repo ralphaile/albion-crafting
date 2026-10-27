@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { AodpPrice } from "./aodp.js";
-import { type NormalizeOptions, normalizePrices } from "./prices.js";
+import type { AodpPrice } from "./aodp.schema.js";
+import { normalizePrices } from "./prices.helpers.js";
+import type { NormalizeOptions } from "./prices.types.js";
 import pricesNoData from "../test/fixtures/prices-no-data.json" with { type: "json" };
 import prices from "../test/fixtures/prices.json" with { type: "json" };
 

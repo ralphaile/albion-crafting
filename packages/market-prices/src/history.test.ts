@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { AodpHistory } from "./aodp.js";
-import { summarizeHistory } from "./history.js";
+import type { AodpHistory } from "./aodp.schema.js";
+import { summarizeHistory } from "./history.helpers.js";
 import history from "../test/fixtures/history.json" with { type: "json" };
 
 function seriesOf(

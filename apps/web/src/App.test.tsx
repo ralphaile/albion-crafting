@@ -2,8 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { App } from "./App";
-import { NO_FILTERS } from "./filters";
-import { memoryFilterStore } from "./saved-filters";
+import { NO_FILTERS } from "./filters.constants";
+import { memoryFilterStore } from "./saved-filters.store";
 import { fakeMarketData } from "../test/fake-market-data";
 
 function renderApp(savedFilters = NO_FILTERS) {

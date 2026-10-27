@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { search, type SearchEntry, searchText } from "./search.js";
+import { search, searchText } from "./search.helpers.js";
+import type { SearchEntry } from "./search.types.js";
 
 const index: SearchEntry[] = [
   "Expert's Broadsword 5.0 T5_MAIN_SWORD",

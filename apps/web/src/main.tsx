@@ -12,7 +12,7 @@ import { createRoot } from "react-dom/client";
 import { openMarketData } from "@aoc/market-prices";
 
 import { App } from "./App";
-import { openFilterStore } from "./saved-filters";
+import { openFilterStore } from "./saved-filters.store";
 
 const root = document.getElementById("root");
 if (!root) {

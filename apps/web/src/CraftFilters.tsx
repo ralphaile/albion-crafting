@@ -1,23 +1,22 @@
 import { useCallback, useEffect, useId, useState } from "react";
 
+import { armorPiece } from "./armor.helpers";
 import styles from "./CraftFilters.module.css";
 import {
-  activeFilters,
   ARMOR_MATERIALS,
   ARMOR_SLOTS,
-  armorPiece,
-  type ArtifactFilter,
   CATEGORIES,
   ENCHANTS,
-  type Filters,
+  MAX_MARGIN_PERCENT,
+  MAX_PROFIT,
   MAX_SEARCH_LENGTH,
   NO_FILTERS,
   OFFHAND_TYPES,
-  type Option,
   TIERS,
   WEAPON_TYPES,
-} from "./filters";
-import { MAX_MARGIN_PERCENT, MAX_PROFIT } from "./filters-schema";
+} from "./filters.constants";
+import { activeFilters } from "./filters.helpers";
+import type { ArtifactFilter, Filters, Option } from "./filters.types";
 
 export type UpdateFilters = (update: (filters: Filters) => Filters) => void;
 

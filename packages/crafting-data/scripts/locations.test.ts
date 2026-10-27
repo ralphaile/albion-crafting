@@ -2,8 +2,8 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { extractLocations } from "./locations.ts";
-import { type Dumps, validate } from "./validate.ts";
+import { type Dumps, validate } from "./dumps.schema.ts";
+import { extractLocations } from "./locations.helpers.ts";
 
 type CraftingModifiers = Dumps["craftingmodifiers.json"]["craftingmodifiers"];
 type Location = CraftingModifiers["craftinglocation"][number];

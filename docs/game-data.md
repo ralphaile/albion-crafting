@@ -58,7 +58,7 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 
 ## Recipes
 
-`src/generated/recipes.json` has a recipe for every weapon, armor piece and offhand the app covers, at each enchantment level. The app imports it as `recipes` from `@aoc/crafting-data`. Its type, `GameRecipe` in `src/recipe.ts`, is core's `Recipe` plus the item's tier, enchantment, shop category and whether it's an artifact item.
+`src/generated/recipes.json` has a recipe for every weapon, armor piece and offhand the app covers, at each enchantment level. The app imports it as `recipes` from `@aoc/crafting-data`. Its type, `GameRecipe` in `src/recipe.types.ts`, is core's `Recipe` plus the item's tier, enchantment, shop category and whether it's an artifact item.
 
 - **Which items:** the shop categories `weapons`, `armors`, `head`, `shoes` and `offhands`, tiers 4 to 8. They come from three lists in `items.json`: `weapon`, `equipmentitem`, and `transformationweapon`, which holds the shapeshifter staffs. If any other list holds gear, `pnpm data:update` prints a warning that names it, because the shapeshifter staffs arrived that way.
 - **Left out:**
@@ -100,10 +100,10 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 
 ## Hideouts
 
-`src/generated/hideouts.json` has the bonuses for crafting in a Black Zone hideout, as three small tables. The app imports it as `hideouts` from `@aoc/crafting-data`, and `src/hideout.ts` has its type.
+`src/generated/hideouts.json` has the bonuses for crafting in a Black Zone hideout, as three small tables. The app imports it as `hideouts` from `@aoc/crafting-data`, and `src/hideout.types.ts` has its type.
 
 - **`biomes`:** Swamp, Forest, Steppe, Highland and Mountain, each with its 5 crafting categories and `cityId`, the cluster ID of its royal city. A biome's categories are exactly that city's gear specialties.
-  - The game files don't link a biome to its city, so `scripts/hideouts.ts` has that table: Swamp is Thetford, Forest Lymhurst, Steppe Bridgewatch, Highland Martlock and Mountain Fort Sterling.
+  - The game files don't link a biome to its city, so `scripts/hideouts.helpers.ts` has that table: Swamp is Thetford, Forest Lymhurst, Steppe Bridgewatch, Highland Martlock and Mountain Fort Sterling.
   - A test checks that each biome's categories still match its city's.
 - **`mapQualities`:** what the map quality, Q1 to Q6, adds for the biome's 5 categories: 0.01 to 0.26.
 - **`powerLevels`:** levels 1 to 9, from `hideouts.json`. The general bonus counts for everything crafted there, and the specialist bonus only for the biome's 5 categories. The file leaves both out at level 1, which means 0.
@@ -121,7 +121,7 @@ So a level 9 hideout on a Q6 map gives 0.26 + 0.26 + 0.30 = 0.82 for its biome's
 
 ## When a check fails
 
-The files were converted from XML, so attribute names start with `@`, numbers are text, and a list with one entry can be a single object. The schemas in `packages/crafting-data/scripts/schemas.ts` handle all three. They only check the fields the app reads and ignore the rest.
+The files were converted from XML, so attribute names start with `@`, numbers are text, and a list with one entry can be a single object. The schemas in `packages/crafting-data/scripts/dump-files.schema.ts` handle all three. They only check the fields the app reads and ignore the rest.
 
 A failure lists each problem as `file: path: problem`:
 

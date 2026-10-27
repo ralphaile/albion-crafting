@@ -5,12 +5,8 @@ import { join } from "node:path";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  fetchLatestCommit,
-  readSource,
-  type Source,
-  writeSource,
-} from "./source.ts";
+import { fetchLatestCommit } from "./source.client.ts";
+import { readSource, type Source, writeSource } from "./source.schema.ts";
 import { server } from "../test/setup.ts";
 
 const source: Source = {

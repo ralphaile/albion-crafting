@@ -1,0 +1,114 @@
+import { Dexie, type Table } from "dexie";
+
+import type { AodpHistory, AodpPrice } from "./aodp.schema.js";
+import type { Region } from "./aodp.types.js";
+import type { RowKey, RowStore } from "./cache.types.js";
+
+interface StoredPrice extends AodpPrice {
+  region: Region;
+  fetchedAt: number;
+}
+
+interface StoredHistory extends AodpHistory {
+  region: Region;
+  fetchedAt: number;
+}
+
+interface CacheStore {
+  readonly persistent: boolean;
+  readonly prices: RowStore<StoredPrice>;
+  readonly history: RowStore<StoredHistory>;
+  clear(): Promise<void>;
+}
+
+const DATABASE_NAME = "aoc-price-cache";
+
+export async function openCacheStore(): Promise<CacheStore> {
+  const db = new Dexie(DATABASE_NAME) as Dexie & {
+    prices: Table<StoredPrice, RowKey>;
+    history: Table<StoredHistory, RowKey>;
+  };
+  db.version(2).stores({
+    prices: "[region+item_id+city+quality]",
+    history: "[region+item_id+location+quality]",
+  });
+  try {
+    await db.open();
+  } catch {
+    return createMemoryStore();
+  }
+
+  return {
+    persistent: true,
+    prices: tableRows(db.prices),
+    history: tableRows(db.history),
+    async clear() {
+      await Promise.all([db.prices.clear(), db.history.clear()]);
+    },
+  };
+}
+
+function tableRows<T>(table: Table<T, RowKey>): RowStore<T> {
+  return {
+    async get(keys) {
+      const found = await table.bulkGet([...keys]);
+      return found.filter((row) => row !== undefined);
+    },
+    async put(rows) {
+      await table.bulkPut(rows);
+    },
+  };
+}
+
+function createMemoryStore(): CacheStore {
+  const prices = memoryRows<StoredPrice>((row) => [
+    row.region,
+    row.item_id,
+    row.city,
+    row.quality,
+  ]);
+  const history = memoryRows<StoredHistory>((row) => [
+    row.region,
+    row.item_id,
+    row.location,
+    row.quality,
+  ]);
+
+  return {
+    persistent: false,
+    prices,
+    history,
+    clear() {
+      prices.clear();
+      history.clear();
+      return Promise.resolve();
+    },
+  };
+}
+
+function memoryRows<T>(
+  keyOf: (row: T) => RowKey,
+): RowStore<T> & { clear(): void } {
+  const rows = new Map<string, T>();
+  const id = (key: RowKey) => JSON.stringify(key);
+
+  return {
+    get(keys) {
+      return Promise.resolve(
+        keys.flatMap((key) => {
+          const row = rows.get(id(key));
+          return row === undefined ? [] : [row];
+        }),
+      );
+    },
+    put(newRows) {
+      for (const row of newRows) {
+        rows.set(id(keyOf(row)), row);
+      }
+      return Promise.resolve();
+    },
+    clear() {
+      rows.clear();
+    },
+  };
+}
