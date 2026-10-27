@@ -1,6 +1,6 @@
-import { marketId } from "./recipes.ts";
-import type { Dumps } from "./validate.ts";
-import type { GameRecipe } from "../src/recipe.ts";
+import type { Dumps } from "./dumps.schema.ts";
+import { marketId } from "./recipes.helpers.ts";
+import type { GameRecipe } from "../src/recipe.types.ts";
 
 type SimpleItem = Dumps["items.json"]["items"]["simpleitem"][number];
 

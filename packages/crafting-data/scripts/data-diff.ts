@@ -4,9 +4,10 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
-import { type GeneratedData, diffData } from "./diff.ts";
-import { formatReport } from "./report.ts";
-import type { Source } from "./source.ts";
+import { diffData } from "./diff.helpers.ts";
+import type { GeneratedData } from "./diff.types.ts";
+import { formatReport } from "./report.helpers.ts";
+import type { Source } from "./source.schema.ts";
 
 const packageDir = fileURLToPath(new URL("..", import.meta.url));
 const reportPath = join(packageDir, "data-diff.md");

@@ -1,6 +1,6 @@
-import type { Dumps } from "./validate.ts";
-import type { Item } from "../src/item.ts";
-import type { GameRecipe } from "../src/recipe.ts";
+import type { Dumps } from "./dumps.schema.ts";
+import type { Item } from "../src/item.types.ts";
+import type { GameRecipe } from "../src/recipe.types.ts";
 
 type Names = Dumps["formatted/items.json"];
 

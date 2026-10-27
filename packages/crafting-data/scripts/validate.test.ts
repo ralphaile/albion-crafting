@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { FILES } from "./download.ts";
-import { parseDumps, validate } from "./validate.ts";
+import { FILES } from "./download.constants.ts";
+import { parseDumps, validate } from "./dumps.schema.ts";
 
 const fixtures = fileURLToPath(
   new URL("../test/fixtures/dumps", import.meta.url),

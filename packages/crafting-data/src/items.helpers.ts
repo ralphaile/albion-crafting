@@ -1,6 +1,7 @@
 import itemsJson from "./generated/items.json" with { type: "json" };
-import type { Item } from "./item.js";
-import { search, type SearchEntry, searchText } from "./search.js";
+import type { Item } from "./item.types.js";
+import { search, searchText } from "./search.helpers.js";
+import type { SearchEntry } from "./search.types.js";
 
 const items: readonly Item[] = itemsJson;
 const names = new Map(items.map(({ id, name }) => [id, name]));

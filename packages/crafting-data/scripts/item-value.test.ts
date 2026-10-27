@@ -4,10 +4,10 @@ import { describe, expect, it } from "vitest";
 
 import type { Material } from "@aoc/core";
 
-import { addItemValues } from "./item-value.ts";
-import { extractRecipes } from "./recipes.ts";
-import { validate } from "./validate.ts";
-import type { GameRecipe } from "../src/recipe.ts";
+import { validate } from "./dumps.schema.ts";
+import { addItemValues } from "./item-value.helpers.ts";
+import { extractRecipes } from "./recipes.helpers.ts";
+import type { GameRecipe } from "../src/recipe.types.ts";
 
 const fixtures = fileURLToPath(
   new URL("../test/fixtures/dumps", import.meta.url),

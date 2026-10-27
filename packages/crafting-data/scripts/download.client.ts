@@ -4,15 +4,8 @@ import { dirname, join } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-import type { Source } from "./source.ts";
-
-export const FILES = [
-  "items.json",
-  "formatted/items.json",
-  "formatted/world.json",
-  "craftingmodifiers.json",
-  "hideouts.json",
-] as const;
+import { FILES } from "./download.constants.ts";
+import type { Source } from "./source.schema.ts";
 
 const COMMIT_MARKER = "commit.txt";
 

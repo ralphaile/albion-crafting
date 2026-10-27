@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
-import { update } from "./update.ts";
+import { update } from "./update.helpers.ts";
 
 try {
   const { values } = parseArgs({

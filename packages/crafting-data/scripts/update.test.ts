@@ -7,8 +7,8 @@ import { fileURLToPath } from "node:url";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { readSource, type Source, writeSource } from "./source.ts";
-import { update } from "./update.ts";
+import { readSource, type Source, writeSource } from "./source.schema.ts";
+import { update } from "./update.helpers.ts";
 import { server } from "../test/setup.ts";
 
 const fixtures = fileURLToPath(

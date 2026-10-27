@@ -1,7 +1,4 @@
-export interface SearchEntry {
-  id: string;
-  text: string;
-}
+import type { SearchEntry } from "./search.types.js";
 
 export function searchText(text: string): string {
   return text.toLowerCase().replace(/['’]/g, "");

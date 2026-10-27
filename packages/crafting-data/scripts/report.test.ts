@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { DataDiff } from "./diff.ts";
-import { formatReport } from "./report.ts";
+import type { DataDiff } from "./diff.types.ts";
+import { formatReport } from "./report.helpers.ts";
 
 const noChanges: DataDiff = {
   totals: {

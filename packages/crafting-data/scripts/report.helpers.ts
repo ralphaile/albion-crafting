@@ -1,4 +1,4 @@
-import type { DataDiff, Totals } from "./diff.ts";
+import type { DataDiff, Totals } from "./diff.types.ts";
 
 interface Commits {
   repository: string;

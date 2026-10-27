@@ -6,8 +6,9 @@ import { join } from "node:path";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { download, FILES } from "./download.ts";
-import type { Source } from "./source.ts";
+import { download } from "./download.client.ts";
+import { FILES } from "./download.constants.ts";
+import type { Source } from "./source.schema.ts";
 import { server } from "../test/setup.ts";
 
 const source: Source = {

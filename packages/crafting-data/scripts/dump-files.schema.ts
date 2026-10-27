@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { FILES } from "./download.ts";
+import type { FILES } from "./download.constants.ts";
 
 const number = z
   .string()

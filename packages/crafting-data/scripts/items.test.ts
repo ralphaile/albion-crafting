@@ -2,9 +2,9 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { extractItems } from "./items.ts";
-import { extractRecipes } from "./recipes.ts";
-import { validate } from "./validate.ts";
+import { validate } from "./dumps.schema.ts";
+import { extractItems } from "./items.helpers.ts";
+import { extractRecipes } from "./recipes.helpers.ts";
 
 const fixtures = fileURLToPath(
   new URL("../test/fixtures/dumps", import.meta.url),

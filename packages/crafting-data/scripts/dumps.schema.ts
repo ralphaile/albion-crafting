@@ -3,8 +3,8 @@ import { join } from "node:path";
 
 import { z } from "zod";
 
-import { FILES } from "./download.ts";
-import { dumpSchemas } from "./schemas.ts";
+import { FILES } from "./download.constants.ts";
+import { dumpSchemas } from "./dump-files.schema.ts";
 
 const dumpsSchema = z.object(dumpSchemas);
 

@@ -1,7 +1,8 @@
 import type { Material, RecipeAlternative } from "@aoc/core";
 
-import type { Dumps } from "./validate.ts";
-import type { GameRecipe } from "../src/recipe.ts";
+import type { Dumps } from "./dumps.schema.ts";
+import { SHOP_CATEGORIES } from "./recipes.constants.ts";
+import type { GameRecipe } from "../src/recipe.types.ts";
 
 type Items = Dumps["items.json"]["items"];
 type GearItem = Items["weapon"][number];
@@ -10,13 +11,6 @@ type CraftingRequirements = NonNullable<
 >[number];
 type CraftResource = NonNullable<CraftingRequirements["craftresource"]>[number];
 
-export const SHOP_CATEGORIES = new Set([
-  "weapons",
-  "armors",
-  "head",
-  "shoes",
-  "offhands",
-]);
 const GEAR_LISTS = ["weapon", "transformationweapon", "equipmentitem"] as const;
 const MIN_TIER = 4;
 const MAX_TIER = 8;

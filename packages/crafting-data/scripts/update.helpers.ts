@@ -1,14 +1,16 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
-import { download } from "./download.ts";
-import { extractHideouts } from "./hideouts.ts";
-import { addItemValues } from "./item-value.ts";
-import { extractItems } from "./items.ts";
-import { extractLocations } from "./locations.ts";
-import { extractRecipes, findUnreadGear, SHOP_CATEGORIES } from "./recipes.ts";
-import { fetchLatestCommit, readSource, writeSource } from "./source.ts";
-import { validate } from "./validate.ts";
+import { download } from "./download.client.ts";
+import { validate } from "./dumps.schema.ts";
+import { extractHideouts } from "./hideouts.helpers.ts";
+import { addItemValues } from "./item-value.helpers.ts";
+import { extractItems } from "./items.helpers.ts";
+import { extractLocations } from "./locations.helpers.ts";
+import { SHOP_CATEGORIES } from "./recipes.constants.ts";
+import { extractRecipes, findUnreadGear } from "./recipes.helpers.ts";
+import { fetchLatestCommit } from "./source.client.ts";
+import { readSource, writeSource } from "./source.schema.ts";
 
 interface UpdateOptions {
   latest: boolean;
