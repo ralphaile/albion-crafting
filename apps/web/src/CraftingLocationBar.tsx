@@ -1,12 +1,10 @@
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { hideouts } from "@aoc/crafting-data";
-import { markets } from "@aoc/market-prices";
 
-import { bonusPreview } from "./bonus-preview.helpers";
-import type { BonusRow } from "./bonus-preview.types";
 import styles from "./CraftingLocationBar.module.css";
-import { formatBonus, formatReturnRate } from "./format.helpers";
+import { formatReturnRate } from "./format.helpers";
+import { placeReturnRates } from "./return-rates.helpers";
 import {
   BUY_MARKET_GROUPS,
   LOCATION_GROUPS,
@@ -27,14 +25,12 @@ function Select({
   value,
   onChange,
   className,
-  describedBy,
   children,
 }: {
   label: string;
   value: string | number;
   onChange: (value: string) => void;
   className: string | undefined;
-  describedBy?: string | undefined;
   children: ReactNode;
 }) {
   return (
@@ -43,7 +39,6 @@ function Select({
       <select
         className={styles.select}
         value={value}
-        aria-describedby={describedBy}
         onChange={(event) => {
           onChange(event.target.value);
         }}
@@ -121,61 +116,55 @@ function HideoutFields({
   );
 }
 
-function BonusCells({ row }: { row: BonusRow }) {
+function Rate({
+  term,
+  value,
+  className,
+}: {
+  term: string;
+  value: number;
+  className: string | undefined;
+}) {
   return (
-    <>
-      <td>{formatBonus(row.bonus)}</td>
-      <td className={styles.rate}>{formatReturnRate(row.returnRate)}</td>
-      <td>{formatBonus(row.bonusWithFocus)}</td>
-      <td className={styles.rate}>
-        {formatReturnRate(row.returnRateWithFocus)}
-      </td>
-    </>
+    <div className={className}>
+      <dt>{term}</dt>
+      <dd>{formatReturnRate(value)}</dd>
+    </div>
   );
 }
 
-function BonusTable({ place }: { place: PlaceChoice }) {
-  const { base, specialty } = bonusPreview(placeFromChoice(place));
+function ReturnRateLine({ place }: { place: PlaceChoice }) {
+  const { base, specialty } = placeReturnRates(placeFromChoice(place));
   return (
-    <table
-      className={styles.preview}
-      aria-label="Production bonus and return rate"
-    >
-      <thead>
-        <tr>
-          <td />
-          <th scope="colgroup" colSpan={2}>
-            Without focus
-          </th>
-          <th scope="colgroup" colSpan={2}>
-            With focus
-          </th>
-        </tr>
-        <tr>
-          <td />
-          <th scope="col">Bonus</th>
-          <th scope="col">Return rate</th>
-          <th scope="col">Bonus</th>
-          <th scope="col">Return rate</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">Base</th>
-          <BonusCells row={base} />
-        </tr>
-        <tr className={styles.specialty}>
-          <th scope="row">Specialty</th>
-          {specialty ? (
-            <BonusCells row={specialty} />
-          ) : (
-            <td colSpan={4} className={styles.none}>
-              No specialties
-            </td>
-          )}
-        </tr>
-      </tbody>
-    </table>
+    <div className={styles.rates}>
+      <dl className={styles.rateList}>
+        <Rate
+          term="Return rate"
+          value={base.withoutFocus}
+          className={undefined}
+        />
+        {specialty && (
+          <Rate
+            term="Specialty"
+            value={specialty.withoutFocus}
+            className={styles.specialty}
+          />
+        )}
+        <Rate
+          term="With focus"
+          value={base.withFocus}
+          className={styles.focus}
+        />
+        {specialty && (
+          <Rate
+            term="Specialty"
+            value={specialty.withFocus}
+            className={styles.specialty}
+          />
+        )}
+      </dl>
+      {!specialty && <p className={styles.none}>No specialties</p>}
+    </div>
   );
 }
 
@@ -186,12 +175,8 @@ export function CraftingLocationBar({
   route: RouteChoice;
   onChange: (route: RouteChoice) => void;
 }) {
-  const noteId = useId();
   const { place } = route;
   const [lastHideout, setLastHideout] = useState<HideoutChoice>();
-  const sellsToBlackMarket = markets.some(
-    ({ id, sellOnly }) => id === route.sellMarketId && sellOnly === true,
-  );
 
   const choosePlace = (next: PlaceChoice) => {
     onChange({ ...route, place: next });
@@ -235,21 +220,13 @@ export function CraftingLocationBar({
         label="Sell in"
         className={styles.sell}
         value={route.sellMarketId}
-        describedBy={sellsToBlackMarket ? noteId : undefined}
         onChange={(sellMarketId) => {
           onChange({ ...route, sellMarketId });
         }}
       >
         <GroupedOptions groups={SELL_MARKET_GROUPS} />
       </Select>
-      {sellsToBlackMarket && (
-        <p id={noteId} className={styles.note}>
-          Priced at its highest buy order
-        </p>
-      )}
-      <div className={styles.previewArea}>
-        <BonusTable place={place} />
-      </div>
+      <ReturnRateLine place={place} />
     </section>
   );
 }

@@ -58,13 +58,13 @@ function groups(name: string) {
     .map((group) => [group.getAttribute("label"), options(group)]);
 }
 
-function preview() {
-  return within(
-    screen.getByRole("table", { name: "Production bonus and return rate" }),
-  )
-    .getAllByRole("row")
-    .slice(2)
-    .map((row) => row.textContent);
+function returnRates() {
+  return screen
+    .getAllByRole("term")
+    .map(
+      (term) =>
+        `${term.textContent} ${term.nextElementSibling?.textContent ?? ""}`,
+    );
 }
 
 const ROYAL_CITIES = [
@@ -89,12 +89,14 @@ describe("CraftingLocationBar", () => {
     ]);
   });
 
-  it("crafts at the location you pick, and previews its bonus", () => {
+  it("crafts at the location you pick, and shows its return rates", () => {
     const latest = renderBar();
 
-    expect(preview()).toEqual([
-      "Base18%15.25%77%43.50%",
-      "Specialty33%24.81%92%47.92%",
+    expect(returnRates()).toEqual([
+      "Return rate 15.25%",
+      "Specialty 24.81%",
+      "With focus 43.50%",
+      "Specialty 47.92%",
     ]);
 
     choose("Crafting location", "4300");
@@ -106,10 +108,8 @@ describe("CraftingLocationBar", () => {
   it("says the island has no specialties", () => {
     renderBar({ kind: "location", locationId: "island" });
 
-    expect(preview()).toEqual([
-      "Base0%0.00%59%37.11%",
-      "SpecialtyNo specialties",
-    ]);
+    expect(returnRates()).toEqual(["Return rate 0.00%", "With focus 37.11%"]);
+    expect(screen.getByText("No specialties")).toBeInTheDocument();
   });
 
   it("lists the biomes, map qualities and power levels of a hideout", () => {
@@ -171,9 +171,11 @@ describe("CraftingLocationBar", () => {
     choose("Map quality", "6");
     choose("Power level", "9");
 
-    expect(preview()).toEqual([
-      "Base26%20.63%85%45.95%",
-      "Specialty82%45.05%141%58.51%",
+    expect(returnRates()).toEqual([
+      "Return rate 20.63%",
+      "Specialty 45.05%",
+      "With focus 45.95%",
+      "Specialty 58.51%",
     ]);
   });
 
@@ -232,17 +234,5 @@ describe("CraftingLocationBar", () => {
       buyMarketId: "Martlock",
       sellMarketId: "Arthurs Rest Smugglers Network",
     });
-  });
-
-  it("says the Black Market is priced at its buy orders", () => {
-    renderBar();
-
-    expect(select("Sell in")).not.toHaveAccessibleDescription();
-
-    choose("Sell in", "Black Market");
-
-    expect(select("Sell in")).toHaveAccessibleDescription(
-      "Priced at its highest buy order",
-    );
   });
 });

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatAge,
-  formatBonus,
   formatCount,
   formatPercent,
   formatReturnRate,
@@ -41,17 +40,6 @@ describe("formatPercent", () => {
     [0, "0.0%"],
   ])("shows %d as %s", (value, expected) => {
     expect(formatPercent(value)).toBe(expected);
-  });
-});
-
-describe("formatBonus", () => {
-  it.each([
-    [0.18, "18%"],
-    [0.26 + 0.26 + 0.3, "82%"],
-    [0.0375, "3.75%"],
-    [0, "0%"],
-  ])("shows %d as %s", (value, expected) => {
-    expect(formatBonus(value)).toBe(expected);
   });
 });
 

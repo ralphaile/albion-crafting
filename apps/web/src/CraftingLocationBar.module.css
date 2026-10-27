@@ -1,14 +1,14 @@
 /* Every field keeps its cell, so choosing a hideout fills empty cells
-   instead of pushing the markets or the preview aside. */
+   instead of pushing the markets aside. */
 .bar {
   display: grid;
   grid-template-areas:
-    "location biome quality level preview"
-    "buy sell note note preview";
-  grid-template-columns: 11.5em 10em 5.5em 5em minmax(0, 1fr);
+    "location biome quality level . buy sell"
+    "rates rates rates rates rates rates rates";
+  grid-template-columns: 11.5em 10em 5.5em 5em minmax(0, 1fr) 10em 10em;
   gap: 12px 20px;
   align-items: end;
-  padding: 14px 18px;
+  padding: 12px 18px;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--surface);
@@ -38,29 +38,14 @@
   grid-area: sell;
 }
 
-.note {
-  grid-area: note;
-  margin: 0 0 7px;
-  color: var(--text-muted);
-  font-size: 14px;
-  line-height: 1.3;
-}
-
-.previewArea {
-  grid-area: preview;
-  align-self: center;
-  justify-self: end;
-  max-width: 100%;
-  overflow-x: auto;
-}
-
 .field {
   display: grid;
   gap: 6px;
   min-width: 0;
 }
 
-.label {
+.label,
+.rateList dt {
   color: var(--text-muted);
   font-family: var(--font-caps);
   font-size: 14px;
@@ -92,80 +77,59 @@
   border-color: var(--text-faint);
 }
 
-.preview {
-  border-collapse: collapse;
-  font-size: 14px;
-  font-variant-numeric: lining-nums tabular-nums;
-  white-space: nowrap;
+.rates {
+  display: flex;
+  flex-wrap: wrap;
+  grid-area: rates;
+  align-items: baseline;
+  gap: 4px 18px;
 }
 
-.preview th,
-.preview td {
-  padding: 3px 8px;
-  text-align: right;
+.rateList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 18px;
+  margin: 0;
 }
 
-.preview thead th {
-  color: var(--text-muted);
-  font-family: var(--font-caps);
-  font-weight: 500;
-  letter-spacing: 0.04em;
+.rateList > div {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
 }
 
-.preview thead th[scope="colgroup"] {
-  border-bottom: 1px solid var(--rule);
-  text-align: center;
-}
-
-.preview thead th[scope="col"]:nth-of-type(odd) {
-  width: 4.5em;
-}
-
-.preview thead th[scope="col"]:nth-of-type(even) {
-  width: 6.8em;
-}
-
-.preview tbody th {
-  width: 6em;
-  font-weight: 500;
-  text-align: left;
-}
-
-.preview tbody tr + tr {
-  border-top: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
-}
-
-.preview td {
-  color: var(--text-muted);
-}
-
-.preview .rate {
+.rateList dd {
+  margin: 0;
   color: var(--text);
   font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-.specialty th,
-.preview .specialty .rate {
+.rateList .specialty dt,
+.rateList .specialty dd {
   color: var(--brass);
 }
 
-.preview .none {
-  color: var(--text-faint);
-  font-style: italic;
-  text-align: center;
+.rateList .focus {
+  padding-left: 18px;
+  border-left: 1px solid var(--rule);
 }
 
-@media (max-width: 1120px) {
+.none {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 14px;
+  font-style: italic;
+}
+
+@media (max-width: 1100px) {
   .bar {
     grid-template-areas:
       "location biome quality level"
-      "buy sell note note"
-      "preview preview preview preview";
+      "buy sell . ."
+      "rates rates rates rates";
     grid-template-columns: 11.5em 10em 5.5em 5em;
-  }
-
-  .previewArea {
-    justify-self: start;
   }
 }
 
@@ -177,8 +141,7 @@
   }
 
   .field,
-  .note,
-  .previewArea {
+  .rates {
     flex: 1 1 100%;
   }
 
@@ -189,21 +152,8 @@
     flex-basis: calc(50% - 10px);
   }
 
-  .previewArea {
-    min-width: 0;
-  }
-
-  .preview {
-    font-size: 13px;
-  }
-
-  .preview th,
-  .preview td {
-    padding: 2px 4px;
-  }
-
-  .preview thead th[scope="col"]:nth-of-type(n),
-  .preview tbody th {
-    width: auto;
+  .rateList .focus {
+    padding-left: 0;
+    border-left: 0;
   }
 }
