@@ -49,4 +49,5 @@ export {
   type RevenueOptions,
   type SellMode,
 } from "./revenue.js";
+export { hasSpecialty } from "./specialty.js";
 export { stationFee } from "./station-fee.js";

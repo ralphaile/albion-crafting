@@ -192,6 +192,17 @@ function SortHeader({
   );
 }
 
+const RECENT_MINUTES = 3 * 60;
+
+type SeenPrice = Exclude<ObservedPrice, { status: "missing" }>;
+
+function ageBand(price: SeenPrice) {
+  if (price.status === "stale") {
+    return "old";
+  }
+  return price.ageMinutes < RECENT_MINUTES ? "recent" : "aging";
+}
+
 function PriceAge({
   label,
   price,
@@ -206,7 +217,7 @@ function PriceAge({
   return (
     <span
       className={styles.age}
-      data-status={price.status}
+      data-age={ageBand(price)}
       title={`${label} price seen ${age} ago${price.status === "stale" ? ", stale" : ""}`}
     >
       <span className={styles.dot} aria-hidden="true" />
