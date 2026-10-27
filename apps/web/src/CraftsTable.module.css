@@ -11,7 +11,7 @@
 .summary {
   margin: 0;
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .summary strong {
@@ -51,7 +51,7 @@
 }
 
 .pricesColumn {
-  width: 150px;
+  width: 164px;
 }
 
 .table thead th {
@@ -60,12 +60,11 @@
   z-index: 1;
   height: 40px;
   padding: 0 12px;
-  background: color-mix(in srgb, var(--bg) 90%, transparent);
-  backdrop-filter: blur(6px);
+  background: var(--bg);
   /* A ledger's double rule under the column names. */
   box-shadow:
     0 1px 0 var(--rule),
-    0 4px 0 color-mix(in srgb, var(--bg) 90%, transparent),
+    0 4px 0 var(--bg),
     0 5px 0 var(--rule);
   color: var(--text-muted);
   font-family: var(--font-caps);
@@ -130,10 +129,6 @@
 
 .row:hover > * {
   background: var(--surface-hover);
-}
-
-.row:hover > :first-child {
-  box-shadow: inset 3px 0 0 var(--brass);
 }
 
 .number {
@@ -220,14 +215,14 @@
   flex: none;
   color: var(--brass);
   font-family: var(--font-caps);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 .missing {
   color: var(--loss);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.2;
 }
 
@@ -251,7 +246,7 @@
 .ages {
   display: grid;
   gap: 1px;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.25;
 }
 
@@ -267,7 +262,7 @@
 }
 
 .ageLabel {
-  min-width: 62px;
+  min-width: 70px;
   font-family: var(--font-caps);
 }
 
@@ -310,7 +305,7 @@
 .range {
   margin: 0;
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .pages {
@@ -391,18 +386,6 @@
   place-items: center;
   min-width: 20px;
   color: var(--text-faint);
-}
-
-.reveal {
-  animation: rise 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  animation-delay: calc(var(--i) * 28ms);
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
 }
 
 .srOnly {

@@ -1,5 +1,4 @@
 import {
-  type CSSProperties,
   Fragment,
   useMemo,
   useRef,
@@ -28,7 +27,6 @@ import {
 import { ItemIcon } from "./ItemIcon";
 
 export const PAGE_SIZE = 50;
-const REVEALED_ROWS = 14;
 
 const SORT_LABELS: Record<SortKey, string> = {
   profit: "profit per craft",
@@ -226,14 +224,12 @@ function CraftRow({
   sortKey,
   focus,
   wide,
-  revealOrder,
 }: {
   craft: Craft;
   rowIndex: number;
   sortKey: SortKey;
   focus: boolean;
   wide: boolean;
-  revealOrder: number | undefined;
 }) {
   const { recipe } = craft;
   const complete = craft.status === "complete" ? craft : undefined;
@@ -257,16 +253,7 @@ function CraftRow({
   return (
     <tr
       aria-rowindex={rowIndex}
-      className={cx(
-        styles.row,
-        complete === undefined && styles.incomplete,
-        revealOrder !== undefined && styles.reveal,
-      )}
-      style={
-        revealOrder === undefined
-          ? undefined
-          : ({ "--i": revealOrder } as CSSProperties)
-      }
+      className={cx(styles.row, complete === undefined && styles.incomplete)}
     >
       <th scope="row" className={styles.item}>
         <span className={styles.itemInner}>
@@ -475,8 +462,7 @@ export function CraftsTable({
               <th scope="col">Prices</th>
             </tr>
           </thead>
-          {/* A new key per page and sort lets the first rows rise in again. */}
-          <tbody key={`${sortKey}:${String(page)}:${direction}`}>
+          <tbody>
             {ranked.slice(start, start + PAGE_SIZE).map((craft, offset) => {
               const index = start + offset;
               return (
@@ -492,7 +478,6 @@ export function CraftsTable({
                     sortKey={sortKey}
                     focus={focus}
                     wide={wide}
-                    revealOrder={offset < REVEALED_ROWS ? offset : undefined}
                   />
                 </Fragment>
               );
