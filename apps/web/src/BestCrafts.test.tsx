@@ -208,6 +208,10 @@ function askedFor(getPrices: ReturnType<typeof renderFiltered>, call = 1) {
   return itemIds;
 }
 
+function categoryButton() {
+  return screen.getByRole("button", { name: /^Category/ });
+}
+
 describe("BestCrafts with filters", () => {
   it("asks only for the items that pass the filters", async () => {
     const getPrices = renderFiltered({
@@ -249,6 +253,7 @@ describe("BestCrafts with filters", () => {
     await screen.findByRole("button", { name: "Remove filter: Tier 4" });
     expect(getPrices).toHaveBeenCalledTimes(2);
 
+    fireEvent.click(categoryButton());
     fireEvent.click(screen.getByRole("checkbox", { name: "Bow" }));
     await waitFor(() => {
       expect(getPrices).toHaveBeenCalledTimes(4);
@@ -331,6 +336,7 @@ describe("BestCrafts with filters", () => {
         .getAllByRole("button")
         .map((chip) => chip.textContent);
 
+    fireEvent.click(categoryButton());
     fireEvent.click(screen.getByRole("checkbox", { name: "Plate helmet" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Leather shoes" }));
     expect(chips()).toEqual(["Leather shoes", "Plate helmet"]);
@@ -353,6 +359,31 @@ describe("BestCrafts with filters", () => {
       screen.getByRole("button", { name: "Shoes, whole column" }),
     );
     expect(chips()).toEqual(["Plate helmet", "Plate armor"]);
+  });
+
+  it("picks categories from a list that closes on Escape or a click outside", async () => {
+    renderFiltered({});
+    await screen.findByText(ranked);
+
+    expect(categoryButton()).toHaveAccessibleName("Category All");
+    expect(screen.queryByRole("group", { name: "Category" })).toBeNull();
+
+    fireEvent.click(categoryButton());
+    fireEvent.click(screen.getByRole("checkbox", { name: "Sword" }));
+    expect(categoryButton()).toHaveAccessibleName("Category Sword");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Torch" }));
+    expect(categoryButton()).toHaveAccessibleName("Category 2 chosen");
+
+    fireEvent.keyDown(screen.getByRole("checkbox", { name: "Torch" }), {
+      key: "Escape",
+    });
+    expect(screen.queryByRole("group", { name: "Category" })).toBeNull();
+    expect(categoryButton()).toHaveFocus();
+
+    fireEvent.click(categoryButton());
+    expect(categoryButton()).toHaveAttribute("aria-expanded", "true");
+    fireEvent.pointerDown(document.body);
+    expect(categoryButton()).toHaveAttribute("aria-expanded", "false");
   });
 
   it("filters by name once typing pauses", async () => {

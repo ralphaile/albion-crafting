@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useId, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { armorPiece } from "./armor.helpers";
 import styles from "./CraftFilters.module.css";
@@ -15,12 +22,13 @@ import {
   TIERS,
   WEAPON_TYPES,
 } from "./filters.constants";
-import { activeFilters } from "./filters.helpers";
+import { activeFilters, categoryLabel } from "./filters.helpers";
 import type { ArtifactFilter, Filters, Option } from "./filters.types";
 
 export type UpdateFilters = (update: (filters: Filters) => Filters) => void;
 
 const SEARCH_DELAY_MS = 250;
+const VIEWPORT_MARGIN_PX = 16;
 
 const ARTIFACT_CHOICES: readonly { id: ArtifactFilter; label: string }[] = [
   { id: "include", label: "Include" },
@@ -159,6 +167,122 @@ function ArmorGrid({
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function categorySummary(chosen: readonly string[]) {
+  const [first, ...rest] = chosen;
+  if (first === undefined) {
+    return "All";
+  }
+  return rest.length === 0
+    ? categoryLabel(first)
+    : `${String(chosen.length)} chosen`;
+}
+
+function CategoryPicker({
+  chosen,
+  onSet,
+}: {
+  chosen: readonly string[];
+  onSet: SetCategories;
+}) {
+  const labelId = useId();
+  const valueId = useId();
+  const panelId = useId();
+  const [open, setOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const closeFromOutside = ({ target }: Event) => {
+      if (target instanceof Node && !pickerRef.current?.contains(target)) {
+        setOpen(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", closeFromOutside);
+    document.addEventListener("focusin", closeFromOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeFromOutside);
+      document.removeEventListener("focusin", closeFromOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) {
+      return;
+    }
+    const { left, right } = panel.getBoundingClientRect();
+    const overflow =
+      right - (document.documentElement.clientWidth - VIEWPORT_MARGIN_PX);
+    const shift = Math.max(0, Math.min(overflow, left - VIEWPORT_MARGIN_PX));
+    panel.style.translate = shift > 0 ? `${String(-shift)}px` : "";
+  }, [open]);
+
+  return (
+    <div ref={pickerRef} className={[styles.field, styles.picker].join(" ")}>
+      <span id={labelId} className={styles.legend}>
+        Category
+      </span>
+      <button
+        ref={buttonRef}
+        type="button"
+        className={styles.pickerButton}
+        aria-labelledby={`${labelId} ${valueId}`}
+        aria-expanded={open}
+        aria-controls={open ? panelId : undefined}
+        onClick={() => {
+          setOpen((wasOpen) => !wasOpen);
+        }}
+      >
+        <span id={valueId} className={styles.pickerValue}>
+          {categorySummary(chosen)}
+        </span>
+        <svg className={styles.chevron} viewBox="0 0 8 5" aria-hidden="true">
+          <path d="M0 0h8L4 5z" />
+        </svg>
+      </button>
+      {open && (
+        <div
+          ref={panelRef}
+          id={panelId}
+          className={styles.panel}
+          role="group"
+          aria-labelledby={labelId}
+        >
+          <CategoryGroup
+            label="Weapon"
+            options={WEAPON_TYPES}
+            chosen={chosen}
+            onSet={onSet}
+            className={styles.weapons}
+          />
+          <div className={styles.gear}>
+            <ArmorGrid chosen={chosen} onSet={onSet} />
+            <CategoryGroup
+              label="Offhand"
+              options={OFFHAND_TYPES}
+              chosen={chosen}
+              onSet={onSet}
+              className={styles.offhand}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -324,7 +448,6 @@ export function CraftFilters({
 }) {
   const artifactsName = useId();
   const chips = activeFilters(filters);
-  const categoryCount = filters.categories.length;
   const setCategories: SetCategories = (ids, on) => {
     onChange((current) => ({
       ...current,
@@ -402,6 +525,7 @@ export function CraftFilters({
             ))}
           </div>
         </div>
+        <CategoryPicker chosen={filters.categories} onSet={setCategories} />
       </div>
       <div className={styles.row}>
         <SearchField value={filters.search} onChange={setSearch} />
@@ -432,30 +556,6 @@ export function CraftFilters({
           />
         </div>
       </div>
-      <details className={styles.categories}>
-        <summary className={styles.summary}>
-          Category
-          {categoryCount > 0 && (
-            <span className={styles.count}> · {categoryCount} chosen</span>
-          )}
-        </summary>
-        <div className={styles.groups}>
-          <CategoryGroup
-            label="Weapon"
-            options={WEAPON_TYPES}
-            chosen={filters.categories}
-            onSet={setCategories}
-            className={styles.weapons}
-          />
-          <ArmorGrid chosen={filters.categories} onSet={setCategories} />
-          <CategoryGroup
-            label="Offhand"
-            options={OFFHAND_TYPES}
-            chosen={filters.categories}
-            onSet={setCategories}
-          />
-        </div>
-      </details>
       {chips.length > 0 && (
         <div className={styles.active}>
           <ul className={styles.chips} aria-label="Active filters">

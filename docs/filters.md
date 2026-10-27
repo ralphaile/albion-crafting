@@ -7,7 +7,7 @@ The filters above the best-crafts table narrow it to what you can and want to cr
 Different filters combine with AND: a craft has to pass every one of them. Inside one filter, the choices add up:
 
 - **Tier** (T4 to T8) and **Enchant** (.0 to .4): any of the chosen ones. None chosen means all.
-- **Category**: any of the chosen weapon types, armor pieces and offhand types, so **Sword**, **Plate helmet** and **Leather shoes** gives you all three. Armor is a grid of materials and slots: tick single pieces, or click a material or slot to tick its whole row or column, such as every plate piece or all shoes.
+- **Category**: a dropdown of weapon types, armor pieces and offhand types that opens over the page. Any of the chosen ones count, so **Sword**, **Plate helmet** and **Leather shoes** gives you all three. Armor is a grid of materials and slots: tick single pieces, or click a material or slot to tick its whole row or column, such as every plate piece or all shoes.
 - **Artifacts**: include them, exclude them, or show only them.
 - **Specialty only**: items that get the crafting location's [specialty bonus](glossary.md#specialty-bonus), or in a hideout, its biome's categories.
 - **Filter by name**: the item's name or ID, in any case. It applies once you stop typing for a moment.
