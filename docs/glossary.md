@@ -104,6 +104,8 @@ The engine's version for cities, Rests and islands is `productionBonus()` in `pa
 
 For hideouts it's `hideoutProductionBonus()` in `packages/core/src/hideout-bonus.helpers.ts`. It takes the hideout's [biome](#biome), [map quality](#hideout-map-quality) and [power level](#power-level) as their rows from `@aoc/crafting-data`, and works like `productionBonus()` otherwise.
 
+For a `CraftingPlace`, either kind, `placeProductionBonus()` in `packages/core/src/place-bonus.helpers.ts` calls the right one of the two. `evaluate()` uses it.
+
 ## Profit and margin
 
 What one crafted item earns you, after everything it cost:
