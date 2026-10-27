@@ -9,7 +9,7 @@
 | E2E       | Playwright and Chromium                 | A few key journeys through the built app in a real browser, with AODP responses faked                       | `apps/web/e2e/`                             |
 
 - Logic belongs in the packages, where unit tests are fast and simple. Components stay thin.
-- Test a package through its entry point, `src/index.ts`, the way the app uses it. A file behind it gets tests of its own only for what's hard to reach from there, such as how the AODP client splits a long list of items, and those tests import that file: `./aodp.js`.
+- Test a package through its entry point, `src/index.ts`, the way the app uses it. A file behind it gets tests of its own only for what's hard to reach from there, such as how the AODP client splits a long list of items, and those tests import that file: `./aodp.client.js`.
 - Test at the lowest level that can catch the bug. E2E tests are slow, so keep them for whole journeys.
 - Component tests find elements the way a user does: by role, label or visible text, such as `screen.getByRole("heading", { name: "Albion Crafting" })`. Not by CSS class or component internals.
 - No test calls a real server. See [HTTP and fixtures](#http-and-fixtures).
@@ -33,7 +33,7 @@ The E2E tests need Chromium, downloaded once with `pnpm --filter @aoc/web exec p
 
 ## Naming
 
-- Test files are named after what they test: `return-rate.test.ts` for `return-rate.ts`, `App.test.tsx` for `App.tsx`.
+- Test files are named after what they test, without its [ending](file-names.md): `return-rate.test.ts` for `return-rate.helpers.ts`, `App.test.tsx` for `App.tsx`.
 - `describe` names the function or component. Each `it` finishes the sentence with the expected behavior: `returnRate` › "rises as the production bonus rises".
 - Setup files and fixtures live in the workspace's `test/` folder, not in `src/`.
 
@@ -100,7 +100,7 @@ The `market-prices` tests run in Tokyo time, set in its `vitest.config.ts`. AODP
 
 Node has no IndexedDB, so tests that save prices or filters import `fake-indexeddb/auto`, which provides one in memory. Each test deletes the database afterwards, `new Dexie("aoc-price-cache").delete()` for prices and `new Dexie("aoc-settings").delete()` for filters, so the next one starts empty. Examples: `packages/market-prices/src/market-data.test.ts` and `apps/web/src/saved-filters.test.ts`.
 
-Components that don't need IndexedDB take a `FilterStore`, and tests pass `memoryFilterStore()` from `apps/web/src/saved-filters.ts`, which keeps the filters in memory.
+Components that don't need IndexedDB take a `FilterStore`, and tests pass `memoryFilterStore()` from `apps/web/src/saved-filters.store.ts`, which keeps the filters in memory.
 
 To move the clock in these tests, fake only `Date`, with `vi.useFakeTimers({ toFake: ["Date"] })` and `vi.setSystemTime(...)`. fake-indexeddb runs its work with `setImmediate`, so faking every timer stops it.
 
@@ -216,11 +216,11 @@ pnpm --filter @aoc/web exec playwright show-trace test-results/<test>/trace.zip
 
 `pnpm coverage` fails when a package is below its minimum for lines or branches:
 
-| Package                              | Minimum |
-| ------------------------------------ | ------- |
-| `core`                               | 90%     |
-| `core`'s `evaluate.ts` and `rank.ts` | 100%    |
-| `market-prices`, `crafting-data`     | 80%     |
-| `web`                                | 60%     |
+| Package                                              | Minimum |
+| ---------------------------------------------------- | ------- |
+| `core`                                               | 90%     |
+| `core`'s `evaluate.helpers.ts` and `rank.helpers.ts` | 100%    |
+| `market-prices`, `crafting-data`                     | 80%     |
+| `web`                                                | 60%     |
 
 The profit and ranking code needs 100%, because every branch of it changes what the app recommends. Files that no test loads count as 0%. `apps/web/src/main.tsx` only starts the app, so it's left out and the E2E tests cover it. The full report is in `coverage/index.html`. In CI, the run's **Summary** page shows a table per package, next to each minimum.
