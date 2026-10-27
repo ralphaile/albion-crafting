@@ -2,6 +2,8 @@ import type { Page } from "@playwright/test";
 
 import { expect, ICON_ORIGIN, test } from "./test";
 
+const BROADSWORD_ICON = `${ICON_ORIGIN}/v1/item/T5_MAIN_SWORD@1.png?quality=1&size=64`;
+
 async function searchFor(page: Page, query: string) {
   await page.goto("./");
   await page.getByRole("searchbox", { name: "Search items" }).fill(query);
@@ -23,10 +25,7 @@ test("searching lists the matching items with their names and icons", async ({
     "Expert's Broadsword 5.4",
   ]);
   const icon = items.nth(1).locator("img");
-  await expect(icon).toHaveAttribute(
-    "src",
-    `${ICON_ORIGIN}/v1/item/T5_MAIN_SWORD@1.png?quality=1&size=64`,
-  );
+  await expect(icon).toHaveAttribute("src", BROADSWORD_ICON);
   await expect
     .poll(() => icon.evaluate((image: HTMLImageElement) => image.naturalWidth))
     .toBeGreaterThan(0);
@@ -38,7 +37,7 @@ test("an icon that fails once loads when it's tried again", async ({
 }) => {
   let requests = 0;
   await page.route(
-    (url) => url.origin === ICON_ORIGIN,
+    (url) => url.href === BROADSWORD_ICON,
     async (route) => {
       requests += 1;
       await (requests === 1
@@ -51,10 +50,7 @@ test("an icon that fails once loads when it's tried again", async ({
   const icon = items.locator("img");
 
   await expect.poll(() => requests).toBe(2);
-  await expect(icon).toHaveAttribute(
-    "src",
-    `${ICON_ORIGIN}/v1/item/T5_MAIN_SWORD@1.png?quality=1&size=64`,
-  );
+  await expect(icon).toHaveAttribute("src", BROADSWORD_ICON);
   await expect
     .poll(() => icon.evaluate((image: HTMLImageElement) => image.naturalWidth))
     .toBeGreaterThan(0);
@@ -71,7 +67,7 @@ test("an icon that keeps failing shows a placeholder after three tries", async (
   problems,
 }) => {
   await page.route(
-    (url) => url.origin === ICON_ORIGIN,
+    (url) => url.href === BROADSWORD_ICON,
     (route) => route.fulfill({ status: 404, body: "" }),
   );
 
