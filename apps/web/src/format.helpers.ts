@@ -18,6 +18,17 @@ export const formatPercent = formatter({
   maximumFractionDigits: 1,
 });
 
+export const formatBonus = formatter({
+  style: "percent",
+  maximumFractionDigits: 2,
+});
+
+export const formatReturnRate = formatter({
+  style: "percent",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 export const formatSilverPerFocus = formatter({
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
