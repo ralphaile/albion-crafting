@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { type Filters, MAX_SEARCH_LENGTH, NO_FILTERS } from "./filters";
-import { filtersFromSearch, searchWithFilters } from "./filters-url";
+import { filtersFromSearch, searchWithFilters } from "./filters-url.helpers";
+import { MAX_SEARCH_LENGTH, NO_FILTERS } from "./filters.constants";
+import type { Filters } from "./filters.types";
 
 const everyFilter: Filters = {
   tiers: [6, 7],

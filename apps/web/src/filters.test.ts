@@ -3,15 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { CraftingPlace } from "@aoc/core";
 import { type GameRecipe, recipes } from "@aoc/crafting-data";
 
-import type { Craft } from "./best-crafts";
-import {
-  activeFilters,
-  CATEGORIES,
-  craftFilter,
-  type Filters,
-  NO_FILTERS,
-  recipeFilter,
-} from "./filters";
+import type { Craft } from "./best-crafts.types";
+import { CATEGORIES, NO_FILTERS } from "./filters.constants";
+import { activeFilters, craftFilter, recipeFilter } from "./filters.helpers";
+import type { Filters } from "./filters.types";
 
 function recipe(
   itemId: string,

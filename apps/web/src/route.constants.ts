@@ -1,11 +1,6 @@
-import type { CraftingPlace } from "@aoc/core";
 import { craftingLocations } from "@aoc/crafting-data";
 
-export interface Route {
-  place: CraftingPlace;
-  buyMarketId: string;
-  sellMarketId: string;
-}
+import type { Route } from "./route.types";
 
 const lymhurst = craftingLocations.find(({ name }) => name === "Lymhurst");
 if (lymhurst === undefined) {

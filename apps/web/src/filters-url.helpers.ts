@@ -1,5 +1,6 @@
-import { type Filters, NO_FILTERS } from "./filters";
-import { parseFilters } from "./filters-schema";
+import { NO_FILTERS } from "./filters.constants";
+import { parseFilters } from "./filters.schema";
+import type { Filters } from "./filters.types";
 
 const LIST_PARAMS = {
   tiers: "tier",

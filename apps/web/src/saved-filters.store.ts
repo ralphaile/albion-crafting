@@ -1,14 +1,9 @@
 import { Dexie, type Table } from "dexie";
 import { z } from "zod";
 
-import type { Filters } from "./filters";
-import { parseFilters } from "./filters-schema";
-
-export interface FilterStore {
-  readonly persistent: boolean;
-  load(): Promise<Filters | undefined>;
-  save(filters: Filters): Promise<void>;
-}
+import { parseFilters } from "./filters.schema";
+import type { Filters } from "./filters.types";
+import type { FilterStore } from "./saved-filters.types";
 
 interface SavedSetting {
   id: string;

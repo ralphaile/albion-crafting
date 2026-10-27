@@ -6,7 +6,7 @@ import {
   formatPercent,
   formatSilver,
   formatSilverPerFocus,
-} from "./format";
+} from "./format.helpers";
 
 describe("formatSilver", () => {
   it.each([

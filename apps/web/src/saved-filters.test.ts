@@ -3,8 +3,9 @@ import "fake-indexeddb/auto";
 import { Dexie } from "dexie";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { type Filters, NO_FILTERS } from "./filters";
-import { memoryFilterStore, openFilterStore } from "./saved-filters";
+import { NO_FILTERS } from "./filters.constants";
+import type { Filters } from "./filters.types";
+import { memoryFilterStore, openFilterStore } from "./saved-filters.store";
 
 const filters: Filters = {
   ...NO_FILTERS,

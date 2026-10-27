@@ -3,14 +3,13 @@ import { z } from "zod";
 import {
   CATEGORIES,
   ENCHANTS,
-  type Filters,
+  MAX_MARGIN_PERCENT,
+  MAX_PROFIT,
   MAX_SEARCH_LENGTH,
   NO_FILTERS,
   TIERS,
-} from "./filters";
-
-export const MAX_PROFIT = 1_000_000_000;
-export const MAX_MARGIN_PERCENT = 100_000;
+} from "./filters.constants";
+import type { Filters } from "./filters.types";
 
 // Keeps only the values it knows, in their usual order and once each.
 function choices<T>(allowed: readonly T[]) {
