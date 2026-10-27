@@ -1,0 +1,356 @@
+.ledger {
+  display: grid;
+  gap: 10px;
+}
+
+.summary {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.summary strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.silverColumn {
+  width: 118px;
+}
+
+.percentColumn {
+  width: 104px;
+}
+
+.pricesColumn {
+  width: 150px;
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 40px;
+  padding: 0 12px;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(6px);
+  /* A ledger's double rule under the column names. */
+  box-shadow:
+    0 1px 0 var(--rule),
+    0 4px 0 color-mix(in srgb, var(--bg) 90%, transparent),
+    0 5px 0 var(--rule);
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table thead th.number {
+  text-align: right;
+}
+
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
+.sortButton:hover {
+  color: var(--text);
+}
+
+.arrow {
+  width: 10px;
+  height: 6px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.sortButton:hover .arrow {
+  opacity: 0.5;
+}
+
+.table thead th.sorted {
+  color: var(--brass);
+}
+
+.sorted .arrow {
+  opacity: 1;
+}
+
+.row > * {
+  height: 52px;
+  padding: 0 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
+  font-weight: 400;
+  text-align: left;
+}
+
+.row:hover > * {
+  background: var(--surface-hover);
+}
+
+.row:hover > :first-child {
+  box-shadow: inset 3px 0 0 var(--brass);
+}
+
+.number {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.row > .number {
+  text-align: right;
+}
+
+.row > .sorted {
+  font-weight: 700;
+}
+
+.loss {
+  color: var(--loss);
+}
+
+.item {
+  overflow: hidden;
+}
+
+.itemInner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.itemInner img {
+  flex: none;
+  width: 36px;
+  height: 36px;
+}
+
+.itemText {
+  display: grid;
+  min-width: 0;
+}
+
+.nameLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tier {
+  flex: none;
+  padding: 0 5px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.tier[data-enchant="1"] {
+  color: var(--enchant-1);
+}
+
+.tier[data-enchant="2"] {
+  color: var(--enchant-2);
+}
+
+.tier[data-enchant="3"] {
+  color: var(--enchant-3);
+}
+
+.tier[data-enchant="4"] {
+  color: var(--enchant-4);
+}
+
+.specialty {
+  flex: none;
+  color: var(--brass);
+  font-family: var(--font-caps);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.missing {
+  color: var(--loss);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.incomplete > * {
+  color: var(--text-faint);
+}
+
+.incomplete .name {
+  font-weight: 400;
+}
+
+.incomplete img {
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+
+.prices {
+  white-space: nowrap;
+}
+
+.ages {
+  display: grid;
+  gap: 1px;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.age {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+
+.age[data-status="stale"] {
+  color: var(--stale);
+}
+
+.ageLabel {
+  min-width: 62px;
+  font-family: var(--font-caps);
+}
+
+.dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.age[data-status="fresh"] .dot {
+  background: var(--fresh);
+}
+
+.age[data-status="stale"] .dot {
+  border: 1.5px solid var(--stale);
+}
+
+.divider > td {
+  height: 52px;
+  padding: 16px 12px 0;
+  border-bottom: 1px solid var(--rule);
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.spacer {
+  padding: 0;
+  border: 0;
+}
+
+.reveal {
+  animation: rise 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 28ms);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 32px;
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.empty p {
+  margin: 0;
+}
+
+.emptyTitle {
+  margin-bottom: 4px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Phones: the numbers scroll sideways under the item, which stays put. */
+@media (max-width: 759px) {
+  .scroller {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 770px;
+  }
+
+  .itemColumn {
+    width: 190px;
+  }
+
+  .table thead th:first-child,
+  .item {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--bg);
+  }
+
+  .table thead th:first-child {
+    z-index: 3;
+  }
+
+  .itemInner img {
+    display: none;
+  }
+}

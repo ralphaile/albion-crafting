@@ -61,7 +61,7 @@ function renderBestCrafts(getPrices: MarketData["getPrices"]) {
   return marketData;
 }
 
-const everyPrice = /with every price/;
+const ranked = /ranked by/;
 
 describe("BestCrafts", () => {
   it("asks for the materials where it buys and the items where it sells, at quality 1", async () => {
@@ -70,7 +70,7 @@ describe("BestCrafts", () => {
     );
     renderBestCrafts(getPrices);
 
-    await screen.findByText(everyPrice);
+    await screen.findByText(ranked);
 
     expect(getPrices).toHaveBeenCalledTimes(2);
     expect(getPrices).toHaveBeenCalledWith(
@@ -102,18 +102,16 @@ describe("BestCrafts", () => {
       answer(noPrices);
     }
 
-    await screen.findByText(everyPrice);
+    await screen.findByText(ranked);
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("counts the crafts that have every price", async () => {
     renderBestCrafts((_itemIds, marketIds) => broadswordPrices(marketIds));
 
-    expect(
-      await screen.findByText(
-        `1 craft with every price, ${formatCount(recipes.length - 1)} crafts missing some`,
-      ),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(ranked)).toHaveTextContent(
+      `1 craft ranked by silver per focus · ${formatCount(recipes.length - 1)} crafts missing prices`,
+    );
   });
 
   it("uses the prices it has when only some batches fail", async () => {
@@ -122,7 +120,9 @@ describe("BestCrafts", () => {
       failures: [{ itemIds: [...itemIds], error: new Error("AODP is down") }],
     }));
 
-    expect(await screen.findByText(/^1 craft with every price/)).toBeVisible();
+    expect(await screen.findByText(ranked)).toHaveTextContent(
+      /^1 craft ranked/,
+    );
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -146,8 +146,19 @@ describe("BestCrafts", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
-    expect(await screen.findByText(/^1 craft with every price/)).toBeVisible();
+    expect(await screen.findByText(ranked)).toHaveTextContent(
+      /^1 craft ranked/,
+    );
     expect(getPrices).toHaveBeenCalledTimes(4);
+  });
+
+  it("says which route it's ranking", async () => {
+    renderBestCrafts((_itemIds, marketIds) => broadswordPrices(marketIds));
+
+    expect(screen.getByText(/^Crafting in/)).toHaveTextContent(
+      "Crafting in Lymhurst, buying in Martlock and selling in Caerleon, with focus",
+    );
+    await screen.findByText(ranked);
   });
 
   it("says what went wrong when fetching prices fails outright", async () => {
