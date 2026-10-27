@@ -1,50 +1,22 @@
-import { z } from "zod";
+import type { z } from "zod";
 
-import { createLimiter, type Limiter } from "./limiter.js";
-
-export type Region = "west" | "europe" | "east";
+import {
+  type AodpHistory,
+  type AodpPrice,
+  historySchema,
+  pricesSchema,
+} from "./aodp.schema.js";
+import type {
+  AodpClient,
+  AodpEvent,
+  BatchFailure,
+  Region,
+} from "./aodp.types.js";
+import { createLimiter } from "./limiter.helpers.js";
+import type { Limiter } from "./limiter.types.js";
 
 interface AodpClientOptions {
   region?: Region;
-}
-
-export interface BatchFailure {
-  itemIds: string[];
-  error: Error;
-}
-
-export type AodpEvent =
-  | { type: "progress"; done: number; total: number }
-  | { type: "waiting"; seconds: number }
-  | ({ type: "error" } & BatchFailure);
-
-export interface FetchOptions {
-  onEvent?: (event: AodpEvent) => void;
-}
-
-interface FetchedPrices {
-  prices: AodpPrice[];
-  failures: BatchFailure[];
-}
-
-interface FetchedHistory {
-  history: AodpHistory[];
-  failures: BatchFailure[];
-}
-
-export interface AodpClient {
-  getPrices(
-    itemIds: readonly string[],
-    marketIds: readonly string[],
-    qualities: readonly number[],
-    options?: FetchOptions,
-  ): Promise<FetchedPrices>;
-  getHistory(
-    itemIds: readonly string[],
-    marketIds: readonly string[],
-    qualities: readonly number[],
-    options?: FetchOptions,
-  ): Promise<FetchedHistory>;
 }
 
 const MAX_URL_LENGTH = 4096;
@@ -52,45 +24,6 @@ const MAX_ATTEMPTS = 3;
 const FIRST_BACKOFF_MS = 1000;
 const MINUTE_MS = 60_000;
 const CLOCK_MARGIN_MS = 1000;
-
-const date = z.iso.datetime({ local: true });
-
-export const NO_DATA_DATE = "0001-01-01T00:00:00";
-
-const pricesSchema = z.array(
-  z.object({
-    item_id: z.string(),
-    city: z.string(),
-    quality: z.int(),
-    sell_price_min: z.number(),
-    sell_price_min_date: date,
-    sell_price_max: z.number(),
-    sell_price_max_date: date,
-    buy_price_min: z.number(),
-    buy_price_min_date: date,
-    buy_price_max: z.number(),
-    buy_price_max_date: date,
-  }),
-);
-
-export type AodpPrice = z.output<typeof pricesSchema>[number];
-
-const historySchema = z.array(
-  z.object({
-    location: z.string(),
-    item_id: z.string(),
-    quality: z.int(),
-    data: z.array(
-      z.object({
-        item_count: z.int(),
-        avg_price: z.number(),
-        timestamp: date,
-      }),
-    ),
-  }),
-);
-
-export type AodpHistory = z.output<typeof historySchema>[number];
 
 interface Endpoint<T> {
   path: string;
@@ -327,9 +260,4 @@ function sleep(ms: number): Promise<void> {
 
 function toError(reason: unknown): Error {
   return reason instanceof Error ? reason : new Error(String(reason));
-}
-
-// AODP's dates are in UTC but don't say so, and a date without a zone reads as local time.
-export function parseAodpDate(date: string): number {
-  return Date.parse(date.endsWith("Z") ? date : `${date}Z`);
 }

@@ -1,6 +1,8 @@
 import { Dexie, type Table } from "dexie";
 
-import type { AodpHistory, AodpPrice, Region } from "./aodp.js";
+import type { AodpHistory, AodpPrice } from "./aodp.schema.js";
+import type { Region } from "./aodp.types.js";
+import type { RowKey, RowStore } from "./cache.types.js";
 
 interface StoredPrice extends AodpPrice {
   region: Region;
@@ -10,18 +12,6 @@ interface StoredPrice extends AodpPrice {
 interface StoredHistory extends AodpHistory {
   region: Region;
   fetchedAt: number;
-}
-
-export type RowKey = [
-  region: Region,
-  itemId: string,
-  marketId: string,
-  quality: number,
-];
-
-export interface RowStore<T> {
-  get(keys: readonly RowKey[]): Promise<T[]>;
-  put(rows: readonly T[]): Promise<void>;
 }
 
 interface CacheStore {

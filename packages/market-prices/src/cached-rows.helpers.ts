@@ -1,9 +1,6 @@
-import type { BatchFailure, FetchOptions, Region } from "./aodp.js";
-import type { RowKey, RowStore } from "./cache-store.js";
-
-export interface CachedFetchOptions extends FetchOptions {
-  force?: boolean;
-}
+import type { BatchFailure, FetchOptions, Region } from "./aodp.types.js";
+import type { RowKey, RowStore } from "./cache.types.js";
+import type { CachedFetchOptions } from "./cached-rows.types.js";
 
 const MINUTE_MS = 60_000;
 

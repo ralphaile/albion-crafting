@@ -1,7 +1,4 @@
-export interface Limiter {
-  run<T>(task: () => Promise<T>, onWait?: (ms: number) => void): Promise<T>;
-  pauseUntil(time: number): void;
-}
+import type { Limiter } from "./limiter.types.js";
 
 const CONCURRENCY = 3;
 const LIMITS = [

@@ -1,9 +1,4 @@
-export interface Market {
-  id: string;
-  name: string;
-  sellOnly?: boolean;
-  sparseData?: boolean;
-}
+import type { Market } from "./markets.types.js";
 
 export const markets: readonly Market[] = [
   { id: "Bridgewatch", name: "Bridgewatch" },

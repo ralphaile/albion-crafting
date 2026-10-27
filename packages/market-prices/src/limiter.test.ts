@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createLimiter, type Limiter } from "./limiter.js";
+import { createLimiter } from "./limiter.helpers.js";
+import type { Limiter } from "./limiter.types.js";
 
 beforeEach(() => {
   vi.useFakeTimers();

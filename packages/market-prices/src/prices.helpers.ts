@@ -1,28 +1,11 @@
-import type { OrderPrices } from "@aoc/core";
-
-import { type AodpPrice, NO_DATA_DATE, parseAodpDate } from "./aodp.js";
-
-export type ObservedPrice =
-  | { status: "missing" }
-  | {
-      status: "fresh" | "stale";
-      value: number;
-      observedAt: number;
-      ageMinutes: number;
-    };
-
-export interface ItemPrices extends OrderPrices {
-  itemId: string;
-  marketId: string;
-  quality: number;
-  sellMin: ObservedPrice;
-  buyMax: ObservedPrice;
-}
-
-export interface NormalizeOptions {
-  now?: number;
-  staleAfterMinutes?: number;
-}
+import { NO_DATA_DATE } from "./aodp.constants.js";
+import { parseAodpDate } from "./aodp.helpers.js";
+import type { AodpPrice } from "./aodp.schema.js";
+import type {
+  ItemPrices,
+  NormalizeOptions,
+  ObservedPrice,
+} from "./prices.types.js";
 
 const MINUTE_MS = 60_000;
 

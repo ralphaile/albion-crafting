@@ -1,56 +1,10 @@
-import {
-  type BatchFailure,
-  createAodpClient,
-  NO_DATA_DATE,
-  type Region,
-} from "./aodp.js";
-import { openCacheStore } from "./cache-store.js";
-import { type CachedFetchOptions, cachedRows } from "./cached-rows.js";
-import {
-  type HistorySummary,
-  summarizeHistory,
-  type SummarizeOptions,
-} from "./history.js";
-import { type ItemPrices, normalizePrices } from "./prices.js";
-
-export interface MarketDataOptions {
-  region?: Region;
-}
-
-export interface PricesOptions extends CachedFetchOptions {
-  staleAfterMinutes?: number;
-}
-
-export type HistoryOptions = CachedFetchOptions & SummarizeOptions;
-
-export interface PricesResult {
-  prices: ItemPrices[];
-  failures: BatchFailure[];
-  fetchedAt: number | undefined;
-}
-
-export interface HistoryResult {
-  history: HistorySummary[];
-  failures: BatchFailure[];
-  fetchedAt: number | undefined;
-}
-
-export interface MarketData {
-  readonly persistent: boolean;
-  getPrices(
-    itemIds: readonly string[],
-    marketIds: readonly string[],
-    qualities: readonly number[],
-    options?: PricesOptions,
-  ): Promise<PricesResult>;
-  getHistory(
-    itemIds: readonly string[],
-    marketIds: readonly string[],
-    qualities: readonly number[],
-    options?: HistoryOptions,
-  ): Promise<HistoryResult>;
-  clear(): Promise<void>;
-}
+import { createAodpClient } from "./aodp.client.js";
+import { NO_DATA_DATE } from "./aodp.constants.js";
+import { openCacheStore } from "./cache.store.js";
+import { cachedRows } from "./cached-rows.helpers.js";
+import { summarizeHistory } from "./history.helpers.js";
+import type { MarketData, MarketDataOptions } from "./market-data.types.js";
+import { normalizePrices } from "./prices.helpers.js";
 
 export async function openMarketData({
   region = "west",

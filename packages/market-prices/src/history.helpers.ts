@@ -1,17 +1,6 @@
-import { type AodpHistory, parseAodpDate } from "./aodp.js";
-
-export interface HistorySummary {
-  itemId: string;
-  marketId: string;
-  quality: number;
-  averagePrice: number | undefined;
-  averageDailyVolume: number;
-  newestDay: number | undefined;
-}
-
-export interface SummarizeOptions {
-  days?: number;
-}
+import { parseAodpDate } from "./aodp.helpers.js";
+import type { AodpHistory } from "./aodp.schema.js";
+import type { HistorySummary, SummarizeOptions } from "./history.types.js";
 
 const DAY_MS = 24 * 60 * 60_000;
 
