@@ -7,7 +7,12 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import { defaultSortKey, rank, type SortKey } from "@aoc/core";
+import {
+  defaultSortKey,
+  rank,
+  type SortDirection,
+  type SortKey,
+} from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
 import type { ObservedPrice } from "@aoc/market-prices";
 
@@ -30,6 +35,11 @@ const SORT_LABELS: Record<SortKey, string> = {
   margin: "margin",
   silverPerFocus: "silver per focus",
 };
+
+interface Sort {
+  key: SortKey;
+  direction: SortDirection;
+}
 
 function cx(...names: (string | false | undefined)[]) {
   return names.filter(Boolean).join(" ");
@@ -66,10 +76,16 @@ function pagesAround(current: number, count: number) {
   });
 }
 
-function Chevron({ className }: { className: string | undefined }) {
+function Chevron({
+  className,
+  up = false,
+}: {
+  className: string | undefined;
+  up?: boolean;
+}) {
   return (
     <svg className={className} viewBox="0 0 10 6" aria-hidden="true">
-      <path d="M1 1l4 4 4-4" />
+      <path d={up ? "M1 5l4-4 4 4" : "M1 1l4 4 4-4"} />
     </svg>
   );
 }
@@ -151,15 +167,15 @@ function SortHeader({
 }: {
   sortKey: SortKey;
   label: string;
-  active: SortKey;
+  active: Sort;
   onSort: (sortKey: SortKey) => void;
 }) {
-  const sorted = sortKey === active;
+  const sorted = sortKey === active.key;
   return (
     <th
       scope="col"
       className={cx(styles.number, sorted && styles.sorted)}
-      aria-sort={sorted ? "descending" : undefined}
+      aria-sort={sorted ? active.direction : undefined}
     >
       <button
         type="button"
@@ -169,7 +185,10 @@ function SortHeader({
         }}
       >
         {label}
-        <Chevron className={styles.arrow} />
+        <Chevron
+          className={styles.arrow}
+          up={sorted && active.direction === "ascending"}
+        />
       </button>
     </th>
   );
@@ -308,17 +327,25 @@ export function CraftsTable({
   crafts: readonly Craft[];
   focus: boolean;
 }) {
-  const [chosenSortKey, setSortKey] = useState<SortKey>();
-  const sortKey =
-    chosenSortKey === undefined ||
-    (chosenSortKey === "silverPerFocus" && !focus)
-      ? defaultSortKey(focus)
-      : chosenSortKey;
+  const [chosenSort, setChosenSort] = useState<Sort>();
+  const sort: Sort =
+    chosenSort === undefined || (chosenSort.key === "silverPerFocus" && !focus)
+      ? { key: defaultSortKey(focus), direction: "descending" }
+      : chosenSort;
+  const { key: sortKey, direction } = sort;
   // Remembers what the page was chosen for, so new crafts or a new sort start again at the first page.
-  const [chosenPage, setChosenPage] = useState({ crafts, sortKey, page: 0 });
+  const [chosenPage, setChosenPage] = useState({
+    crafts,
+    sortKey,
+    direction,
+    page: 0,
+  });
   const wide = useMediaQuery("(min-width: 1100px)");
   const ledgerRef = useRef<HTMLElement>(null);
-  const ranked = useMemo(() => rank(crafts, sortKey), [crafts, sortKey]);
+  const ranked = useMemo(
+    () => rank(crafts, sortKey, direction),
+    [crafts, sortKey, direction],
+  );
 
   if (crafts.length === 0) {
     return (
@@ -336,7 +363,9 @@ export function CraftsTable({
   const missing = plural(ranked.length - complete, "craft", "crafts");
   const pageCount = Math.ceil(ranked.length / PAGE_SIZE);
   const page =
-    chosenPage.crafts === crafts && chosenPage.sortKey === sortKey
+    chosenPage.crafts === crafts &&
+    chosenPage.sortKey === sortKey &&
+    chosenPage.direction === direction
       ? Math.min(chosenPage.page, pageCount - 1)
       : 0;
   const start = page * PAGE_SIZE;
@@ -345,9 +374,20 @@ export function CraftsTable({
     index + 2 + (firstIncomplete !== -1 && index >= firstIncomplete ? 1 : 0);
 
   function showPage(next: number) {
-    setChosenPage({ crafts, sortKey, page: next });
+    setChosenPage({ crafts, sortKey, direction, page: next });
     ledgerRef.current?.scrollIntoView({ block: "start" });
     ledgerRef.current?.focus({ preventScroll: true });
+  }
+
+  function sortBy(key: SortKey) {
+    setChosenSort(
+      key === sortKey
+        ? {
+            key,
+            direction: direction === "descending" ? "ascending" : "descending",
+          }
+        : { key, direction: "descending" },
+    );
   }
 
   return (
@@ -360,6 +400,7 @@ export function CraftsTable({
       <p className={styles.summary}>
         <strong>{plural(complete, "craft", "crafts")}</strong> ranked by{" "}
         {SORT_LABELS[sortKey]}
+        {direction === "ascending" && ", lowest first"}
         {complete < ranked.length && (
           <>
             {" · "}
@@ -401,21 +442,21 @@ export function CraftsTable({
               <SortHeader
                 sortKey="profit"
                 label="Profit"
-                active={sortKey}
-                onSort={setSortKey}
+                active={sort}
+                onSort={sortBy}
               />
               <SortHeader
                 sortKey="margin"
                 label="Margin"
-                active={sortKey}
-                onSort={setSortKey}
+                active={sort}
+                onSort={sortBy}
               />
               {focus && (
                 <SortHeader
                   sortKey="silverPerFocus"
                   label="Silver/focus"
-                  active={sortKey}
-                  onSort={setSortKey}
+                  active={sort}
+                  onSort={sortBy}
                 />
               )}
               {wide && (
@@ -435,7 +476,7 @@ export function CraftsTable({
             </tr>
           </thead>
           {/* A new key per page and sort lets the first rows rise in again. */}
-          <tbody key={`${sortKey}:${String(page)}`}>
+          <tbody key={`${sortKey}:${String(page)}:${direction}`}>
             {ranked.slice(start, start + PAGE_SIZE).map((craft, offset) => {
               const index = start + offset;
               return (

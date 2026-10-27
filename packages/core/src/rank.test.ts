@@ -87,6 +87,16 @@ describe("rank", () => {
     },
   );
 
+  it.each<[SortKey, string[]]>([
+    ["profit", ["E", "B", "F", "C", "A", "D"]],
+    ["margin", ["E", "C", "B", "F", "A", "D"]],
+  ])(
+    "sorts by %s lowest first when asked, still with results lacking it after the rest and incomplete ones last",
+    (sortKey, expected) => {
+      expect(ids(rank(results, sortKey, "ascending"))).toEqual(expected);
+    },
+  );
+
   it("keeps the order of results that tie", () => {
     expect(
       ids(rank([complete("X", 100), complete("Y", 100)], "profit")),

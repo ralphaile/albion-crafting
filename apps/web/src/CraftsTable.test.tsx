@@ -145,6 +145,29 @@ describe("CraftsTable", () => {
     );
   });
 
+  it("ranks lowest first when the sorted column is clicked again, and back", () => {
+    renderTable();
+    const silverPerFocus = () =>
+      screen.getByRole("columnheader", { name: "Silver/focus" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Silver/focus" }));
+
+    expect(itemsInOrder()).toEqual([
+      "Adept's Broadsword 4.0",
+      "Adept's Battleaxe 4.0",
+      "Adept's Bow 4.0",
+    ]);
+    expect(silverPerFocus()).toHaveAttribute("aria-sort", "ascending");
+    expect(screen.getByText(/ranked by/)).toHaveTextContent(
+      "ranked by silver per focus, lowest first",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Silver/focus" }));
+
+    expect(silverPerFocus()).toHaveAttribute("aria-sort", "descending");
+    expect(itemsInOrder()[0]).toBe("Adept's Battleaxe 4.0");
+  });
+
   it("shows a craft's profit, margin, silver per focus, costs and return rate", () => {
     renderTable();
     const broadsword = craft("T4_MAIN_SWORD");
