@@ -77,7 +77,7 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 
 ## Names, icons and search
 
-`src/generated/items.json` names every crafted item and every material its recipes use, and marks the crafted ones `"crafted": true`. The search covers only those, and builds its index when the app loads. The app uses them through `itemName`, `iconUrl` and `searchItems` from `@aoc/crafting-data`.
+`src/generated/items.json` names every crafted item and every material its recipes use, and marks the crafted ones `"crafted": true`. The search covers only those, and builds its index when the app loads. The app uses them through `itemName`, `iconUrl` and `searchItems` from `@aoc/crafting-data`; the crafts table's [name filter](filters.md) is `searchItems`.
 
 - **Names** are the `EN-US` names from `formatted/items.json`, keyed by `UniqueName`, which includes the enchanted IDs such as `T5_MAIN_SWORD@1`. The other languages are left out, because some of them have encoding problems.
 - **Tier and enchantment** are added to the name: `T5_MAIN_SWORD@1` is "Expert's Broadsword 5.1", and `T5_MAIN_SWORD` is "Expert's Broadsword 5.0". An ID that doesn't start with a tier, such as `QUESTITEM_TOKEN_ROYAL_T4` ("Adept's Royal Sigil"), keeps its name as it is.

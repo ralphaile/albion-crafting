@@ -6,7 +6,6 @@ import styles from "./App.module.css";
 import { BestCrafts } from "./BestCrafts";
 import { type Filters, NO_FILTERS } from "./filters";
 import { filtersFromSearch, searchWithFilters } from "./filters-url";
-import { ItemSearch } from "./ItemSearch";
 import { DEFAULT_ROUTE } from "./route";
 import type { FilterStore } from "./saved-filters";
 import { DEFAULT_SETTINGS } from "./settings";
@@ -46,7 +45,6 @@ export function App({
         </p>
       </header>
       <main className={styles.main}>
-        <ItemSearch />
         <BestCrafts
           marketData={marketData}
           route={DEFAULT_ROUTE}

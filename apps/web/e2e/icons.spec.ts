@@ -4,27 +4,16 @@ import { expect, ICON_ORIGIN, test } from "./test";
 
 const BROADSWORD_ICON = `${ICON_ORIGIN}/v1/item/T5_MAIN_SWORD@1.png?quality=1&size=64`;
 
-async function searchFor(page: Page, query: string) {
-  await page.goto("./");
-  await page.getByRole("searchbox", { name: "Search items" }).fill(query);
-  return page
-    .getByRole("list", { name: "Matching items" })
-    .getByRole("listitem");
+async function broadswordIcon(page: Page) {
+  await page.goto(`./?${new URLSearchParams({ q: "broadsword 5.1" })}`);
+  const rows = page.getByRole("rowheader");
+  await expect(rows).toHaveText([/^Expert's Broadsword5\.1/]);
+  return rows.locator("img");
 }
 
-test("searching lists the matching items with their names and icons", async ({
-  page,
-}) => {
-  const items = await searchFor(page, "Expert broad");
+test("each craft shows its item's icon", async ({ page }) => {
+  const icon = await broadswordIcon(page);
 
-  await expect(items).toHaveText([
-    "Expert's Broadsword 5.0",
-    "Expert's Broadsword 5.1",
-    "Expert's Broadsword 5.2",
-    "Expert's Broadsword 5.3",
-    "Expert's Broadsword 5.4",
-  ]);
-  const icon = items.nth(1).locator("img");
   await expect(icon).toHaveAttribute("src", BROADSWORD_ICON);
   await expect
     .poll(() => icon.evaluate((image: HTMLImageElement) => image.naturalWidth))
@@ -46,8 +35,7 @@ test("an icon that fails once loads when it's tried again", async ({
     },
   );
 
-  const items = await searchFor(page, "broadsword 5.1");
-  const icon = items.locator("img");
+  const icon = await broadswordIcon(page);
 
   await expect.poll(() => requests).toBe(2);
   await expect(icon).toHaveAttribute("src", BROADSWORD_ICON);
@@ -71,12 +59,9 @@ test("an icon that keeps failing shows a placeholder after three tries", async (
     (route) => route.fulfill({ status: 404, body: "" }),
   );
 
-  const items = await searchFor(page, "broadsword 5.1");
+  const icon = await broadswordIcon(page);
 
-  await expect(items.locator("img")).toHaveAttribute(
-    "src",
-    /^data:image\/svg\+xml,/,
-  );
+  await expect(icon).toHaveAttribute("src", /^data:image\/svg\+xml,/);
   const failed =
     "Failed to load resource: the server responded with a status of 404 (Not Found)";
   await expect
