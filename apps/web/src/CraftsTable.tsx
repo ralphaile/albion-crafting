@@ -413,7 +413,7 @@ export function CraftsTable({
             <col className={styles.itemColumn} />
             <col className={styles.silverColumn} />
             <col className={styles.percentColumn} />
-            {focus && <col className={styles.percentColumn} />}
+            {focus && <col className={styles.silverPerFocusColumn} />}
             {wide && (
               <>
                 <col className={styles.silverColumn} />

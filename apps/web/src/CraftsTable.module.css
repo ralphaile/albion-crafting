@@ -50,6 +50,10 @@
   width: 104px;
 }
 
+.silverPerFocusColumn {
+  width: 124px;
+}
+
 .pricesColumn {
   width: 164px;
 }
@@ -107,7 +111,7 @@
   transition: opacity 120ms ease-out;
 }
 
-.sortButton:hover .arrow {
+:not(.sorted) > .sortButton:hover .arrow {
   opacity: 0.5;
 }
 
