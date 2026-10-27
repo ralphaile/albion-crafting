@@ -1,6 +1,11 @@
 .ledger {
   display: grid;
   gap: 10px;
+  scroll-margin-top: 16px;
+}
+
+.ledger:focus {
+  outline: none;
 }
 
 .summary {
@@ -12,6 +17,21 @@
 .summary strong {
   color: var(--text);
   font-weight: 700;
+}
+
+.jump {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.jump:hover {
+  color: var(--text);
+  text-decoration-style: solid;
 }
 
 .table {
@@ -278,9 +298,99 @@
   vertical-align: middle;
 }
 
-.spacer {
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-top: 8px;
+}
+
+.range {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.pages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pageList {
+  display: flex;
+  gap: 2px;
+  margin: 0;
   padding: 0;
-  border: 0;
+  list-style: none;
+}
+
+.pageButton,
+.step {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.pageButton:hover,
+.step:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+/* The current page is stamped like a tier plate. */
+.pageButton[aria-current="page"] {
+  border-color: var(--brass);
+  color: var(--brass);
+  font-weight: 700;
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-caps);
+  letter-spacing: 0.04em;
+}
+
+.step:disabled {
+  opacity: 0.4;
+}
+
+.previous,
+.next {
+  width: 10px;
+  height: 6px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.previous {
+  transform: rotate(90deg);
+}
+
+.next {
+  transform: rotate(-90deg);
+}
+
+.gap {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  color: var(--text-faint);
 }
 
 .reveal {
@@ -352,5 +462,31 @@
 
   .itemInner img {
     display: none;
+  }
+
+  .row > * {
+    padding-block: 7px;
+  }
+
+  .nameLine {
+    flex-wrap: wrap;
+    row-gap: 3px;
+  }
+
+  .name {
+    flex-basis: 100%;
+  }
+
+  .stepLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .pager {
+    justify-content: center;
   }
 }

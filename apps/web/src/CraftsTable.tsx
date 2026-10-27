@@ -1,8 +1,6 @@
-import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import {
   type CSSProperties,
-  type RefObject,
-  useEffect,
+  Fragment,
   useMemo,
   useRef,
   useState,
@@ -24,18 +22,14 @@ import {
 } from "./format";
 import { ItemIcon } from "./ItemIcon";
 
-const ROW_HEIGHT = 52;
+export const PAGE_SIZE = 50;
 const REVEALED_ROWS = 14;
-const REVEAL_MS = 1000;
 
 const SORT_LABELS: Record<SortKey, string> = {
   profit: "profit per craft",
   margin: "margin",
   silverPerFocus: "silver per focus",
 };
-
-type Line =
-  { kind: "craft"; craft: Craft } | { kind: "divider"; count: number };
 
 function cx(...names: (string | false | undefined)[]) {
   return names.filter(Boolean).join(" ");
@@ -58,36 +52,95 @@ function useMediaQuery(query: string) {
   );
 }
 
-// Where the rows start on the page, which moves when anything above them grows.
-function useOffsetTop(ref: RefObject<HTMLElement | null>) {
-  const [offsetTop, setOffsetTop] = useState(0);
-  useEffect(() => {
-    const element = ref.current;
-    if (element === null) {
-      return;
+// The first and last pages, and the ones either side of the current page.
+function pagesAround(current: number, count: number) {
+  const shown = [...new Set([0, current - 1, current, current + 1, count - 1])]
+    .filter((page) => page >= 0 && page < count)
+    .sort((a, b) => a - b);
+  return shown.flatMap((page, index): (number | "gap")[] => {
+    const previous = shown[index - 1];
+    if (previous === undefined || page === previous + 1) {
+      return [page];
     }
-    const observer = new ResizeObserver(() => {
-      setOffsetTop(element.getBoundingClientRect().top + window.scrollY);
-    });
-    observer.observe(document.body);
-    return () => {
-      observer.disconnect();
-    };
-  }, [ref]);
-  return offsetTop;
+    return page === previous + 2 ? [previous + 1, page] : ["gap", page];
+  });
 }
 
-function useRevealing() {
-  const [revealing, setRevealing] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setRevealing(false);
-    }, REVEAL_MS);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, []);
-  return revealing;
+function Chevron({ className }: { className: string | undefined }) {
+  return (
+    <svg className={className} viewBox="0 0 10 6" aria-hidden="true">
+      <path d="M1 1l4 4 4-4" />
+    </svg>
+  );
+}
+
+function Pager({
+  page,
+  pageCount,
+  total,
+  onPage,
+}: {
+  page: number;
+  pageCount: number;
+  total: number;
+  onPage: (page: number) => void;
+}) {
+  const first = page * PAGE_SIZE + 1;
+  const last = Math.min(total, (page + 1) * PAGE_SIZE);
+  return (
+    <nav className={styles.pager} aria-label="Pages">
+      <p className={styles.range}>
+        Crafts {formatCount(first)}–{formatCount(last)} of {formatCount(total)}
+      </p>
+      <div className={styles.pages}>
+        <button
+          type="button"
+          className={styles.step}
+          disabled={page === 0}
+          onClick={() => {
+            onPage(page - 1);
+          }}
+        >
+          <Chevron className={styles.previous} />
+          <span className={styles.stepLabel}>Previous</span>
+        </button>
+        <ol className={styles.pageList}>
+          {pagesAround(page, pageCount).map((entry, index) =>
+            entry === "gap" ? (
+              <li key={`gap-${String(index)}`} className={styles.gap}>
+                …
+              </li>
+            ) : (
+              <li key={entry}>
+                <button
+                  type="button"
+                  className={styles.pageButton}
+                  aria-label={`Page ${String(entry + 1)}`}
+                  aria-current={entry === page ? "page" : undefined}
+                  onClick={() => {
+                    onPage(entry);
+                  }}
+                >
+                  {formatCount(entry + 1)}
+                </button>
+              </li>
+            ),
+          )}
+        </ol>
+        <button
+          type="button"
+          className={styles.step}
+          disabled={page === pageCount - 1}
+          onClick={() => {
+            onPage(page + 1);
+          }}
+        >
+          <span className={styles.stepLabel}>Next</span>
+          <Chevron className={styles.next} />
+        </button>
+      </div>
+    </nav>
+  );
 }
 
 function SortHeader({
@@ -116,9 +169,7 @@ function SortHeader({
         }}
       >
         {label}
-        <svg className={styles.arrow} viewBox="0 0 10 6" aria-hidden="true">
-          <path d="M1 1l4 4 4-4" />
-        </svg>
+        <Chevron className={styles.arrow} />
       </button>
     </th>
   );
@@ -156,14 +207,14 @@ function CraftRow({
   sortKey,
   focus,
   wide,
-  reveal,
+  revealOrder,
 }: {
   craft: Craft;
   rowIndex: number;
   sortKey: SortKey;
   focus: boolean;
   wide: boolean;
-  reveal: boolean;
+  revealOrder: number | undefined;
 }) {
   const { recipe } = craft;
   const complete = craft.status === "complete" ? craft : undefined;
@@ -190,9 +241,13 @@ function CraftRow({
       className={cx(
         styles.row,
         complete === undefined && styles.incomplete,
-        reveal && styles.reveal,
+        revealOrder !== undefined && styles.reveal,
       )}
-      style={reveal ? ({ "--i": rowIndex } as CSSProperties) : undefined}
+      style={
+        revealOrder === undefined
+          ? undefined
+          : ({ "--i": revealOrder } as CSSProperties)
+      }
     >
       <th scope="row" className={styles.item}>
         <span className={styles.itemInner}>
@@ -259,38 +314,11 @@ export function CraftsTable({
     (chosenSortKey === "silverPerFocus" && !focus)
       ? defaultSortKey(focus)
       : chosenSortKey;
+  // Remembers what the page was chosen for, so new crafts or a new sort start again at the first page.
+  const [chosenPage, setChosenPage] = useState({ crafts, sortKey, page: 0 });
   const wide = useMediaQuery("(min-width: 1100px)");
-  const revealing = useRevealing();
-  const bodyRef = useRef<HTMLTableSectionElement>(null);
-  const scrollMargin = useOffsetTop(bodyRef);
-
-  const lines = useMemo((): Line[] => {
-    const ranked = rank(crafts, sortKey);
-    const firstIncomplete = ranked.findIndex(
-      ({ status }) => status === "incomplete",
-    );
-    const lineOf = (craft: Craft): Line => ({ kind: "craft", craft });
-    return firstIncomplete === -1
-      ? ranked.map(lineOf)
-      : [
-          ...ranked.slice(0, firstIncomplete).map(lineOf),
-          { kind: "divider", count: ranked.length - firstIncomplete },
-          ...ranked.slice(firstIncomplete).map(lineOf),
-        ];
-  }, [crafts, sortKey]);
-
-  const virtualizer = useWindowVirtualizer({
-    count: lines.length,
-    estimateSize: () => ROW_HEIGHT,
-    overscan: 10,
-    scrollMargin,
-  });
-  const rows = virtualizer.getVirtualItems();
-  const spaceAbove = (rows[0]?.start ?? scrollMargin) - scrollMargin;
-  const spaceBelow =
-    virtualizer.getTotalSize() -
-    ((rows.at(-1)?.end ?? scrollMargin) - scrollMargin);
-  const columns = 5 + (focus ? 1 : 0) + (wide ? 2 : 0);
+  const ledgerRef = useRef<HTMLElement>(null);
+  const ranked = useMemo(() => rank(crafts, sortKey), [crafts, sortKey]);
 
   if (crafts.length === 0) {
     return (
@@ -301,24 +329,58 @@ export function CraftsTable({
     );
   }
 
-  const complete = crafts.filter(({ status }) => status === "complete").length;
-  const spacer = (height: number) =>
-    height > 0 && (
-      <tr aria-hidden="true">
-        <td colSpan={columns} className={styles.spacer} style={{ height }} />
-      </tr>
-    );
+  const firstIncomplete = ranked.findIndex(
+    ({ status }) => status === "incomplete",
+  );
+  const complete = firstIncomplete === -1 ? ranked.length : firstIncomplete;
+  const missing = plural(ranked.length - complete, "craft", "crafts");
+  const pageCount = Math.ceil(ranked.length / PAGE_SIZE);
+  const page =
+    chosenPage.crafts === crafts && chosenPage.sortKey === sortKey
+      ? Math.min(chosenPage.page, pageCount - 1)
+      : 0;
+  const start = page * PAGE_SIZE;
+  const columns = 5 + (focus ? 1 : 0) + (wide ? 2 : 0);
+  const rowIndexOf = (index: number) =>
+    index + 2 + (firstIncomplete !== -1 && index >= firstIncomplete ? 1 : 0);
+
+  function showPage(next: number) {
+    setChosenPage({ crafts, sortKey, page: next });
+    ledgerRef.current?.scrollIntoView({ block: "start" });
+    ledgerRef.current?.focus({ preventScroll: true });
+  }
 
   return (
-    <section className={styles.ledger} aria-label="Best crafts">
+    <section
+      ref={ledgerRef}
+      className={styles.ledger}
+      aria-label="Best crafts"
+      tabIndex={-1}
+    >
       <p className={styles.summary}>
         <strong>{plural(complete, "craft", "crafts")}</strong> ranked by{" "}
         {SORT_LABELS[sortKey]}
-        {complete < crafts.length &&
-          ` · ${plural(crafts.length - complete, "craft", "crafts")} missing prices`}
+        {complete < ranked.length && (
+          <>
+            {" · "}
+            <button
+              type="button"
+              className={styles.jump}
+              aria-label={`Go to the ${missing} missing prices`}
+              onClick={() => {
+                showPage(Math.floor(complete / PAGE_SIZE));
+              }}
+            >
+              {missing} missing prices
+            </button>
+          </>
+        )}
       </p>
       <div className={styles.scroller}>
-        <table className={styles.table} aria-rowcount={lines.length + 1}>
+        <table
+          className={styles.table}
+          aria-rowcount={ranked.length + (firstIncomplete === -1 ? 1 : 2)}
+        >
           <colgroup>
             <col className={styles.itemColumn} />
             <col className={styles.silverColumn} />
@@ -372,42 +434,39 @@ export function CraftsTable({
               <th scope="col">Prices</th>
             </tr>
           </thead>
-          <tbody ref={bodyRef}>
-            {spacer(spaceAbove)}
-            {rows.map(({ index }) => {
-              const line = lines[index];
-              if (line === undefined) {
-                return null;
-              }
-              if (line.kind === "divider") {
-                return (
-                  <tr
-                    key="divider"
-                    aria-rowindex={index + 2}
-                    className={styles.divider}
-                  >
-                    <td colSpan={columns}>
-                      Missing prices · {plural(line.count, "craft", "crafts")}
-                    </td>
-                  </tr>
-                );
-              }
+          {/* A new key per page and sort lets the first rows rise in again. */}
+          <tbody key={`${sortKey}:${String(page)}`}>
+            {ranked.slice(start, start + PAGE_SIZE).map((craft, offset) => {
+              const index = start + offset;
               return (
-                <CraftRow
-                  key={line.craft.itemId}
-                  craft={line.craft}
-                  rowIndex={index + 2}
-                  sortKey={sortKey}
-                  focus={focus}
-                  wide={wide}
-                  reveal={revealing && index < REVEALED_ROWS}
-                />
+                <Fragment key={craft.itemId}>
+                  {index === firstIncomplete && (
+                    <tr aria-rowindex={index + 2} className={styles.divider}>
+                      <td colSpan={columns}>Missing prices · {missing}</td>
+                    </tr>
+                  )}
+                  <CraftRow
+                    craft={craft}
+                    rowIndex={rowIndexOf(index)}
+                    sortKey={sortKey}
+                    focus={focus}
+                    wide={wide}
+                    revealOrder={offset < REVEALED_ROWS ? offset : undefined}
+                  />
+                </Fragment>
               );
             })}
-            {spacer(spaceBelow)}
           </tbody>
         </table>
       </div>
+      {pageCount > 1 && (
+        <Pager
+          page={page}
+          pageCount={pageCount}
+          total={ranked.length}
+          onPage={showPage}
+        />
+      )}
     </section>
   );
 }

@@ -1,13 +1,18 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import type { EvaluateSettings } from "@aoc/core";
+import { type EvaluateSettings, pricesNeeded } from "@aoc/core";
 import { type GameRecipe, recipes } from "@aoc/crafting-data";
 import type { ItemPrices, ObservedPrice } from "@aoc/market-prices";
 
 import { type Craft, type CraftPrices, evaluateCrafts } from "./best-crafts";
-import { CraftsTable } from "./CraftsTable";
-import { formatPercent, formatSilver, formatSilverPerFocus } from "./format";
+import { CraftsTable, PAGE_SIZE } from "./CraftsTable";
+import {
+  formatCount,
+  formatPercent,
+  formatSilver,
+  formatSilverPerFocus,
+} from "./format";
 import { DEFAULT_ROUTE } from "./route";
 import { DEFAULT_SETTINGS } from "./settings";
 
@@ -67,6 +72,20 @@ function craft(itemId: string) {
     throw new Error(`${itemId} isn't complete`);
   }
   return found;
+}
+
+const unpriced = evaluateCrafts(
+  recipes,
+  DEFAULT_ROUTE.place,
+  DEFAULT_SETTINGS,
+  {
+    materials: [],
+    products: [],
+  },
+);
+
+function rangeShown() {
+  return screen.getByText(/^Crafts /).textContent;
 }
 
 function renderTable(given: readonly Craft[] = crafts, focus = true) {
@@ -202,19 +221,90 @@ describe("CraftsTable", () => {
     ).toHaveAttribute("aria-sort", "descending");
   });
 
-  it("puts only the rows near the screen on the page", () => {
-    renderTable(
-      evaluateCrafts(recipes, DEFAULT_ROUTE.place, DEFAULT_SETTINGS, {
-        materials: [],
-        products: [],
-      }),
-    );
+  it("shows 50 crafts a page, and moves between pages", () => {
+    renderTable(unpriced);
+    const total = formatCount(recipes.length);
 
+    expect(screen.getAllByRole("rowheader")).toHaveLength(PAGE_SIZE);
     expect(screen.getByRole("table")).toHaveAttribute(
       "aria-rowcount",
       String(recipes.length + 2),
     );
-    expect(screen.getAllByRole("rowheader").length).toBeLessThan(50);
+    expect(rangeShown()).toBe(`Crafts 1–50 of ${total}`);
+    expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+
+    expect(rangeShown()).toBe(`Crafts 51–100 of ${total}`);
+    expect(screen.getByRole("button", { name: "Page 2" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getAllByRole("rowheader")[0]?.closest("tr")).toHaveAttribute(
+      "aria-rowindex",
+      "53",
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: `Page ${formatCount(Math.ceil(recipes.length / PAGE_SIZE))}`,
+      }),
+    );
+
+    expect(rangeShown()).toMatch(new RegExp(`–${total} of ${total}$`));
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+  });
+
+  it("goes back to the first page when the sort changes", () => {
+    renderTable(unpriced);
+
+    fireEvent.click(screen.getByRole("button", { name: "Page 2" }));
+    fireEvent.click(screen.getByRole("button", { name: "Margin" }));
+
+    expect(rangeShown()).toMatch(/^Crafts 1–50 of/);
+  });
+
+  it("goes to the page where the crafts missing prices start", () => {
+    const needed = pricesNeeded(recipes);
+    const somePriced = evaluateCrafts(
+      recipes,
+      DEFAULT_ROUTE.place,
+      DEFAULT_SETTINGS,
+      {
+        materials: needed.materials.map((id) => sellsAt(id, seen(100, 30))),
+        products: needed.products
+          .slice(0, 300)
+          .map((id) => sellsAt(id, seen(5000, 30))),
+      },
+    );
+    const complete = somePriced.filter(
+      ({ status }) => status === "complete",
+    ).length;
+    expect(complete).toBeGreaterThan(PAGE_SIZE);
+    renderTable(somePriced);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /^Go to the .* missing prices$/ }),
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: `Page ${String(Math.floor(complete / PAGE_SIZE) + 1)}`,
+      }),
+    ).toHaveAttribute("aria-current", "page");
+    expect(
+      screen.getByText(
+        `Missing prices · ${formatCount(recipes.length - complete)} crafts`,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("has no pages when every craft fits on one", () => {
+    renderTable();
+
+    expect(
+      screen.queryByRole("navigation", { name: "Pages" }),
+    ).not.toBeInTheDocument();
   });
 
   it("says when there's nothing to rank", () => {

@@ -2,7 +2,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
 
-// jsdom has neither: every screen counts as wide, and nothing ever resizes.
+// jsdom has no media queries and doesn't scroll: every screen counts as wide.
 window.matchMedia = (media) => ({
   matches: true,
   media,
@@ -14,11 +14,7 @@ window.matchMedia = (media) => ({
   dispatchEvent: () => false,
 });
 
-globalThis.ResizeObserver = class {
-  observe = vi.fn();
-  unobserve = vi.fn();
-  disconnect = vi.fn();
-};
+Element.prototype.scrollIntoView = vi.fn();
 
 afterEach(() => {
   cleanup();
