@@ -43,7 +43,7 @@ pnpm dev   # http://localhost:5173/albion-crafting/
 
 ## Project layout
 
-A pnpm + Turborepo monorepo. The web app uses Vite and React. Dashed parts come in a later release. [ADR-001](docs/adr/001-monorepo-with-a-pure-core.md) explains the split, and [ADR-004](docs/adr/004-core-owns-the-shared-types.md) why the packages use core's types.
+A pnpm + Turborepo monorepo. The web app uses Vite and React, styled with CSS Modules ([ADR-005](docs/adr/005-css-modules.md)). Dashed parts come in a later release. [ADR-001](docs/adr/001-monorepo-with-a-pure-core.md) explains the split, and [ADR-004](docs/adr/004-core-owns-the-shared-types.md) why the packages use core's types.
 
 ```mermaid
 flowchart LR

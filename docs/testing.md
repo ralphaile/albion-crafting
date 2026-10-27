@@ -102,6 +102,29 @@ Node has no IndexedDB, so tests that save prices import `fake-indexeddb/auto`, w
 
 To move the clock in these tests, fake only `Date`, with `vi.useFakeTimers({ toFake: ["Date"] })` and `vi.setSystemTime(...)`. fake-indexeddb runs its work with `setImmediate`, so faking every timer stops it.
 
+## Component tests
+
+Components that fetch prices take a `MarketData`, the object `openMarketData` returns, so a test passes a fake. `fakeMarketData()` in `apps/web/test/fake-market-data.ts` answers with no prices. Give it the methods a test needs:
+
+```ts
+import { fakeMarketData } from "../test/fake-market-data";
+
+const getPrices = vi.fn<MarketData["getPrices"]>(() =>
+  Promise.reject(new Error("AODP is down")),
+);
+render(
+  <BestCrafts
+    marketData={fakeMarketData({ getPrices })}
+    route={DEFAULT_ROUTE}
+    settings={DEFAULT_SETTINGS}
+  />,
+);
+```
+
+Its methods are `vi.fn`, so a test can also check what was asked for, such as `expect(getPrices).toHaveBeenCalledTimes(2)`. Example: `apps/web/src/BestCrafts.test.tsx`.
+
+jsdom lacks two browser features the app uses, so `apps/web/test/setup.ts` adds them: `matchMedia`, where every screen counts as wide, so tables show all their columns, and `scrollIntoView`, which does nothing.
+
 ## E2E tests
 
 `pnpm e2e` builds the web app, starts it with `vite preview` at `http://localhost:4173/albion-crafting/` and runs every `apps/web/e2e/*.spec.ts` file in headless Chromium. Every UI story adds or updates the scenarios for its journey.
@@ -125,7 +148,7 @@ test("the app loads and shows its title", async ({ page }) => {
 
 The `test` from `./test` adds two things to every test:
 
-- **A fake network.** Requests to anywhere other than the app are answered from the recorded responses in `packages/market-prices/test/fixtures`: `prices.json`, `history.json` and `prices-no-data.json`. Item icons from `https://render.albiononline.com` get a blank 64×64 SVG instead. A request with no recording is blocked and fails the test with `GET <url> has no recorded response`.
+- **A fake network.** Requests to anywhere other than the app are answered from the recorded responses in `packages/market-prices/test/fixtures`: `prices.json`, `history.json` and `prices-no-data.json`. AODP price requests that match no recording get AODP's no-data answer, as for an item nobody has seen. Item icons from `https://render.albiononline.com` get a blank 64×64 SVG instead. Any other request with no recording is blocked and fails the test with `GET <url> has no recorded response`.
 - **An error check.** The test fails if the browser console shows an error or the page throws one.
 
 Find elements by role, label or visible text, as in component tests.
@@ -152,6 +175,22 @@ expect(problems.splice(0)).toEqual([
   "Failed to load resource: the server responded with a status of 429 (Too Many Requests)",
 ]);
 ```
+
+### Prices for one test
+
+`answerPrices` answers AODP price requests from a short list, so a test can set the prices its journey needs without recording them. Call it before `page.goto`:
+
+```ts
+import { answerPrices } from "./test";
+
+await answerPrices(page, [
+  { itemId: "T4_METALBAR", marketId: "Lymhurst", sellMin: 100 },
+  { itemId: "T4_MAIN_SWORD", marketId: "Lymhurst", sellMin: 5000 },
+]);
+await page.goto("/");
+```
+
+Each price was seen `ageMinutes` ago, 30 by default. `buyMax` and `quality` can be given too. Every other item gets the no-data answer. Example: `e2e/best-crafts.spec.ts` checks the top craft's numbers against ones worked out by hand.
 
 ### Never the real AODP
 
