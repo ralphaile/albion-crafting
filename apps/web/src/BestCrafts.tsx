@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import type { CraftingPlace, EvaluateSettings } from "@aoc/core";
 import { type MarketData, markets } from "@aoc/market-prices";
 
@@ -7,6 +9,7 @@ import { CraftsTable } from "./CraftsTable";
 import { NO_FILTERS } from "./filters.constants";
 import { activeFilters } from "./filters.helpers";
 import type { Filters } from "./filters.types";
+import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import { useBestCrafts } from "./useBestCrafts";
 
@@ -64,7 +67,11 @@ export function BestCrafts({
   onFiltersChange?: UpdateFilters;
   persistent?: boolean;
 }) {
-  const bestCrafts = useBestCrafts(marketData, route, settings, filters);
+  const routeSettings = useMemo(
+    () => settingsForRoute(settings, route),
+    [settings, route],
+  );
+  const bestCrafts = useBestCrafts(marketData, route, routeSettings, filters);
   const filtered = activeFilters(filters).length > 0;
 
   return (

@@ -8,7 +8,7 @@ A source file's ending says what it exports, so you can tell what a file holds b
 | `.constants.ts` | Fixed values and defaults                                                         | `apps/web/src/settings.constants.ts`        |
 | `.helpers.ts`   | Functions                                                                         | `packages/core/src/revenue.helpers.ts`      |
 | `.client.ts`    | Functions that talk to a server                                                   | `packages/market-prices/src/aodp.client.ts` |
-| `.store.ts`     | Functions that keep data in the browser, in IndexedDB                             | `apps/web/src/saved-filters.store.ts`       |
+| `.store.ts`     | Functions that keep data in the browser, in IndexedDB                             | `apps/web/src/saved-settings.store.ts`      |
 | `.schema.ts`    | Zod schemas, the types inferred from them, and the functions that parse with them | `apps/web/src/filters.schema.ts`            |
 
 ## Rules

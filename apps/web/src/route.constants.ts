@@ -1,14 +1,10 @@
-import { craftingLocations } from "@aoc/crafting-data";
+import { routeFromChoice } from "./route.helpers";
+import type { Route, RouteChoice } from "./route.types";
 
-import type { Route } from "./route.types";
-
-const lymhurst = craftingLocations.find(({ name }) => name === "Lymhurst");
-if (lymhurst === undefined) {
-  throw new Error("Lymhurst is missing from the crafting locations");
-}
-
-export const DEFAULT_ROUTE: Route = {
-  place: { location: lymhurst },
+export const DEFAULT_ROUTE_CHOICE: RouteChoice = {
+  place: { kind: "location", locationId: "1000" },
   buyMarketId: "Lymhurst",
   sellMarketId: "Lymhurst",
 };
+
+export const DEFAULT_ROUTE: Route = routeFromChoice(DEFAULT_ROUTE_CHOICE);

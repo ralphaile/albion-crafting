@@ -12,26 +12,32 @@ import { createRoot } from "react-dom/client";
 import { openMarketData } from "@aoc/market-prices";
 
 import { App } from "./App";
-import { openFilterStore } from "./saved-filters.store";
+import { FILTERS_SETTING, ROUTE_SETTING } from "./saved-settings.constants";
+import { openSettingsStore } from "./saved-settings.store";
 
 const root = document.getElementById("root");
 if (!root) {
   throw new Error("Missing #root element in index.html");
 }
 
-const [marketData, filterStore] = await Promise.all([
+const [marketData, settingsStore] = await Promise.all([
   openMarketData(),
-  openFilterStore(),
+  openSettingsStore(),
 ]);
-// Loaded before the first render, so the first price request is already filtered.
-const savedFilters = await filterStore.load();
+// Loaded before the first render, so the first price request is already for
+// the saved route and filters.
+const [savedFilters, savedRoute] = await Promise.all([
+  settingsStore.load(FILTERS_SETTING),
+  settingsStore.load(ROUTE_SETTING),
+]);
 
 createRoot(root).render(
   <StrictMode>
     <App
       marketData={marketData}
-      filterStore={filterStore}
+      settingsStore={settingsStore}
       savedFilters={savedFilters}
+      savedRoute={savedRoute}
     />
   </StrictMode>,
 );
