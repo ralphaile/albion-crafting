@@ -3,6 +3,7 @@ import {
   evaluate,
   type EvaluateSettings,
   type Evaluation,
+  hasSpecialty,
 } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
 import type { ItemPrices, ObservedPrice } from "@aoc/market-prices";
@@ -40,7 +41,7 @@ export function evaluateCrafts(
     return {
       ...evaluation,
       recipe,
-      specialty: isSpecialty(evaluation.bonus),
+      specialty: hasSpecialty(place, recipe.craftingCategory),
       itemPrice:
         products.get(recipe.itemId)?.[evaluation.revenue.source] ?? MISSING,
       oldestMaterialPrice: oldest(
@@ -54,12 +55,6 @@ export function evaluateCrafts(
 
 function byItem(prices: readonly ItemPrices[]) {
   return new Map(prices.map((price) => [price.itemId, price]));
-}
-
-function isSpecialty(bonus: Evaluation["bonus"]) {
-  return "specialty" in bonus
-    ? bonus.specialty > 0
-    : bonus.mapQuality + bonus.powerSpecialist > 0;
 }
 
 function oldest(prices: readonly ObservedPrice[]) {

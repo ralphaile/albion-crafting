@@ -167,7 +167,7 @@ The engine's version is `revenue()` in `packages/core/src/revenue.ts`. It return
 
 ## Specialty bonus
 
-Each city and [Rest](#rest) specializes in some crafting categories, such as swords in Lymhurst. Crafting one of them there adds 0.15 to the [production bonus](#production-bonus). Islands have no specialty.
+Each city and [Rest](#rest) specializes in some crafting categories, such as swords in Lymhurst. Crafting one of them there adds 0.15 to the [production bonus](#production-bonus). Islands have no specialty. A hideout's specialties are its [biome](#biome)'s 5 categories, which get its [map quality](#hideout-map-quality) and specialist [power level](#power-level) bonuses. `hasSpecialty()` in `packages/core/src/specialty.ts` says whether a place gives a category its specialty, and the table marks those crafts **Specialty**.
 
 ## Tax and premium
 
