@@ -71,7 +71,13 @@ function renderBestCrafts(getPrices: MarketData["getPrices"]) {
   return marketData;
 }
 
-const ranked = /ranked by/;
+function bestCrafts() {
+  return screen.findByRole("region", { name: "Best crafts" });
+}
+
+function missingPrices(count: number) {
+  return screen.findByText(`Missing prices · ${formatCount(count)} crafts`);
+}
 
 describe("BestCrafts", () => {
   it("asks for the materials where it buys and the items where it sells, at quality 1", async () => {
@@ -80,7 +86,7 @@ describe("BestCrafts", () => {
     );
     renderBestCrafts(getPrices);
 
-    await screen.findByText(ranked);
+    await bestCrafts();
 
     expect(getPrices).toHaveBeenCalledTimes(2);
     expect(getPrices).toHaveBeenCalledWith(
@@ -112,16 +118,14 @@ describe("BestCrafts", () => {
       answer(noPrices);
     }
 
-    await screen.findByText(ranked);
+    await bestCrafts();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("counts the crafts that have every price", async () => {
     renderBestCrafts((_itemIds, marketIds) => broadswordPrices(marketIds));
 
-    expect(await screen.findByText(ranked)).toHaveTextContent(
-      `1 craft ranked by silver per focus · ${formatCount(recipes.length - 1)} crafts missing prices`,
-    );
+    expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
   });
 
   it("uses the prices it has when only some batches fail", async () => {
@@ -130,9 +134,7 @@ describe("BestCrafts", () => {
       failures: [{ itemIds: [...itemIds], error: new Error("AODP is down") }],
     }));
 
-    expect(await screen.findByText(ranked)).toHaveTextContent(
-      /^1 craft ranked/,
-    );
+    expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -156,9 +158,7 @@ describe("BestCrafts", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
-    expect(await screen.findByText(ranked)).toHaveTextContent(
-      /^1 craft ranked/,
-    );
+    expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
     expect(getPrices).toHaveBeenCalledTimes(4);
   });
 
@@ -220,7 +220,7 @@ describe("BestCrafts with filters", () => {
       enchants: [0],
       artifacts: "exclude",
     });
-    await screen.findByText(ranked);
+    await bestCrafts();
 
     const expected = recipes
       .filter(
@@ -246,7 +246,7 @@ describe("BestCrafts with filters", () => {
 
   it("asks again only when the filters let new items in", async () => {
     const getPrices = renderFiltered(swords);
-    await screen.findByText(ranked);
+    await bestCrafts();
     expect(getPrices).toHaveBeenCalledTimes(2);
 
     fireEvent.click(screen.getByRole("button", { name: "T4" }));
@@ -263,7 +263,7 @@ describe("BestCrafts with filters", () => {
 
   it("doesn't ask again when a minimum changes", async () => {
     const getPrices = renderFiltered(swords);
-    await screen.findByText(ranked);
+    await bestCrafts();
 
     fireEvent.change(screen.getByRole("spinbutton", { name: "Min profit" }), {
       target: { value: "1000" },
@@ -279,8 +279,8 @@ describe("BestCrafts with filters", () => {
 
   it("hides crafts below a minimum, and says so when none are left", async () => {
     renderFiltered({ ...swords, hideIncomplete: true });
-    expect(await screen.findByText(ranked)).toHaveTextContent(
-      /^1 craft ranked/,
+    expect(within(await bestCrafts()).getAllByRole("rowheader")).toHaveLength(
+      1,
     );
 
     fireEvent.change(screen.getByRole("spinbutton", { name: "Min profit" }), {
@@ -293,16 +293,12 @@ describe("BestCrafts with filters", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Clear all filters" }));
 
-    await waitFor(() => {
-      expect(screen.getByText(ranked)).toHaveTextContent(
-        `1 craft ranked by silver per focus · ${formatCount(recipes.length - 1)} crafts missing prices`,
-      );
-    });
+    expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
   });
 
   it("removes a filter with its chip, and all of them with Clear all", async () => {
     renderFiltered({ ...swords, tiers: [4, 5], specialtyOnly: true });
-    await screen.findByText(ranked);
+    await bestCrafts();
     const chips = () =>
       within(screen.getByRole("list", { name: "Active filters" }))
         .getAllByRole("button")
@@ -330,7 +326,7 @@ describe("BestCrafts with filters", () => {
 
   it("picks any mix of armor pieces, and a whole material or slot at once", async () => {
     renderFiltered({});
-    await screen.findByText(ranked);
+    await bestCrafts();
     const chips = () =>
       within(screen.getByRole("list", { name: "Active filters" }))
         .getAllByRole("button")
@@ -363,7 +359,7 @@ describe("BestCrafts with filters", () => {
 
   it("picks categories from a list that closes on Escape or a click outside", async () => {
     renderFiltered({});
-    await screen.findByText(ranked);
+    await bestCrafts();
 
     expect(categoryButton()).toHaveAccessibleName("Category All");
     expect(screen.queryByRole("group", { name: "Category" })).toBeNull();
@@ -388,7 +384,7 @@ describe("BestCrafts with filters", () => {
 
   it("filters by name once typing pauses", async () => {
     const getPrices = renderFiltered({});
-    await screen.findByText(ranked);
+    await bestCrafts();
 
     fireEvent.change(
       screen.getByRole("searchbox", { name: "Filter by name" }),
@@ -402,11 +398,9 @@ describe("BestCrafts with filters", () => {
         name: "Remove filter: Name: broadsword",
       }),
     ).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getByText(ranked)).toHaveTextContent(
-        `1 craft ranked by silver per focus · ${formatCount(searchItems("broadsword").length - 1)} crafts missing prices`,
-      );
-    });
+    expect(
+      await missingPrices(searchItems("broadsword").length - 1),
+    ).toBeInTheDocument();
     expect(getPrices).toHaveBeenCalledTimes(2);
   });
 });

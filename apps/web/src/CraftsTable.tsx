@@ -28,12 +28,6 @@ import { ItemIcon } from "./ItemIcon";
 
 export const PAGE_SIZE = 50;
 
-const SORT_LABELS: Record<SortKey, string> = {
-  profit: "profit per craft",
-  margin: "margin",
-  silverPerFocus: "silver per focus",
-};
-
 interface Sort {
   key: SortKey;
   direction: SortDirection;
@@ -395,26 +389,6 @@ export function CraftsTable({
       aria-label="Best crafts"
       tabIndex={-1}
     >
-      <p className={styles.summary}>
-        <strong>{plural(complete, "craft", "crafts")}</strong> ranked by{" "}
-        {SORT_LABELS[sortKey]}
-        {direction === "ascending" && ", lowest first"}
-        {complete < ranked.length && (
-          <>
-            {" · "}
-            <button
-              type="button"
-              className={styles.jump}
-              aria-label={`Go to the ${missing} missing prices`}
-              onClick={() => {
-                showPage(Math.floor(complete / PAGE_SIZE));
-              }}
-            >
-              {missing} missing prices
-            </button>
-          </>
-        )}
-      </p>
       <div className={styles.scroller}>
         <table
           className={styles.table}

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { type EvaluateSettings, pricesNeeded } from "@aoc/core";
+import type { EvaluateSettings } from "@aoc/core";
 import { type GameRecipe, recipes } from "@aoc/crafting-data";
 import type { ItemPrices, ObservedPrice } from "@aoc/market-prices";
 
@@ -120,9 +120,6 @@ describe("CraftsTable", () => {
       screen.getByRole("columnheader", { name: "Silver/focus" }),
     ).toHaveAttribute("aria-sort", "descending");
     expect(screen.getByText("Missing prices · 1 craft")).toBeInTheDocument();
-    expect(screen.getByText(/ranked by/)).toHaveTextContent(
-      "2 crafts ranked by silver per focus · 1 craft missing prices",
-    );
   });
 
   it("ranks by the column clicked", () => {
@@ -141,9 +138,6 @@ describe("CraftsTable", () => {
     expect(
       screen.getByRole("columnheader", { name: "Silver/focus" }),
     ).not.toHaveAttribute("aria-sort");
-    expect(screen.getByText(/ranked by/)).toHaveTextContent(
-      "ranked by profit per craft",
-    );
   });
 
   it("ranks lowest first when the sorted column is clicked again, and back", () => {
@@ -159,9 +153,6 @@ describe("CraftsTable", () => {
       "Adept's Bow 4.0",
     ]);
     expect(silverPerFocus()).toHaveAttribute("aria-sort", "ascending");
-    expect(screen.getByText(/ranked by/)).toHaveTextContent(
-      "ranked by silver per focus, lowest first",
-    );
 
     fireEvent.click(screen.getByRole("button", { name: "Silver/focus" }));
 
@@ -299,41 +290,6 @@ describe("CraftsTable", () => {
     fireEvent.click(screen.getByRole("button", { name: "Margin" }));
 
     expect(rangeShown()).toMatch(/^Crafts 1–50 of/);
-  });
-
-  it("goes to the page where the crafts missing prices start", () => {
-    const needed = pricesNeeded(recipes);
-    const somePriced = evaluateCrafts(
-      recipes,
-      DEFAULT_ROUTE.place,
-      DEFAULT_SETTINGS,
-      {
-        materials: needed.materials.map((id) => sellsAt(id, seen(100, 30))),
-        products: needed.products
-          .slice(0, 300)
-          .map((id) => sellsAt(id, seen(5000, 30))),
-      },
-    );
-    const complete = somePriced.filter(
-      ({ status }) => status === "complete",
-    ).length;
-    expect(complete).toBeGreaterThan(PAGE_SIZE);
-    renderTable(somePriced);
-
-    fireEvent.click(
-      screen.getByRole("button", { name: /^Go to the .* missing prices$/ }),
-    );
-
-    expect(
-      screen.getByRole("button", {
-        name: `Page ${String(Math.floor(complete / PAGE_SIZE) + 1)}`,
-      }),
-    ).toHaveAttribute("aria-current", "page");
-    expect(
-      screen.getByText(
-        `Missing prices · ${formatCount(recipes.length - complete)} crafts`,
-      ),
-    ).toBeInTheDocument();
   });
 
   it("has no pages when every craft fits on one", () => {

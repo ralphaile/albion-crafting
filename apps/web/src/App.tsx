@@ -62,9 +62,6 @@ export function App({
     <div className={styles.app}>
       <header className={styles.masthead}>
         <h1 className={styles.title}>Albion Crafting</h1>
-        <p className={styles.tagline}>
-          What to craft, priced from the Albion Online Data Project
-        </p>
       </header>
       <main className={styles.main}>
         <CraftingLocationBar route={routeChoice} onChange={setRouteChoice} />

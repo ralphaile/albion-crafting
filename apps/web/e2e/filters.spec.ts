@@ -28,12 +28,9 @@ test("a filtered link prices only its items, and the filters are kept", async ({
     "No artifacts",
     "No missing prices",
   ]);
-  await expect(page.getByText(/ranked by/)).toHaveText(
-    /^1 craft ranked by silver per focus$/,
-  );
-  await expect(page.getByRole("row").nth(1).getByRole("rowheader")).toHaveText(
-    /^Adept's Broadsword/,
-  );
+  await expect(
+    page.getByRole("region", { name: "Best crafts" }).getByRole("rowheader"),
+  ).toHaveText([/^Adept's Broadsword/]);
   // The three T4.0 swords without artifacts and their materials, not the whole catalog.
   expect([...requested].sort()).toEqual([
     "T4_2H_CLAYMORE",

@@ -8,32 +8,6 @@
   outline: none;
 }
 
-.summary {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-.summary strong {
-  color: var(--text);
-  font-weight: 700;
-}
-
-.jump {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
-}
-
-.jump:hover {
-  color: var(--text);
-  text-decoration-style: solid;
-}
-
 .table {
   width: 100%;
   border-collapse: separate;
