@@ -17,11 +17,17 @@ const hideout: RouteChoice = {
   sellMarketId: "Caerleon",
 };
 
-function renderApp({
-  savedFilters = NO_FILTERS,
+async function renderApp({
+  savedFilters,
   savedRoute,
 }: { savedFilters?: Filters; savedRoute?: RouteChoice } = {}) {
   const settingsStore = memorySettingsStore();
+  if (savedFilters !== undefined) {
+    await settingsStore.save(FILTERS_SETTING, savedFilters);
+  }
+  if (savedRoute !== undefined) {
+    await settingsStore.save(ROUTE_SETTING, savedRoute);
+  }
   render(
     <App
       marketData={fakeMarketData()}
@@ -42,37 +48,54 @@ describe("App", () => {
     window.history.replaceState(null, "", "/");
   });
 
-  it("shows the app title as a heading", () => {
-    renderApp();
+  it("shows the app title as a heading", async () => {
+    await renderApp();
 
     expect(
       screen.getByRole("heading", { name: "Albion Crafting" }),
     ).toBeInTheDocument();
   });
 
-  it("starts with the filters this browser saved", () => {
-    renderApp({ savedFilters: { ...NO_FILTERS, tiers: [6] } });
+  it("starts with the filters this browser saved", async () => {
+    await renderApp({ savedFilters: { ...NO_FILTERS, tiers: [6] } });
 
     expect(pressed("T6")).toBe("true");
     expect(window.location.search).toBe(`?${DEFAULT_ROUTE_SEARCH}&tier=6`);
   });
 
-  it("starts with a shared link's filters instead, and saves them", async () => {
+  it("starts with a shared link's filters instead, and saves them only once you change one", async () => {
     window.history.replaceState(null, "", "/?tier=7&artifacts=only");
-    const settingsStore = renderApp({
+    const settingsStore = await renderApp({
       savedFilters: { ...NO_FILTERS, tiers: [6] },
     });
 
     expect(pressed("T7")).toBe("true");
     expect(pressed("T6")).toBe("false");
     await expect(settingsStore.load(FILTERS_SETTING)).resolves.toMatchObject({
-      tiers: [7],
-      artifacts: "only",
+      tiers: [6],
+      artifacts: "include",
     });
+
+    fireEvent.click(screen.getByRole("button", { name: "T5" }));
+
+    await expect
+      .poll(() => settingsStore.load(FILTERS_SETTING))
+      .toMatchObject({ tiers: [5, 7], artifacts: "only" });
+  });
+
+  it("saves a change back to no filters", async () => {
+    const settingsStore = await renderApp();
+
+    fireEvent.click(screen.getByRole("button", { name: "T5" }));
+    fireEvent.click(screen.getByRole("button", { name: "T5" }));
+
+    await expect
+      .poll(() => settingsStore.load(FILTERS_SETTING))
+      .toMatchObject({ tiers: [] });
   });
 
   it("puts each change in the link and saves it", async () => {
-    const settingsStore = renderApp();
+    const settingsStore = await renderApp();
 
     fireEvent.click(screen.getByRole("button", { name: "T5" }));
 
@@ -84,8 +107,8 @@ describe("App", () => {
     });
   });
 
-  it("starts with the route this browser saved, and puts it in the link", () => {
-    renderApp({ savedRoute: hideout });
+  it("starts with the route this browser saved, and puts it in the link", async () => {
+    await renderApp({ savedRoute: hideout });
 
     expect(screen.getByText(/Crafting in/).textContent).toMatch(
       /buying in Martlock and selling in Caerleon/,
@@ -95,17 +118,13 @@ describe("App", () => {
     );
   });
 
-  it("starts with a shared link's route instead, and saves it", async () => {
+  it("starts with a shared link's route instead, and keeps the saved one", async () => {
     window.history.replaceState(null, "", "/?place=0000&buy=Thetford");
-    const settingsStore = renderApp({ savedRoute: hideout });
+    const settingsStore = await renderApp({ savedRoute: hideout });
 
     expect(screen.getByText(/Crafting in/).textContent).toMatch(
       /Crafting in Thetford, buying in Thetford and selling in Lymhurst/,
     );
-    await expect(settingsStore.load(ROUTE_SETTING)).resolves.toEqual({
-      place: { kind: "location", locationId: "0000" },
-      buyMarketId: "Thetford",
-      sellMarketId: "Lymhurst",
-    });
+    await expect(settingsStore.load(ROUTE_SETTING)).resolves.toEqual(hideout);
   });
 });

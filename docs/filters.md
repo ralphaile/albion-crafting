@@ -33,6 +33,6 @@ The filters are in the page's link, so you can bookmark or share it. Only filter
 | `specialty` | Specialty only                                                                                                                                          | `specialty=1`                          |
 | `q`         | Name                                                                                                                                                    | `q=broadsword`                         |
 
-The browser also saves them in IndexedDB ([ADR-002](adr/002-local-first-storage.md)), and the app opens with them next time. A link with filters wins over the saved ones and replaces them. Where IndexedDB isn't available, the filters last for the visit, and the panel says so.
+The browser also saves them in IndexedDB ([ADR-002](adr/002-local-first-storage.md)), and the app opens with them next time. A link with filters wins over the saved ones, but doesn't replace them: the saved filters change only when you change one. Where IndexedDB isn't available, the filters last for the visit, and the panel says so.
 
 A link or a saved value the app doesn't know is ignored, one filter at a time: `tier=4,9` keeps tier 4, and `profit=lots` leaves no minimum profit. A name longer than 100 characters is cut short. The saved filters carry a version number, and a version the app doesn't know is ignored.

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 import type { MarketData } from "@aoc/market-prices";
 
@@ -14,6 +14,7 @@ import type { RouteChoice } from "./route.types";
 import { FILTERS_SETTING, ROUTE_SETTING } from "./saved-settings.constants";
 import type { SettingsStore } from "./saved-settings.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
+import { useSavedSetting } from "./useSavedSetting";
 
 export function App({
   marketData,
@@ -27,11 +28,15 @@ export function App({
   savedRoute: RouteChoice | undefined;
 }) {
   // A shared link wins over what this browser saved.
-  const [filters, setFilters] = useState(
+  const [filters, setFilters] = useSavedSetting(
+    settingsStore,
+    FILTERS_SETTING,
     () =>
       filtersFromSearch(window.location.search) ?? savedFilters ?? NO_FILTERS,
   );
-  const [routeChoice] = useState(
+  const [routeChoice] = useSavedSetting(
+    settingsStore,
+    ROUTE_SETTING,
     () =>
       routeFromSearch(window.location.search) ??
       savedRoute ??
@@ -51,14 +56,6 @@ export function App({
       window.history.replaceState(window.history.state, "", url);
     }
   }, [filters, routeChoice]);
-
-  useEffect(() => {
-    void settingsStore.save(FILTERS_SETTING, filters);
-  }, [filters, settingsStore]);
-
-  useEffect(() => {
-    void settingsStore.save(ROUTE_SETTING, routeChoice);
-  }, [routeChoice, settingsStore]);
 
   return (
     <div className={styles.app}>
