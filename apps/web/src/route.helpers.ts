@@ -2,7 +2,18 @@ import type { CraftingPlace, EvaluateSettings } from "@aoc/core";
 import { craftingLocations, hideouts } from "@aoc/crafting-data";
 import { markets } from "@aoc/market-prices";
 
-import type { PlaceChoice, Route, RouteChoice } from "./route.types";
+import type {
+  HideoutChoice,
+  LocationChoice,
+  OptionGroup,
+  PlaceChoice,
+  Route,
+  RouteChoice,
+} from "./route.types";
+
+const FIRST_BIOME_ID = "SWAMP";
+const BEST_MAP_QUALITY = 6;
+const BEST_POWER_LEVEL = 9;
 
 function found<T>(rows: readonly T[], matches: (row: T) => boolean): T {
   const row = rows.find(matches);
@@ -12,7 +23,33 @@ function found<T>(rows: readonly T[], matches: (row: T) => boolean): T {
   return row;
 }
 
-function placeFromChoice(choice: PlaceChoice): CraftingPlace {
+export function optionGroups(
+  groups: readonly { label: string; names: readonly string[] }[],
+  rows: readonly { id: string; name: string }[],
+): OptionGroup[] {
+  return groups.map(({ label, names }) => ({
+    label,
+    options: names.map((name) => {
+      const row = found(rows, (other) => other.name === name);
+      return { id: row.id, label: row.name };
+    }),
+  }));
+}
+
+export function defaultHideoutFor({
+  locationId,
+}: LocationChoice): HideoutChoice {
+  return {
+    kind: "hideout",
+    biomeId:
+      hideouts.biomes.find(({ cityId }) => cityId === locationId)?.id ??
+      FIRST_BIOME_ID,
+    quality: BEST_MAP_QUALITY,
+    level: BEST_POWER_LEVEL,
+  };
+}
+
+export function placeFromChoice(choice: PlaceChoice): CraftingPlace {
   if (choice.kind === "location") {
     return {
       location: found(craftingLocations, ({ id }) => id === choice.locationId),

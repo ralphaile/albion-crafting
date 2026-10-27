@@ -1,10 +1,13 @@
 import { z } from "zod";
 
 import { craftingLocations, hideouts } from "@aoc/crafting-data";
-import { markets } from "@aoc/market-prices";
 
-import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
-import type { RouteChoice } from "./route.types";
+import {
+  BUY_MARKET_GROUPS,
+  DEFAULT_ROUTE_CHOICE,
+  SELL_MARKET_GROUPS,
+} from "./route.constants";
+import type { OptionGroup, RouteChoice } from "./route.types";
 
 function oneOf<T>(allowed: readonly T[]) {
   return (value: T) => allowed.includes(value);
@@ -27,10 +30,12 @@ const placeSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
-const buyMarketIds = markets
-  .filter(({ sellOnly }) => sellOnly !== true)
-  .map(({ id }) => id);
-const sellMarketIds = markets.map(({ id }) => id);
+function ids(groups: readonly OptionGroup[]) {
+  return groups.flatMap(({ options }) => options.map(({ id }) => id));
+}
+
+const buyMarketIds = ids(BUY_MARKET_GROUPS);
+const sellMarketIds = ids(SELL_MARKET_GROUPS);
 
 const routeSchema = z.object({
   place: placeSchema.catch(DEFAULT_ROUTE_CHOICE.place),

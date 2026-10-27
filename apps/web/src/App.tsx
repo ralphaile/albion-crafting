@@ -4,6 +4,7 @@ import type { MarketData } from "@aoc/market-prices";
 
 import styles from "./App.module.css";
 import { BestCrafts } from "./BestCrafts";
+import { CraftingLocationBar } from "./CraftingLocationBar";
 import { filtersFromSearch, searchWithFilters } from "./filters-url.helpers";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
@@ -34,7 +35,7 @@ export function App({
     () =>
       filtersFromSearch(window.location.search) ?? savedFilters ?? NO_FILTERS,
   );
-  const [routeChoice] = useSavedSetting(
+  const [routeChoice, setRouteChoice] = useSavedSetting(
     settingsStore,
     ROUTE_SETTING,
     () =>
@@ -62,11 +63,11 @@ export function App({
       <header className={styles.masthead}>
         <h1 className={styles.title}>Albion Crafting</h1>
         <p className={styles.tagline}>
-          What to craft for your route, priced from the Albion Online Data
-          Project
+          What to craft, priced from the Albion Online Data Project
         </p>
       </header>
       <main className={styles.main}>
+        <CraftingLocationBar route={routeChoice} onChange={setRouteChoice} />
         <BestCrafts
           marketData={marketData}
           route={route}

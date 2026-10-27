@@ -1,0 +1,209 @@
+/* Every field keeps its cell, so choosing a hideout fills empty cells
+   instead of pushing the markets or the preview aside. */
+.bar {
+  display: grid;
+  grid-template-areas:
+    "location biome quality level preview"
+    "buy sell note note preview";
+  grid-template-columns: 11.5em 10em 5.5em 5em minmax(0, 1fr);
+  gap: 12px 20px;
+  align-items: end;
+  padding: 14px 18px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.location {
+  grid-area: location;
+}
+
+.biome {
+  grid-area: biome;
+}
+
+.quality {
+  grid-area: quality;
+}
+
+.level {
+  grid-area: level;
+}
+
+.buy {
+  grid-area: buy;
+}
+
+.sell {
+  grid-area: sell;
+}
+
+.note {
+  grid-area: note;
+  margin: 0 0 7px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.previewArea {
+  grid-area: preview;
+  align-self: center;
+  justify-self: end;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.select {
+  width: 100%;
+  height: 34px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%)
+      calc(100% - 15px) 50% / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%)
+      calc(100% - 10px) 50% / 5px 5px no-repeat,
+    var(--bg);
+  color: var(--text);
+  font: inherit;
+  text-overflow: ellipsis;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 120ms ease-out;
+}
+
+.select:hover {
+  border-color: var(--text-faint);
+}
+
+.preview {
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+
+.preview th,
+.preview td {
+  padding: 3px 8px;
+  text-align: right;
+}
+
+.preview thead th {
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.preview thead th[scope="colgroup"] {
+  border-bottom: 1px solid var(--rule);
+  text-align: center;
+}
+
+.preview thead th[scope="col"]:nth-of-type(odd) {
+  width: 4.5em;
+}
+
+.preview thead th[scope="col"]:nth-of-type(even) {
+  width: 6.8em;
+}
+
+.preview tbody th {
+  width: 6em;
+  font-weight: 500;
+  text-align: left;
+}
+
+.preview tbody tr + tr {
+  border-top: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
+}
+
+.preview td {
+  color: var(--text-muted);
+}
+
+.preview .rate {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.specialty th,
+.preview .specialty .rate {
+  color: var(--brass);
+}
+
+.preview .none {
+  color: var(--text-faint);
+  font-style: italic;
+  text-align: center;
+}
+
+@media (max-width: 1120px) {
+  .bar {
+    grid-template-areas:
+      "location biome quality level"
+      "buy sell note note"
+      "preview preview preview preview";
+    grid-template-columns: 11.5em 10em 5.5em 5em;
+  }
+
+  .previewArea {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 560px) {
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+
+  .field,
+  .note,
+  .previewArea {
+    flex: 1 1 100%;
+  }
+
+  .quality,
+  .level,
+  .buy,
+  .sell {
+    flex-basis: calc(50% - 10px);
+  }
+
+  .previewArea {
+    min-width: 0;
+  }
+
+  .preview {
+    font-size: 13px;
+  }
+
+  .preview th,
+  .preview td {
+    padding: 2px 4px;
+  }
+
+  .preview thead th[scope="col"]:nth-of-type(n),
+  .preview tbody th {
+    width: auto;
+  }
+}

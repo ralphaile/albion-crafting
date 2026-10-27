@@ -494,7 +494,7 @@ export function CraftFilters({
       )}
       {!persistent && (
         <p className={styles.note}>
-          This browser can’t save your filters, but the page’s link keeps them.
+          This browser can’t save your choices, but the page’s link keeps them.
         </p>
       )}
     </section>

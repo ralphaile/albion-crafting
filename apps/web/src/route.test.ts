@@ -1,7 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
-import { routeFromChoice, settingsForRoute } from "./route.helpers";
+import { craftingLocations } from "@aoc/crafting-data";
+import { markets } from "@aoc/market-prices";
+
+import {
+  BUY_MARKET_GROUPS,
+  DEFAULT_ROUTE_CHOICE,
+  LOCATION_GROUPS,
+  SELL_MARKET_GROUPS,
+} from "./route.constants";
+import {
+  defaultHideoutFor,
+  optionGroups,
+  routeFromChoice,
+  settingsForRoute,
+} from "./route.helpers";
 import { parseRoute } from "./route.schema";
 import type { RouteChoice } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
@@ -47,6 +60,47 @@ describe("routeFromChoice", () => {
   });
 });
 
+describe("the picker's lists", () => {
+  const ids = (groups: typeof LOCATION_GROUPS) =>
+    groups.flatMap(({ options }) => options.map(({ id }) => id)).sort();
+
+  it("put every crafting location in one group", () => {
+    expect(ids(LOCATION_GROUPS)).toEqual(
+      craftingLocations.map(({ id }) => id).sort(),
+    );
+  });
+
+  it("sell in every market, and buy only in the cities", () => {
+    expect(ids(SELL_MARKET_GROUPS)).toEqual(markets.map(({ id }) => id).sort());
+    expect(ids(BUY_MARKET_GROUPS)).toEqual(
+      markets
+        .filter(({ sellOnly, sparseData }) => !sellOnly && !sparseData)
+        .map(({ id }) => id)
+        .sort(),
+    );
+  });
+
+  it("refuse a name the game data doesn't have", () => {
+    expect(() =>
+      optionGroups([{ label: "Cities", names: ["Atlantis"] }], markets),
+    ).toThrow("The route names a place the game data doesn't have");
+  });
+});
+
+describe("defaultHideoutFor", () => {
+  it("picks the biome that shares the city's specialties, at Q6 and level 9", () => {
+    expect(defaultHideoutFor({ kind: "location", locationId: "4000" })).toEqual(
+      { kind: "hideout", biomeId: "MOUNTAIN", quality: 6, level: 9 },
+    );
+  });
+
+  it("picks Swamp for a place without a biome", () => {
+    expect(
+      defaultHideoutFor({ kind: "location", locationId: "island" }),
+    ).toMatchObject({ biomeId: "SWAMP" });
+  });
+});
+
 describe("settingsForRoute", () => {
   it("sells to the Black Market's buy orders, whatever the sell mode", () => {
     const route = routeFromChoice({
@@ -89,10 +143,13 @@ describe("parseRoute", () => {
     });
   });
 
-  it("doesn't buy at the Black Market, which only buys", () => {
-    expect(
-      parseRoute({ ...hideout, buyMarketId: "Black Market" }).buyMarketId,
-    ).toBe(DEFAULT_ROUTE_CHOICE.buyMarketId);
+  it.each([
+    ["the Black Market, which only buys", "Black Market"],
+    ["a Rest", "Arthurs Rest Smugglers Network"],
+  ])("doesn't buy at %s", (_case, buyMarketId) => {
+    expect(parseRoute({ ...hideout, buyMarketId }).buyMarketId).toBe(
+      DEFAULT_ROUTE_CHOICE.buyMarketId,
+    );
   });
 
   it("drops a market it doesn't know, and keeps the rest", () => {

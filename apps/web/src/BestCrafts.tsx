@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
-import type { CraftingPlace, EvaluateSettings } from "@aoc/core";
-import { type MarketData, markets } from "@aoc/market-prices";
+import type { EvaluateSettings } from "@aoc/core";
+import type { MarketData } from "@aoc/market-prices";
 
 import styles from "./BestCrafts.module.css";
 import { CraftFilters, type UpdateFilters } from "./CraftFilters";
@@ -16,41 +16,6 @@ import { useBestCrafts } from "./useBestCrafts";
 const SKELETON_ROWS = 8;
 
 const IGNORE_FILTERS: UpdateFilters = () => undefined;
-
-function marketName(marketId: string) {
-  return markets.find(({ id }) => id === marketId)?.name ?? marketId;
-}
-
-function placeName(place: CraftingPlace) {
-  return "location" in place ? place.location.name : "your hideout";
-}
-
-function RouteLine({
-  route,
-  settings,
-}: {
-  route: Route;
-  settings: EvaluateSettings;
-}) {
-  const buy = marketName(route.buyMarketId);
-  const sell = marketName(route.sellMarketId);
-  return (
-    <p className={styles.route}>
-      Crafting in <strong>{placeName(route.place)}</strong>
-      {buy === sell ? (
-        <>
-          , buying and selling in <strong>{buy}</strong>
-        </>
-      ) : (
-        <>
-          , buying in <strong>{buy}</strong> and selling in{" "}
-          <strong>{sell}</strong>
-        </>
-      )}
-      {settings.focus ? ", with focus" : ", without focus"}
-    </p>
-  );
-}
 
 export function BestCrafts({
   marketData,
@@ -76,7 +41,6 @@ export function BestCrafts({
 
   return (
     <div className={styles.bestCrafts}>
-      <RouteLine route={route} settings={settings} />
       <CraftFilters
         filters={filters}
         onChange={onFiltersChange}

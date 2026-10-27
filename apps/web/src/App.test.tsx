@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import type { MarketData } from "@aoc/market-prices";
 
 import { App } from "./App";
 import { NO_FILTERS } from "./filters.constants";
@@ -7,7 +9,7 @@ import type { Filters } from "./filters.types";
 import type { RouteChoice } from "./route.types";
 import { FILTERS_SETTING, ROUTE_SETTING } from "./saved-settings.constants";
 import { memorySettingsStore } from "./saved-settings.store";
-import { fakeMarketData } from "../test/fake-market-data";
+import { fakeMarketData, noPrices } from "../test/fake-market-data";
 
 const DEFAULT_ROUTE_SEARCH = "place=1000&buy=Lymhurst&sell=Lymhurst";
 
@@ -20,7 +22,12 @@ const hideout: RouteChoice = {
 async function renderApp({
   savedFilters,
   savedRoute,
-}: { savedFilters?: Filters; savedRoute?: RouteChoice } = {}) {
+  marketData = fakeMarketData(),
+}: {
+  savedFilters?: Filters;
+  savedRoute?: RouteChoice;
+  marketData?: MarketData;
+} = {}) {
   const settingsStore = memorySettingsStore();
   if (savedFilters !== undefined) {
     await settingsStore.save(FILTERS_SETTING, savedFilters);
@@ -30,13 +37,17 @@ async function renderApp({
   }
   render(
     <App
-      marketData={fakeMarketData()}
+      marketData={marketData}
       settingsStore={settingsStore}
       savedFilters={savedFilters}
       savedRoute={savedRoute}
     />,
   );
   return settingsStore;
+}
+
+function selected(name: string) {
+  return screen.getByRole("combobox", { name });
 }
 
 function pressed(name: string) {
@@ -110,9 +121,10 @@ describe("App", () => {
   it("starts with the route this browser saved, and puts it in the link", async () => {
     await renderApp({ savedRoute: hideout });
 
-    expect(screen.getByText(/Crafting in/).textContent).toMatch(
-      /buying in Martlock and selling in Caerleon/,
-    );
+    expect(selected("Crafting location")).toHaveValue("hideout");
+    expect(selected("Biome")).toHaveValue("FOREST");
+    expect(selected("Buy materials in")).toHaveValue("Martlock");
+    expect(selected("Sell in")).toHaveValue("Caerleon");
     expect(window.location.search).toBe(
       "?place=hideout&biome=FOREST&quality=6&level=9&buy=Martlock&sell=Caerleon",
     );
@@ -122,9 +134,30 @@ describe("App", () => {
     window.history.replaceState(null, "", "/?place=0000&buy=Thetford");
     const settingsStore = await renderApp({ savedRoute: hideout });
 
-    expect(screen.getByText(/Crafting in/).textContent).toMatch(
-      /Crafting in Thetford, buying in Thetford and selling in Lymhurst/,
-    );
+    expect(selected("Crafting location")).toHaveValue("0000");
+    expect(selected("Buy materials in")).toHaveValue("Thetford");
+    expect(selected("Sell in")).toHaveValue("Lymhurst");
     await expect(settingsStore.load(ROUTE_SETTING)).resolves.toEqual(hideout);
+  });
+
+  it("prices a changed route right away, puts it in the link and saves it", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>(() =>
+      Promise.resolve(noPrices),
+    );
+    const settingsStore = await renderApp({
+      marketData: fakeMarketData({ getPrices }),
+    });
+
+    fireEvent.change(selected("Sell in"), { target: { value: "Caerleon" } });
+
+    await expect
+      .poll(() => window.location.search)
+      .toBe("?place=1000&buy=Lymhurst&sell=Caerleon");
+    await expect(settingsStore.load(ROUTE_SETTING)).resolves.toMatchObject({
+      sellMarketId: "Caerleon",
+    });
+    await expect
+      .poll(() => getPrices.mock.calls.map(([, marketIds]) => marketIds))
+      .toContainEqual(["Caerleon"]);
   });
 });

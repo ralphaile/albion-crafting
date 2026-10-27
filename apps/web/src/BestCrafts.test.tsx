@@ -162,15 +162,6 @@ describe("BestCrafts", () => {
     expect(getPrices).toHaveBeenCalledTimes(4);
   });
 
-  it("says which route it's ranking", async () => {
-    renderBestCrafts((_itemIds, marketIds) => broadswordPrices(marketIds));
-
-    expect(screen.getByText(/^Crafting in/)).toHaveTextContent(
-      "Crafting in Lymhurst, buying in Martlock and selling in Caerleon, with focus",
-    );
-    await screen.findByText(ranked);
-  });
-
   it("says what went wrong when fetching prices fails outright", async () => {
     renderBestCrafts(() => Promise.reject(new Error("Failed to fetch")));
 
