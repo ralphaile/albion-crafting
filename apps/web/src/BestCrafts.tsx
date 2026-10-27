@@ -2,11 +2,15 @@ import type { CraftingPlace, EvaluateSettings } from "@aoc/core";
 import { type MarketData, markets } from "@aoc/market-prices";
 
 import styles from "./BestCrafts.module.css";
+import { CraftFilters, type UpdateFilters } from "./CraftFilters";
 import { CraftsTable } from "./CraftsTable";
+import { activeFilters, type Filters, NO_FILTERS } from "./filters";
 import type { Route } from "./route";
 import { useBestCrafts } from "./useBestCrafts";
 
 const SKELETON_ROWS = 8;
+
+const IGNORE_FILTERS: UpdateFilters = () => undefined;
 
 function marketName(marketId: string) {
   return markets.find(({ id }) => id === marketId)?.name ?? marketId;
@@ -47,16 +51,28 @@ export function BestCrafts({
   marketData,
   route,
   settings,
+  filters = NO_FILTERS,
+  onFiltersChange = IGNORE_FILTERS,
+  persistent = true,
 }: {
   marketData: MarketData;
   route: Route;
   settings: EvaluateSettings;
+  filters?: Filters;
+  onFiltersChange?: UpdateFilters;
+  persistent?: boolean;
 }) {
-  const bestCrafts = useBestCrafts(marketData, route, settings);
+  const bestCrafts = useBestCrafts(marketData, route, settings, filters);
+  const filtered = activeFilters(filters).length > 0;
 
   return (
     <div className={styles.bestCrafts}>
       <RouteLine route={route} settings={settings} />
+      <CraftFilters
+        filters={filters}
+        onChange={onFiltersChange}
+        persistent={persistent}
+      />
       {bestCrafts.status === "loading" && (
         <div className={styles.loading} role="status">
           <p className={styles.loadingText}>
@@ -94,9 +110,29 @@ export function BestCrafts({
           </button>
         </div>
       )}
-      {bestCrafts.status === "ready" && (
-        <CraftsTable crafts={bestCrafts.crafts} focus={settings.focus} />
+      {bestCrafts.status === "ready" && bestCrafts.updating && (
+        <p className={styles.updating} role="status">
+          Updating prices…
+        </p>
       )}
+      {bestCrafts.status === "ready" &&
+        (filtered && bestCrafts.crafts.length === 0 && !bestCrafts.updating ? (
+          <div className={styles.empty}>
+            <p className={styles.emptyTitle}>No crafts match your filters</p>
+            <p>Loosen or remove a filter to see more.</p>
+            <button
+              type="button"
+              className={styles.button}
+              onClick={() => {
+                onFiltersChange(() => NO_FILTERS);
+              }}
+            >
+              Clear all filters
+            </button>
+          </div>
+        ) : (
+          <CraftsTable crafts={bestCrafts.crafts} focus={settings.focus} />
+        ))}
     </div>
   );
 }

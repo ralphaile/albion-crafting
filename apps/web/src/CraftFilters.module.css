@@ -1,0 +1,294 @@
+.filters {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 14px 28px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.toggle,
+.radio > span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-muted);
+  font-variant-numeric: lining-nums tabular-nums;
+  transition:
+    border-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.toggle:hover,
+.radio:hover > span {
+  border-color: var(--text-faint);
+  color: var(--text);
+}
+
+.toggle[aria-pressed="true"],
+.radio input:checked + span {
+  border-color: var(--brass);
+  color: var(--brass);
+  font-weight: 700;
+}
+
+.radio {
+  position: relative;
+  cursor: pointer;
+}
+
+.radio input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio input:focus-visible + span {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+.searchField {
+  flex: 1 1 220px;
+  max-width: 320px;
+}
+
+.search,
+.number {
+  height: 34px;
+  padding-block: 0;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+}
+
+.number {
+  width: 130px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.checks {
+  display: grid;
+  gap: 2px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--brass);
+}
+
+.categories {
+  color: var(--text);
+}
+
+.summary {
+  width: fit-content;
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.summary:hover {
+  color: var(--text);
+}
+
+.count {
+  color: var(--brass);
+}
+
+.groups {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 16px 48px;
+  padding-top: 12px;
+}
+
+.group {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.options {
+  display: grid;
+  gap: 4px 20px;
+}
+
+/* The 17 weapon types read better in two columns. */
+.weapons .options {
+  grid-template-rows: repeat(9, auto);
+  grid-template-columns: repeat(2, max-content);
+  grid-auto-flow: column;
+}
+
+.armor {
+  border-collapse: collapse;
+  width: max-content;
+}
+
+.armor th,
+.armor td {
+  padding: 0;
+  font-weight: inherit;
+  text-align: center;
+}
+
+.armor tbody th {
+  text-align: left;
+}
+
+.armor td {
+  width: 64px;
+  height: 28px;
+}
+
+.line {
+  padding: 0 4px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-decoration: underline dotted transparent;
+  text-underline-offset: 3px;
+}
+
+.armor tbody .line {
+  padding-left: 0;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.line:hover {
+  color: var(--text);
+  text-decoration-color: currentColor;
+}
+
+.line[aria-pressed="true"] {
+  color: var(--brass);
+}
+
+.piece {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--brass);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  transition: border-color 120ms ease-out;
+}
+
+.chip:hover {
+  border-color: var(--brass);
+}
+
+.cross {
+  width: 9px;
+  height: 9px;
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.chip:hover .cross {
+  stroke: var(--brass);
+}
+
+.clear {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.clear:hover {
+  color: var(--text);
+  text-decoration-style: solid;
+}
+
+.note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}

@@ -1,7 +1,14 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { recipes } from "@aoc/crafting-data";
+import { recipes, searchItems } from "@aoc/crafting-data";
 import type {
   ItemPrices,
   MarketData,
@@ -10,6 +17,7 @@ import type {
 } from "@aoc/market-prices";
 
 import { BestCrafts } from "./BestCrafts";
+import { type Filters, NO_FILTERS } from "./filters";
 import { formatCount } from "./format";
 import { DEFAULT_ROUTE, type Route } from "./route";
 import { DEFAULT_SETTINGS } from "./settings";
@@ -167,5 +175,214 @@ describe("BestCrafts", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Failed to fetch",
     );
+  });
+});
+
+function Filtered({
+  getPrices,
+  initial,
+}: {
+  getPrices: MarketData["getPrices"];
+  initial: Filters;
+}) {
+  const [filters, setFilters] = useState(initial);
+  const [marketData] = useState(() => fakeMarketData({ getPrices }));
+  return (
+    <BestCrafts
+      marketData={marketData}
+      route={route}
+      settings={DEFAULT_SETTINGS}
+      filters={filters}
+      onFiltersChange={setFilters}
+    />
+  );
+}
+
+function renderFiltered(initial: Partial<Filters>) {
+  const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
+    broadswordPrices(marketIds),
+  );
+  render(
+    <Filtered getPrices={getPrices} initial={{ ...NO_FILTERS, ...initial }} />,
+  );
+  return getPrices;
+}
+
+const swords: Partial<Filters> = { categories: ["sword"] };
+
+function askedFor(getPrices: ReturnType<typeof renderFiltered>, call = 1) {
+  const [itemIds = []] = getPrices.mock.calls[call] ?? [];
+  return itemIds;
+}
+
+describe("BestCrafts with filters", () => {
+  it("asks only for the items that pass the filters", async () => {
+    const getPrices = renderFiltered({
+      ...swords,
+      tiers: [4],
+      enchants: [0],
+      artifacts: "exclude",
+    });
+    await screen.findByText(ranked);
+
+    const expected = recipes
+      .filter(
+        (recipe) =>
+          recipe.shopSubcategory === "sword" &&
+          recipe.tier === 4 &&
+          recipe.enchant === 0 &&
+          !recipe.isArtifact,
+      )
+      .map(({ itemId }) => itemId);
+    expect(expected.length).toBeGreaterThan(0);
+    expect([...askedFor(getPrices)].sort()).toEqual(expected.sort());
+  });
+
+  it("asks AODP nothing when no recipe passes", async () => {
+    const getPrices = renderFiltered({ search: "no such item anywhere" });
+
+    expect(
+      await screen.findByText("No crafts match your filters"),
+    ).toBeInTheDocument();
+    expect(getPrices).not.toHaveBeenCalled();
+  });
+
+  it("asks again only when the filters let new items in", async () => {
+    const getPrices = renderFiltered(swords);
+    await screen.findByText(ranked);
+    expect(getPrices).toHaveBeenCalledTimes(2);
+
+    fireEvent.click(screen.getByRole("button", { name: "T4" }));
+    await screen.findByRole("button", { name: "Remove filter: Tier 4" });
+    expect(getPrices).toHaveBeenCalledTimes(2);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Bow" }));
+    await waitFor(() => {
+      expect(getPrices).toHaveBeenCalledTimes(4);
+    });
+    expect(askedFor(getPrices, 3)).toContain("T4_2H_BOW");
+  });
+
+  it("doesn't ask again when a minimum changes", async () => {
+    const getPrices = renderFiltered(swords);
+    await screen.findByText(ranked);
+
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Min profit" }), {
+      target: { value: "1000" },
+    });
+
+    expect(
+      await screen.findByRole("button", {
+        name: "Remove filter: Profit ≥ 1,000",
+      }),
+    ).toBeInTheDocument();
+    expect(getPrices).toHaveBeenCalledTimes(2);
+  });
+
+  it("hides crafts below a minimum, and says so when none are left", async () => {
+    renderFiltered({ ...swords, hideIncomplete: true });
+    expect(await screen.findByText(ranked)).toHaveTextContent(
+      /^1 craft ranked/,
+    );
+
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Min profit" }), {
+      target: { value: "1000000" },
+    });
+
+    expect(
+      await screen.findByText("No crafts match your filters"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear all filters" }));
+
+    await waitFor(() => {
+      expect(screen.getByText(ranked)).toHaveTextContent(
+        `1 craft ranked by silver per focus · ${formatCount(recipes.length - 1)} crafts missing prices`,
+      );
+    });
+  });
+
+  it("removes a filter with its chip, and all of them with Clear all", async () => {
+    renderFiltered({ ...swords, tiers: [4, 5], specialtyOnly: true });
+    await screen.findByText(ranked);
+    const chips = () =>
+      within(screen.getByRole("list", { name: "Active filters" }))
+        .getAllByRole("button")
+        .map((chip) => chip.textContent);
+
+    expect(chips()).toEqual(["Tier 4", "Tier 5", "Sword", "Specialty only"]);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remove filter: Tier 5" }),
+    );
+    expect(chips()).toEqual(["Tier 4", "Sword", "Specialty only"]);
+    expect(screen.getByRole("button", { name: "T5" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear all" }));
+    expect(
+      screen.queryByRole("list", { name: "Active filters" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: "Specialty only" }),
+    ).not.toBeChecked();
+  });
+
+  it("picks any mix of armor pieces, and a whole material or slot at once", async () => {
+    renderFiltered({});
+    await screen.findByText(ranked);
+    const chips = () =>
+      within(screen.getByRole("list", { name: "Active filters" }))
+        .getAllByRole("button")
+        .map((chip) => chip.textContent);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Plate helmet" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Leather shoes" }));
+    expect(chips()).toEqual(["Leather shoes", "Plate helmet"]);
+
+    fireEvent.click(screen.getByRole("button", { name: "Plate, whole row" }));
+    expect(chips()).toEqual([
+      "Leather shoes",
+      "Plate helmet",
+      "Plate armor",
+      "Plate shoes",
+    ]);
+    expect(
+      screen.getByRole("button", { name: "Plate, whole row" }),
+    ).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Shoes, whole column" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Shoes, whole column" }),
+    );
+    expect(chips()).toEqual(["Plate helmet", "Plate armor"]);
+  });
+
+  it("filters by name once typing pauses", async () => {
+    const getPrices = renderFiltered({});
+    await screen.findByText(ranked);
+
+    fireEvent.change(
+      screen.getByRole("searchbox", { name: "Filter by name" }),
+      {
+        target: { value: "broadsword" },
+      },
+    );
+
+    expect(
+      await screen.findByRole("button", {
+        name: "Remove filter: Name: broadsword",
+      }),
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(ranked)).toHaveTextContent(
+        `1 craft ranked by silver per focus · ${formatCount(searchItems("broadsword").length - 1)} crafts missing prices`,
+      );
+    });
+    expect(getPrices).toHaveBeenCalledTimes(2);
   });
 });
