@@ -261,10 +261,6 @@
   color: var(--text-muted);
 }
 
-.age[data-status="stale"] {
-  color: var(--stale);
-}
-
 .ageLabel {
   min-width: 70px;
   font-family: var(--font-caps);
@@ -277,12 +273,16 @@
   border-radius: 50%;
 }
 
-.age[data-status="fresh"] .dot {
-  background: var(--fresh);
+.age[data-age="recent"] .dot {
+  background: var(--age-recent);
 }
 
-.age[data-status="stale"] .dot {
-  border: 1.5px solid var(--stale);
+.age[data-age="aging"] .dot {
+  background: var(--age-aging);
+}
+
+.age[data-age="old"] .dot {
+  background: var(--age-old);
 }
 
 .divider > td {

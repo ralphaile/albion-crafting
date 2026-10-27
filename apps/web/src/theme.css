@@ -11,8 +11,9 @@
   --text-faint: #958974;
   --brass: #d1ad5f;
 
-  --fresh: #6dbfa2;
-  --stale: #e38d43;
+  --age-recent: #6dbfa2;
+  --age-aging: #e2c15a;
+  --age-old: #ef6f5e;
   --loss: #ef6f5e;
 
   --enchant-1: #7fc77f;
@@ -42,8 +43,9 @@
     --text-faint: #695a44;
     --brass: #7d5e14;
 
-    --fresh: #22705a;
-    --stale: #9a4f12;
+    --age-recent: #22705a;
+    --age-aging: #a87f00;
+    --age-old: #ad3424;
     --loss: #ad3424;
 
     --enchant-1: #276b2b;

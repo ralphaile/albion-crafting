@@ -225,6 +225,19 @@ describe("CraftsTable", () => {
     ).toHaveTextContent("materials 14 h, stale");
   });
 
+  it("colors a price's dot by its age, and nothing else", () => {
+    renderTable();
+    const row = rowOf("Adept's Broadsword 4.0");
+
+    expect(row.getByTitle("item price seen 30 min ago")).toHaveAttribute(
+      "data-age",
+      "recent",
+    );
+    expect(
+      row.getByTitle("materials price seen 14 h ago, stale"),
+    ).toHaveAttribute("data-age", "old");
+  });
+
   it("says how many prices a craft is missing", () => {
     renderTable();
     const row = rowOf("Adept's Bow 4.0");

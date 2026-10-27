@@ -46,6 +46,8 @@ With premium you get 10,000 focus a day, and can store up to 30,000. The engine 
 
 How far an API price can be trusted. **Fresh** means AODP saw it in the last 12 hours, **stale** means it's older, and **missing** means AODP has none, because no player running its client has looked at that item in that market. The 12 hours are a setting. A [manual price](adr/003-price-data-strategy.md) counts as stale after 3 days.
 
+In the table's Prices column, the dot next to each age shows how recent it is: green under 3 hours, yellow from then until it's stale, and red once it's stale.
+
 ## Hideout map quality
 
 The quality of the Black Zone map a hideout stands on, from Q1 to Q6. It adds 0.01, 0.06, 0.11, 0.16, 0.21 or 0.26 to the [production bonus](#production-bonus) for the 5 crafting categories of the map's [biome](#biome). In a hideout, map quality and [power level](#power-level) take the place of a city's base and [specialty bonus](#specialty-bonus).
