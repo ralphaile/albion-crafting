@@ -1,6 +1,6 @@
-import type { CraftingPlace } from "./evaluate.js";
-import { hideoutProductionBonus } from "./hideout-bonus.js";
-import { productionBonus } from "./production-bonus.js";
+import type { CraftingPlace } from "./evaluate.types.js";
+import { hideoutProductionBonus } from "./hideout-bonus.helpers.js";
+import { productionBonus } from "./production-bonus.helpers.js";
 
 export function hasSpecialty(
   place: CraftingPlace,

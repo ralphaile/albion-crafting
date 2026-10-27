@@ -1,9 +1,5 @@
-import type { Recipe } from "./evaluate.js";
-
-export interface PricesNeeded {
-  products: string[];
-  materials: string[];
-}
+import type { Recipe } from "./evaluate.types.js";
+import type { PricesNeeded } from "./prices-needed.types.js";
 
 export function pricesNeeded(recipes: readonly Recipe[]): PricesNeeded {
   const products = new Set<string>();

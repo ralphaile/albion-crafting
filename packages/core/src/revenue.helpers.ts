@@ -1,23 +1,6 @@
-import { type OrderPrices, SETUP_FEE } from "./market.js";
-
-export type SellMode = "order" | "instant" | "blackMarket";
-
-export interface RevenueOptions {
-  sellMode: SellMode;
-  premium: boolean;
-  undercut?: boolean;
-}
-
-export type Revenue =
-  | { status: "missing"; source: keyof OrderPrices }
-  | {
-      status: "fresh" | "stale";
-      source: keyof OrderPrices;
-      price: number;
-      tax: number;
-      setupFee: number;
-      net: number;
-    };
+import { SETUP_FEE } from "./market.constants.js";
+import type { OrderPrices } from "./market.types.js";
+import type { Revenue, RevenueOptions } from "./revenue.types.js";
 
 const PREMIUM_TAX = 0.04;
 const TAX = 0.08;

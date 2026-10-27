@@ -1,7 +1,7 @@
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { bonusForReturnRate, returnRate } from "./return-rate.js";
+import { bonusForReturnRate, returnRate } from "./return-rate.helpers.js";
 
 const asPercent = (rate: number) => `${(rate * 100).toFixed(2)}%`;
 

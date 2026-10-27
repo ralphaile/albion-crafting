@@ -1,24 +1,6 @@
-import {
-  dailyAndFocus,
-  type ProductionBonusOptions,
-  withTotal,
-} from "./production-bonus.js";
-
-export interface Hideout {
-  biome: { specialties: readonly string[] };
-  mapQuality: { specialtyBonus: number };
-  powerLevel: { generalBonus: number; specialistBonus: number };
-}
-
-export interface HideoutProductionBonus {
-  mapQuality: number;
-  powerGeneral: number;
-  powerSpecialist: number;
-  daily: number;
-  focus: number;
-  override?: number;
-  total: number;
-}
+import type { Hideout, HideoutProductionBonus } from "./hideout-bonus.types.js";
+import { dailyAndFocus, withTotal } from "./production-bonus.helpers.js";
+import type { ProductionBonusOptions } from "./production-bonus.types.js";
 
 export function hideoutProductionBonus(
   { biome, mapQuality, powerLevel }: Hideout,

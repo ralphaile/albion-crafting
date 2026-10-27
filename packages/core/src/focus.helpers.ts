@@ -1,6 +1,3 @@
-export const FOCUS_PER_DAY = 10_000;
-export const MAX_STORED_FOCUS = 30_000;
-
 const FCE_PER_HALVING = 10_000;
 
 export function focusCost(baseFocus: number, fce = 0): number {

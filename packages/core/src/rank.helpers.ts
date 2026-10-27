@@ -1,8 +1,5 @@
-import type { Evaluation } from "./evaluate.js";
-
-export type SortKey = "profit" | "margin" | "silverPerFocus";
-
-export type SortDirection = "descending" | "ascending";
+import type { Evaluation } from "./evaluate.types.js";
+import type { SortDirection, SortKey } from "./rank.types.js";
 
 export function defaultSortKey(focus: boolean): SortKey {
   return focus ? "silverPerFocus" : "profit";
