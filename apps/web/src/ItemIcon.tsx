@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { iconUrl } from "@aoc/crafting-data";
 
 const ICON_PLACEHOLDER =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%23d4d4d4'/%3E%3C/svg%3E";
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%238a7f6b' fill-opacity='0.3'/%3E%3C/svg%3E";
 
 const RETRY_DELAYS_MS = [1000, 3000];
 

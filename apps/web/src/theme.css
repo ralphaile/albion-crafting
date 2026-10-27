@@ -1,0 +1,127 @@
+/* Iron, with brass only for what you act on and for the specialty bonus. */
+:root {
+  color-scheme: dark;
+
+  --bg: #15120f;
+  --surface: #1d1915;
+  --surface-hover: #241f1a;
+  --rule: #3b332a;
+  --text: #ece2cf;
+  --text-muted: #a89c85;
+  --text-faint: #958974;
+  --brass: #d1ad5f;
+
+  --fresh: #6dbfa2;
+  --stale: #e38d43;
+  --loss: #ef6f5e;
+
+  --enchant-1: #7fc77f;
+  --enchant-2: #6fa8e6;
+  --enchant-3: #b48ce6;
+  --enchant-4: #e8c860;
+
+  --font-display: "Alegreya", "Iowan Old Style", Georgia, serif;
+  --font-body: "Alegreya Sans", "Gill Sans", "Trebuchet MS", sans-serif;
+  --font-caps: "Alegreya Sans SC", var(--font-body);
+
+  --radius: 3px;
+  --gutter: clamp(16px, 4vw, 40px);
+}
+
+/* For light-mode systems: the parchment of the game's own crafting and market windows. */
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --bg: #f3ecdd;
+    --surface: #faf5ea;
+    --surface-hover: #ece3d0;
+    --rule: #cfc1a6;
+    --text: #2a2119;
+    --text-muted: #64553f;
+    --text-faint: #695a44;
+    --brass: #7d5e14;
+
+    --fresh: #22705a;
+    --stale: #9a4f12;
+    --loss: #ad3424;
+
+    --enchant-1: #276b2b;
+    --enchant-2: #22599b;
+    --enchant-3: #6c3fa6;
+    --enchant-4: #6e5605;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  font-variant-numeric: lining-nums;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--brass);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+input {
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+input:hover {
+  border-color: var(--text-faint);
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--text-muted);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1 1l10 10M11 1L1 11' stroke='black' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

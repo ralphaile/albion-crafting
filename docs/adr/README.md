@@ -8,6 +8,7 @@ An architecture decision record (ADR) is a short note about one design decision:
 | [002](002-local-first-storage.md)        | Everything the app saves stays in the browser, in IndexedDB                          | Accepted |
 | [003](003-price-data-strategy.md)        | Prices come from AODP, with manual prices, and a fixed order picks which one is used | Accepted |
 | [004](004-core-owns-the-shared-types.md) | Core owns the types it shares with the data packages                                 | Accepted |
+| [005](005-css-modules.md)                | Components are styled with CSS Modules and shared theme variables                    | Accepted |
 
 ## Adding one
 
