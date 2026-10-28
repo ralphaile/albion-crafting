@@ -1,20 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  type CraftingPlace,
-  type EvaluateSettings,
-  pricesNeeded,
-  type PricesNeeded,
-} from "@aoc/core";
+import { type CraftingPlace, pricesNeeded, type PricesNeeded } from "@aoc/core";
 import { recipes } from "@aoc/crafting-data";
-import type { BatchFailure, MarketData } from "@aoc/market-prices";
+import type {
+  BatchFailure,
+  MarketData,
+  PricesOptions,
+  Region,
+} from "@aoc/market-prices";
 
 import { evaluateCrafts } from "./best-crafts.helpers";
 import type { Craft, CraftPrices } from "./best-crafts.types";
 import { NO_FILTERS } from "./filters.constants";
 import { craftFilter, recipeFilter } from "./filters.helpers";
 import type { Filters } from "./filters.types";
+import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
+import type { CraftingSettings } from "./settings.types";
 
 export type BestCrafts =
   | { status: "loading" }
@@ -33,6 +35,8 @@ type Fetched =
 interface Answer {
   buyMarketId: string;
   sellMarketId: string;
+  server: Region;
+  staleAfterHours: number;
   attempt: number;
   products: ReadonlySet<string>;
   fetched: Fetched;
@@ -45,11 +49,12 @@ async function fetchPrices(
   needed: PricesNeeded,
   buyMarketId: string,
   sellMarketId: string,
+  options: PricesOptions,
 ): Promise<Fetched> {
   try {
     const [materials, products] = await Promise.all([
-      marketData.getPrices(needed.materials, [buyMarketId], QUALITIES),
-      marketData.getPrices(needed.products, [sellMarketId], QUALITIES),
+      marketData.getPrices(needed.materials, [buyMarketId], QUALITIES, options),
+      marketData.getPrices(needed.products, [sellMarketId], QUALITIES, options),
     ]);
     const failures = [...materials.failures, ...products.failures];
     const [firstFailure] = failures;
@@ -98,10 +103,12 @@ function useSelectedRecipes(filters: Filters, place: CraftingPlace) {
 
 export function useBestCrafts(
   marketData: MarketData,
-  { place, buyMarketId, sellMarketId }: Route,
-  settings: EvaluateSettings,
+  route: Route,
+  settings: CraftingSettings,
   filters: Filters,
 ): BestCrafts {
+  const { place, buyMarketId, sellMarketId } = route;
+  const { server, staleAfterHours } = settings;
   const [attempt, setAttempt] = useState(0);
   const [answer, setAnswer] = useState<Answer>();
   const selected = useSelectedRecipes(filters, place);
@@ -110,6 +117,8 @@ export function useBestCrafts(
   const current =
     answer?.buyMarketId === buyMarketId &&
     answer.sellMarketId === sellMarketId &&
+    answer.server === server &&
+    answer.staleAfterHours === staleAfterHours &&
     answer.attempt === attempt
       ? answer
       : undefined;
@@ -130,32 +139,48 @@ export function useBestCrafts(
       return;
     }
     let active = true;
-    void fetchPrices(marketData, needed, buyMarketId, sellMarketId).then(
-      (fetched) => {
-        if (active) {
-          setAnswer({
-            buyMarketId,
-            sellMarketId,
-            attempt,
-            products: new Set(needed.products),
-            fetched,
-          });
-        }
-      },
-    );
+    void fetchPrices(marketData, needed, buyMarketId, sellMarketId, {
+      region: server,
+      staleAfterMinutes: staleAfterHours * 60,
+    }).then((fetched) => {
+      if (active) {
+        setAnswer({
+          buyMarketId,
+          sellMarketId,
+          server,
+          staleAfterHours,
+          attempt,
+          products: new Set(needed.products),
+          fetched,
+        });
+      }
+    });
     return () => {
       active = false;
     };
-  }, [needsFetch, marketData, needed, buyMarketId, sellMarketId, attempt]);
+  }, [
+    needsFetch,
+    marketData,
+    needed,
+    buyMarketId,
+    sellMarketId,
+    server,
+    staleAfterHours,
+    attempt,
+  ]);
 
   const prices =
     current?.fetched.status === "ready" ? current.fetched.prices : undefined;
+  const routeSettings = useMemo(
+    () => settingsForRoute(settings, route),
+    [settings, route],
+  );
   const evaluated = useMemo(
     () =>
       prices === undefined
         ? []
-        : evaluateCrafts(priced, place, settings, prices),
-    [priced, place, settings, prices],
+        : evaluateCrafts(priced, place, routeSettings, prices),
+    [priced, place, routeSettings, prices],
   );
   const crafts = useMemo(
     () => evaluated.filter(craftFilter(filters)),

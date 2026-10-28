@@ -7,8 +7,14 @@ import { App } from "./App";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 import type { RouteChoice } from "./route.types";
-import { FILTERS_SETTING, ROUTE_SETTING } from "./saved-settings.constants";
+import {
+  CRAFTING_SETTING,
+  FILTERS_SETTING,
+  ROUTE_SETTING,
+} from "./saved-settings.constants";
 import { memorySettingsStore } from "./saved-settings.store";
+import { DEFAULT_SETTINGS } from "./settings.constants";
+import type { CraftingSettings } from "./settings.types";
 import { fakeMarketData, noPrices } from "../test/fake-market-data";
 
 const DEFAULT_ROUTE_SEARCH = "place=1000&buy=Lymhurst&sell=Lymhurst";
@@ -22,10 +28,12 @@ const hideout: RouteChoice = {
 async function renderApp({
   savedFilters,
   savedRoute,
+  savedSettings,
   marketData = fakeMarketData(),
 }: {
   savedFilters?: Filters;
   savedRoute?: RouteChoice;
+  savedSettings?: CraftingSettings;
   marketData?: MarketData;
 } = {}) {
   const settingsStore = memorySettingsStore();
@@ -35,12 +43,16 @@ async function renderApp({
   if (savedRoute !== undefined) {
     await settingsStore.save(ROUTE_SETTING, savedRoute);
   }
+  if (savedSettings !== undefined) {
+    await settingsStore.save(CRAFTING_SETTING, savedSettings);
+  }
   render(
     <App
       marketData={marketData}
       settingsStore={settingsStore}
       savedFilters={savedFilters}
       savedRoute={savedRoute}
+      savedSettings={savedSettings}
     />,
   );
   return settingsStore;
@@ -138,6 +150,40 @@ describe("App", () => {
     expect(selected("Buy materials in")).toHaveValue("Thetford");
     expect(selected("Sell in")).toHaveValue("Lymhurst");
     await expect(settingsStore.load(ROUTE_SETTING)).resolves.toEqual(hideout);
+  });
+
+  it("prices with the settings this browser saved", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>(() =>
+      Promise.resolve(noPrices),
+    );
+    await renderApp({
+      savedSettings: {
+        ...DEFAULT_SETTINGS,
+        server: "europe",
+        staleAfterHours: 24,
+      },
+      marketData: fakeMarketData({ getPrices }),
+    });
+
+    await vi.waitFor(() => {
+      expect(getPrices).toHaveBeenCalledWith(
+        expect.anything(),
+        ["Lymhurst"],
+        [1],
+        { region: "europe", staleAfterMinutes: 24 * 60 },
+      );
+    });
+  });
+
+  it("saves a setting changed in the panel", async () => {
+    const settingsStore = await renderApp();
+
+    fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Use focus" }));
+
+    await expect
+      .poll(() => settingsStore.load(CRAFTING_SETTING))
+      .toEqual({ ...DEFAULT_SETTINGS, focus: false });
   });
 
   it("prices a changed route right away, puts it in the link and saves it", async () => {

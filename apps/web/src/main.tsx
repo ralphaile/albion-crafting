@@ -12,7 +12,11 @@ import { createRoot } from "react-dom/client";
 import { openMarketData } from "@aoc/market-prices";
 
 import { App } from "./App";
-import { FILTERS_SETTING, ROUTE_SETTING } from "./saved-settings.constants";
+import {
+  CRAFTING_SETTING,
+  FILTERS_SETTING,
+  ROUTE_SETTING,
+} from "./saved-settings.constants";
 import { openSettingsStore } from "./saved-settings.store";
 
 const root = document.getElementById("root");
@@ -25,10 +29,11 @@ const [marketData, settingsStore] = await Promise.all([
   openSettingsStore(),
 ]);
 // Loaded before the first render, so the first price request is already for
-// the saved route and filters.
-const [savedFilters, savedRoute] = await Promise.all([
+// the saved route, filters and settings.
+const [savedFilters, savedRoute, savedSettings] = await Promise.all([
   settingsStore.load(FILTERS_SETTING),
   settingsStore.load(ROUTE_SETTING),
+  settingsStore.load(CRAFTING_SETTING),
 ]);
 
 createRoot(root).render(
@@ -38,6 +43,7 @@ createRoot(root).render(
       settingsStore={settingsStore}
       savedFilters={savedFilters}
       savedRoute={savedRoute}
+      savedSettings={savedSettings}
     />
   </StrictMode>,
 );

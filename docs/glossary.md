@@ -20,7 +20,7 @@ Where you craft: one of the 7 cities, a [Rest](#rest) or an island. It gives a b
 
 ## Daily bonus
 
-Extra [production bonus](#production-bonus) the game gives a few crafting categories each day: +0.10 or +0.20. The app takes up to two, and adds them up if both are for the same category.
+Extra [production bonus](#production-bonus) the game gives a few crafting categories each day: +0.10 or +0.20. You set up to two in the [settings](settings.md), and the app adds them up if both are for the same category.
 
 ## Enchantment
 
@@ -44,7 +44,7 @@ With premium you get 10,000 focus a day, and can store up to 30,000. The engine 
 
 ## Fresh, stale and missing prices
 
-How far an API price can be trusted. **Fresh** means AODP saw it in the last 12 hours, **stale** means it's older, and **missing** means AODP has none, because no player running its client has looked at that item in that market. The 12 hours are a setting. A [manual price](adr/003-price-data-strategy.md) counts as stale after 3 days.
+How far an API price can be trusted. **Fresh** means AODP saw it in the last 12 hours, **stale** means it's older, and **missing** means AODP has none, because no player running its client has looked at that item in that market. The 12 hours are a [setting](settings.md). A [manual price](adr/003-price-data-strategy.md) counts as stale after 3 days.
 
 In the table's Prices column, the dot next to each age shows how recent it is: green under 3 hours, yellow from then until it's stale, and red once it's stale.
 
@@ -86,7 +86,7 @@ Crafting stations run on nutrition. A craft uses `item value × 0.1125` nutritio
 station fee = item value × 0.1125 × fee per 100 nutrition / 100
 ```
 
-The engine's version is `stationFee()` in `packages/core/src/station-fee.helpers.ts`. It gives the fee for one craft, and every recipe crafts one item. A fee of 0, such as on your own island, costs nothing. The shapeshifter staffs have no [item value](#item-value), so at a paid station their fee is unknown. The settings panel will let you set the fee for each kind of location. Its defaults wait for the in-game check of what fees are typical.
+The engine's version is `stationFee()` in `packages/core/src/station-fee.helpers.ts`. It gives the fee for one craft, and every recipe crafts one item. A fee of 0, such as on your own island, costs nothing. The shapeshifter staffs have no [item value](#item-value), so at a paid station their fee is unknown. The fee is a [setting](settings.md), 500 by default, because station owners set anything from 0 to about 1,000.
 
 ## Power level
 
@@ -175,4 +175,4 @@ Each city and [Rest](#rest) specializes in some crafting categories, such as swo
 
 ## Tax and premium
 
-Every market sale is taxed: 4% with premium, Albion's paid subscription, or 8% without.
+Every market sale is taxed: 4% with premium, Albion's paid subscription, or 8% without. Premium is a [setting](settings.md).

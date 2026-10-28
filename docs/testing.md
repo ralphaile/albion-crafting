@@ -98,7 +98,7 @@ The `market-prices` tests run in Tokyo time, set in its `vitest.config.ts`. AODP
 
 ## IndexedDB
 
-Node has no IndexedDB, so tests that save prices or settings import `fake-indexeddb/auto`, which provides one in memory. Each test deletes the database afterwards, `new Dexie("aoc-price-cache").delete()` for prices and `new Dexie("aoc-settings").delete()` for the filters and route, so the next one starts empty. Examples: `packages/market-prices/src/market-data.test.ts` and `apps/web/src/saved-settings.test.ts`.
+Node has no IndexedDB, so tests that save prices or settings import `fake-indexeddb/auto`, which provides one in memory. Each test deletes the database afterwards, `new Dexie("aoc-price-cache").delete()` for prices and `new Dexie("aoc-settings").delete()` for the filters, route and settings, so the next one starts empty. Examples: `packages/market-prices/src/market-data.test.ts` and `apps/web/src/saved-settings.test.ts`.
 
 Components that don't need IndexedDB take a `SettingsStore`, and tests pass `memorySettingsStore()` from `apps/web/src/saved-settings.store.ts`, which keeps the settings in memory.
 
@@ -125,7 +125,7 @@ render(
 
 Its methods are `vi.fn`, so a test can also check what was asked for, such as `expect(getPrices).toHaveBeenCalledTimes(2)`. Example: `apps/web/src/BestCrafts.test.tsx`.
 
-jsdom lacks two browser features the app uses, so `apps/web/test/setup.ts` adds them: `matchMedia`, where every screen counts as wide, so tables show all their columns, and `scrollIntoView`, which does nothing.
+jsdom lacks some browser features the app uses, so `apps/web/test/setup.ts` adds them: `matchMedia`, where every screen counts as wide, so tables show all their columns; `scrollIntoView`, which does nothing; and a `<dialog>`'s `showModal()` and `close()`, which only show and hide it. Closing a dialog with Escape or a click outside needs a real browser, so the e2e tests check that.
 
 ## E2E tests
 

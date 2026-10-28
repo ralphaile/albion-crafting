@@ -1,11 +1,7 @@
-import type { BatchFailure, Region } from "./aodp.types.js";
+import type { BatchFailure } from "./aodp.types.js";
 import type { CachedFetchOptions } from "./cached-rows.types.js";
 import type { HistorySummary, SummarizeOptions } from "./history.types.js";
 import type { ItemPrices } from "./prices.types.js";
-
-export interface MarketDataOptions {
-  region?: Region;
-}
 
 export interface PricesOptions extends CachedFetchOptions {
   staleAfterMinutes?: number;

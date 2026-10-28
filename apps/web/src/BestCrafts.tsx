@@ -1,6 +1,3 @@
-import { useMemo } from "react";
-
-import type { EvaluateSettings } from "@aoc/core";
 import type { MarketData } from "@aoc/market-prices";
 
 import styles from "./BestCrafts.module.css";
@@ -9,8 +6,8 @@ import { CraftsTable } from "./CraftsTable";
 import { NO_FILTERS } from "./filters.constants";
 import { activeFilters } from "./filters.helpers";
 import type { Filters } from "./filters.types";
-import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
+import type { CraftingSettings } from "./settings.types";
 import { useBestCrafts } from "./useBestCrafts";
 
 const SKELETON_ROWS = 8;
@@ -27,16 +24,12 @@ export function BestCrafts({
 }: {
   marketData: MarketData;
   route: Route;
-  settings: EvaluateSettings;
+  settings: CraftingSettings;
   filters?: Filters;
   onFiltersChange?: UpdateFilters;
   persistent?: boolean;
 }) {
-  const routeSettings = useMemo(
-    () => settingsForRoute(settings, route),
-    [settings, route],
-  );
-  const bestCrafts = useBestCrafts(marketData, route, routeSettings, filters);
+  const bestCrafts = useBestCrafts(marketData, route, settings, filters);
   const filtered = activeFilters(filters).length > 0;
 
   return (

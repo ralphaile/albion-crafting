@@ -85,11 +85,9 @@ describe("getPrices", () => {
     async (region) => {
       const requested = serve([]);
 
-      await createAodpClient({ region }).getPrices(
-        ["T4_BAG"],
-        ["Caerleon"],
-        [1],
-      );
+      await createAodpClient().getPrices(["T4_BAG"], ["Caerleon"], [1], {
+        region,
+      });
 
       expect(requested).toEqual([
         EMPTY_URL.replace("west", region).replace("/.json", "/T4_BAG.json"),

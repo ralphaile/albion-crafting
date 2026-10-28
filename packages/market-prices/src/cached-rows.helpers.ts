@@ -1,3 +1,4 @@
+import { DEFAULT_REGION } from "./aodp.constants.js";
 import type { BatchFailure, FetchOptions, Region } from "./aodp.types.js";
 import type { RowKey, RowStore } from "./cache.types.js";
 import type { CachedFetchOptions } from "./cached-rows.types.js";
@@ -10,7 +11,6 @@ interface Stamp {
 }
 
 interface CachedRowsOptions<T> {
-  region: Region;
   rows: RowStore<T & Stamp>;
   ttlMinutes: number;
   fetch: (
@@ -29,7 +29,6 @@ function comboId(itemId: string, marketId: string, quality: number): string {
 }
 
 export function cachedRows<T extends { item_id: string; quality: number }>({
-  region,
   rows: store,
   ttlMinutes,
   fetch,
@@ -42,6 +41,7 @@ export function cachedRows<T extends { item_id: string; quality: number }>({
     qualities: readonly number[],
     { force = false, ...options }: CachedFetchOptions = {},
   ) => {
+    const region = options.region ?? DEFAULT_REGION;
     const now = Date.now();
     const items = [...new Set(itemIds)];
     const markets = [...new Set(marketIds)];

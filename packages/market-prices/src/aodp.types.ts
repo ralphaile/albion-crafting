@@ -13,6 +13,7 @@ export type AodpEvent =
   | ({ type: "error" } & BatchFailure);
 
 export interface FetchOptions {
+  region?: Region;
   onEvent?: (event: AodpEvent) => void;
 }
 

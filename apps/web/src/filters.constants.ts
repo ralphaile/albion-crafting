@@ -48,8 +48,8 @@ export const ARMOR_SLOTS: readonly Option[] = [
   { id: "shoes", label: "Shoes" },
 ];
 
-const ARMOR_PIECES: readonly Option[] = ARMOR_MATERIALS.flatMap((material) =>
-  ARMOR_SLOTS.map((slot) => armorPiece(material, slot)),
+export const ARMOR_PIECES: readonly Option[] = ARMOR_MATERIALS.flatMap(
+  (material) => ARMOR_SLOTS.map((slot) => armorPiece(material, slot)),
 );
 
 export const OFFHAND_TYPES: readonly Option[] = [
