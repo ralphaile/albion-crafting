@@ -14,6 +14,8 @@ import type { Craft, CraftPrices } from "./best-crafts.types";
 import { NO_FILTERS } from "./filters.constants";
 import { craftFilter, recipeFilter } from "./filters.helpers";
 import type { Filters } from "./filters.types";
+import { withManualPrices } from "./manual-prices.helpers";
+import type { ManualPrice } from "./manual-prices.types";
 import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
@@ -42,7 +44,9 @@ interface Answer {
   fetched: Fetched;
 }
 
-const QUALITIES = [1];
+const QUALITY = 1;
+
+const QUALITIES = [QUALITY];
 
 async function fetchPrices(
   marketData: MarketData,
@@ -106,6 +110,7 @@ export function useBestCrafts(
   route: Route,
   settings: CraftingSettings,
   filters: Filters,
+  manualPrices: readonly ManualPrice[],
 ): BestCrafts {
   const { place, buyMarketId, sellMarketId } = route;
   const { server, staleAfterHours } = settings;
@@ -169,8 +174,19 @@ export function useBestCrafts(
     attempt,
   ]);
 
-  const prices =
+  const fetchedPrices =
     current?.fetched.status === "ready" ? current.fetched.prices : undefined;
+  const prices = useMemo(
+    () =>
+      fetchedPrices &&
+      withManualPrices(fetchedPrices, manualPrices, {
+        region: server,
+        buyMarketId,
+        sellMarketId,
+        quality: QUALITY,
+      }),
+    [fetchedPrices, manualPrices, server, buyMarketId, sellMarketId],
+  );
   const routeSettings = useMemo(
     () => settingsForRoute(settings, route),
     [settings, route],

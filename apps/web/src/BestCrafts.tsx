@@ -6,6 +6,7 @@ import { CraftsTable } from "./CraftsTable";
 import { NO_FILTERS } from "./filters.constants";
 import { activeFilters } from "./filters.helpers";
 import type { Filters } from "./filters.types";
+import type { ManualPrice } from "./manual-prices.types";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 import { useBestCrafts } from "./useBestCrafts";
@@ -14,6 +15,8 @@ const SKELETON_ROWS = 8;
 
 const IGNORE_FILTERS: UpdateFilters = () => undefined;
 
+const NO_MANUAL_PRICES: readonly ManualPrice[] = [];
+
 export function BestCrafts({
   marketData,
   route,
@@ -21,6 +24,7 @@ export function BestCrafts({
   filters = NO_FILTERS,
   onFiltersChange = IGNORE_FILTERS,
   persistent = true,
+  manualPrices = NO_MANUAL_PRICES,
 }: {
   marketData: MarketData;
   route: Route;
@@ -28,8 +32,15 @@ export function BestCrafts({
   filters?: Filters;
   onFiltersChange?: UpdateFilters;
   persistent?: boolean;
+  manualPrices?: readonly ManualPrice[];
 }) {
-  const bestCrafts = useBestCrafts(marketData, route, settings, filters);
+  const bestCrafts = useBestCrafts(
+    marketData,
+    route,
+    settings,
+    filters,
+    manualPrices,
+  );
   const filtered = activeFilters(filters).length > 0;
 
   return (

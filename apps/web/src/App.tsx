@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { MarketData } from "@aoc/market-prices";
 
@@ -8,6 +8,7 @@ import { CraftingLocationBar } from "./CraftingLocationBar";
 import { filtersFromSearch, searchWithFilters } from "./filters-url.helpers";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
+import type { ManualPrice } from "./manual-prices.types";
 import { routeFromSearch, searchWithRoute } from "./route-url.helpers";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import { routeFromChoice } from "./route.helpers";
@@ -29,12 +30,14 @@ export function App({
   savedFilters,
   savedRoute,
   savedSettings,
+  savedManualPrices,
 }: {
   marketData: MarketData;
   settingsStore: SettingsStore;
   savedFilters: Filters | undefined;
   savedRoute: RouteChoice | undefined;
   savedSettings: CraftingSettings | undefined;
+  savedManualPrices: readonly ManualPrice[];
 }) {
   // A shared link wins over what this browser saved.
   const [filters, setFilters] = useSavedSetting(
@@ -56,6 +59,7 @@ export function App({
     CRAFTING_SETTING,
     () => savedSettings ?? DEFAULT_SETTINGS,
   );
+  const [manualPrices] = useState(savedManualPrices);
   // One object per choice, so the crafts only recalculate when the route changes.
   const route = useMemo(() => routeFromChoice(routeChoice), [routeChoice]);
 
@@ -90,6 +94,7 @@ export function App({
           filters={filters}
           onFiltersChange={setFilters}
           persistent={settingsStore.persistent}
+          manualPrices={manualPrices}
         />
       </main>
     </div>

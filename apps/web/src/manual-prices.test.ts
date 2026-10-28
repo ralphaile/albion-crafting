@@ -3,8 +3,9 @@ import "fake-indexeddb/auto";
 import { Dexie } from "dexie";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { openMarketData } from "@aoc/market-prices";
+import { type ItemPrices, openMarketData } from "@aoc/market-prices";
 
+import { withManualPrices } from "./manual-prices.helpers";
 import {
   memoryManualPriceStore,
   openManualPriceStore,
@@ -114,5 +115,81 @@ describe("openManualPriceStore", () => {
     await (await openMarketData()).clear();
 
     await expect(store.list()).resolves.toEqual([artifact]);
+  });
+});
+
+describe("withManualPrices", () => {
+  const now = artifact.enteredAt + 90 * 60_000;
+  const where = {
+    region: "west",
+    buyMarketId: "Lymhurst",
+    sellMarketId: "Caerleon",
+    quality: 1,
+  } as const;
+  const apiBars: ItemPrices = {
+    itemId: "T4_METALBAR",
+    marketId: "Lymhurst",
+    quality: 1,
+    sellMin: { status: "fresh", value: 100, observedAt: 0, ageMinutes: 30 },
+    buyMax: { status: "stale", value: 80, observedAt: 0, ageMinutes: 900 },
+  };
+  const typedBars = { ...artifact, itemId: "T4_METALBAR", value: 120 };
+
+  it("replaces the API price for the same order, and keeps the other", () => {
+    const { materials } = withManualPrices(
+      { materials: [apiBars], products: [] },
+      [typedBars],
+      where,
+      now,
+    );
+
+    expect(materials).toEqual([
+      {
+        ...apiBars,
+        sellMin: {
+          status: "fresh",
+          value: 120,
+          observedAt: artifact.enteredAt,
+          ageMinutes: 90,
+        },
+      },
+    ]);
+  });
+
+  it("adds a price AODP had no row for, at the market it's for", () => {
+    const { materials, products } = withManualPrices(
+      { materials: [], products: [] },
+      [sword],
+      where,
+      now,
+    );
+
+    expect(materials).toEqual([]);
+    expect(products).toEqual([
+      {
+        itemId: "T4_MAIN_SWORD",
+        marketId: "Caerleon",
+        quality: 1,
+        sellMin: {
+          status: "fresh",
+          value: 5000,
+          observedAt: artifact.enteredAt,
+          ageMinutes: 90,
+        },
+        buyMax: { status: "missing" },
+      },
+    ]);
+  });
+
+  it.each([
+    ["server", { region: "europe" as const }],
+    ["market", { marketId: "Martlock" }],
+    ["quality", { quality: 2 }],
+  ])("ignores a manual price for another %s", (_other, overrides) => {
+    const prices = { materials: [apiBars], products: [] };
+
+    expect(
+      withManualPrices(prices, [{ ...typedBars, ...overrides }], where, now),
+    ).toEqual(prices);
   });
 });
