@@ -15,7 +15,7 @@ The **Settings** button at the top right opens a panel over the right of the pag
 
 A change applies straight away. A new server or stale time asks for prices again, and the browser's [cache](market-prices.md) answers with any it fetched in the last 15 minutes. Every other setting re-ranks the prices already fetched.
 
-**Reset to defaults** puts every setting back. **Clear price cache** forgets every price saved in the browser, on every server, so the next request goes to AODP. The prices on screen stay until then.
+**Reset to defaults** puts every setting back. **Clear price cache** forgets every price saved in the browser, on every server, so the next request goes to AODP. The prices on screen stay until then, and [manual prices](manual-prices.md) stay for good.
 
 ## Saved, not in the link
 

@@ -98,9 +98,9 @@ The `market-prices` tests run in Tokyo time, set in its `vitest.config.ts`. AODP
 
 ## IndexedDB
 
-Node has no IndexedDB, so tests that save prices or settings import `fake-indexeddb/auto`, which provides one in memory. Each test deletes the database afterwards, `new Dexie("aoc-price-cache").delete()` for prices and `new Dexie("aoc-settings").delete()` for the filters, route and settings, so the next one starts empty. Examples: `packages/market-prices/src/market-data.test.ts` and `apps/web/src/saved-settings.test.ts`.
+Node has no IndexedDB, so tests that save prices or settings import `fake-indexeddb/auto`, which provides one in memory. Each test deletes the database afterwards, `new Dexie("aoc-price-cache").delete()` for prices and `new Dexie("aoc-settings").delete()` for the filters, route and settings, and `new Dexie("aoc-manual-prices").delete()` for manual prices, so the next one starts empty. Examples: `packages/market-prices/src/market-data.test.ts`, `apps/web/src/saved-settings.test.ts` and `apps/web/src/manual-prices.test.ts`.
 
-Components that don't need IndexedDB take a `SettingsStore`, and tests pass `memorySettingsStore()` from `apps/web/src/saved-settings.store.ts`, which keeps the settings in memory.
+Components that don't need IndexedDB take a `SettingsStore` or a `ManualPriceStore`, and tests pass `memorySettingsStore()` from `apps/web/src/saved-settings.store.ts` or `memoryManualPriceStore()` from `apps/web/src/manual-prices.store.ts`, which keep what's saved in memory.
 
 To move the clock in these tests, fake only `Date`, with `vi.useFakeTimers({ toFake: ["Date"] })` and `vi.setSystemTime(...)`. fake-indexeddb runs its work with `setImmediate`, so faking every timer stops it.
 
