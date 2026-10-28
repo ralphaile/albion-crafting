@@ -16,6 +16,14 @@ window.matchMedia = (media) => ({
 
 Element.prototype.scrollIntoView = vi.fn();
 
+// jsdom's dialog can't open as a modal or close itself.
+HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+  this.open = true;
+};
+HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+  this.open = false;
+};
+
 afterEach(() => {
   cleanup();
 });

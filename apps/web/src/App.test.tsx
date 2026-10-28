@@ -175,6 +175,17 @@ describe("App", () => {
     });
   });
 
+  it("saves a setting changed in the panel", async () => {
+    const settingsStore = await renderApp();
+
+    fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Use focus" }));
+
+    await expect
+      .poll(() => settingsStore.load(CRAFTING_SETTING))
+      .toEqual({ ...DEFAULT_SETTINGS, focus: false });
+  });
+
   it("prices a changed route right away, puts it in the link and saves it", async () => {
     const getPrices = vi.fn<MarketData["getPrices"]>(() =>
       Promise.resolve(noPrices),

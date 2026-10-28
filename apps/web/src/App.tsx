@@ -20,6 +20,7 @@ import {
 import type { SettingsStore } from "./saved-settings.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
+import { SettingsPanel } from "./SettingsPanel";
 import { useSavedSetting } from "./useSavedSetting";
 
 export function App({
@@ -50,7 +51,7 @@ export function App({
       savedRoute ??
       DEFAULT_ROUTE_CHOICE,
   );
-  const [settings] = useSavedSetting(
+  const [settings, setSettings] = useSavedSetting(
     settingsStore,
     CRAFTING_SETTING,
     () => savedSettings ?? DEFAULT_SETTINGS,
@@ -74,6 +75,11 @@ export function App({
     <div className={styles.app}>
       <header className={styles.masthead}>
         <h1 className={styles.title}>Albion Crafting</h1>
+        <SettingsPanel
+          settings={settings}
+          onChange={setSettings}
+          onClearCache={() => marketData.clear()}
+        />
       </header>
       <main className={styles.main}>
         <CraftingLocationBar route={routeChoice} onChange={setRouteChoice} />
