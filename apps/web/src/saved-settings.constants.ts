@@ -3,6 +3,8 @@ import type { Filters } from "./filters.types";
 import { parseRoute } from "./route.schema";
 import type { RouteChoice } from "./route.types";
 import type { SavedSetting } from "./saved-settings.types";
+import { parseSettings } from "./settings.schema";
+import type { CraftingSettings } from "./settings.types";
 
 export const FILTERS_SETTING: SavedSetting<Filters> = {
   id: "filters",
@@ -14,4 +16,10 @@ export const ROUTE_SETTING: SavedSetting<RouteChoice> = {
   id: "route",
   version: 1,
   parse: parseRoute,
+};
+
+export const CRAFTING_SETTING: SavedSetting<CraftingSettings> = {
+  id: "crafting",
+  version: 1,
+  parse: parseSettings,
 };
