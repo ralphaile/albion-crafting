@@ -1,5 +1,6 @@
 import type { z } from "zod";
 
+import { DEFAULT_REGION } from "./aodp.constants.js";
 import {
   type AodpHistory,
   type AodpPrice,
@@ -14,10 +15,6 @@ import type {
 } from "./aodp.types.js";
 import { createLimiter } from "./limiter.helpers.js";
 import type { Limiter } from "./limiter.types.js";
-
-interface AodpClientOptions {
-  region?: Region;
-}
 
 const MAX_URL_LENGTH = 4096;
 const MAX_ATTEMPTS = 3;
@@ -49,10 +46,8 @@ const historyEndpoint: Endpoint<AodpHistory> = {
   marketIdOf: (row) => row.location,
 };
 
-export function createAodpClient({
-  region = "west",
-}: AodpClientOptions = {}): AodpClient {
-  const host = `https://${region}.albion-online-data.com/api/v2/stats/`;
+// One limiter for every server, because AODP counts requests per IP address.
+export function createAodpClient(): AodpClient {
   const limiter = createLimiter();
 
   async function getRows<T>(
@@ -60,6 +55,7 @@ export function createAodpClient({
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
+    region: Region,
     onEvent: (event: AodpEvent) => void,
   ): Promise<{ rows: T[]; failures: BatchFailure[] }> {
     if (
@@ -75,7 +71,7 @@ export function createAodpClient({
     const asked = new Set(marketIds.map((marketId) => marketId.toLowerCase()));
 
     const batches = splitIntoBatches(
-      `${host}${endpoint.path}/`,
+      `https://${region}.albion-online-data.com/api/v2/stats/${endpoint.path}/`,
       itemIds,
       `.json?${query}`,
     );
@@ -107,13 +103,14 @@ export function createAodpClient({
       itemIds,
       marketIds,
       qualities,
-      { onEvent = () => undefined } = {},
+      { region = DEFAULT_REGION, onEvent = () => undefined } = {},
     ) {
       const { rows, failures } = await getRows(
         pricesEndpoint,
         itemIds,
         marketIds,
         qualities,
+        region,
         onEvent,
       );
       return { prices: rows, failures };
@@ -122,13 +119,14 @@ export function createAodpClient({
       itemIds,
       marketIds,
       qualities,
-      { onEvent = () => undefined } = {},
+      { region = DEFAULT_REGION, onEvent = () => undefined } = {},
     ) {
       const { rows, failures } = await getRows(
         historyEndpoint,
         itemIds,
         marketIds,
         qualities,
+        region,
         onEvent,
       );
       return { history: rows, failures };

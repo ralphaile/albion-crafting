@@ -3,18 +3,15 @@ import { NO_DATA_DATE } from "./aodp.constants.js";
 import { openCacheStore } from "./cache.store.js";
 import { cachedRows } from "./cached-rows.helpers.js";
 import { summarizeHistory } from "./history.helpers.js";
-import type { MarketData, MarketDataOptions } from "./market-data.types.js";
+import type { MarketData } from "./market-data.types.js";
 import { normalizePrices } from "./prices.helpers.js";
 
-export async function openMarketData({
-  region = "west",
-}: MarketDataOptions = {}): Promise<MarketData> {
+export async function openMarketData(): Promise<MarketData> {
   const store = await openCacheStore();
   // One client, so that prices and history share its rate limiter.
-  const client = createAodpClient({ region });
+  const client = createAodpClient();
 
   const cachedPrices = cachedRows({
-    region,
     rows: store.prices,
     ttlMinutes: 15,
     fetch: async (itemIds, marketIds, qualities, options) => {
@@ -43,7 +40,6 @@ export async function openMarketData({
   });
 
   const cachedHistory = cachedRows({
-    region,
     rows: store.history,
     ttlMinutes: 6 * 60,
     fetch: async (itemIds, marketIds, qualities, options) => {

@@ -16,11 +16,10 @@ Live prices come from the [Albion Online Data Project](https://www.albion-online
 ```ts
 import { openMarketData } from "@aoc/market-prices";
 
-const marketData = await openMarketData({ region: "europe" });
+const marketData = await openMarketData();
 ```
 
-- **`region`** is the game server: `west` (Americas, the default), `europe` or `east` (Asia). Each has its own AODP host, such as `https://europe.albion-online-data.com`, and its own saved prices.
-- **One at a time:** prices and history share one AODP client, so they share its request limits. Open market data once and pass it around. A second one, such as in another browser tab, has limits of its own.
+- **One at a time:** prices and history share one AODP client, so they share its request limits, on every server. Open market data once and pass it around. A second one, such as in another browser tab, has limits of its own.
 - **Saved in the browser:** prices and history go in IndexedDB, in a database of their own called `aoc-price-cache`, so clearing it can't touch anything else the app saves. [ADR-002](adr/002-local-first-storage.md) explains why.
 - **`persistent`** is `false` when the browser won't open IndexedDB, as in some private windows. Prices are then kept in memory until the page closes, and the app can say so.
 - **`clear()`** forgets every saved price and all history, on every server.
@@ -41,6 +40,7 @@ const { prices, failures, fetchedAt } = await marketData.getPrices(
 
 - **What to ask for:** `pricesNeeded` from `@aoc/core` lists what a set of recipes makes (`products`) and what they use, alternative recipes included (`materials`). Ask for the materials where you buy and the products where you sell, never the whole catalog.
 - **Markets** are given by their `id`, and **qualities** by number, from 1 to 5. See [quality](glossary.md#quality).
+- **`region`** is the game server: `west` (Americas, the default), `europe` or `east` (Asia). Each has its own AODP host, such as `https://europe.albion-online-data.com`, and its own saved prices.
 - **`prices`:** one per item, market and quality, as [ADR-003](adr/003-price-data-strategy.md) describes. They fit `OrderPrices` from `@aoc/core`, so they go into its calculations as they are.
   - **`sellMin`** is the cheapest sell order: what you pay to buy instantly, and the reference for a sell order.
   - **`buyMax`** is the best buy order: what you get for selling instantly, the reference for a buy order, and the Black Market price.

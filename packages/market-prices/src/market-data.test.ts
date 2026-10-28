@@ -401,11 +401,12 @@ describe.each([
 
     it("keeps each server's prices apart", async () => {
       const { requests } = fakeAodp();
-      const west = await openMarketData({ region: "west" });
-      await west.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+      const marketData = await openMarketData();
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
 
-      const europe = await openMarketData({ region: "europe" });
-      const result = await europe.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+      const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1], {
+        region: "europe",
+      });
 
       expect(requests).toEqual(["west prices T4_BAG", "europe prices T4_BAG"]);
       expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 2000"]);
