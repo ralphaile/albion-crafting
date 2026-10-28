@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 import type { MarketData } from "@aoc/market-prices";
 
@@ -8,7 +8,7 @@ import { CraftingLocationBar } from "./CraftingLocationBar";
 import { filtersFromSearch, searchWithFilters } from "./filters-url.helpers";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
-import type { ManualPrice } from "./manual-prices.types";
+import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
 import { routeFromSearch, searchWithRoute } from "./route-url.helpers";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import { routeFromChoice } from "./route.helpers";
@@ -22,11 +22,13 @@ import type { SettingsStore } from "./saved-settings.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
 import { SettingsPanel } from "./SettingsPanel";
+import { useManualPrices } from "./useManualPrices";
 import { useSavedSetting } from "./useSavedSetting";
 
 export function App({
   marketData,
   settingsStore,
+  manualPriceStore,
   savedFilters,
   savedRoute,
   savedSettings,
@@ -34,6 +36,7 @@ export function App({
 }: {
   marketData: MarketData;
   settingsStore: SettingsStore;
+  manualPriceStore: ManualPriceStore;
   savedFilters: Filters | undefined;
   savedRoute: RouteChoice | undefined;
   savedSettings: CraftingSettings | undefined;
@@ -59,7 +62,10 @@ export function App({
     CRAFTING_SETTING,
     () => savedSettings ?? DEFAULT_SETTINGS,
   );
-  const [manualPrices] = useState(savedManualPrices);
+  const { manualPrices, saveManualPrice, removeManualPrice } = useManualPrices(
+    manualPriceStore,
+    savedManualPrices,
+  );
   // One object per choice, so the crafts only recalculate when the route changes.
   const route = useMemo(() => routeFromChoice(routeChoice), [routeChoice]);
 
@@ -95,6 +101,8 @@ export function App({
           onFiltersChange={setFilters}
           persistent={settingsStore.persistent}
           manualPrices={manualPrices}
+          onSaveManualPrice={saveManualPrice}
+          onRemoveManualPrice={removeManualPrice}
         />
       </main>
     </div>

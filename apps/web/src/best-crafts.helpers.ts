@@ -25,17 +25,20 @@ export function evaluateCrafts(
       materials,
       products,
     });
+    const materialPrices = new Map(
+      evaluation.materialCost.lines.map(({ itemId, source }) => [
+        itemId,
+        materials.get(itemId)?.[source] ?? MISSING,
+      ]),
+    );
     return {
       ...evaluation,
       recipe,
       specialty: hasSpecialty(place, recipe.craftingCategory),
       itemPrice:
         products.get(recipe.itemId)?.[evaluation.revenue.source] ?? MISSING,
-      oldestMaterialPrice: oldest(
-        evaluation.materialCost.lines.map(
-          ({ itemId, source }) => materials.get(itemId)?.[source] ?? MISSING,
-        ),
-      ),
+      materialPrices,
+      oldestMaterialPrice: oldest([...materialPrices.values()]),
     };
   });
 }

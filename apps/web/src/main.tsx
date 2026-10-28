@@ -45,6 +45,7 @@ createRoot(root).render(
     <App
       marketData={marketData}
       settingsStore={settingsStore}
+      manualPriceStore={manualPriceStore}
       savedFilters={savedFilters}
       savedRoute={savedRoute}
       savedSettings={savedSettings}

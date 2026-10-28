@@ -1,7 +1,7 @@
 import type { ItemPrices, ObservedPrice, Region } from "@aoc/market-prices";
 
 import type { CraftPrices } from "./best-crafts.types";
-import type { ManualPrice } from "./manual-prices.types";
+import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 
 const MINUTE_MS = 60_000;
 
@@ -11,6 +11,16 @@ interface PricesAt {
   region: Region;
   marketId: string;
   quality: number;
+}
+
+export function sameManualPrice(a: ManualPriceKey, b: ManualPriceKey) {
+  return (
+    a.region === b.region &&
+    a.itemId === b.itemId &&
+    a.marketId === b.marketId &&
+    a.quality === b.quality &&
+    a.source === b.source
+  );
 }
 
 function observed({ value, enteredAt }: ManualPrice, now: number) {

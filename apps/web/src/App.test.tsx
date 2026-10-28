@@ -8,6 +8,7 @@ import { App } from "./App";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 import { formatCount } from "./format.helpers";
+import { memoryManualPriceStore } from "./manual-prices.store";
 import type { ManualPrice } from "./manual-prices.types";
 import type { RouteChoice } from "./route.types";
 import {
@@ -55,6 +56,7 @@ async function renderApp({
     <App
       marketData={marketData}
       settingsStore={settingsStore}
+      manualPriceStore={memoryManualPriceStore()}
       savedFilters={savedFilters}
       savedRoute={savedRoute}
       savedSettings={savedSettings}

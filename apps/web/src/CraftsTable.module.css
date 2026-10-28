@@ -29,7 +29,7 @@
 }
 
 .pricesColumn {
-  width: 164px;
+  width: 184px;
 }
 
 .table thead th {
@@ -199,9 +199,20 @@
 }
 
 .missing {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--loss);
   font-size: 14px;
   line-height: 1.2;
+  text-align: left;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.missing:hover {
+  text-decoration-style: solid;
 }
 
 .incomplete > * {
@@ -219,6 +230,44 @@
 
 .prices {
   white-space: nowrap;
+}
+
+.pricesInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.edit {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: none;
+  transition: border-color 120ms ease-out;
+}
+
+.edit:hover {
+  border-color: var(--brass);
+}
+
+.edit svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.edit:hover svg {
+  stroke: var(--brass);
 }
 
 .ages {

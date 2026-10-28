@@ -16,6 +16,7 @@ import { craftFilter, recipeFilter } from "./filters.helpers";
 import type { Filters } from "./filters.types";
 import { withManualPrices } from "./manual-prices.helpers";
 import type { ManualPrice } from "./manual-prices.types";
+import { QUALITY } from "./prices.constants";
 import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
@@ -43,8 +44,6 @@ interface Answer {
   products: ReadonlySet<string>;
   fetched: Fetched;
 }
-
-const QUALITY = 1;
 
 const QUALITIES = [QUALITY];
 

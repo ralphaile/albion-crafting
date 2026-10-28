@@ -13,5 +13,6 @@ export type Craft = Evaluation & {
   recipe: GameRecipe;
   specialty: boolean;
   itemPrice: ObservedPrice;
+  materialPrices: ReadonlyMap<string, ObservedPrice>;
   oldestMaterialPrice: SeenPrice | undefined;
 };
