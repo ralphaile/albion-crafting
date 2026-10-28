@@ -1,4 +1,4 @@
-import { type ReactNode, useId, useRef, useState } from "react";
+import { type ReactNode, useId, useState } from "react";
 
 import type { DailyBonus } from "@aoc/core";
 
@@ -12,6 +12,7 @@ import {
 } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
 import styles from "./SettingsPanel.module.css";
+import { SidePanel } from "./SidePanel";
 
 const NO_BONUS = "";
 
@@ -306,8 +307,7 @@ export function SettingsPanel({
   onChange: (settings: CraftingSettings) => void;
   onClearCache: () => Promise<void>;
 }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const headingId = useId();
+  const [open, setOpen] = useState(false);
   const serverId = useId();
   const serverHelpId = useId();
   const [cache, setCache] = useState<"kept" | "clearing" | "cleared">("kept");
@@ -326,7 +326,7 @@ export function SettingsPanel({
         aria-haspopup="dialog"
         onClick={() => {
           setCache("kept");
-          dialogRef.current?.showModal();
+          setOpen(true);
         }}
       >
         <svg className={styles.sliders} viewBox="0 0 16 16" aria-hidden="true">
@@ -337,142 +337,15 @@ export function SettingsPanel({
         </svg>
         Settings
       </button>
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- a click outside the panel lands on the dialog's backdrop; keyboards close it with Escape */}
-      <dialog
-        ref={dialogRef}
-        className={styles.panel}
-        aria-labelledby={headingId}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) {
-            dialogRef.current?.close();
-          }
+      <SidePanel
+        heading="Settings"
+        closeLabel="Close settings"
+        open={open}
+        onClose={() => {
+          setOpen(false);
         }}
-      >
-        <div className={styles.sheet}>
-          <header className={styles.header}>
-            <h2 id={headingId} className={styles.heading}>
-              Settings
-            </h2>
-            <button
-              type="button"
-              className={styles.close}
-              aria-label="Close settings"
-              onClick={() => {
-                dialogRef.current?.close();
-              }}
-            >
-              <svg viewBox="0 0 10 10" aria-hidden="true">
-                <path d="M2 2l6 6M8 2L2 8" />
-              </svg>
-            </button>
-          </header>
-          <div className={styles.body}>
-            <section className={styles.section}>
-              <h3 className={styles.sectionHeading}>Crafting</h3>
-              <Check
-                label="Use focus"
-                checked={settings.focus}
-                onChange={(focus) => {
-                  set("focus", focus);
-                }}
-                help="Focus raises the return rate, so more materials come back. Silver per focus ranks crafts by how well they use it."
-              />
-              <Check
-                label="Premium"
-                checked={settings.premium}
-                onChange={(premium) => {
-                  set("premium", premium);
-                }}
-                help="Premium halves the market tax, from 8% to 4% of each sale."
-              />
-              <WholeNumber
-                label="Station fee"
-                unit="silver per 100 nutrition"
-                value={settings.stationFee}
-                min={0}
-                max={MAX_STATION_FEE}
-                onChange={(stationFee) => {
-                  set("stationFee", stationFee);
-                }}
-                help="Each station’s owner sets it, often between 0 and 1,000. Your own island costs 0."
-              />
-              <DailyBonuses
-                bonuses={settings.dailyBonuses}
-                onChange={(dailyBonuses) => {
-                  set("dailyBonuses", dailyBonuses);
-                }}
-              />
-            </section>
-            <section className={styles.section}>
-              <h3 className={styles.sectionHeading}>Market</h3>
-              <Choice
-                label="Buy materials by"
-                value={settings.buyMode}
-                options={[
-                  { id: "instant", label: "Instant buy" },
-                  { id: "order", label: "Buy order" },
-                ]}
-                onChange={(buyMode) => {
-                  set("buyMode", buyMode);
-                }}
-                help="Instant buy pays the cheapest sell order. A buy order usually costs less, but adds a 2.5% setup fee and takes time to fill."
-              />
-              <Choice
-                label="Sell by"
-                value={settings.sellMode}
-                options={[
-                  { id: "order", label: "Sell order" },
-                  { id: "instant", label: "Instant sell" },
-                ]}
-                onChange={(sellMode) => {
-                  set("sellMode", sellMode);
-                }}
-                help="A sell order lists at the cheapest sell order and adds a 2.5% setup fee. Instant sell takes the best buy order. Selling to the Black Market is always instant."
-              />
-              <WholeNumber
-                label="Stale after"
-                unit="hours"
-                value={settings.staleAfterHours}
-                min={1}
-                max={MAX_STALE_HOURS}
-                onChange={(staleAfterHours) => {
-                  set("staleAfterHours", staleAfterHours);
-                }}
-                help="Prices older than this get a red dot and count as stale."
-              />
-              <div className={styles.setting}>
-                <div className={styles.title}>
-                  <label htmlFor={serverId} className={styles.label}>
-                    Server
-                  </label>
-                  <Help id={serverHelpId} about="Server">
-                    The game server whose market prices to use.
-                  </Help>
-                </div>
-                <select
-                  id={serverId}
-                  className={styles.select}
-                  value={settings.server}
-                  aria-describedby={serverHelpId}
-                  onChange={(event) => {
-                    const server = SERVERS.find(
-                      ({ id }) => id === event.target.value,
-                    );
-                    if (server !== undefined) {
-                      set("server", server.id);
-                    }
-                  }}
-                >
-                  {SERVERS.map((server) => (
-                    <option key={server.id} value={server.id}>
-                      {server.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </section>
-          </div>
-          <footer className={styles.actions}>
+        footer={
+          <>
             <button
               type="button"
               className={styles.action}
@@ -498,9 +371,114 @@ export function SettingsPanel({
             <p className={styles.status} role="status">
               {cache === "cleared" && "Saved prices cleared"}
             </p>
-          </footer>
-        </div>
-      </dialog>
+          </>
+        }
+      >
+        <section className={styles.section}>
+          <h3 className={styles.sectionHeading}>Crafting</h3>
+          <Check
+            label="Use focus"
+            checked={settings.focus}
+            onChange={(focus) => {
+              set("focus", focus);
+            }}
+            help="Focus raises the return rate, so more materials come back. Silver per focus ranks crafts by how well they use it."
+          />
+          <Check
+            label="Premium"
+            checked={settings.premium}
+            onChange={(premium) => {
+              set("premium", premium);
+            }}
+            help="Premium halves the market tax, from 8% to 4% of each sale."
+          />
+          <WholeNumber
+            label="Station fee"
+            unit="silver per 100 nutrition"
+            value={settings.stationFee}
+            min={0}
+            max={MAX_STATION_FEE}
+            onChange={(stationFee) => {
+              set("stationFee", stationFee);
+            }}
+            help="Each station’s owner sets it, often between 0 and 1,000. Your own island costs 0."
+          />
+          <DailyBonuses
+            bonuses={settings.dailyBonuses}
+            onChange={(dailyBonuses) => {
+              set("dailyBonuses", dailyBonuses);
+            }}
+          />
+        </section>
+        <section className={styles.section}>
+          <h3 className={styles.sectionHeading}>Market</h3>
+          <Choice
+            label="Buy materials by"
+            value={settings.buyMode}
+            options={[
+              { id: "instant", label: "Instant buy" },
+              { id: "order", label: "Buy order" },
+            ]}
+            onChange={(buyMode) => {
+              set("buyMode", buyMode);
+            }}
+            help="Instant buy pays the cheapest sell order. A buy order usually costs less, but adds a 2.5% setup fee and takes time to fill."
+          />
+          <Choice
+            label="Sell by"
+            value={settings.sellMode}
+            options={[
+              { id: "order", label: "Sell order" },
+              { id: "instant", label: "Instant sell" },
+            ]}
+            onChange={(sellMode) => {
+              set("sellMode", sellMode);
+            }}
+            help="A sell order lists at the cheapest sell order and adds a 2.5% setup fee. Instant sell takes the best buy order. Selling to the Black Market is always instant."
+          />
+          <WholeNumber
+            label="Stale after"
+            unit="hours"
+            value={settings.staleAfterHours}
+            min={1}
+            max={MAX_STALE_HOURS}
+            onChange={(staleAfterHours) => {
+              set("staleAfterHours", staleAfterHours);
+            }}
+            help="Prices older than this get a red dot and count as stale."
+          />
+          <div className={styles.setting}>
+            <div className={styles.title}>
+              <label htmlFor={serverId} className={styles.label}>
+                Server
+              </label>
+              <Help id={serverHelpId} about="Server">
+                The game server whose market prices to use.
+              </Help>
+            </div>
+            <select
+              id={serverId}
+              className={styles.select}
+              value={settings.server}
+              aria-describedby={serverHelpId}
+              onChange={(event) => {
+                const server = SERVERS.find(
+                  ({ id }) => id === event.target.value,
+                );
+                if (server !== undefined) {
+                  set("server", server.id);
+                }
+              }}
+            >
+              {SERVERS.map((server) => (
+                <option key={server.id} value={server.id}>
+                  {server.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </section>
+      </SidePanel>
     </>
   );
 }
