@@ -12,9 +12,14 @@ import { routeFromSearch, searchWithRoute } from "./route-url.helpers";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import { routeFromChoice } from "./route.helpers";
 import type { RouteChoice } from "./route.types";
-import { FILTERS_SETTING, ROUTE_SETTING } from "./saved-settings.constants";
+import {
+  CRAFTING_SETTING,
+  FILTERS_SETTING,
+  ROUTE_SETTING,
+} from "./saved-settings.constants";
 import type { SettingsStore } from "./saved-settings.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
+import type { CraftingSettings } from "./settings.types";
 import { useSavedSetting } from "./useSavedSetting";
 
 export function App({
@@ -22,11 +27,13 @@ export function App({
   settingsStore,
   savedFilters,
   savedRoute,
+  savedSettings,
 }: {
   marketData: MarketData;
   settingsStore: SettingsStore;
   savedFilters: Filters | undefined;
   savedRoute: RouteChoice | undefined;
+  savedSettings: CraftingSettings | undefined;
 }) {
   // A shared link wins over what this browser saved.
   const [filters, setFilters] = useSavedSetting(
@@ -42,6 +49,11 @@ export function App({
       routeFromSearch(window.location.search) ??
       savedRoute ??
       DEFAULT_ROUTE_CHOICE,
+  );
+  const [settings] = useSavedSetting(
+    settingsStore,
+    CRAFTING_SETTING,
+    () => savedSettings ?? DEFAULT_SETTINGS,
   );
   // One object per choice, so the crafts only recalculate when the route changes.
   const route = useMemo(() => routeFromChoice(routeChoice), [routeChoice]);
@@ -68,7 +80,7 @@ export function App({
         <BestCrafts
           marketData={marketData}
           route={route}
-          settings={DEFAULT_SETTINGS}
+          settings={settings}
           filters={filters}
           onFiltersChange={setFilters}
           persistent={settingsStore.persistent}

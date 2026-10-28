@@ -23,6 +23,7 @@ import { formatCount } from "./format.helpers";
 import { DEFAULT_ROUTE } from "./route.constants";
 import type { Route } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
+import type { CraftingSettings } from "./settings.types";
 import { fakeMarketData, noPrices } from "../test/fake-market-data";
 
 const route: Route = {
@@ -93,11 +94,63 @@ describe("BestCrafts", () => {
       expect.arrayContaining(["T4_METALBAR", "T4_LEATHER"]),
       ["Martlock"],
       [1],
+      { region: "west", staleAfterMinutes: 12 * 60 },
     );
     expect(getPrices).toHaveBeenCalledWith(
       expect.arrayContaining(["T4_MAIN_SWORD"]),
       ["Caerleon"],
       [1],
+      { region: "west", staleAfterMinutes: 12 * 60 },
+    );
+  });
+
+  it("asks again for a new server or stale time, and re-prices other settings without asking", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
+      broadswordPrices(marketIds),
+    );
+    const marketData = fakeMarketData({ getPrices });
+    const withSettings = (settings: CraftingSettings) => (
+      <BestCrafts marketData={marketData} route={route} settings={settings} />
+    );
+    const { rerender } = render(withSettings(DEFAULT_SETTINGS));
+    await bestCrafts();
+    expect(getPrices).toHaveBeenCalledTimes(2);
+
+    rerender(withSettings({ ...DEFAULT_SETTINGS, focus: false }));
+
+    expect(
+      screen.queryByRole("columnheader", { name: "Silver/focus" }),
+    ).not.toBeInTheDocument();
+    expect(getPrices).toHaveBeenCalledTimes(2);
+
+    rerender(withSettings({ ...DEFAULT_SETTINGS, server: "europe" }));
+
+    await waitFor(() => {
+      expect(getPrices).toHaveBeenCalledTimes(4);
+    });
+    expect(getPrices).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.anything(),
+      [1],
+      { region: "europe", staleAfterMinutes: 12 * 60 },
+    );
+
+    rerender(
+      withSettings({
+        ...DEFAULT_SETTINGS,
+        server: "europe",
+        staleAfterHours: 2,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(getPrices).toHaveBeenCalledTimes(6);
+    });
+    expect(getPrices).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.anything(),
+      [1],
+      { region: "europe", staleAfterMinutes: 2 * 60 },
     );
   });
 
