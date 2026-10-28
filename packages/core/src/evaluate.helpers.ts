@@ -7,23 +7,11 @@ import type {
   RecipeAlternative,
 } from "./evaluate.types.js";
 import { focusCost, silverPerFocus } from "./focus.helpers.js";
-import { hideoutProductionBonus } from "./hideout-bonus.helpers.js";
 import { materialCost } from "./material-cost.helpers.js";
-import { productionBonus } from "./production-bonus.helpers.js";
-import type { ProductionBonusOptions } from "./production-bonus.types.js";
+import { placeProductionBonus } from "./place-bonus.helpers.js";
 import { returnRate } from "./return-rate.helpers.js";
 import { revenue } from "./revenue.helpers.js";
 import { stationFee } from "./station-fee.helpers.js";
-
-function bonusAt(
-  place: CraftingPlace,
-  craftingCategory: string | undefined,
-  options: ProductionBonusOptions,
-) {
-  return "hideout" in place
-    ? hideoutProductionBonus(place.hideout, craftingCategory, options)
-    : productionBonus(place.location, craftingCategory, options);
-}
 
 export function evaluate(
   recipe: Recipe,
@@ -32,14 +20,15 @@ export function evaluate(
   prices: EvaluatePrices,
 ): Evaluation {
   const dailyBonuses = settings.dailyBonuses ?? [];
-  const bonus = bonusAt(place, recipe.craftingCategory, {
+  const bonus = placeProductionBonus(place, recipe.craftingCategory, {
     focus: settings.focus,
     dailyBonuses,
   });
   const rrr = returnRate(bonus.total);
   const rrrWithoutFocus = settings.focus
     ? returnRate(
-        bonusAt(place, recipe.craftingCategory, { dailyBonuses }).total,
+        placeProductionBonus(place, recipe.craftingCategory, { dailyBonuses })
+          .total,
       )
     : rrr;
   const fee = stationFee(recipe.itemValue, settings.stationFee);

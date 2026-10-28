@@ -1,0 +1,159 @@
+/* Every field keeps its cell, so choosing a hideout fills empty cells
+   instead of pushing the markets aside. */
+.bar {
+  display: grid;
+  grid-template-areas:
+    "location biome quality level . buy sell"
+    "rates rates rates rates rates rates rates";
+  grid-template-columns: 11.5em 10em 5.5em 5em minmax(0, 1fr) 10em 10em;
+  gap: 12px 20px;
+  align-items: end;
+  padding: 12px 18px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.location {
+  grid-area: location;
+}
+
+.biome {
+  grid-area: biome;
+}
+
+.quality {
+  grid-area: quality;
+}
+
+.level {
+  grid-area: level;
+}
+
+.buy {
+  grid-area: buy;
+}
+
+.sell {
+  grid-area: sell;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label,
+.rateList dt {
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.select {
+  width: 100%;
+  height: 34px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%)
+      calc(100% - 15px) 50% / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%)
+      calc(100% - 10px) 50% / 5px 5px no-repeat,
+    var(--bg);
+  color: var(--text);
+  font: inherit;
+  text-overflow: ellipsis;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 120ms ease-out;
+}
+
+.select:hover {
+  border-color: var(--text-faint);
+}
+
+.rates {
+  display: flex;
+  flex-wrap: wrap;
+  grid-area: rates;
+  align-items: baseline;
+  gap: 4px 18px;
+}
+
+.rateList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 18px;
+  margin: 0;
+}
+
+.rateList > div {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.rateList dd {
+  margin: 0;
+  color: var(--text);
+  font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.rateList .specialty dt,
+.rateList .specialty dd {
+  color: var(--brass);
+}
+
+.rateList .focus {
+  padding-left: 18px;
+  border-left: 1px solid var(--rule);
+}
+
+.none {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 14px;
+  font-style: italic;
+}
+
+@media (max-width: 1100px) {
+  .bar {
+    grid-template-areas:
+      "location biome quality level"
+      "buy sell . ."
+      "rates rates rates rates";
+    grid-template-columns: 11.5em 10em 5.5em 5em;
+  }
+}
+
+@media (max-width: 560px) {
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+
+  .field,
+  .rates {
+    flex: 1 1 100%;
+  }
+
+  .quality,
+  .level,
+  .buy,
+  .sell {
+    flex-basis: calc(50% - 10px);
+  }
+
+  .rateList .focus {
+    padding-left: 0;
+    border-left: 0;
+  }
+}

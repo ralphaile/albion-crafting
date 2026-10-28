@@ -4,6 +4,7 @@ import {
   formatAge,
   formatCount,
   formatPercent,
+  formatReturnRate,
   formatSilver,
   formatSilverPerFocus,
 } from "./format.helpers";
@@ -39,6 +40,16 @@ describe("formatPercent", () => {
     [0, "0.0%"],
   ])("shows %d as %s", (value, expected) => {
     expect(formatPercent(value)).toBe(expected);
+  });
+});
+
+describe("formatReturnRate", () => {
+  it.each([
+    [0.82 / 1.82, "45.05%"],
+    [1.41 / 2.41, "58.51%"],
+    [0, "0.00%"],
+  ])("shows %d as %s", (value, expected) => {
+    expect(formatReturnRate(value)).toBe(expected);
   });
 });
 

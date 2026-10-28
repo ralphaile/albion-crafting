@@ -16,6 +16,7 @@ export {
 } from "./hideout-bonus.types.js";
 export { type MarketPrice, type OrderPrices } from "./market.types.js";
 export { materialCost } from "./material-cost.helpers.js";
+export { placeProductionBonus } from "./place-bonus.helpers.js";
 export {
   type BuyMode,
   type Material,

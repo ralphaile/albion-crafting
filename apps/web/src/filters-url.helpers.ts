@@ -1,6 +1,7 @@
 import { NO_FILTERS } from "./filters.constants";
 import { parseFilters } from "./filters.schema";
 import type { Filters } from "./filters.types";
+import { wholeNumber } from "./search-params.helpers";
 
 const LIST_PARAMS = {
   tiers: "tier",
@@ -18,8 +19,6 @@ const PARAMS = [
   "q",
 ];
 
-const NUMBER = /^-?\d+$/;
-
 function list(params: URLSearchParams, name: string) {
   const value = params.get(name);
   return value === null || value === "" ? [] : value.split(",");
@@ -27,11 +26,6 @@ function list(params: URLSearchParams, name: string) {
 
 function numbers(params: URLSearchParams, name: string) {
   return list(params, name).map(Number);
-}
-
-function whole(params: URLSearchParams, name: string) {
-  const value = params.get(name);
-  return value !== null && NUMBER.test(value) ? Number(value) : undefined;
 }
 
 // Undefined when the link carries no filters, so the saved ones can apply.
@@ -45,8 +39,8 @@ export function filtersFromSearch(search: string): Filters | undefined {
     enchants: numbers(params, LIST_PARAMS.enchants),
     categories: list(params, LIST_PARAMS.categories),
     artifacts: params.get("artifacts") ?? NO_FILTERS.artifacts,
-    minProfit: whole(params, "profit"),
-    minMarginPercent: whole(params, "margin"),
+    minProfit: wholeNumber(params, "profit"),
+    minMarginPercent: wholeNumber(params, "margin"),
     hideIncomplete: params.get("complete") === "1",
     specialtyOnly: params.get("specialty") === "1",
     search: params.get("q") ?? "",

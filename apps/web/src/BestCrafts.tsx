@@ -1,5 +1,7 @@
-import type { CraftingPlace, EvaluateSettings } from "@aoc/core";
-import { type MarketData, markets } from "@aoc/market-prices";
+import { useMemo } from "react";
+
+import type { EvaluateSettings } from "@aoc/core";
+import type { MarketData } from "@aoc/market-prices";
 
 import styles from "./BestCrafts.module.css";
 import { CraftFilters, type UpdateFilters } from "./CraftFilters";
@@ -7,47 +9,13 @@ import { CraftsTable } from "./CraftsTable";
 import { NO_FILTERS } from "./filters.constants";
 import { activeFilters } from "./filters.helpers";
 import type { Filters } from "./filters.types";
+import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import { useBestCrafts } from "./useBestCrafts";
 
 const SKELETON_ROWS = 8;
 
 const IGNORE_FILTERS: UpdateFilters = () => undefined;
-
-function marketName(marketId: string) {
-  return markets.find(({ id }) => id === marketId)?.name ?? marketId;
-}
-
-function placeName(place: CraftingPlace) {
-  return "location" in place ? place.location.name : "your hideout";
-}
-
-function RouteLine({
-  route,
-  settings,
-}: {
-  route: Route;
-  settings: EvaluateSettings;
-}) {
-  const buy = marketName(route.buyMarketId);
-  const sell = marketName(route.sellMarketId);
-  return (
-    <p className={styles.route}>
-      Crafting in <strong>{placeName(route.place)}</strong>
-      {buy === sell ? (
-        <>
-          , buying and selling in <strong>{buy}</strong>
-        </>
-      ) : (
-        <>
-          , buying in <strong>{buy}</strong> and selling in{" "}
-          <strong>{sell}</strong>
-        </>
-      )}
-      {settings.focus ? ", with focus" : ", without focus"}
-    </p>
-  );
-}
 
 export function BestCrafts({
   marketData,
@@ -64,12 +32,15 @@ export function BestCrafts({
   onFiltersChange?: UpdateFilters;
   persistent?: boolean;
 }) {
-  const bestCrafts = useBestCrafts(marketData, route, settings, filters);
+  const routeSettings = useMemo(
+    () => settingsForRoute(settings, route),
+    [settings, route],
+  );
+  const bestCrafts = useBestCrafts(marketData, route, routeSettings, filters);
   const filtered = activeFilters(filters).length > 0;
 
   return (
     <div className={styles.bestCrafts}>
-      <RouteLine route={route} settings={settings} />
       <CraftFilters
         filters={filters}
         onChange={onFiltersChange}

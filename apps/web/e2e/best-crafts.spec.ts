@@ -18,7 +18,10 @@ test("ranks the one craft with every price first, with its numbers worked out", 
   //   profit        4,675 − 1,041.67 − 216 = 3,417.33, a 271.7% margin
   //   without focus materials are 2,000 × (1 − 0.33/1.33) = 1,503.76,
   //   so focus saves 462.09 silver for 1,286 focus: 0.36 silver per focus
-  const topRow = page.getByRole("row").nth(1);
+  const rows = page
+    .getByRole("region", { name: "Best crafts" })
+    .getByRole("row");
+  const topRow = rows.nth(1);
   await expect(topRow.getByRole("rowheader")).toHaveText(
     /^Adept's Broadsword\s*4\.0\s*Specialty$/,
   );
@@ -31,7 +34,5 @@ test("ranks the one craft with every price first, with its numbers worked out", 
     "47.9%",
     /item 30 min.*materials 30 min/,
   ]);
-  await expect(page.getByText(/ranked by/)).toHaveText(
-    /^1 craft ranked by silver per focus · [\d,]+ crafts missing prices$/,
-  );
+  await expect(rows.nth(2)).toHaveText(/^Missing prices · [\d,]+ crafts$/);
 });

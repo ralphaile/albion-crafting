@@ -28,12 +28,9 @@ test("a filtered link prices only its items, and the filters are kept", async ({
     "No artifacts",
     "No missing prices",
   ]);
-  await expect(page.getByText(/ranked by/)).toHaveText(
-    /^1 craft ranked by silver per focus$/,
-  );
-  await expect(page.getByRole("row").nth(1).getByRole("rowheader")).toHaveText(
-    /^Adept's Broadsword/,
-  );
+  await expect(
+    page.getByRole("region", { name: "Best crafts" }).getByRole("rowheader"),
+  ).toHaveText([/^Adept's Broadsword/]);
   // The three T4.0 swords without artifacts and their materials, not the whole catalog.
   expect([...requested].sort()).toEqual([
     "T4_2H_CLAYMORE",
@@ -52,7 +49,7 @@ test("a filtered link prices only its items, and the filters are kept", async ({
     "No missing prices",
   ]);
   await expect(page).toHaveURL(
-    /\?enchant=0&cat=sword&artifacts=exclude&complete=1$/,
+    /\?place=1000&buy=Lymhurst&sell=Lymhurst&enchant=0&cat=sword&artifacts=exclude&complete=1$/,
   );
   await expect(page.getByRole("button", { name: "T4" })).toHaveAttribute(
     "aria-pressed",
@@ -68,11 +65,13 @@ test("a filtered link prices only its items, and the filters are kept", async ({
     "No missing prices",
   ]);
   await expect(page).toHaveURL(
-    /\?enchant=0&cat=sword&artifacts=exclude&complete=1$/,
+    /\?place=1000&buy=Lymhurst&sell=Lymhurst&enchant=0&cat=sword&artifacts=exclude&complete=1$/,
   );
 
   await page.getByRole("button", { name: "Clear all", exact: true }).click();
 
   await expect(chips).toBeHidden();
-  await expect(page).toHaveURL(/\/albion-crafting\/$/);
+  await expect(page).toHaveURL(
+    /\/albion-crafting\/\?place=1000&buy=Lymhurst&sell=Lymhurst$/,
+  );
 });

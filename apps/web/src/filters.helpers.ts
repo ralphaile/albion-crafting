@@ -6,6 +6,10 @@ import { CATEGORIES } from "./filters.constants";
 import type { ActiveFilter, ArtifactFilter, Filters } from "./filters.types";
 import { formatCount, formatSilver } from "./format.helpers";
 
+export function categoryLabel(id: string) {
+  return CATEGORIES.find((option) => option.id === id)?.label ?? id;
+}
+
 function includesOrEmpty<T>(selected: readonly T[], value: T) {
   return selected.length === 0 || selected.includes(value);
 }
@@ -83,8 +87,7 @@ export function activeFilters(filters: Filters): ActiveFilter[] {
     })),
     ...filters.categories.map((category) => ({
       id: `category-${category}`,
-      label:
-        CATEGORIES.find((option) => option.id === category)?.label ?? category,
+      label: categoryLabel(category),
       remove: (current: Filters) => ({
         ...current,
         categories: without(current.categories, category),
