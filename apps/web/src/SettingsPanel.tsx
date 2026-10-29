@@ -446,7 +446,7 @@ export function SettingsPanel({
             onChange={(staleAfterHours) => {
               set("staleAfterHours", staleAfterHours);
             }}
-            help="Prices older than this get a red dot and count as stale."
+            help="Prices from AODP older than this count as stale."
           />
           <WholeNumber
             label="Manual prices stale after"

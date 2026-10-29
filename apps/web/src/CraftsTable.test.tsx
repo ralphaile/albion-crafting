@@ -210,29 +210,24 @@ describe("CraftsTable", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows how old the item's price and the oldest material price are, and which are stale", () => {
+  it("shows how old the item's price and the oldest material price are, and where they came from", () => {
     renderTable();
     const row = rowOf("Adept's Broadsword 4.0");
 
-    expect(row.getByTitle("item price seen 30 min ago")).toHaveTextContent(
-      "item 30 min",
-    );
     expect(
-      row.getByTitle("materials price seen 14 h ago, stale"),
-    ).toHaveTextContent("materials 14 h, stale");
+      row.getByTitle("API fresh 5,000, seen 30 min ago"),
+    ).toHaveTextContent("item 30 min, API fresh");
+    expect(row.getByTitle("API stale 50, seen 14 h ago")).toHaveTextContent(
+      "materials 14 h, API stale",
+    );
   });
 
-  it("colors a price's dot by its age, and nothing else", () => {
+  it("shows a missing price as missing", () => {
     renderTable();
-    const row = rowOf("Adept's Broadsword 4.0");
 
-    expect(row.getByTitle("item price seen 30 min ago")).toHaveAttribute(
-      "data-age",
-      "recent",
+    expect(rowOf("Adept's Bow 4.0").getByTitle("Missing")).toHaveTextContent(
+      "item missing, Missing",
     );
-    expect(
-      row.getByTitle("materials price seen 14 h ago, stale"),
-    ).toHaveAttribute("data-age", "old");
   });
 
   it("says how many prices a craft is missing", () => {

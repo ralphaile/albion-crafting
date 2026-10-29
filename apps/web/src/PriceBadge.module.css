@@ -1,0 +1,76 @@
+/* Inline, so the text keeps the line's baseline. */
+.badge {
+  white-space: nowrap;
+}
+
+.icon {
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  vertical-align: -1px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.badge[data-kind="fresh"] .icon {
+  color: var(--price-fresh);
+}
+
+.badge[data-kind="stale"] .icon {
+  color: var(--price-stale);
+}
+
+.badge[data-kind="manual"] .icon {
+  color: var(--price-manual);
+}
+
+.badge[data-kind="missing"] .icon {
+  color: var(--price-missing);
+}
+
+.trigger {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+.tip {
+  position: fixed;
+  z-index: 10;
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  max-width: 280px;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--bg);
+  box-shadow: 0 10px 24px -14px rgb(0 0 0 / 60%);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+.tip[data-open="false"] {
+  display: none;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

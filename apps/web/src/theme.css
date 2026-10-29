@@ -11,9 +11,10 @@
   --text-faint: #958974;
   --brass: #d1ad5f;
 
-  --age-recent: #6dbfa2;
-  --age-aging: #e2c15a;
-  --age-old: #ef6f5e;
+  --price-fresh: #6dbfa2;
+  --price-stale: #e2c15a;
+  --price-manual: #6fa8e6;
+  --price-missing: #ef6f5e;
   --loss: #ef6f5e;
 
   --enchant-1: #7fc77f;
@@ -43,9 +44,10 @@
     --text-faint: #695a44;
     --brass: #7d5e14;
 
-    --age-recent: #22705a;
-    --age-aging: #a87f00;
-    --age-old: #ad3424;
+    --price-fresh: #22705a;
+    --price-stale: #a87f00;
+    --price-manual: #22599b;
+    --price-missing: #ad3424;
     --loss: #ad3424;
 
     --enchant-1: #276b2b;

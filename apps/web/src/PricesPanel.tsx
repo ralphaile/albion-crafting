@@ -5,10 +5,11 @@ import { itemName } from "@aoc/crafting-data";
 import { markets, type Region } from "@aoc/market-prices";
 
 import type { Craft, UsedPrice } from "./best-crafts.types";
-import { formatAge, formatSilver } from "./format.helpers";
+import { formatAgo, formatSilver } from "./format.helpers";
 import { ItemIcon } from "./ItemIcon";
 import { sameManualPrice } from "./manual-prices.helpers";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
+import { PriceBadge } from "./PriceBadge";
 import { QUALITY } from "./prices.constants";
 import styles from "./PricesPanel.module.css";
 import { SidePanel } from "./SidePanel";
@@ -39,16 +40,12 @@ function parseSilver(text: string) {
     : undefined;
 }
 
-function ago(minutes: number) {
-  return minutes < 1 ? "just now" : `${formatAge(minutes)} ago`;
-}
-
 function seen(price: UsedPrice) {
   if (price.status === "missing") {
     return "missing";
   }
   const how = price.origin === "manual" ? "typed" : "seen";
-  return `${how} ${ago(price.ageMinutes)}${price.status === "stale" ? ", stale" : ""}`;
+  return `${how} ${formatAgo(price.ageMinutes)}${price.status === "stale" ? ", stale" : ""}`;
 }
 
 function priceLines(
@@ -151,7 +148,8 @@ function PriceRow({
         onBlur={commit}
       />
       <span id={statusId} className={styles.status} data-price={price.status}>
-        {order} · {market} · {seen(price)}
+        {order} · {market} ·{" "}
+        <PriceBadge price={price}>{seen(price)}</PriceBadge>
       </span>
       {draft.invalid && (
         <p id={errorId} className={styles.error}>
