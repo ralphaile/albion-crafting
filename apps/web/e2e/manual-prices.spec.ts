@@ -111,7 +111,8 @@ test("a newer AODP price replaces a typed one, unless you always prefer yours", 
       ageMinutes: 30,
     },
   ]);
-  await page.clock.setSystemTime(now);
+  // The real time, not `now`: AODP's ages count from when it answers.
+  await page.clock.setSystemTime(Date.now());
   await page.reload();
 
   // Adept's Broadsword in Lymhurst with focus: 1,041.67 materials and 216
