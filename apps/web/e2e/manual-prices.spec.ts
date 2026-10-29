@@ -61,3 +61,81 @@ test("typing a missing artifact price completes its craft, and it's still there 
     .click();
   await expect(artifact).toHaveValue("12000");
 });
+
+test("a newer AODP price replaces a typed one, unless you always prefer yours", async ({
+  page,
+}) => {
+  const now = Date.now();
+  const materials = [
+    {
+      itemId: "T4_METALBAR",
+      marketId: "Lymhurst",
+      sellMin: 100,
+      ageMinutes: 3 * 60,
+    },
+    {
+      itemId: "T4_LEATHER",
+      marketId: "Lymhurst",
+      sellMin: 50,
+      ageMinutes: 3 * 60,
+    },
+  ];
+  await page.clock.install({ time: now - 125 * 60_000 });
+  await answerPrices(page, materials);
+  await page.goto("./?tier=4&enchant=0&q=broadsword");
+  const row = page
+    .getByRole("region", { name: "Best crafts" })
+    .getByRole("row")
+    .filter({ hasText: "Adept's Broadsword" });
+
+  await row.getByRole("button", { name: "1 price missing" }).click();
+  const sword = page
+    .getByRole("dialog", { name: "Adept's Broadsword 4.0" })
+    .getByRole("textbox", {
+      name: "Adept's Broadsword 4.0, sell order in Lymhurst",
+    });
+  await sword.fill("6000");
+  await sword.press("Enter");
+  await expect(sword).toHaveAccessibleDescription(
+    "Sell order · Lymhurst · typed just now",
+  );
+  await page.keyboard.press("Escape");
+
+  // Two hours later, AODP has a sword price seen 30 minutes ago.
+  await answerPrices(page, [
+    ...materials,
+    {
+      itemId: "T4_MAIN_SWORD",
+      marketId: "Lymhurst",
+      sellMin: 5000,
+      ageMinutes: 30,
+    },
+  ]);
+  await page.clock.setSystemTime(now);
+  await page.reload();
+
+  // Adept's Broadsword in Lymhurst with focus: 1,041.67 materials and 216
+  // station fee, so selling at 5,000 (4,675 after tax and setup fee) makes
+  // 3,417 and selling at 6,000 (5,610) makes 4,352.
+  const profit = row.getByRole("cell").first();
+  await expect(profit).toHaveText("3,417");
+  await expect(
+    row.getByRole("button", { name: /^item 30 min/ }),
+  ).toHaveAccessibleDescription(
+    "API fresh 5,000, seen 30 min ago Not used: Manual 6,000, typed 2 h ago",
+  );
+
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page
+    .getByRole("dialog", { name: "Settings" })
+    .getByRole("checkbox", { name: "Always prefer my manual prices" })
+    .check();
+  await page.keyboard.press("Escape");
+
+  await expect(profit).toHaveText("4,352");
+  await expect(
+    row.getByRole("button", { name: /^item 2 h/ }),
+  ).toHaveAccessibleDescription(
+    "Manual 6,000, typed 2 h ago Not used: API fresh 5,000, seen 30 min ago",
+  );
+});
