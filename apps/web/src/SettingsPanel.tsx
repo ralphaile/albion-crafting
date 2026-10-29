@@ -6,6 +6,7 @@ import {
   DAILY_BONUS_GROUPS,
   DEFAULT_SETTINGS,
   MAX_DAILY_BONUSES,
+  MAX_MANUAL_STALE_DAYS,
   MAX_STALE_HOURS,
   MAX_STATION_FEE,
   SERVERS,
@@ -446,6 +447,25 @@ export function SettingsPanel({
               set("staleAfterHours", staleAfterHours);
             }}
             help="Prices older than this get a red dot and count as stale."
+          />
+          <WholeNumber
+            label="Manual prices stale after"
+            unit="days"
+            value={settings.manualStaleAfterDays}
+            min={1}
+            max={MAX_MANUAL_STALE_DAYS}
+            onChange={(manualStaleAfterDays) => {
+              set("manualStaleAfterDays", manualStaleAfterDays);
+            }}
+            help="Prices you typed count as stale after this, and a fresh price from AODP then takes their place."
+          />
+          <Check
+            label="Always prefer my manual prices"
+            checked={settings.preferManualPrices}
+            onChange={(preferManualPrices) => {
+              set("preferManualPrices", preferManualPrices);
+            }}
+            help="Uses a price you typed whenever there is one, even when AODP has a newer one."
           />
           <div className={styles.setting}>
             <div className={styles.title}>

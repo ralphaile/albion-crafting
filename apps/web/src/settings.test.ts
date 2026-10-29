@@ -18,6 +18,8 @@ describe("parseSettings", () => {
         { category: "offhand", bonus: 0.1 },
       ],
       staleAfterHours: 24,
+      manualStaleAfterDays: 7,
+      preferManualPrices: true,
       server: "europe",
     };
 
@@ -39,6 +41,8 @@ describe("parseSettings", () => {
         premium: "yes",
         stationFee: -1,
         staleAfterHours: 0,
+        manualStaleAfterDays: 31,
+        preferManualPrices: "yes",
         server: "mars",
       }),
     ).toEqual({ ...DEFAULT_SETTINGS, focus: false });

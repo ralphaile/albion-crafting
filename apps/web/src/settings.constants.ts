@@ -10,12 +10,16 @@ export const DEFAULT_SETTINGS: CraftingSettings = {
   sellMode: "order",
   dailyBonuses: [],
   staleAfterHours: 12,
+  manualStaleAfterDays: 3,
+  preferManualPrices: false,
   server: "west",
 };
 
 export const MAX_STATION_FEE = 100_000;
 
 export const MAX_STALE_HOURS = 168;
+
+export const MAX_MANUAL_STALE_DAYS = 30;
 
 export const MAX_DAILY_BONUSES = 2;
 

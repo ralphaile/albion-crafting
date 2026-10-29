@@ -10,6 +10,8 @@ export interface CraftingSettings {
   sellMode: Exclude<SellMode, "blackMarket">;
   dailyBonuses: readonly DailyBonus[];
   staleAfterHours: number;
+  manualStaleAfterDays: number;
+  preferManualPrices: boolean;
   server: Region;
 }
 

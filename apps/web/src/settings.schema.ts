@@ -6,6 +6,7 @@ import {
   DAILY_BONUS_GROUPS,
   DEFAULT_SETTINGS,
   MAX_DAILY_BONUSES,
+  MAX_MANUAL_STALE_DAYS,
   MAX_STALE_HOURS,
   MAX_STATION_FEE,
   SERVERS,
@@ -53,6 +54,12 @@ const settingsSchema = z.object({
     .min(1)
     .max(MAX_STALE_HOURS)
     .catch(DEFAULT_SETTINGS.staleAfterHours),
+  manualStaleAfterDays: z
+    .int()
+    .min(1)
+    .max(MAX_MANUAL_STALE_DAYS)
+    .catch(DEFAULT_SETTINGS.manualStaleAfterDays),
+  preferManualPrices: z.boolean().catch(DEFAULT_SETTINGS.preferManualPrices),
   server: serverSchema.catch(DEFAULT_SETTINGS.server),
 });
 
