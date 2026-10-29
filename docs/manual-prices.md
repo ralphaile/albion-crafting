@@ -17,7 +17,7 @@ For an item with more than one recipe, such as a token instead of its artifact, 
 
 ## Which price is used
 
-Your price always wins over AODP's, and counts as fresh however old it is. Its age shows in the table's Prices column like an AODP price's. [ADR-003](adr/003-price-data-strategy.md) describes the order a later release puts in place, where a newer AODP price can replace yours and a badge shows where each price came from.
+Your price always wins over AODP's, and counts as fresh however old it is. Its age shows in the table's Prices column like an AODP price's. When AODP can't be reached and the browser has no prices saved from it, the table still shows under the error, priced with yours, and every other price is missing. [ADR-003](adr/003-price-data-strategy.md) describes the order a later release puts in place, where a newer AODP price can replace yours and a badge shows where each price came from.
 
 ## Saved, not in the link
 

@@ -254,6 +254,41 @@ describe("BestCrafts", () => {
     expect(getPrices).toHaveBeenCalledTimes(4);
   });
 
+  it("still lists the crafts when no prices could be fetched, priced with manual prices", async () => {
+    const manual = (
+      itemId: string,
+      marketId: string,
+      value: number,
+    ): ManualPrice => ({
+      region: "west",
+      itemId,
+      marketId,
+      quality: 1,
+      source: "sellMin",
+      value,
+      enteredAt: Date.now(),
+    });
+    render(
+      <BestCrafts
+        marketData={fakeMarketData({
+          getPrices: () => Promise.reject(new Error("Failed to fetch")),
+        })}
+        route={route}
+        settings={DEFAULT_SETTINGS}
+        manualPrices={[
+          manual("T4_METALBAR", "Martlock", 100),
+          manual("T4_LEATHER", "Martlock", 50),
+          manual("T4_MAIN_SWORD", "Caerleon", 5000),
+        ]}
+      />,
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Failed to fetch",
+    );
+    expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
+  });
+
   it("says what went wrong when fetching prices fails outright", async () => {
     renderBestCrafts(() => Promise.reject(new Error("Failed to fetch")));
 

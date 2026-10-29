@@ -23,7 +23,7 @@ import type { CraftingSettings } from "./settings.types";
 
 export type BestCrafts =
   | { status: "loading" }
-  | { status: "error"; error: Error; retry: () => void }
+  | { status: "error"; error: Error; crafts: Craft[]; retry: () => void }
   | {
       status: "ready";
       crafts: Craft[];
@@ -46,6 +46,8 @@ interface Answer {
 }
 
 const QUALITIES = [QUALITY];
+
+const NO_PRICES: CraftPrices = { materials: [], products: [] };
 
 async function fetchPrices(
   marketData: MarketData,
@@ -173,8 +175,14 @@ export function useBestCrafts(
     attempt,
   ]);
 
+  // When AODP gives nothing at all, the manual prices still price what they
+  // can, and every other price is missing.
   const fetchedPrices =
-    current?.fetched.status === "ready" ? current.fetched.prices : undefined;
+    current?.fetched.status === "ready"
+      ? current.fetched.prices
+      : current?.fetched.status === "error"
+        ? NO_PRICES
+        : undefined;
   const prices = useMemo(
     () =>
       fetchedPrices &&
@@ -209,6 +217,7 @@ export function useBestCrafts(
     return {
       status: "error",
       error: current.fetched.error,
+      crafts,
       retry: () => {
         setAttempt((count) => count + 1);
       },

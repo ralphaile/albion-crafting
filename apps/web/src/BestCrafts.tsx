@@ -52,10 +52,10 @@ export function BestCrafts({
   );
   const filtered = activeFilters(filters).length > 0;
   const [pricesFor, setPricesFor] = useState<string>();
-  const pricedCraft =
-    bestCrafts.status === "ready"
-      ? bestCrafts.crafts.find(({ itemId }) => itemId === pricesFor)
-      : undefined;
+  const crafts =
+    bestCrafts.status === "loading" ? undefined : bestCrafts.crafts;
+  const updating = bestCrafts.status === "ready" && bestCrafts.updating;
+  const pricedCraft = crafts?.find(({ itemId }) => itemId === pricesFor);
 
   return (
     <div className={styles.bestCrafts}>
@@ -101,13 +101,13 @@ export function BestCrafts({
           </button>
         </div>
       )}
-      {bestCrafts.status === "ready" && bestCrafts.updating && (
+      {updating && (
         <p className={styles.updating} role="status">
           Updating prices…
         </p>
       )}
-      {bestCrafts.status === "ready" &&
-        (filtered && bestCrafts.crafts.length === 0 && !bestCrafts.updating ? (
+      {crafts !== undefined &&
+        (filtered && crafts.length === 0 && !updating ? (
           <div className={styles.empty}>
             <p className={styles.emptyTitle}>No crafts match your filters</p>
             <p>Loosen or remove a filter to see more.</p>
@@ -123,7 +123,7 @@ export function BestCrafts({
           </div>
         ) : (
           <CraftsTable
-            crafts={bestCrafts.crafts}
+            crafts={crafts}
             focus={settings.focus}
             onShowPrices={setPricesFor}
           />
