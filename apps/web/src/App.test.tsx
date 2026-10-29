@@ -1,11 +1,15 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { recipes } from "@aoc/crafting-data";
 import type { MarketData } from "@aoc/market-prices";
 
 import { App } from "./App";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
+import { formatCount } from "./format.helpers";
+import { memoryManualPriceStore } from "./manual-prices.store";
+import type { ManualPrice } from "./manual-prices.types";
 import type { RouteChoice } from "./route.types";
 import {
   CRAFTING_SETTING,
@@ -29,11 +33,13 @@ async function renderApp({
   savedFilters,
   savedRoute,
   savedSettings,
+  savedManualPrices = [],
   marketData = fakeMarketData(),
 }: {
   savedFilters?: Filters;
   savedRoute?: RouteChoice;
   savedSettings?: CraftingSettings;
+  savedManualPrices?: readonly ManualPrice[];
   marketData?: MarketData;
 } = {}) {
   const settingsStore = memorySettingsStore();
@@ -50,9 +56,11 @@ async function renderApp({
     <App
       marketData={marketData}
       settingsStore={settingsStore}
+      manualPriceStore={memoryManualPriceStore()}
       savedFilters={savedFilters}
       savedRoute={savedRoute}
       savedSettings={savedSettings}
+      savedManualPrices={savedManualPrices}
     />,
   );
   return settingsStore;
@@ -173,6 +181,28 @@ describe("App", () => {
         { region: "europe", staleAfterMinutes: 24 * 60 },
       );
     });
+  });
+
+  it("prices with the manual prices this browser saved", async () => {
+    await renderApp({
+      savedManualPrices: ["T4_METALBAR", "T4_LEATHER", "T4_MAIN_SWORD"].map(
+        (itemId) => ({
+          region: "west",
+          itemId,
+          marketId: "Lymhurst",
+          quality: 1,
+          source: "sellMin",
+          value: 100,
+          enteredAt: Date.now(),
+        }),
+      ),
+    });
+
+    expect(
+      await screen.findByText(
+        `Missing prices · ${formatCount(recipes.length - 1)} crafts`,
+      ),
+    ).toBeInTheDocument();
   });
 
   it("saves a setting changed in the panel", async () => {

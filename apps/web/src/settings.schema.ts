@@ -12,6 +12,10 @@ import {
 } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
 
+export const serverSchema = z.custom<Region>((value) =>
+  SERVERS.some(({ id }) => id === value),
+);
+
 const dailyBonusCategories = DAILY_BONUS_GROUPS.flatMap(({ options }) =>
   options.map(({ id }) => id),
 );
@@ -49,9 +53,7 @@ const settingsSchema = z.object({
     .min(1)
     .max(MAX_STALE_HOURS)
     .catch(DEFAULT_SETTINGS.staleAfterHours),
-  server: z
-    .custom<Region>((value) => SERVERS.some(({ id }) => id === value))
-    .catch(DEFAULT_SETTINGS.server),
+  server: serverSchema.catch(DEFAULT_SETTINGS.server),
 });
 
 // Each setting that doesn't fit falls back to its default, so a bad save never

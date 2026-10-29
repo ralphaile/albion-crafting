@@ -20,6 +20,7 @@ import { BestCrafts } from "./BestCrafts";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 import { formatCount } from "./format.helpers";
+import type { ManualPrice } from "./manual-prices.types";
 import { DEFAULT_ROUTE } from "./route.constants";
 import type { Route } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
@@ -154,6 +155,44 @@ describe("BestCrafts", () => {
     );
   });
 
+  it("prices with manual prices right away, without asking again", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
+      Promise.resolve(
+        marketIds[0] === "Martlock"
+          ? result([priced("T4_METALBAR", "Martlock", 100)])
+          : result([priced("T4_MAIN_SWORD", "Caerleon", 5000)]),
+      ),
+    );
+    const marketData = fakeMarketData({ getPrices });
+    const withManualPrices = (manualPrices: readonly ManualPrice[]) => (
+      <BestCrafts
+        marketData={marketData}
+        route={route}
+        settings={DEFAULT_SETTINGS}
+        manualPrices={manualPrices}
+      />
+    );
+    const { rerender } = render(withManualPrices([]));
+    expect(await missingPrices(recipes.length)).toBeInTheDocument();
+
+    rerender(
+      withManualPrices([
+        {
+          region: "west",
+          itemId: "T4_LEATHER",
+          marketId: "Martlock",
+          quality: 1,
+          source: "sellMin",
+          value: 50,
+          enteredAt: Date.now(),
+        },
+      ]),
+    );
+
+    expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
+    expect(getPrices).toHaveBeenCalledTimes(2);
+  });
+
   it("says it's fetching prices until they arrive", async () => {
     const answers: ((result: PricesResult) => void)[] = [];
     renderBestCrafts(
@@ -213,6 +252,41 @@ describe("BestCrafts", () => {
 
     expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
     expect(getPrices).toHaveBeenCalledTimes(4);
+  });
+
+  it("still lists the crafts when no prices could be fetched, priced with manual prices", async () => {
+    const manual = (
+      itemId: string,
+      marketId: string,
+      value: number,
+    ): ManualPrice => ({
+      region: "west",
+      itemId,
+      marketId,
+      quality: 1,
+      source: "sellMin",
+      value,
+      enteredAt: Date.now(),
+    });
+    render(
+      <BestCrafts
+        marketData={fakeMarketData({
+          getPrices: () => Promise.reject(new Error("Failed to fetch")),
+        })}
+        route={route}
+        settings={DEFAULT_SETTINGS}
+        manualPrices={[
+          manual("T4_METALBAR", "Martlock", 100),
+          manual("T4_LEATHER", "Martlock", 50),
+          manual("T4_MAIN_SWORD", "Caerleon", 5000),
+        ]}
+      />,
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Failed to fetch",
+    );
+    expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
   });
 
   it("says what went wrong when fetching prices fails outright", async () => {

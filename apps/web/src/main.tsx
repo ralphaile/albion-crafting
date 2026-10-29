@@ -12,6 +12,7 @@ import { createRoot } from "react-dom/client";
 import { openMarketData } from "@aoc/market-prices";
 
 import { App } from "./App";
+import { openManualPriceStore } from "./manual-prices.store";
 import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
@@ -24,26 +25,31 @@ if (!root) {
   throw new Error("Missing #root element in index.html");
 }
 
-const [marketData, settingsStore] = await Promise.all([
+const [marketData, settingsStore, manualPriceStore] = await Promise.all([
   openMarketData(),
   openSettingsStore(),
+  openManualPriceStore(),
 ]);
 // Loaded before the first render, so the first price request is already for
-// the saved route, filters and settings.
-const [savedFilters, savedRoute, savedSettings] = await Promise.all([
-  settingsStore.load(FILTERS_SETTING),
-  settingsStore.load(ROUTE_SETTING),
-  settingsStore.load(CRAFTING_SETTING),
-]);
+// the saved route, filters and settings, and is priced with the manual prices.
+const [savedFilters, savedRoute, savedSettings, savedManualPrices] =
+  await Promise.all([
+    settingsStore.load(FILTERS_SETTING),
+    settingsStore.load(ROUTE_SETTING),
+    settingsStore.load(CRAFTING_SETTING),
+    manualPriceStore.list(),
+  ]);
 
 createRoot(root).render(
   <StrictMode>
     <App
       marketData={marketData}
       settingsStore={settingsStore}
+      manualPriceStore={manualPriceStore}
       savedFilters={savedFilters}
       savedRoute={savedRoute}
       savedSettings={savedSettings}
+      savedManualPrices={savedManualPrices}
     />
   </StrictMode>,
 );

@@ -14,13 +14,16 @@ import type { Craft, CraftPrices } from "./best-crafts.types";
 import { NO_FILTERS } from "./filters.constants";
 import { craftFilter, recipeFilter } from "./filters.helpers";
 import type { Filters } from "./filters.types";
+import { withManualPrices } from "./manual-prices.helpers";
+import type { ManualPrice } from "./manual-prices.types";
+import { QUALITY } from "./prices.constants";
 import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 
 export type BestCrafts =
   | { status: "loading" }
-  | { status: "error"; error: Error; retry: () => void }
+  | { status: "error"; error: Error; crafts: Craft[]; retry: () => void }
   | {
       status: "ready";
       crafts: Craft[];
@@ -42,7 +45,9 @@ interface Answer {
   fetched: Fetched;
 }
 
-const QUALITIES = [1];
+const QUALITIES = [QUALITY];
+
+const NO_PRICES: CraftPrices = { materials: [], products: [] };
 
 async function fetchPrices(
   marketData: MarketData,
@@ -106,6 +111,7 @@ export function useBestCrafts(
   route: Route,
   settings: CraftingSettings,
   filters: Filters,
+  manualPrices: readonly ManualPrice[],
 ): BestCrafts {
   const { place, buyMarketId, sellMarketId } = route;
   const { server, staleAfterHours } = settings;
@@ -169,8 +175,25 @@ export function useBestCrafts(
     attempt,
   ]);
 
-  const prices =
-    current?.fetched.status === "ready" ? current.fetched.prices : undefined;
+  // When AODP gives nothing at all, the manual prices still price what they
+  // can, and every other price is missing.
+  const fetchedPrices =
+    current?.fetched.status === "ready"
+      ? current.fetched.prices
+      : current?.fetched.status === "error"
+        ? NO_PRICES
+        : undefined;
+  const prices = useMemo(
+    () =>
+      fetchedPrices &&
+      withManualPrices(fetchedPrices, manualPrices, {
+        region: server,
+        buyMarketId,
+        sellMarketId,
+        quality: QUALITY,
+      }),
+    [fetchedPrices, manualPrices, server, buyMarketId, sellMarketId],
+  );
   const routeSettings = useMemo(
     () => settingsForRoute(settings, route),
     [settings, route],
@@ -194,6 +217,7 @@ export function useBestCrafts(
     return {
       status: "error",
       error: current.fetched.error,
+      crafts,
       retry: () => {
         setAttempt((count) => count + 1);
       },
