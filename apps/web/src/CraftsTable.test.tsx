@@ -3,10 +3,14 @@ import { describe, expect, it } from "vitest";
 
 import type { EvaluateSettings } from "@aoc/core";
 import { type GameRecipe, recipes } from "@aoc/crafting-data";
-import type { ItemPrices, ObservedPrice } from "@aoc/market-prices";
 
 import { evaluateCrafts } from "./best-crafts.helpers";
-import type { Craft, CraftPrices } from "./best-crafts.types";
+import type {
+  Craft,
+  UsedItemPrices,
+  UsedPrice,
+  UsedPrices,
+} from "./best-crafts.types";
 import { CraftsTable, PAGE_SIZE } from "./CraftsTable";
 import {
   formatCount,
@@ -25,26 +29,27 @@ function recipe(itemId: string): GameRecipe {
   return found;
 }
 
-function seen(value: number, ageMinutes: number): ObservedPrice {
+function seen(value: number, ageMinutes: number): UsedPrice {
   return {
     status: ageMinutes > 12 * 60 ? "stale" : "fresh",
     value,
     observedAt: 0,
     ageMinutes,
+    origin: "api",
   };
 }
 
-function sellsAt(itemId: string, price: ObservedPrice): ItemPrices {
+function sellsAt(itemId: string, price: UsedPrice): UsedItemPrices {
   return {
     itemId,
     marketId: "Lymhurst",
     quality: 1,
     sellMin: price,
-    buyMax: { status: "missing" },
+    buyMax: { status: "missing", origin: "api" },
   };
 }
 
-const lymhurstPrices: CraftPrices = {
+const lymhurstPrices: UsedPrices = {
   materials: [
     sellsAt("T4_METALBAR", seen(100, 20)),
     sellsAt("T4_LEATHER", seen(50, 14 * 60)),

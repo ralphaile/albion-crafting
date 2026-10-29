@@ -114,7 +114,8 @@ export function useBestCrafts(
   manualPrices: readonly ManualPrice[],
 ): BestCrafts {
   const { place, buyMarketId, sellMarketId } = route;
-  const { server, staleAfterHours } = settings;
+  const { server, staleAfterHours, manualStaleAfterDays, preferManualPrices } =
+    settings;
   const [attempt, setAttempt] = useState(0);
   const [answer, setAnswer] = useState<Answer>();
   const selected = useSelectedRecipes(filters, place);
@@ -191,8 +192,18 @@ export function useBestCrafts(
         buyMarketId,
         sellMarketId,
         quality: QUALITY,
+        manualStaleAfterMinutes: manualStaleAfterDays * 24 * 60,
+        preferManual: preferManualPrices,
       }),
-    [fetchedPrices, manualPrices, server, buyMarketId, sellMarketId],
+    [
+      fetchedPrices,
+      manualPrices,
+      server,
+      buyMarketId,
+      sellMarketId,
+      manualStaleAfterDays,
+      preferManualPrices,
+    ],
   );
   const routeSettings = useMemo(
     () => settingsForRoute(settings, route),

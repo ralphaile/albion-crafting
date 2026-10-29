@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import type { CraftingPlace, EvaluateSettings } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
-import type { ItemPrices, ObservedPrice } from "@aoc/market-prices";
 
 import { evaluateCrafts } from "./best-crafts.helpers";
-import type { CraftPrices } from "./best-crafts.types";
+import type {
+  UsedItemPrices,
+  UsedPrice,
+  UsedPrices,
+} from "./best-crafts.types";
 
 function recipe(
   itemId: string,
@@ -39,22 +42,23 @@ const axe = recipe("T4_MAIN_AXE", "axe", [
   { id: "T4_PLANKS", count: 8, returnable: true },
 ]);
 
-function seen(value: number, ageMinutes: number): ObservedPrice {
+function seen(value: number, ageMinutes: number): UsedPrice {
   return {
     status: ageMinutes > 12 * 60 ? "stale" : "fresh",
     value,
     observedAt: Date.UTC(2026, 9, 26) - ageMinutes * 60_000,
     ageMinutes,
+    origin: "api",
   };
 }
 
-const missing: ObservedPrice = { status: "missing" };
+const missing: UsedPrice = { status: "missing", origin: "api" };
 
 function prices(
   itemId: string,
-  sellMin: ObservedPrice,
-  buyMax: ObservedPrice,
-): ItemPrices {
+  sellMin: UsedPrice,
+  buyMax: UsedPrice,
+): UsedItemPrices {
   return { itemId, marketId: "Lymhurst", quality: 1, sellMin, buyMax };
 }
 
@@ -85,7 +89,7 @@ const instantBuyAndSell: EvaluateSettings = {
   stationFee: 0,
 };
 
-const pricesOnHand: CraftPrices = {
+const pricesOnHand: UsedPrices = {
   materials: [
     prices("T4_METALBAR", seen(100, 30), seen(90, 30)),
     prices("T4_LEATHER", seen(50, 200), seen(45, 5)),
