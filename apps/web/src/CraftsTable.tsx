@@ -13,9 +13,8 @@ import {
   type SortKey,
 } from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
-import type { ObservedPrice } from "@aoc/market-prices";
 
-import type { Craft } from "./best-crafts.types";
+import type { Craft, UsedPrice } from "./best-crafts.types";
 import styles from "./CraftsTable.module.css";
 import {
   formatAge,
@@ -25,6 +24,7 @@ import {
   formatSilverPerFocus,
 } from "./format.helpers";
 import { ItemIcon } from "./ItemIcon";
+import { PriceBadge } from "./PriceBadge";
 
 export const PAGE_SIZE = 50;
 
@@ -186,41 +186,26 @@ function SortHeader({
   );
 }
 
-const RECENT_MINUTES = 3 * 60;
+const MISSING: UsedPrice = { status: "missing", origin: "api" };
 
-type SeenPrice = Exclude<ObservedPrice, { status: "missing" }>;
-
-function ageBand(price: SeenPrice) {
-  if (price.status === "stale") {
-    return "old";
-  }
-  return price.ageMinutes < RECENT_MINUTES ? "recent" : "aging";
-}
-
-function PriceAge({
-  label,
-  price,
-}: {
-  label: string;
-  price: ObservedPrice | undefined;
-}) {
-  if (price === undefined || price.status === "missing") {
-    return null;
-  }
-  const age = formatAge(price.ageMinutes);
+function PriceAge({ label, price }: { label: string; price: UsedPrice }) {
   return (
-    <span
-      className={styles.age}
-      data-age={ageBand(price)}
-      title={`${label} price seen ${age} ago${price.status === "stale" ? ", stale" : ""}`}
-    >
-      <span className={styles.dot} aria-hidden="true" />
-      <span className={styles.ageLabel}>{label}</span> {age}
-      {price.status === "stale" && (
-        <span className={styles.srOnly}>, stale</span>
-      )}
+    <span className={styles.age}>
+      <PriceBadge price={price} announceName>
+        <span>
+          <span className={styles.ageLabel}>{label} </span>
+          {price.status === "missing" ? "missing" : formatAge(price.ageMinutes)}
+        </span>
+      </PriceBadge>
     </span>
   );
+}
+
+// The oldest material price, or missing when any of them is.
+function materialsPrice({ materialPrices, oldestMaterialPrice }: Craft) {
+  return [...materialPrices.values()].some(({ status }) => status === "missing")
+    ? MISSING
+    : (oldestMaterialPrice ?? MISSING);
 }
 
 function CraftRow({
@@ -316,7 +301,7 @@ function CraftRow({
         <span className={styles.pricesInner}>
           <span className={styles.ages}>
             <PriceAge label="item" price={craft.itemPrice} />
-            <PriceAge label="materials" price={craft.oldestMaterialPrice} />
+            <PriceAge label="materials" price={materialsPrice(craft)} />
           </span>
           <button
             type="button"

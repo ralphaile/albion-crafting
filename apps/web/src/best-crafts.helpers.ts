@@ -5,17 +5,21 @@ import {
   hasSpecialty,
 } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
-import type { ItemPrices, ObservedPrice } from "@aoc/market-prices";
 
-import type { Craft, CraftPrices } from "./best-crafts.types";
+import type {
+  Craft,
+  UsedItemPrices,
+  UsedPrice,
+  UsedPrices,
+} from "./best-crafts.types";
 
-const MISSING: ObservedPrice = { status: "missing" };
+const MISSING: UsedPrice = { status: "missing", origin: "api" };
 
 export function evaluateCrafts(
   recipes: readonly GameRecipe[],
   place: CraftingPlace,
   settings: EvaluateSettings,
-  prices: CraftPrices,
+  prices: UsedPrices,
 ): Craft[] {
   const materials = byItem(prices.materials);
   const products = byItem(prices.products);
@@ -43,11 +47,11 @@ export function evaluateCrafts(
   });
 }
 
-function byItem(prices: readonly ItemPrices[]) {
+function byItem(prices: readonly UsedItemPrices[]) {
   return new Map(prices.map((price) => [price.itemId, price]));
 }
 
-function oldest(prices: readonly ObservedPrice[]) {
+function oldest(prices: readonly UsedPrice[]) {
   let oldestSeen: Craft["oldestMaterialPrice"];
   for (const price of prices) {
     if (

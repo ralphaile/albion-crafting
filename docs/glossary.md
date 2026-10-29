@@ -44,9 +44,18 @@ With premium you get 10,000 focus a day, and can store up to 30,000. The engine 
 
 ## Fresh, stale and missing prices
 
-How far an API price can be trusted. **Fresh** means AODP saw it in the last 12 hours, **stale** means it's older, and **missing** means AODP has none, because no player running its client has looked at that item in that market. The 12 hours are a [setting](settings.md). A [manual price](manual-prices.md) counts as fresh, however old it is.
+How far an API price can be trusted. **Fresh** means AODP saw it in the last 12 hours, **stale** means it's older, and **missing** means AODP has none, because no player running its client has looked at that item in that market. The 12 hours are a [setting](settings.md). A [manual price](manual-prices.md) is fresh for 3 days after you type it, also a setting.
 
-In the table's Prices column, the dot next to each age shows how recent it is: green under 3 hours, yellow from then until it's stale, and red once it's stale.
+In the table's Prices column and the prices panel, a badge next to each price shows where it came from, in color and with an icon:
+
+| Badge       | Means                         |
+| ----------- | ----------------------------- |
+| Green check | **API fresh**                 |
+| Amber clock | **API stale**                 |
+| Blue pencil | **Manual**, a price you typed |
+| Red cross   | **Missing**                   |
+
+Hovering a badge names it, with the price and its age. The code is `PriceBadge` in `apps/web/src/PriceBadge.tsx`.
 
 ## Hideout map quality
 

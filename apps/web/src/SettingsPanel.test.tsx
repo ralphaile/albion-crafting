@@ -102,6 +102,12 @@ describe("SettingsPanel", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Buy order" }));
     fireEvent.click(screen.getByRole("radio", { name: "Instant sell" }));
     fireEvent.change(number("Stale after"), { target: { value: "24" } });
+    fireEvent.change(number("Manual prices stale after"), {
+      target: { value: "7" },
+    });
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Always prefer my manual prices" }),
+    );
     fireEvent.change(select("Server"), { target: { value: "europe" } });
 
     expect(lastChange()).toEqual({
@@ -112,6 +118,8 @@ describe("SettingsPanel", () => {
       buyMode: "order",
       sellMode: "instant",
       staleAfterHours: 24,
+      manualStaleAfterDays: 7,
+      preferManualPrices: true,
       server: "europe",
     });
   });
@@ -174,6 +182,9 @@ describe("SettingsPanel", () => {
     expect(
       screen.getByRole("button", { name: "About Stale after" }),
     ).toHaveAccessibleDescription(/stale/);
+    expect(
+      screen.getByRole("checkbox", { name: "Always prefer my manual prices" }),
+    ).toHaveAccessibleDescription(/even when AODP has a newer one/);
   });
 
   it("resets to the defaults", () => {

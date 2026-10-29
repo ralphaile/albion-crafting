@@ -3,8 +3,13 @@ import "fake-indexeddb/auto";
 import { Dexie } from "dexie";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { type ItemPrices, openMarketData } from "@aoc/market-prices";
+import {
+  type ItemPrices,
+  type ObservedPrice,
+  openMarketData,
+} from "@aoc/market-prices";
 
+import type { SeenPrice } from "./best-crafts.types";
 import { withManualPrices } from "./manual-prices.helpers";
 import {
   memoryManualPriceStore,
@@ -119,47 +124,113 @@ describe("openManualPriceStore", () => {
 });
 
 describe("withManualPrices", () => {
-  const now = artifact.enteredAt + 90 * 60_000;
+  const MINUTE_MS = 60_000;
+  const now = Date.UTC(2026, 9, 28, 14);
   const where = {
-    region: "west",
+    region: "west" as const,
     buyMarketId: "Lymhurst",
     sellMarketId: "Caerleon",
     quality: 1,
-  } as const;
-  const apiBars: ItemPrices = {
-    itemId: "T4_METALBAR",
-    marketId: "Lymhurst",
-    quality: 1,
-    sellMin: { status: "fresh", value: 100, observedAt: 0, ageMinutes: 30 },
-    buyMax: { status: "stale", value: 80, observedAt: 0, ageMinutes: 900 },
+    manualStaleAfterMinutes: 3 * 24 * 60,
+    preferManual: false,
   };
-  const typedBars = { ...artifact, itemId: "T4_METALBAR", value: 120 };
 
-  it("replaces the API price for the same order, and keeps the other", () => {
-    const { materials } = withManualPrices(
-      { materials: [apiBars], products: [] },
-      [typedBars],
-      where,
+  function seen(
+    value: number,
+    minutesAgo: number,
+    status: SeenPrice["status"] = "fresh",
+  ): SeenPrice {
+    return {
+      status,
+      value,
+      observedAt: now - minutesAgo * MINUTE_MS,
+      ageMinutes: minutesAgo,
+    };
+  }
+
+  function apiBars(sellMin: ObservedPrice): ItemPrices {
+    return {
+      itemId: "T4_METALBAR",
+      marketId: "Lymhurst",
+      quality: 1,
+      sellMin,
+      buyMax: seen(80, 900, "stale"),
+    };
+  }
+
+  function barsUsed(
+    sellMin: ObservedPrice,
+    typedMinutesAgo: number,
+    options: Partial<typeof where> = {},
+  ) {
+    const typed: ManualPrice = {
+      ...artifact,
+      itemId: "T4_METALBAR",
+      value: 120,
+      enteredAt: now - typedMinutesAgo * MINUTE_MS,
+    };
+    const [bars] = withManualPrices(
+      { materials: [apiBars(sellMin)], products: [] },
+      [typed],
+      { ...where, ...options },
       now,
-    );
+    ).materials;
+    return bars;
+  }
 
-    expect(materials).toEqual([
-      {
-        ...apiBars,
-        sellMin: {
-          status: "fresh",
-          value: 120,
-          observedAt: artifact.enteredAt,
-          ageMinutes: 90,
-        },
+  it("uses a typed price newer than the API's, and the API's for the other order", () => {
+    expect(barsUsed(seen(100, 120), 90)).toEqual({
+      ...apiBars(seen(100, 120)),
+      sellMin: {
+        ...seen(120, 90),
+        origin: "manual",
+        passedOver: seen(100, 120),
       },
-    ]);
+      buyMax: { ...seen(80, 900, "stale"), origin: "api" },
+    });
+  });
+
+  it("uses an API price newer than the typed one", () => {
+    expect(barsUsed(seen(100, 30), 90)?.sellMin).toEqual({
+      ...seen(100, 30),
+      origin: "api",
+      passedOver: seen(120, 90),
+    });
+  });
+
+  it("counts a typed price as stale once it's older than the expiry", () => {
+    const fourDays = 4 * 24 * 60;
+    const staleApi = seen(100, 13 * 60, "stale");
+
+    expect(barsUsed(staleApi, fourDays)?.sellMin).toEqual({
+      ...staleApi,
+      origin: "api",
+      passedOver: seen(120, fourDays, "stale"),
+    });
+    expect(
+      barsUsed(staleApi, fourDays, { manualStaleAfterMinutes: 7 * 24 * 60 })
+        ?.sellMin,
+    ).toEqual({
+      ...seen(120, fourDays),
+      origin: "manual",
+      passedOver: staleApi,
+    });
+  });
+
+  it("uses the typed price whenever there is one when manual prices are preferred", () => {
+    expect(
+      barsUsed(seen(100, 30), 90, { preferManual: true })?.sellMin,
+    ).toEqual({
+      ...seen(120, 90),
+      origin: "manual",
+      passedOver: seen(100, 30),
+    });
   });
 
   it("adds a price AODP had no row for, at the market it's for", () => {
     const { materials, products } = withManualPrices(
       { materials: [], products: [] },
-      [sword],
+      [{ ...sword, enteredAt: now - 90 * MINUTE_MS }],
       where,
       now,
     );
@@ -170,13 +241,8 @@ describe("withManualPrices", () => {
         itemId: "T4_MAIN_SWORD",
         marketId: "Caerleon",
         quality: 1,
-        sellMin: {
-          status: "fresh",
-          value: 5000,
-          observedAt: artifact.enteredAt,
-          ageMinutes: 90,
-        },
-        buyMax: { status: "missing" },
+        sellMin: { ...seen(5000, 90), origin: "manual" },
+        buyMax: { status: "missing", origin: "api" },
       },
     ]);
   });
@@ -186,10 +252,11 @@ describe("withManualPrices", () => {
     ["market", { marketId: "Martlock" }],
     ["quality", { quality: 2 }],
   ])("ignores a manual price for another %s", (_other, overrides) => {
-    const prices = { materials: [apiBars], products: [] };
+    const prices = { materials: [apiBars(seen(100, 120))], products: [] };
+    const typed = { ...artifact, itemId: "T4_METALBAR", ...overrides };
 
-    expect(
-      withManualPrices(prices, [{ ...typedBars, ...overrides }], where, now),
-    ).toEqual(prices);
+    expect(withManualPrices(prices, [typed], where, now)).toEqual(
+      withManualPrices(prices, [], where, now),
+    );
   });
 });

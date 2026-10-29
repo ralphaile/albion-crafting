@@ -1,6 +1,13 @@
+import { choosePrice } from "@aoc/core";
 import type { ItemPrices, ObservedPrice, Region } from "@aoc/market-prices";
 
-import type { CraftPrices } from "./best-crafts.types";
+import type {
+  CraftPrices,
+  SeenPrice,
+  UsedItemPrices,
+  UsedPrice,
+  UsedPrices,
+} from "./best-crafts.types";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 
 const MINUTE_MS = 60_000;
@@ -13,6 +20,12 @@ interface PricesAt {
   quality: number;
 }
 
+interface ChoiceOptions {
+  manualStaleAfterMinutes: number;
+  preferManual: boolean;
+  now: number;
+}
+
 export function sameManualPrice(a: ManualPriceKey, b: ManualPriceKey) {
   return (
     a.region === b.region &&
@@ -23,45 +36,79 @@ export function sameManualPrice(a: ManualPriceKey, b: ManualPriceKey) {
   );
 }
 
-function observed({ value, enteredAt }: ManualPrice, now: number) {
+function observed(
+  { value, enteredAt }: ManualPrice,
+  { now, manualStaleAfterMinutes }: ChoiceOptions,
+): SeenPrice {
+  const ageMs = Math.max(0, now - enteredAt);
   return {
-    status: "fresh",
+    status: ageMs > manualStaleAfterMinutes * MINUTE_MS ? "stale" : "fresh",
     value,
     observedAt: enteredAt,
-    ageMinutes: Math.floor(Math.max(0, now - enteredAt) / MINUTE_MS),
-  } satisfies ObservedPrice;
+    ageMinutes: Math.floor(ageMs / MINUTE_MS),
+  };
 }
 
-function applyAt(
+function usedPrice(
+  api: ObservedPrice,
+  manual: SeenPrice | undefined,
+  preferManual: boolean,
+): UsedPrice {
+  if (manual === undefined) {
+    return { ...api, origin: "api" };
+  }
+  if (choosePrice(api, manual, { preferManual }) === "api") {
+    return { ...api, origin: "api", passedOver: manual };
+  }
+  return api.status === "missing"
+    ? { ...manual, origin: "manual" }
+    : { ...manual, origin: "manual", passedOver: api };
+}
+
+function chooseAt(
   rows: readonly ItemPrices[],
   manualPrices: readonly ManualPrice[],
   { region, marketId, quality }: PricesAt,
-  now: number,
-): readonly ItemPrices[] {
-  const here = manualPrices.filter(
-    (price) =>
+  options: ChoiceOptions,
+): UsedItemPrices[] {
+  const typed = new Map<string, ManualPrice[]>();
+  for (const price of manualPrices) {
+    if (
       price.region === region &&
       price.marketId === marketId &&
-      price.quality === quality,
-  );
-  if (here.length === 0) {
-    return rows;
+      price.quality === quality
+    ) {
+      typed.set(price.itemId, [...(typed.get(price.itemId) ?? []), price]);
+    }
   }
-  const byItem = new Map(rows.map((row) => [row.itemId, row]));
-  for (const price of here) {
-    const row = byItem.get(price.itemId) ?? {
-      itemId: price.itemId,
+  const fetched = new Set(rows.map(({ itemId }) => itemId));
+  const typedOnly = [...typed.keys()]
+    .filter((itemId) => !fetched.has(itemId))
+    .map((itemId): ItemPrices => ({
+      itemId,
       marketId,
       quality,
       sellMin: MISSING,
       buyMax: MISSING,
+    }));
+
+  return [...rows, ...typedOnly].map((row) => {
+    const manual = (source: ManualPrice["source"]) => {
+      const price = typed
+        .get(row.itemId)
+        ?.find((candidate) => candidate.source === source);
+      return price === undefined ? undefined : observed(price, options);
     };
-    byItem.set(price.itemId, { ...row, [price.source]: observed(price, now) });
-  }
-  return [...byItem.values()];
+    return {
+      ...row,
+      sellMin: usedPrice(row.sellMin, manual("sellMin"), options.preferManual),
+      buyMax: usedPrice(row.buyMax, manual("buyMax"), options.preferManual),
+    };
+  });
 }
 
-// Until prices have a precedence rule, a manual price always replaces the API's.
+// Picks the price each craft uses: the API's or the one typed for the same
+// server, market, quality and order.
 export function withManualPrices(
   prices: CraftPrices,
   manualPrices: readonly ManualPrice[],
@@ -70,26 +117,31 @@ export function withManualPrices(
     buyMarketId,
     sellMarketId,
     quality,
+    manualStaleAfterMinutes,
+    preferManual,
   }: {
     region: Region;
     buyMarketId: string;
     sellMarketId: string;
     quality: number;
+    manualStaleAfterMinutes: number;
+    preferManual: boolean;
   },
   now = Date.now(),
-): CraftPrices {
+): UsedPrices {
+  const options = { manualStaleAfterMinutes, preferManual, now };
   return {
-    materials: applyAt(
+    materials: chooseAt(
       prices.materials,
       manualPrices,
       { region, marketId: buyMarketId, quality },
-      now,
+      options,
     ),
-    products: applyAt(
+    products: chooseAt(
       prices.products,
       manualPrices,
       { region, marketId: sellMarketId, quality },
-      now,
+      options,
     ),
   };
 }

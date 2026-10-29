@@ -3,10 +3,14 @@ import { describe, expect, it } from "vitest";
 
 import type { EvaluateSettings } from "@aoc/core";
 import { type GameRecipe, recipes } from "@aoc/crafting-data";
-import type { ItemPrices, ObservedPrice } from "@aoc/market-prices";
 
 import { evaluateCrafts } from "./best-crafts.helpers";
-import type { Craft, CraftPrices } from "./best-crafts.types";
+import type {
+  Craft,
+  UsedItemPrices,
+  UsedPrice,
+  UsedPrices,
+} from "./best-crafts.types";
 import { CraftsTable, PAGE_SIZE } from "./CraftsTable";
 import {
   formatCount,
@@ -25,26 +29,27 @@ function recipe(itemId: string): GameRecipe {
   return found;
 }
 
-function seen(value: number, ageMinutes: number): ObservedPrice {
+function seen(value: number, ageMinutes: number): UsedPrice {
   return {
     status: ageMinutes > 12 * 60 ? "stale" : "fresh",
     value,
     observedAt: 0,
     ageMinutes,
+    origin: "api",
   };
 }
 
-function sellsAt(itemId: string, price: ObservedPrice): ItemPrices {
+function sellsAt(itemId: string, price: UsedPrice): UsedItemPrices {
   return {
     itemId,
     marketId: "Lymhurst",
     quality: 1,
     sellMin: price,
-    buyMax: { status: "missing" },
+    buyMax: { status: "missing", origin: "api" },
   };
 }
 
-const lymhurstPrices: CraftPrices = {
+const lymhurstPrices: UsedPrices = {
   materials: [
     sellsAt("T4_METALBAR", seen(100, 20)),
     sellsAt("T4_LEATHER", seen(50, 14 * 60)),
@@ -205,29 +210,24 @@ describe("CraftsTable", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows how old the item's price and the oldest material price are, and which are stale", () => {
+  it("shows how old the item's price and the oldest material price are, and where they came from", () => {
     renderTable();
     const row = rowOf("Adept's Broadsword 4.0");
 
-    expect(row.getByTitle("item price seen 30 min ago")).toHaveTextContent(
-      "item 30 min",
-    );
     expect(
-      row.getByTitle("materials price seen 14 h ago, stale"),
-    ).toHaveTextContent("materials 14 h, stale");
+      row.getByTitle("API fresh 5,000, seen 30 min ago"),
+    ).toHaveTextContent("item 30 min, API fresh");
+    expect(row.getByTitle("API stale 50, seen 14 h ago")).toHaveTextContent(
+      "materials 14 h, API stale",
+    );
   });
 
-  it("colors a price's dot by its age, and nothing else", () => {
+  it("shows a missing price as missing", () => {
     renderTable();
-    const row = rowOf("Adept's Broadsword 4.0");
 
-    expect(row.getByTitle("item price seen 30 min ago")).toHaveAttribute(
-      "data-age",
-      "recent",
+    expect(rowOf("Adept's Bow 4.0").getByTitle("Missing")).toHaveTextContent(
+      "item missing, Missing",
     );
-    expect(
-      row.getByTitle("materials price seen 14 h ago, stale"),
-    ).toHaveAttribute("data-age", "old");
   });
 
   it("says how many prices a craft is missing", () => {

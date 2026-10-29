@@ -29,7 +29,7 @@
 }
 
 .pricesColumn {
-  width: 184px;
+  width: 192px;
 }
 
 .table thead th {
@@ -278,34 +278,16 @@
 }
 
 .age {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   color: var(--text-muted);
 }
 
+/* Its own box keeps the price's underline off the label, and `pre` keeps the
+   space after it. */
 .ageLabel {
+  display: inline-block;
   min-width: 70px;
+  white-space: pre;
   font-family: var(--font-caps);
-}
-
-.dot {
-  flex: none;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.age[data-age="recent"] .dot {
-  background: var(--age-recent);
-}
-
-.age[data-age="aging"] .dot {
-  background: var(--age-aging);
-}
-
-.age[data-age="old"] .dot {
-  background: var(--age-old);
 }
 
 .divider > td {

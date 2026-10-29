@@ -32,6 +32,12 @@ export {
   type ProductionBonus,
   type ProductionBonusOptions,
 } from "./production-bonus.types.js";
+export { choosePrice } from "./price-choice.helpers.js";
+export {
+  type DatedPrice,
+  type PriceChoiceOptions,
+  type PriceOrigin,
+} from "./price-choice.types.js";
 export { pricesNeeded } from "./prices-needed.helpers.js";
 export { type PricesNeeded } from "./prices-needed.types.js";
 export { defaultSortKey, rank } from "./rank.helpers.js";

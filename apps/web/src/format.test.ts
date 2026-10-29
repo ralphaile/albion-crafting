@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatAge,
+  formatAgo,
   formatCount,
   formatPercent,
   formatReturnRate,
@@ -74,5 +75,15 @@ describe("formatAge", () => {
     [10 * 24 * 60, "10 d"],
   ])("shows %d minutes as %s", (minutes, expected) => {
     expect(formatAge(minutes)).toBe(expected);
+  });
+});
+
+describe("formatAgo", () => {
+  it.each([
+    [0, "just now"],
+    [1, "1 min ago"],
+    [14 * 60, "14 h ago"],
+  ])("shows %d minutes as %s", (minutes, expected) => {
+    expect(formatAgo(minutes)).toBe(expected);
   });
 });

@@ -38,3 +38,7 @@ export function formatAge(minutes: number): string {
   }
   return `${String(Math.floor(minutes / (24 * 60)))} d`;
 }
+
+export function formatAgo(minutes: number): string {
+  return minutes < 1 ? "just now" : `${formatAge(minutes)} ago`;
+}
