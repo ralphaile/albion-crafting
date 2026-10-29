@@ -1,6 +1,6 @@
 # ADR-003: Where prices come from and which one is used
 
-- **Status:** Accepted
+- **Status:** Accepted. Its order for which price is used is superseded by [ADR-006](006-newer-price-wins.md).
 - **Date:** 2026-10-25
 
 ## Context
