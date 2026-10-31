@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import { craftingTrees } from "@aoc/crafting-data";
 
@@ -8,7 +8,12 @@ import {
   MAX_SPECIALIZATION_LEVEL,
   TREE_GROUPS,
 } from "./specializations.constants";
-import { treeLevels, withLevel } from "./specializations.helpers";
+import {
+  treeLevels,
+  withEverySpecialization,
+  withLevel,
+} from "./specializations.helpers";
+import { parseSpecializations } from "./specializations.schema";
 import type { SpecializationProfile } from "./specializations.types";
 import styles from "./SpecializationsPanel.module.css";
 
@@ -75,6 +80,19 @@ function Level({
 
 // The owner keeps whether it's open and which tree it shows, so a craft's
 // panel can open it on that craft's tree.
+const FILE_NAME = "specializations.json";
+
+function download(profile: SpecializationProfile) {
+  const url = URL.createObjectURL(
+    new Blob([JSON.stringify(profile, null, 2)], { type: "application/json" }),
+  );
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = FILE_NAME;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function SpecializationsPanel({
   profile,
   onChange,
@@ -91,10 +109,32 @@ export function SpecializationsPanel({
   onClose: () => void;
 }) {
   const treeFieldId = useId();
+  const everyFieldId = useId();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [every, setEvery] = useState("");
+  const [message, setMessage] = useState("");
   const tree = craftingTrees.find(({ id }) => id === treeId);
   const levels = treeLevels(profile, treeId);
+  const everyLevel = parseLevel(every);
   const setLevel = (specializationId: string | undefined, level: number) => {
+    setMessage("");
     onChange(withLevel(profile, treeId, specializationId, level));
+  };
+  const importFile = async (file: File) => {
+    let raw: unknown;
+    try {
+      raw = JSON.parse(await file.text());
+    } catch {
+      setMessage("That file isn't JSON");
+      return;
+    }
+    const imported = parseSpecializations(raw);
+    if (Object.keys(imported).length === 0) {
+      setMessage("No specialization levels in that file");
+      return;
+    }
+    onChange(imported);
+    setMessage("Imported");
   };
 
   return (
@@ -119,7 +159,84 @@ export function SpecializationsPanel({
         heading="Specializations"
         closeLabel="Close specializations"
         open={open}
-        onClose={onClose}
+        onClose={() => {
+          setMessage("");
+          onClose();
+        }}
+        footer={
+          <>
+            <form
+              className={styles.every}
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (tree !== undefined && everyLevel !== undefined) {
+                  setMessage("");
+                  onChange(withEverySpecialization(profile, tree, everyLevel));
+                  setEvery("");
+                }
+              }}
+            >
+              <label htmlFor={everyFieldId}>Set all specs to</label>
+              <input
+                id={everyFieldId}
+                className={styles.number}
+                type="number"
+                inputMode="numeric"
+                step={1}
+                min={0}
+                max={MAX_SPECIALIZATION_LEVEL}
+                value={every}
+                onChange={(event) => {
+                  setEvery(event.target.value);
+                }}
+              />
+              <button
+                type="submit"
+                className={styles.set}
+                disabled={everyLevel === undefined}
+              >
+                Set
+              </button>
+            </form>
+            <button
+              type="button"
+              className={styles.action}
+              onClick={() => {
+                fileRef.current?.click();
+              }}
+            >
+              Import
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".json,application/json"
+              aria-label="Specializations file"
+              hidden
+              onChange={(event) => {
+                const [file] = event.target.files ?? [];
+                event.target.value = "";
+                if (file !== undefined) {
+                  void importFile(file);
+                }
+              }}
+            />
+            <button
+              type="button"
+              className={styles.action}
+              onClick={() => {
+                download(profile);
+              }}
+            >
+              Export
+            </button>
+            {message !== "" && (
+              <p className={styles.status} role="status">
+                {message}
+              </p>
+            )}
+          </>
+        }
       >
         <div className={styles.tree}>
           <label htmlFor={treeFieldId} className={styles.label}>

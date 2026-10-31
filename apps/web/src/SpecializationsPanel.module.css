@@ -109,6 +109,60 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 
+.every {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-basis: 100%;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.set {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--brass);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--brass);
+  font-weight: 500;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.set:hover:enabled {
+  background: var(--brass);
+  color: var(--bg);
+}
+
+.set:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.action:hover {
+  color: var(--text);
+  text-decoration-style: solid;
+}
+
+.status {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
 @media (max-width: 759px) {
   .openLabel {
     position: absolute;
