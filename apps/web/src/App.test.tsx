@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { recipes } from "@aoc/crafting-data";
@@ -121,6 +127,39 @@ describe("App", () => {
     expect(
       screen.getByRole("heading", { name: "Albion Crafting" }),
     ).toBeInTheDocument();
+  });
+
+  it("links to the help and privacy pages", async () => {
+    await renderApp();
+
+    expect(
+      screen.getByRole("link", { name: "Help and attribution" }),
+    ).toHaveAttribute("href", "#help");
+    expect(
+      screen.getByRole("link", { name: "Privacy policy" }),
+    ).toHaveAttribute("href", "#privacy");
+
+    fireEvent.click(screen.getByRole("link", { name: "Help and attribution" }));
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: "Help and about" }),
+      ).toBeInTheDocument();
+    });
+    expect(
+      screen.getByText(
+        "This is a fan-made site. It is not affiliated with or endorsed by Sandbox Interactive. Albion Online and its names, logos, and assets belong to their respective owners.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the privacy policy at its hash page", async () => {
+    window.location.hash = "privacy";
+    await renderApp();
+
+    expect(
+      screen.getByRole("heading", { name: "Privacy policy" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/currently has no accounts/)).toBeInTheDocument();
   });
 
   it("starts with the filters this browser saved", async () => {
