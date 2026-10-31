@@ -17,6 +17,7 @@ import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
   ROUTE_SETTING,
+  SPECIALIZATIONS_SETTING,
 } from "./saved-settings.constants";
 import { openSettingsStore } from "./saved-settings.store";
 
@@ -32,13 +33,19 @@ const [marketData, settingsStore, manualPriceStore] = await Promise.all([
 ]);
 // Loaded before the first render, so the first price request is already for
 // the saved route, filters and settings, and is priced with the manual prices.
-const [savedFilters, savedRoute, savedSettings, savedManualPrices] =
-  await Promise.all([
-    settingsStore.load(FILTERS_SETTING),
-    settingsStore.load(ROUTE_SETTING),
-    settingsStore.load(CRAFTING_SETTING),
-    manualPriceStore.list(),
-  ]);
+const [
+  savedFilters,
+  savedRoute,
+  savedSettings,
+  savedSpecializations,
+  savedManualPrices,
+] = await Promise.all([
+  settingsStore.load(FILTERS_SETTING),
+  settingsStore.load(ROUTE_SETTING),
+  settingsStore.load(CRAFTING_SETTING),
+  settingsStore.load(SPECIALIZATIONS_SETTING),
+  manualPriceStore.list(),
+]);
 
 createRoot(root).render(
   <StrictMode>
@@ -49,6 +56,7 @@ createRoot(root).render(
       savedFilters={savedFilters}
       savedRoute={savedRoute}
       savedSettings={savedSettings}
+      savedSpecializations={savedSpecializations}
       savedManualPrices={savedManualPrices}
     />
   </StrictMode>,

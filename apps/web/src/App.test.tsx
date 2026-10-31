@@ -15,6 +15,7 @@ import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
   ROUTE_SETTING,
+  SPECIALIZATIONS_SETTING,
 } from "./saved-settings.constants";
 import { memorySettingsStore } from "./saved-settings.store";
 import { DEFAULT_SETTINGS } from "./settings.constants";
@@ -60,6 +61,7 @@ async function renderApp({
       savedFilters={savedFilters}
       savedRoute={savedRoute}
       savedSettings={savedSettings}
+      savedSpecializations={undefined}
       savedManualPrices={savedManualPrices}
     />,
   );
@@ -284,6 +286,23 @@ describe("App", () => {
     await expect
       .poll(() => settingsStore.load(CRAFTING_SETTING))
       .toEqual({ ...DEFAULT_SETTINGS, focus: false });
+  });
+
+  it("saves a specialization level", async () => {
+    const settingsStore = await renderApp();
+
+    fireEvent.click(screen.getByRole("button", { name: "Specializations" }));
+    fireEvent.change(
+      within(screen.getByRole("dialog", { name: "Specializations" })).getByRole(
+        "spinbutton",
+        { name: "Broadsword" },
+      ),
+      { target: { value: "100" } },
+    );
+
+    await expect
+      .poll(() => settingsStore.load(SPECIALIZATIONS_SETTING))
+      .toEqual({ sword: { mastery: 0, specializations: { MAIN_SWORD: 100 } } });
   });
 
   it("opens the craft a link names, keeps it in the link while open, and drops it once closed", async () => {

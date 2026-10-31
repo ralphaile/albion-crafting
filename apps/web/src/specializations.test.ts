@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { craftingTrees } from "@aoc/crafting-data";
+
+import { TREE_GROUPS } from "./specializations.constants";
+import { withLevel } from "./specializations.helpers";
 import { parseSpecializations } from "./specializations.schema";
 
 describe("parseSpecializations", () => {
@@ -54,4 +58,40 @@ describe("parseSpecializations", () => {
       expect(parseSpecializations(raw)).toEqual({});
     },
   );
+});
+
+describe("withLevel", () => {
+  const profile = {
+    sword: { mastery: 100, specializations: { MAIN_SWORD: 100 } },
+  };
+
+  it("sets a tree's mastery", () => {
+    expect(withLevel(profile, "sword", undefined, 60)).toEqual({
+      sword: { mastery: 60, specializations: { MAIN_SWORD: 100 } },
+    });
+  });
+
+  it("sets a specialization, in a tree it doesn't have yet", () => {
+    expect(withLevel(profile, "axe", "MAIN_AXE", 20)).toEqual({
+      ...profile,
+      axe: { mastery: 0, specializations: { MAIN_AXE: 20 } },
+    });
+  });
+
+  it("leaves out a level set to 0, and a tree with none left", () => {
+    const noBroadsword = withLevel(profile, "sword", "MAIN_SWORD", 0);
+
+    expect(noBroadsword).toEqual({
+      sword: { mastery: 100, specializations: {} },
+    });
+    expect(withLevel(noBroadsword, "sword", undefined, 0)).toEqual({});
+  });
+});
+
+describe("the tree groups", () => {
+  it("have every crafting tree once", () => {
+    expect(
+      TREE_GROUPS.flatMap(({ options }) => options.map(({ id }) => id)).sort(),
+    ).toEqual(craftingTrees.map(({ id }) => id).sort());
+  });
 });
