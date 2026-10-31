@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 
 import type { MarketData } from "@aoc/market-prices";
 
@@ -90,6 +96,31 @@ export function App({
     manualPriceStore,
     savedManualPrices,
   );
+  const [, startTransition] = useTransition();
+  const changeFilters = useCallback(
+    (update: Parameters<typeof setFilters>[0]) => {
+      startTransition(() => {
+        setFilters(update);
+      });
+    },
+    [setFilters],
+  );
+  const changeSettings = useCallback(
+    (next: CraftingSettings) => {
+      startTransition(() => {
+        setSettings(next);
+      });
+    },
+    [setSettings],
+  );
+  const changeSpecializations = useCallback(
+    (next: SpecializationProfile) => {
+      startTransition(() => {
+        setSpecializations(next);
+      });
+    },
+    [setSpecializations],
+  );
   // One object per choice, so the crafts only recalculate when the route changes.
   const route = useMemo(() => routeFromChoice(routeChoice), [routeChoice]);
   const bestCrafts = useBestCrafts(
@@ -143,7 +174,7 @@ export function App({
           />
           <SpecializationsPanel
             profile={specializations}
-            onChange={setSpecializations}
+            onChange={changeSpecializations}
             open={specializationsShown.open}
             treeId={specializationsShown.treeId}
             onShow={showSpecializations}
@@ -156,7 +187,7 @@ export function App({
           />
           <SettingsPanel
             settings={settings}
-            onChange={setSettings}
+            onChange={changeSettings}
             onClearCache={() => marketData.clear()}
           />
         </div>
@@ -170,7 +201,7 @@ export function App({
           route={route}
           settings={settings}
           filters={filters}
-          onFiltersChange={setFilters}
+          onFiltersChange={changeFilters}
           persistent={settingsStore.persistent}
           manualPrices={manualPrices}
           onSaveManualPrice={saveManualPrice}

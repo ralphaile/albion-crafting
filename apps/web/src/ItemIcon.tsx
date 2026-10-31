@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import { iconUrl } from "@aoc/crafting-data";
 
@@ -7,7 +7,7 @@ const ICON_PLACEHOLDER =
 
 const RETRY_DELAYS_MS = [1000, 3000];
 
-export function ItemIcon({ id }: { id: string }) {
+export const ItemIcon = memo(function ItemIcon({ id }: { id: string }) {
   const src = iconUrl(id);
   const [failed, setFailed] = useState({ src, times: 0 });
   const [retried, setRetried] = useState({ src, times: 0 });
@@ -46,9 +46,10 @@ export function ItemIcon({ id }: { id: string }) {
       width={64}
       height={64}
       loading="lazy"
+      decoding="async"
       onError={() => {
         setFailed({ src, times: failures + 1 });
       }}
     />
   );
-}
+});
