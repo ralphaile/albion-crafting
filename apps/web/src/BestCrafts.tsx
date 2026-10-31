@@ -116,7 +116,7 @@ export function BestCrafts({
           <CraftsTable
             crafts={crafts}
             focus={settings.focus}
-            onShowPrices={setPricesFor}
+            onShowCraft={setPricesFor}
           />
         ))}
       <CraftPanel

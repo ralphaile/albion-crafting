@@ -118,17 +118,17 @@ function CraftRow({
   sortKey,
   focus,
   wide,
-  onShowPrices,
+  onShowCraft,
 }: {
   craft: Craft;
   rowIndex: number;
   sortKey: SortKey;
   focus: boolean;
   wide: boolean;
-  onShowPrices: (itemId: string) => void;
+  onShowCraft: (itemId: string) => void;
 }) {
-  const showPrices = () => {
-    onShowPrices(craft.itemId);
+  const showCraft = () => {
+    onShowCraft(craft.itemId);
   };
   const { recipe } = craft;
   const complete = craft.status === "complete" ? craft : undefined;
@@ -153,6 +153,14 @@ function CraftRow({
     <tr
       aria-rowindex={rowIndex}
       className={cx(styles.row, complete === undefined && styles.incomplete)}
+      onClick={(event) => {
+        if (
+          event.target instanceof Element &&
+          event.target.closest("button") === null
+        ) {
+          showCraft();
+        }
+      }}
     >
       <th scope="row" className={styles.item}>
         <span className={styles.itemInner}>
@@ -174,7 +182,7 @@ function CraftRow({
                 type="button"
                 className={styles.missing}
                 aria-haspopup="dialog"
-                onClick={showPrices}
+                onClick={showCraft}
               >
                 {plural(missing, "price", "prices")} missing
               </button>
@@ -213,7 +221,7 @@ function CraftRow({
             aria-label={`Prices for ${itemName(craft.itemId)}`}
             title="Type a price"
             aria-haspopup="dialog"
-            onClick={showPrices}
+            onClick={showCraft}
           >
             <svg viewBox="0 0 16 16" aria-hidden="true">
               <path d="M10.5 2.5l3 3L6 13H3v-3z" />
@@ -226,16 +234,16 @@ function CraftRow({
   );
 }
 
-const IGNORE_SHOW_PRICES = () => undefined;
+const IGNORE_SHOW_CRAFT = () => undefined;
 
 export function CraftsTable({
   crafts,
   focus,
-  onShowPrices = IGNORE_SHOW_PRICES,
+  onShowCraft = IGNORE_SHOW_CRAFT,
 }: {
   crafts: readonly Craft[];
   focus: boolean;
-  onShowPrices?: (itemId: string) => void;
+  onShowCraft?: (itemId: string) => void;
 }) {
   const [chosenSort, setChosenSort] = useState<Sort>();
   const sort: Sort =
@@ -381,7 +389,7 @@ export function CraftsTable({
                     sortKey={sortKey}
                     focus={focus}
                     wide={wide}
-                    onShowPrices={onShowPrices}
+                    onShowCraft={onShowCraft}
                   />
                 </Fragment>
               );

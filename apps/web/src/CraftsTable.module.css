@@ -105,6 +105,10 @@
   text-align: left;
 }
 
+.row {
+  cursor: pointer;
+}
+
 .row:hover > * {
   background: var(--surface-hover);
 }
