@@ -8,16 +8,27 @@ import { NO_FILTERS } from "./filters.constants";
 import { memoryManualPriceStore } from "./manual-prices.store";
 import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
 import { DEFAULT_ROUTE } from "./route.constants";
+import { placeFromChoice } from "./route.helpers";
 import type { Route } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import { useBestCrafts } from "./useBestCrafts";
 import { useManualPrices } from "./useManualPrices";
 import { fakeMarketData } from "../test/fake-market-data";
 
-const route: Route = {
+const lymhurst: Route = {
   place: DEFAULT_ROUTE.place,
   buyMarketId: "Martlock",
   sellMarketId: "Caerleon",
+};
+
+const forestHideout: Route = {
+  ...lymhurst,
+  place: placeFromChoice({
+    kind: "hideout",
+    biomeId: "FOREST",
+    quality: 6,
+    level: 9,
+  }),
 };
 
 const broadswordOnly = {
@@ -51,10 +62,12 @@ function Broadsword({
   marketData,
   store,
   initial,
+  route,
 }: {
   marketData: MarketData;
   store: ManualPriceStore;
   initial: readonly ManualPrice[];
+  route: Route;
 }) {
   const { manualPrices, saveManualPrice, removeManualPrice } = useManualPrices(
     store,
@@ -81,7 +94,10 @@ function Broadsword({
 }
 
 // The broadsword's leather has no price at Martlock.
-function renderBroadsword(initial: readonly ManualPrice[] = []) {
+function renderBroadsword(
+  initial: readonly ManualPrice[] = [],
+  route = lymhurst,
+) {
   const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
     Promise.resolve({
       prices:
@@ -98,6 +114,7 @@ function renderBroadsword(initial: readonly ManualPrice[] = []) {
       marketData={fakeMarketData({ getPrices })}
       store={store}
       initial={initial}
+      route={route}
     />,
   );
   return { getPrices, store };
@@ -177,6 +194,14 @@ describe("CraftPanel", () => {
       "8.33 × 100 = 833",
     );
     expect(detailOf(leather)).toBe("4.17 × 50 = 208");
+    expect(figures("Return rate")).toEqual({
+      Base: "18.0%",
+      Specialty: "15.0%",
+      "Daily bonus": "0.0%",
+      Focus: "59.0%",
+      "Production bonus": "92.0%",
+      "Return rate": "47.92%",
+    });
     expect(figures("Costs")).toEqual({
       Materials: "1,042",
       "Station fee": "216",
@@ -194,6 +219,26 @@ describe("CraftPanel", () => {
       Focus: "1,286",
       "Silver per focus": "0.4",
     });
+  });
+
+  it("builds a hideout's return rate from its map quality and power level", async () => {
+    renderBroadsword([typedLeather], forestHideout);
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Broadsword 4.0",
+      }),
+    );
+
+    expect(figures("Return rate")).toEqual({
+      "Map quality": "26.0%",
+      "Power level": "26.0%",
+      "Power specialist": "30.0%",
+      "Daily bonus": "0.0%",
+      Focus: "59.0%",
+      "Production bonus": "141.0%",
+      "Return rate": "58.51%",
+    });
+    expect(detailOf(leather)).toBe("3.32 × 50 = 166");
   });
 
   it("leaves out what a missing price keeps from being worked out", async () => {

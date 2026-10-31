@@ -1,6 +1,11 @@
 import { type ReactNode, useId } from "react";
 
-import type { MaterialLine, OrderPrices } from "@aoc/core";
+import type {
+  HideoutProductionBonus,
+  MaterialLine,
+  OrderPrices,
+  ProductionBonus,
+} from "@aoc/core";
 import { type GameRecipe, itemName } from "@aoc/crafting-data";
 import type { Region } from "@aoc/market-prices";
 
@@ -11,6 +16,7 @@ import {
   formatCount,
   formatPercent,
   formatQuantity,
+  formatReturnRate,
   formatSilver,
   formatSilverPerFocus,
 } from "./format.helpers";
@@ -92,6 +98,24 @@ function Figure({
   );
 }
 
+// What each part adds to the production bonus, which sets the return rate.
+function bonusParts(
+  bonus: ProductionBonus | HideoutProductionBonus,
+): [string, number][] {
+  const common: [string, number][] = [
+    ["Daily bonus", bonus.daily],
+    ["Focus", bonus.focus],
+  ];
+  return "base" in bonus
+    ? [["Base", bonus.base], ["Specialty", bonus.specialty], ...common]
+    : [
+        ["Map quality", bonus.mapQuality],
+        ["Power level", bonus.powerGeneral],
+        ["Power specialist", bonus.powerSpecialist],
+        ...common,
+      ];
+}
+
 export function CraftPanel({
   craft,
   region,
@@ -168,6 +192,30 @@ export function CraftPanel({
               ),
             )}
           </ul>
+        </Section>
+        <Section title="Return rate">
+          <dl className={styles.figures}>
+            {bonusParts(shown.bonus).map(([label, value]) => (
+              <Figure
+                key={label}
+                label={label}
+                value={value}
+                format={formatPercent}
+              />
+            ))}
+            <Figure
+              label="Production bonus"
+              value={shown.bonus.total}
+              format={formatPercent}
+              total
+            />
+            <Figure
+              label="Return rate"
+              value={shown.rrr}
+              format={formatReturnRate}
+              total
+            />
+          </dl>
         </Section>
         <Section title="Costs">
           <dl className={styles.figures}>

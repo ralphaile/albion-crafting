@@ -48,7 +48,7 @@
   font-weight: 700;
 }
 
-.figure[data-total="true"]:not(:first-child) {
+.figure:not([data-total="true"]) + .figure[data-total="true"] {
   margin-top: 3px;
   padding-top: 6px;
   border-top: 1px solid var(--rule);
