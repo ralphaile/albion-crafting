@@ -119,13 +119,26 @@ async function openFromMissingPrices() {
   );
 }
 
+function figures(section: string) {
+  const region = within(panel()).getByRole("region", { name: section });
+  return Object.fromEntries(
+    within(region)
+      .getAllByRole("term")
+      .map((term) => [term.textContent, term.nextElementSibling?.textContent]),
+  );
+}
+
+function detailOf(name: string) {
+  return field(name).closest("li")?.lastElementChild?.textContent;
+}
+
 function type(name: string, text: string, key = "Enter") {
   fireEvent.change(field(name), { target: { value: text } });
   fireEvent.keyDown(field(name), { key });
 }
 
 describe("CraftPanel", () => {
-  it("lists the item's sell price and each material's buy price", async () => {
+  it("lists each material's buy price and the item's sell price", async () => {
     renderBroadsword();
     await openFromMissingPrices();
 
@@ -134,9 +147,9 @@ describe("CraftPanel", () => {
         .getAllByRole("textbox")
         .map((input) => input.getAttribute("aria-label")),
     ).toEqual([
-      "Adept's Broadsword 4.0, sell order in Caerleon",
       "Steel Bar 4.0, sell order in Martlock",
       leather,
+      "Adept's Broadsword 4.0, sell order in Caerleon",
     ]);
     expect(field("Steel Bar 4.0, sell order in Martlock")).toHaveAttribute(
       "placeholder",
@@ -148,6 +161,49 @@ describe("CraftPanel", () => {
     expect(field(leather)).toHaveAccessibleDescription(
       "Sell order · Martlock · missing",
     );
+  });
+
+  // Lymhurst's 18% and its 15% sword specialty, with focus, return 47.92% of
+  // the bars and leather.
+  it("breaks the craft down into materials, costs, revenue and result", async () => {
+    renderBroadsword([typedLeather]);
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Broadsword 4.0",
+      }),
+    );
+
+    expect(detailOf("Steel Bar 4.0, sell order in Martlock")).toBe(
+      "8.33 × 100 = 833",
+    );
+    expect(detailOf(leather)).toBe("4.17 × 50 = 208");
+    expect(figures("Costs")).toEqual({
+      Materials: "1,042",
+      "Station fee": "216",
+      Silver: "0",
+      Total: "1,258",
+    });
+    expect(figures("Revenue")).toEqual({
+      Tax: "−200",
+      "Setup fee": "−125",
+      Net: "4,675",
+    });
+    expect(figures("Result")).toEqual({
+      Profit: "3,417",
+      Margin: "271.7%",
+      Focus: "1,286",
+      "Silver per focus": "0.4",
+    });
+  });
+
+  it("leaves out what a missing price keeps from being worked out", async () => {
+    renderBroadsword();
+    await openFromMissingPrices();
+
+    expect(detailOf(leather)).toBe("4.17 × —");
+    expect(figures("Costs")).toMatchObject({ Materials: "—", Total: "—" });
+    expect(figures("Revenue")).toMatchObject({ Net: "4,675" });
+    expect(figures("Result")).toMatchObject({ Profit: "—", Margin: "—" });
   });
 
   it("saves a typed price on Enter, and prices the craft without asking AODP again", async () => {
@@ -233,7 +289,7 @@ describe("CraftPanel", () => {
     renderBroadsword();
     await openFromMissingPrices();
 
-    fireEvent.click(screen.getByRole("button", { name: "Close prices" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close details" }));
 
     expect(
       screen.queryByRole("dialog", { name: "Adept's Broadsword 4.0" }),

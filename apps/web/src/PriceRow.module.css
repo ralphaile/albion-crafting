@@ -3,6 +3,7 @@
   grid-template-areas:
     "icon name input"
     "icon status status"
+    ". detail detail"
     ". error error";
   grid-template-columns: 36px minmax(0, 1fr) 7.5em;
   align-items: center;
@@ -33,6 +34,12 @@
   grid-area: status;
   color: var(--text-muted);
   font-size: 14px;
+}
+
+.detail {
+  grid-area: detail;
+  font-size: 14px;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .status[data-missing="true"] {

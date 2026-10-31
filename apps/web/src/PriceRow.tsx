@@ -32,6 +32,7 @@ export function PriceRow({
   manual,
   placeholder,
   status,
+  detail,
   missing,
   onSave,
   onRemove,
@@ -42,6 +43,7 @@ export function PriceRow({
   manual: ManualPrice | undefined;
   placeholder?: string | undefined;
   status: ReactNode;
+  detail?: ReactNode;
   missing: boolean;
   onSave: (price: ManualPrice) => void;
   onRemove: (key: ManualPriceKey) => void;
@@ -114,6 +116,7 @@ export function PriceRow({
       <span id={statusId} className={styles.status} data-missing={missing}>
         {order} · {market} · {status}
       </span>
+      {detail !== undefined && <span className={styles.detail}>{detail}</span>}
       {draft.invalid && (
         <p id={errorId} className={styles.error}>
           Whole silver above 0, like 1500

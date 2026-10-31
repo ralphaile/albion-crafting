@@ -1,3 +1,17 @@
+.section {
+  display: grid;
+  gap: 6px;
+}
+
+.title {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
 .lines {
   display: grid;
   margin: 0;
@@ -5,8 +19,41 @@
   list-style: none;
 }
 
-/* The item you sell, apart from the materials you buy. */
-.lines > :first-child {
-  margin-bottom: 10px;
-  border-bottom-color: var(--text-faint);
+.figures {
+  display: grid;
+  margin: 0;
+}
+
+.figure {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+
+.figure dt {
+  color: var(--text-muted);
+}
+
+.figure dd {
+  margin: 0;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.figure dd[data-loss="true"] {
+  color: var(--loss);
+}
+
+.figure[data-total="true"] {
+  font-weight: 700;
+}
+
+.figure[data-total="true"]:not(:first-child) {
+  margin-top: 3px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rule);
+}
+
+.figure[data-total="true"] dt {
+  color: var(--text);
 }

@@ -12,6 +12,8 @@ export const formatSilver = formatter({ maximumFractionDigits: 0 });
 
 export const formatCount = formatter({ maximumFractionDigits: 0 });
 
+export const formatQuantity = formatter({ maximumFractionDigits: 2 });
+
 export const formatPercent = formatter({
   style: "percent",
   minimumFractionDigits: 1,
