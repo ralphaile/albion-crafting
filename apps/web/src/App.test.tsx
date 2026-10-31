@@ -355,6 +355,23 @@ describe("App", () => {
     expect(window.location.search).not.toContain("item=");
   });
 
+  it("drops a linked craft the route doesn't have when prices fail to load", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/?tier=4&enchant=0&q=broadsword&item=T8_MAIN_SWORD",
+    );
+    await renderApp({
+      marketData: fakeMarketData({
+        getPrices: () => Promise.reject(new Error("AODP is down")),
+      }),
+    });
+
+    await screen.findByRole("button", { name: "Try again" });
+
+    expect(window.location.search).not.toContain("item=");
+  });
+
   it("prices a changed route right away, puts it in the link and saves it", async () => {
     const getPrices = vi.fn<MarketData["getPrices"]>(() =>
       Promise.resolve(noPrices),

@@ -85,11 +85,12 @@ export function App({
   const [shownItemId, setShownItemId] = useState(() =>
     shownItemFromSearch(window.location.search),
   );
-  // A craft the route no longer has closes, so the link doesn't keep it.
+  // A craft the route no longer has closes, so the link doesn't keep it. An
+  // error still lists every craft the route has.
   if (
     shownItemId !== undefined &&
-    bestCrafts.status === "ready" &&
-    !bestCrafts.updating &&
+    (bestCrafts.status === "error" ||
+      (bestCrafts.status === "ready" && !bestCrafts.updating)) &&
     !bestCrafts.allCrafts.some(({ itemId }) => itemId === shownItemId)
   ) {
     setShownItemId(undefined);
