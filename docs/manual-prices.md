@@ -4,16 +4,16 @@ AODP has no price for an item until a player running its client looks at it in t
 
 ## Typing a price
 
-The pencil at the end of a row's Prices column opens that craft's prices in a panel over the right of the page, and so does a row's **N prices missing**. It closes on Escape, a click outside it, or ×.
+A click on a row, its pencil or its **N prices missing** opens the [craft panel](craft-panel.md), over the right of the page. It closes on Escape, a click outside it, or ×.
 
-The first line is the item, at the market you sell in. Under it is each material, at the market you buy in, with how many one craft uses. Each line says which order its price comes from, the market, and the price's [badge](glossary.md#fresh-stale-and-missing-prices) and age: **seen 30 min ago** for AODP's, **typed 2 min ago** for yours, or **missing**. The order follows your [settings](settings.md): buying instantly pays the cheapest **sell order**, and selling instantly or to the Black Market gets the best **buy order**. An empty field shows AODP's price, faintly.
+Each material is at the market you buy in, with how many one craft uses, and the item, under Revenue, is at the market you sell in. Each line says which order its price comes from, the market, and the price's [badge](glossary.md#fresh-stale-and-missing-prices) and age: **seen 30 min ago** for AODP's, **typed 2 min ago** for yours, or **missing**. The order follows your [settings](settings.md): buying instantly pays the cheapest **sell order**, and selling instantly or to the Black Market gets the best **buy order**. An empty field shows AODP's price, faintly.
 
 - **Enter** or leaving the field saves the price. The table re-ranks straight away, without asking AODP again.
 - **Whole silver above 0** only, such as `1500`. `1.5k` or `1,500` is refused, and the field says so.
 - **Escape** cancels what you typed. A second Escape closes the panel.
 - **Emptying a field** and pressing Enter removes your price, so AODP's is used again.
 
-For an item with more than one recipe, such as a token instead of its artifact, the panel lists the materials of the recipe the table uses: the most profitable one with all its prices, or the first in the game files while none has them all.
+For an item with more than one recipe, such as a token instead of its artifact, the panel opens on the recipe the table uses, and can [switch to the others](craft-panel.md#what-it-shows) to type their prices.
 
 ## Filling every missing price
 
