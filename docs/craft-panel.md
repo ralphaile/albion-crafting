@@ -9,7 +9,8 @@ A click anywhere on a row opens that craft in a panel over the right of the page
 - **Return rate:** what each part adds to the production bonus, and the return rate it gives ([glossary](glossary.md#return-rate-rrr)). A city has its base bonus and specialty, and a hideout has its map quality, power level and power specialist. Both can have the daily bonus and focus.
 - **Costs:** materials, station fee and silver for one craft. A recipe that makes several items also shows the cost of each.
 - **Revenue:** the item's price where you sell, less tax and the setup fee.
-- **Result:** profit and margin, and with focus, the focus a craft costs and the silver each focus point adds.
+- **Focus:** only while focus is on. Mastery, the item's own specialization and the tree's other specializations, each times its [FCE](glossary.md#fce) amount, then the total FCE, the base focus and the focus the craft costs. When that FCE is 0, **Fill in specializations** opens the [specializations](specializations.md) panel on this craft's tree.
+- **Result:** profit and margin, and with focus, the silver each focus point adds.
 
 A figure a missing price keeps from being worked out shows **—**.
 
