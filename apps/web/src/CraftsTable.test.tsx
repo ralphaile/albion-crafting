@@ -11,13 +11,14 @@ import type {
   UsedPrice,
   UsedPrices,
 } from "./best-crafts.types";
-import { CraftsTable, PAGE_SIZE } from "./CraftsTable";
+import { CraftsTable } from "./CraftsTable";
 import {
   formatCount,
   formatPercent,
   formatSilver,
   formatSilverPerFocus,
 } from "./format.helpers";
+import { PAGE_SIZE } from "./pager.constants";
 import { DEFAULT_ROUTE } from "./route.constants";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 
