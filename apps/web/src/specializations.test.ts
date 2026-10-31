@@ -3,12 +3,7 @@ import { describe, expect, it } from "vitest";
 import { craftingTrees } from "@aoc/crafting-data";
 
 import { TREE_GROUPS } from "./specializations.constants";
-import {
-  fceFor,
-  fceParts,
-  withEverySpecialization,
-  withLevel,
-} from "./specializations.helpers";
+import { fceFor, fceParts, withLevel } from "./specializations.helpers";
 import { parseSpecializations } from "./specializations.schema";
 
 describe("parseSpecializations", () => {
@@ -90,33 +85,6 @@ describe("withLevel", () => {
       sword: { mastery: 100, specializations: {} },
     });
     expect(withLevel(noBroadsword, "sword", undefined, 0)).toEqual({});
-  });
-});
-
-describe("withEverySpecialization", () => {
-  const sword = craftingTrees.find(({ id }) => id === "sword");
-
-  it("sets every specialization of the tree, and keeps its mastery", () => {
-    const profile = withEverySpecialization(
-      { sword: { mastery: 70, specializations: { MAIN_SWORD: 100 } } },
-      sword!,
-      50,
-    );
-
-    expect(profile.sword?.mastery).toBe(70);
-    expect(Object.values(profile.sword?.specializations ?? {})).toEqual(
-      Array.from({ length: 8 }, () => 50),
-    );
-  });
-
-  it("clears them all at 0", () => {
-    expect(
-      withEverySpecialization(
-        { sword: { mastery: 0, specializations: { MAIN_SWORD: 100 } } },
-        sword!,
-        0,
-      ),
-    ).toEqual({});
   });
 });
 

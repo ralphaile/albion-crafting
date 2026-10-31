@@ -8,8 +8,6 @@ import {
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { craftingTrees } from "@aoc/crafting-data";
-
 import { FIRST_TREE_ID, NO_SPECIALIZATIONS } from "./specializations.constants";
 import type { SpecializationProfile } from "./specializations.types";
 import { SpecializationsPanel } from "./SpecializationsPanel";
@@ -87,7 +85,30 @@ describe("SpecializationsPanel", () => {
     expect(level("Mastery")).toHaveValue(100);
     expect(level("Claymore")).toHaveValue(40);
     expect(level("Broadsword")).toHaveValue(0);
-    expect(within(panel()).getAllByRole("spinbutton")).toHaveLength(10);
+    expect(within(panel()).getAllByRole("spinbutton")).toHaveLength(9);
+  });
+
+  it("steps a level up and down, and stops at 0 and 100", () => {
+    open({ sword: { mastery: 100, specializations: {} } });
+
+    fireEvent.click(
+      within(panel()).getByRole("button", { name: "Increase Broadsword" }),
+    );
+    expect(level("Broadsword")).toHaveValue(1);
+    expect(profile()).toEqual({
+      sword: { mastery: 100, specializations: { MAIN_SWORD: 1 } },
+    });
+
+    fireEvent.click(
+      within(panel()).getByRole("button", { name: "Decrease Broadsword" }),
+    );
+    expect(level("Broadsword")).toHaveValue(0);
+    expect(
+      within(panel()).getByRole("button", { name: "Decrease Broadsword" }),
+    ).toBeDisabled();
+    expect(
+      within(panel()).getByRole("button", { name: "Increase Mastery" }),
+    ).toBeDisabled();
   });
 
   it("shows each specialization's item icon by its name", () => {
@@ -136,37 +157,6 @@ describe("SpecializationsPanel", () => {
       expect(level("Mastery")).toHaveValue(60);
     },
   );
-
-  it("sets every specialization in the tree, and keeps its mastery", () => {
-    const sword = craftingTrees.find(({ id }) => id === "sword");
-    open({ sword: { mastery: 70, specializations: { MAIN_SWORD: 100 } } });
-
-    fireEvent.change(level("Set all specs to"), { target: { value: "50" } });
-    fireEvent.click(within(panel()).getByRole("button", { name: "Set" }));
-
-    expect(profile()).toEqual({
-      sword: {
-        mastery: 70,
-        specializations: Object.fromEntries(
-          sword?.specializations.map(({ id }) => [id, 50]) ?? [],
-        ),
-      },
-    });
-    expect(level("Mastery")).toHaveValue(70);
-    expect(level("Broadsword")).toHaveValue(50);
-    expect(level("Set all specs to")).toHaveValue(null);
-  });
-
-  it("leaves the tree alone when the bulk level is outside 0 to 100", () => {
-    open({ sword: { mastery: 70, specializations: { MAIN_SWORD: 100 } } });
-
-    fireEvent.change(level("Set all specs to"), { target: { value: "101" } });
-
-    expect(within(panel()).getByRole("button", { name: "Set" })).toBeDisabled();
-    expect(profile()).toEqual({
-      sword: { mastery: 70, specializations: { MAIN_SWORD: 100 } },
-    });
-  });
 
   it("replaces the profile from a JSON file, and leaves it when the file has none", async () => {
     open({ sword: { mastery: 10, specializations: {} } });

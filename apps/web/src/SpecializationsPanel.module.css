@@ -100,6 +100,19 @@
   height: 100%;
 }
 
+.stepper {
+  display: flex;
+  flex: none;
+  height: 32px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.stepper:hover {
+  border-color: var(--text-faint);
+}
+
 .number {
   width: 5em;
   height: 32px;
@@ -107,38 +120,67 @@
   background: var(--bg);
   text-align: right;
   font-variant-numeric: lining-nums tabular-nums;
+  appearance: textfield;
 }
 
-.every {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-basis: 100%;
-  color: var(--text-muted);
-  font-size: 14px;
+.number::-webkit-inner-spin-button,
+.number::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
 }
 
-.set {
-  height: 32px;
-  padding: 0 12px;
-  border: 1px solid var(--brass);
-  border-radius: var(--radius);
+.stepper .number {
+  width: 3.4em;
+  height: 100%;
+  padding: 0 6px 0 8px;
+  border: 0;
   background: transparent;
+}
+
+.stepper .number:hover {
+  border-color: transparent;
+}
+
+.spinners {
+  display: flex;
+  flex-direction: column;
+  width: 22px;
+  border-left: 1px solid var(--rule);
+}
+
+.spin {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.spin + .spin {
+  border-top: 1px solid var(--rule);
+}
+
+.spin:hover:enabled {
+  background: var(--surface-hover);
   color: var(--brass);
-  font-weight: 500;
-  transition:
-    background 120ms ease-out,
-    color 120ms ease-out;
 }
 
-.set:hover:enabled {
-  background: var(--brass);
-  color: var(--bg);
-}
-
-.set:disabled {
-  opacity: 0.45;
+.spin:disabled {
+  opacity: 0.35;
   cursor: default;
+}
+
+.spin svg {
+  width: 8px;
+  height: 5px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .action {

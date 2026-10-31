@@ -1,10 +1,5 @@
 import { type FceParts, specializationFce } from "@aoc/core";
-import {
-  type CraftingTree,
-  type GameRecipe,
-  recipes,
-  specializationOf,
-} from "@aoc/crafting-data";
+import { type GameRecipe, recipes, specializationOf } from "@aoc/crafting-data";
 
 import type {
   SpecializationProfile,
@@ -45,17 +40,6 @@ export function withLevel(
   return mastery > 0 || Object.keys(specializations).length > 0
     ? { ...rest, [treeId]: { mastery, specializations } }
     : rest;
-}
-
-export function withEverySpecialization(
-  profile: SpecializationProfile,
-  tree: CraftingTree,
-  level: number,
-): SpecializationProfile {
-  return tree.specializations.reduce(
-    (next, { id }) => withLevel(next, tree.id, id, level),
-    profile,
-  );
 }
 
 // The item's own specialization, its tree's mastery, and the tree's other

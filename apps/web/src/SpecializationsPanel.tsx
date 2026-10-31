@@ -8,11 +8,7 @@ import {
   MAX_SPECIALIZATION_LEVEL,
   TREE_GROUPS,
 } from "./specializations.constants";
-import {
-  treeLevels,
-  withEverySpecialization,
-  withLevel,
-} from "./specializations.helpers";
+import { treeLevels, withLevel } from "./specializations.helpers";
 import { parseSpecializations } from "./specializations.schema";
 import type { SpecializationProfile } from "./specializations.types";
 import styles from "./SpecializationsPanel.module.css";
@@ -43,6 +39,12 @@ function Level({
   if (draft.value !== value) {
     setDraft({ text: String(value), value });
   }
+  const step = (by: number) => {
+    const next = Math.min(MAX_SPECIALIZATION_LEVEL, Math.max(0, value + by));
+    if (next !== value) {
+      onChange(next);
+    }
+  };
   return (
     <li className={styles.level}>
       <label htmlFor={id} className={styles.name}>
@@ -53,27 +55,57 @@ function Level({
         )}
         {label}
       </label>
-      <input
-        id={id}
-        className={styles.number}
-        type="number"
-        inputMode="numeric"
-        step={1}
-        min={0}
-        max={MAX_SPECIALIZATION_LEVEL}
-        value={draft.text}
-        onChange={(event) => {
-          const text = event.target.value;
-          const parsed = parseLevel(text);
-          setDraft({ text, value: parsed ?? draft.value });
-          if (parsed !== undefined && parsed !== value) {
-            onChange(parsed);
-          }
-        }}
-        onBlur={() => {
-          setDraft({ text: String(value), value });
-        }}
-      />
+      <span className={styles.stepper}>
+        <input
+          id={id}
+          className={styles.number}
+          type="number"
+          inputMode="numeric"
+          step={1}
+          min={0}
+          max={MAX_SPECIALIZATION_LEVEL}
+          value={draft.text}
+          onChange={(event) => {
+            const text = event.target.value;
+            const parsed = parseLevel(text);
+            setDraft({ text, value: parsed ?? draft.value });
+            if (parsed !== undefined && parsed !== value) {
+              onChange(parsed);
+            }
+          }}
+          onBlur={() => {
+            setDraft({ text: String(value), value });
+          }}
+        />
+        <span className={styles.spinners}>
+          <button
+            type="button"
+            className={styles.spin}
+            aria-label={`Increase ${label}`}
+            disabled={value >= MAX_SPECIALIZATION_LEVEL}
+            onClick={() => {
+              step(1);
+            }}
+          >
+            <svg viewBox="0 0 10 6" aria-hidden="true">
+              <path d="M1 5l4-4 4 4" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className={styles.spin}
+            aria-label={`Decrease ${label}`}
+            disabled={value <= 0}
+            onClick={() => {
+              step(-1);
+            }}
+          >
+            <svg viewBox="0 0 10 6" aria-hidden="true">
+              <path d="M1 1l4 4 4-4" />
+            </svg>
+          </button>
+        </span>
+      </span>
     </li>
   );
 }
@@ -109,13 +141,10 @@ export function SpecializationsPanel({
   onClose: () => void;
 }) {
   const treeFieldId = useId();
-  const everyFieldId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [every, setEvery] = useState("");
   const [message, setMessage] = useState("");
   const tree = craftingTrees.find(({ id }) => id === treeId);
   const levels = treeLevels(profile, treeId);
-  const everyLevel = parseLevel(every);
   const setLevel = (specializationId: string | undefined, level: number) => {
     setMessage("");
     onChange(withLevel(profile, treeId, specializationId, level));
@@ -165,39 +194,6 @@ export function SpecializationsPanel({
         }}
         footer={
           <>
-            <form
-              className={styles.every}
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (tree !== undefined && everyLevel !== undefined) {
-                  setMessage("");
-                  onChange(withEverySpecialization(profile, tree, everyLevel));
-                  setEvery("");
-                }
-              }}
-            >
-              <label htmlFor={everyFieldId}>Set all specs to</label>
-              <input
-                id={everyFieldId}
-                className={styles.number}
-                type="number"
-                inputMode="numeric"
-                step={1}
-                min={0}
-                max={MAX_SPECIALIZATION_LEVEL}
-                value={every}
-                onChange={(event) => {
-                  setEvery(event.target.value);
-                }}
-              />
-              <button
-                type="submit"
-                className={styles.set}
-                disabled={everyLevel === undefined}
-              >
-                Set
-              </button>
-            </form>
             <button
               type="button"
               className={styles.action}
