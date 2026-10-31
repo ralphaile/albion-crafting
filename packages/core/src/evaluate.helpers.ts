@@ -111,7 +111,9 @@ export function evaluateEach(
 
 // The most profitable recipe with all its prices, or the default one while
 // none has them all.
-export function bestEvaluation(evaluations: Evaluations): Evaluation {
+export function bestEvaluation<Result extends Evaluation>(
+  evaluations: readonly [Result, ...Result[]],
+): Result {
   return evaluations.reduce((best, next) =>
     next.status === "complete" &&
     (best.status === "incomplete" || next.profit > best.profit)

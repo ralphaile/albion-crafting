@@ -1,13 +1,16 @@
 import {
+  bestEvaluation,
   type CraftingPlace,
-  evaluate,
+  evaluateEach,
   type EvaluateSettings,
+  type Evaluation,
   hasSpecialty,
 } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
 
 import type {
   Craft,
+  CraftAlternative,
   UsedItemPrices,
   UsedPrice,
   UsedPrices,
@@ -24,11 +27,7 @@ export function evaluateCrafts(
   const materials = byItem(prices.materials);
   const products = byItem(prices.products);
 
-  return recipes.map((recipe) => {
-    const evaluation = evaluate(recipe, place, settings, {
-      materials,
-      products,
-    });
+  function withPrices(evaluation: Evaluation): CraftAlternative {
     const materialPrices = new Map(
       evaluation.materialCost.lines.map(({ itemId, source }) => [
         itemId,
@@ -37,12 +36,27 @@ export function evaluateCrafts(
     );
     return {
       ...evaluation,
-      recipe,
-      specialty: hasSpecialty(place, recipe.craftingCategory),
       itemPrice:
-        products.get(recipe.itemId)?.[evaluation.revenue.source] ?? MISSING,
+        products.get(evaluation.itemId)?.[evaluation.revenue.source] ?? MISSING,
       materialPrices,
       oldestMaterialPrice: oldest([...materialPrices.values()]),
+    };
+  }
+
+  return recipes.map((recipe) => {
+    const [first, ...others] = evaluateEach(recipe, place, settings, {
+      materials,
+      products,
+    });
+    const alternatives: Craft["alternatives"] = [
+      withPrices(first),
+      ...others.map(withPrices),
+    ];
+    return {
+      ...bestEvaluation(alternatives),
+      recipe,
+      specialty: hasSpecialty(place, recipe.craftingCategory),
+      alternatives,
     };
   });
 }
