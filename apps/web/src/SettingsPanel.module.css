@@ -90,6 +90,12 @@
   line-height: 1;
 }
 
+.helpLink {
+  color: var(--brass);
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .helpButton:hover,
 .helpButton:focus-visible {
   border-color: var(--brass);

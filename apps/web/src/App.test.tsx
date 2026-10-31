@@ -147,7 +147,7 @@ describe("App", () => {
     });
     expect(
       screen.getByText(
-        "This is a fan-made site. It is not affiliated with or endorsed by Sandbox Interactive. Albion Online and its names, logos, and assets belong to their respective owners.",
+        "This is a fan-made site. It is not affiliated with or endorsed by Sandbox Interactive.",
       ),
     ).toBeInTheDocument();
   });
@@ -160,6 +160,16 @@ describe("App", () => {
       screen.getByRole("heading", { name: "Privacy policy" }),
     ).toBeInTheDocument();
     expect(screen.getByText(/currently has no accounts/)).toBeInTheDocument();
+  });
+
+  it("deep-links contextual help to its glossary section", async () => {
+    window.location.hash = "help/focus";
+    await renderApp();
+
+    expect(screen.getByText("Focus", { selector: "dt" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "the focus explanation" }),
+    ).toHaveAttribute("href", "#help/focus");
   });
 
   it("starts with the filters this browser saved", async () => {

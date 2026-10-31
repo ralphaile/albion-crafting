@@ -1,7 +1,6 @@
 .page {
   display: grid;
   gap: 24px;
-  max-width: 860px;
 }
 
 .back {
@@ -20,7 +19,8 @@
 }
 
 .content p,
-.content ul {
+.content ul,
+.content dl {
   margin: 0;
 }
 
@@ -28,6 +28,25 @@
   display: grid;
   gap: 8px;
   padding-left: 24px;
+}
+
+.glossary {
+  display: grid;
+  gap: 12px;
+}
+
+.definition dt {
+  font-weight: 700;
+}
+
+.definition dd {
+  margin: 2px 0 0;
+}
+
+.highlight {
+  padding: 12px;
+  border-left: 3px solid var(--brass);
+  background: var(--surface-hover);
 }
 
 .content a,
@@ -38,6 +57,7 @@
 .footer {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px 18px;
   padding-top: 20px;
   border-top: 1px solid var(--rule);

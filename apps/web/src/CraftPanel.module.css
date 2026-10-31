@@ -12,6 +12,13 @@
   letter-spacing: 0.04em;
 }
 
+.helpLink {
+  margin-left: 6px;
+  color: var(--brass);
+  font-size: 14px;
+  text-decoration: none;
+}
+
 .lines {
   display: grid;
   margin: 0;
