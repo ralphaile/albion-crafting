@@ -1,6 +1,8 @@
+// `itemId` is its lowest tier, to show its icon.
 export interface Specialization {
   id: string;
   name: string;
+  itemId: string;
 }
 
 // A tree of the destiny board, such as Sword or Plate armor: one mastery, and a

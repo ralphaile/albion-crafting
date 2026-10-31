@@ -2,6 +2,7 @@ import { useId, useState } from "react";
 
 import { craftingTrees } from "@aoc/crafting-data";
 
+import { ItemIcon } from "./ItemIcon";
 import { SidePanel } from "./SidePanel";
 import {
   MAX_SPECIALIZATION_LEVEL,
@@ -23,10 +24,12 @@ function parseLevel(text: string) {
 
 function Level({
   label,
+  iconId,
   value,
   onChange,
 }: {
   label: string;
+  iconId?: string;
   value: number;
   onChange: (level: number) => void;
 }) {
@@ -37,7 +40,14 @@ function Level({
   }
   return (
     <li className={styles.level}>
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id} className={styles.name}>
+        {iconId !== undefined && (
+          <span className={styles.itemIcon}>
+            <ItemIcon id={iconId} />
+          </span>
+        )}
+        {label}
+      </label>
       <input
         id={id}
         className={styles.number}
@@ -151,6 +161,7 @@ export function SpecializationsPanel({
                 <Level
                   key={`${treeId} ${specialization.id}`}
                   label={specialization.name}
+                  iconId={specialization.itemId}
                   value={levels.specializations[specialization.id] ?? 0}
                   onChange={(level) => {
                     setLevel(specialization.id, level);

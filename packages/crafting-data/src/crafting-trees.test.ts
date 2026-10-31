@@ -24,6 +24,14 @@ describe("craftingTrees", () => {
     ]);
   });
 
+  it("names each specialization's lowest tier item, for its icon", () => {
+    expect(tree("sword")?.specializations[0]).toEqual({
+      id: "MAIN_SWORD",
+      name: "Broadsword",
+      itemId: "T4_MAIN_SWORD",
+    });
+  });
+
   it("leaves out royal items, which cost no focus", () => {
     expect(
       tree("plate_armor")?.specializations.map(({ id }) => id),

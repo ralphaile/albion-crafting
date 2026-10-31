@@ -82,6 +82,24 @@
   gap: 12px;
 }
 
+.name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.itemIcon {
+  display: grid;
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+.itemIcon img {
+  width: 100%;
+  height: 100%;
+}
+
 .number {
   width: 5em;
   height: 32px;

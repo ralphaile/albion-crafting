@@ -29,6 +29,7 @@ function trees(): CraftingTree[] {
       tree.set(specializationId, {
         id: specializationId,
         name: specializationName(itemName(recipe.baseId)),
+        itemId: recipe.baseId,
         isArtifact: recipe.isArtifact,
         tier: recipe.tier,
       });
@@ -38,7 +39,7 @@ function trees(): CraftingTree[] {
     id,
     specializations: [...tree.values()]
       .sort(byPlainThenName)
-      .map(({ id: specId, name }) => ({ id: specId, name })),
+      .map(({ id: specId, name, itemId }) => ({ id: specId, name, itemId })),
   }));
 }
 

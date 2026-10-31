@@ -60,6 +60,14 @@ describe("SpecializationsPanel", () => {
     expect(within(panel()).getAllByRole("spinbutton")).toHaveLength(9);
   });
 
+  it("shows each specialization's item icon by its name", () => {
+    open();
+
+    expect(
+      level("Broadsword").closest("li")?.querySelector("img"),
+    ).toHaveAttribute("src", expect.stringContaining("/T4_MAIN_SWORD.png"));
+  });
+
   it("groups the trees by the building that crafts them", () => {
     open();
 
