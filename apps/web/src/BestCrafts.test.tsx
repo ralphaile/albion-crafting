@@ -67,9 +67,13 @@ const NO_MANUAL_PRICES: readonly ManualPrice[] = [];
 function PricedBestCrafts({
   marketData,
   ...props
-}: Omit<ComponentProps<typeof BestCrafts>, "bestCrafts"> & {
+}: Omit<
+  ComponentProps<typeof BestCrafts>,
+  "bestCrafts" | "shownItemId" | "onShowItem"
+> & {
   marketData: MarketData;
 }) {
+  const [shownItemId, setShownItemId] = useState<string>();
   const bestCrafts = useBestCrafts(
     marketData,
     props.route,
@@ -77,7 +81,14 @@ function PricedBestCrafts({
     props.filters ?? NO_FILTERS,
     props.manualPrices ?? NO_MANUAL_PRICES,
   );
-  return <BestCrafts bestCrafts={bestCrafts} {...props} />;
+  return (
+    <BestCrafts
+      bestCrafts={bestCrafts}
+      shownItemId={shownItemId}
+      onShowItem={setShownItemId}
+      {...props}
+    />
+  );
 }
 
 function renderBestCrafts(getPrices: MarketData["getPrices"]) {

@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import styles from "./BestCrafts.module.css";
 import { CraftFilters, type UpdateFilters } from "./CraftFilters";
 import { CraftPanel } from "./CraftPanel";
@@ -22,6 +20,8 @@ const IGNORE_MANUAL_PRICE = () => undefined;
 
 export function BestCrafts({
   bestCrafts,
+  shownItemId,
+  onShowItem,
   route,
   settings,
   filters = NO_FILTERS,
@@ -32,6 +32,8 @@ export function BestCrafts({
   onRemoveManualPrice = IGNORE_MANUAL_PRICE,
 }: {
   bestCrafts: BestCraftsResult;
+  shownItemId: string | undefined;
+  onShowItem: (itemId: string | undefined) => void;
   route: Route;
   settings: CraftingSettings;
   filters?: Filters;
@@ -42,11 +44,13 @@ export function BestCrafts({
   onRemoveManualPrice?: (key: ManualPriceKey) => void;
 }) {
   const filtered = activeFilters(filters).length > 0;
-  const [pricesFor, setPricesFor] = useState<string>();
   const crafts =
     bestCrafts.status === "loading" ? undefined : bestCrafts.crafts;
   const updating = bestCrafts.status === "ready" && bestCrafts.updating;
-  const pricedCraft = crafts?.find(({ itemId }) => itemId === pricesFor);
+  const shownCraft =
+    bestCrafts.status === "loading"
+      ? undefined
+      : bestCrafts.allCrafts.find(({ itemId }) => itemId === shownItemId);
 
   return (
     <div className={styles.bestCrafts}>
@@ -116,11 +120,11 @@ export function BestCrafts({
           <CraftsTable
             crafts={crafts}
             focus={settings.focus}
-            onShowCraft={setPricesFor}
+            onShowCraft={onShowItem}
           />
         ))}
       <CraftPanel
-        craft={pricedCraft}
+        craft={shownCraft}
         region={settings.server}
         buyMarketId={route.buyMarketId}
         sellMarketId={route.sellMarketId}
@@ -128,7 +132,7 @@ export function BestCrafts({
         onSave={onSaveManualPrice}
         onRemove={onRemoveManualPrice}
         onClose={() => {
-          setPricesFor(undefined);
+          onShowItem(undefined);
         }}
       />
     </div>

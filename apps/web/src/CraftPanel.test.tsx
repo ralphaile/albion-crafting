@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ItemPrices, MarketData } from "@aoc/market-prices";
@@ -76,6 +77,7 @@ function Crafts({
     store,
     initial,
   );
+  const [shownItemId, setShownItemId] = useState<string>();
   const bestCrafts = useBestCrafts(
     marketData,
     route,
@@ -86,6 +88,8 @@ function Crafts({
   return (
     <BestCrafts
       bestCrafts={bestCrafts}
+      shownItemId={shownItemId}
+      onShowItem={setShownItemId}
       route={route}
       settings={DEFAULT_SETTINGS}
       filters={filters}
