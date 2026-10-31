@@ -336,7 +336,7 @@ export function SettingsPanel({
           <circle cx="5" cy="8" r="1.5" />
           <circle cx="12" cy="12" r="1.5" />
         </svg>
-        Settings
+        <span className={styles.openLabel}>Settings</span>
       </button>
       <SidePanel
         heading="Settings"
