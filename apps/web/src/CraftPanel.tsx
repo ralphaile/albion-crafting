@@ -1,0 +1,382 @@
+import { type ReactNode, useId, useState } from "react";
+
+import type {
+  HideoutProductionBonus,
+  MaterialLine,
+  OrderPrices,
+  ProductionBonus,
+} from "@aoc/core";
+import { type GameRecipe, itemName } from "@aoc/crafting-data";
+import type { Region } from "@aoc/market-prices";
+
+import type { Craft, CraftAlternative, UsedPrice } from "./best-crafts.types";
+import styles from "./CraftPanel.module.css";
+import {
+  formatAgo,
+  formatCount,
+  formatPercent,
+  formatQuantity,
+  formatReturnRate,
+  formatSilver,
+  formatSilverPerFocus,
+} from "./format.helpers";
+import { sameManualPrice } from "./manual-prices.helpers";
+import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
+import { PriceBadge } from "./PriceBadge";
+import { PriceRow } from "./PriceRow";
+import { QUALITY } from "./prices.constants";
+import { SidePanel } from "./SidePanel";
+
+const MISSING: UsedPrice = { status: "missing", origin: "api" };
+
+function seen(price: UsedPrice) {
+  if (price.status === "missing") {
+    return "missing";
+  }
+  const how = price.origin === "manual" ? "typed" : "seen";
+  return `${how} ${formatAgo(price.ageMinutes)}${price.status === "stale" ? ", stale" : ""}`;
+}
+
+// How many the returns leave you buying, times what each costs.
+function lineDetail(line: MaterialLine) {
+  const used = formatQuantity(line.effectiveCount);
+  const cost =
+    line.status === "missing"
+      ? `${used} × —`
+      : `${used} × ${formatQuantity(line.unitPrice)} = ${formatSilver(line.cost)}`;
+  return line.returnable ? cost : `Not returned · ${cost}`;
+}
+
+function amountCrafted(recipe: GameRecipe, alternative: number) {
+  return (
+    (alternative === 0 ? recipe : recipe.alternatives[alternative - 1])
+      ?.amountCrafted ?? recipe.amountCrafted
+  );
+}
+
+function sum(values: readonly (number | undefined)[]) {
+  let total = 0;
+  for (const value of values) {
+    if (value === undefined) {
+      return undefined;
+    }
+    total += value;
+  }
+  return total;
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  const titleId = useId();
+  return (
+    <section className={styles.section} aria-labelledby={titleId}>
+      <h3 id={titleId} className={styles.title}>
+        {title}
+      </h3>
+      {children}
+    </section>
+  );
+}
+
+function Figure({
+  label,
+  value,
+  format = formatSilver,
+  total = false,
+}: {
+  label: string;
+  value: number | undefined;
+  format?: (value: number) => string;
+  total?: boolean;
+}) {
+  return (
+    <div className={styles.figure} data-total={total}>
+      <dt>{label}</dt>
+      <dd data-loss={total && value !== undefined && value < 0}>
+        {value === undefined ? "—" : format(value)}
+      </dd>
+    </div>
+  );
+}
+
+// The materials that tell a recipe apart from the item's other ones, such as
+// an artifact or the token used instead.
+function recipeLabel(
+  shown: CraftAlternative,
+  alternatives: readonly CraftAlternative[],
+) {
+  const inEvery = (itemId: string) =>
+    alternatives.every(({ materialCost }) =>
+      materialCost.lines.some((line) => line.itemId === itemId),
+    );
+  return shown.materialCost.lines
+    .filter(({ itemId }) => !inEvery(itemId))
+    .map(({ itemId }) => itemName(itemId))
+    .join(" + ");
+}
+
+function recipeResult(alternative: CraftAlternative) {
+  if (alternative.status === "complete") {
+    return formatSilver(alternative.profit);
+  }
+  const missing = alternative.missingPrices.length;
+  return `${formatCount(missing)} ${missing === 1 ? "price" : "prices"} missing`;
+}
+
+// What each part adds to the production bonus, which sets the return rate.
+function bonusParts(
+  bonus: ProductionBonus | HideoutProductionBonus,
+): [string, number][] {
+  const common: [string, number][] = [
+    ["Daily bonus", bonus.daily],
+    ["Focus", bonus.focus],
+  ];
+  return "base" in bonus
+    ? [["Base", bonus.base], ["Specialty", bonus.specialty], ...common]
+    : [
+        ["Map quality", bonus.mapQuality],
+        ["Power level", bonus.powerGeneral],
+        ["Power specialist", bonus.powerSpecialist],
+        ...common,
+      ];
+}
+
+export function CraftPanel({
+  craft,
+  region,
+  buyMarketId,
+  sellMarketId,
+  manualPrices,
+  onSave,
+  onRemove,
+  onClose,
+}: {
+  craft: Craft | undefined;
+  region: Region;
+  buyMarketId: string;
+  sellMarketId: string;
+  manualPrices: readonly ManualPrice[];
+  onSave: (price: ManualPrice) => void;
+  onRemove: (key: ManualPriceKey) => void;
+  onClose: () => void;
+}) {
+  // Which recipe the panel shows, until it closes or shows another item.
+  const [chosen, setChosen] = useState<{
+    itemId: string;
+    alternative: number;
+  }>();
+
+  function recipes(craft: Craft, shown: CraftAlternative) {
+    return (
+      <Section title="Recipe">
+        <ul className={styles.recipes}>
+          {craft.alternatives.map((alternative) => (
+            <li key={alternative.alternative}>
+              <button
+                type="button"
+                className={styles.recipe}
+                aria-pressed={alternative.alternative === shown.alternative}
+                onClick={() => {
+                  setChosen({
+                    itemId: craft.itemId,
+                    alternative: alternative.alternative,
+                  });
+                }}
+              >
+                <span className={styles.recipeName}>
+                  {recipeLabel(alternative, craft.alternatives)}
+                </span>
+                <span
+                  className={styles.recipeResult}
+                  data-missing={alternative.status === "incomplete"}
+                >
+                  {recipeResult(alternative)}
+                </span>
+                {alternative.alternative === craft.alternative ? (
+                  <svg
+                    className={styles.used}
+                    viewBox="0 0 16 16"
+                    aria-label="Used in the table"
+                    role="img"
+                  >
+                    <title>Used in the table</title>
+                    <path d="M3 8.5l3 3 7-7" />
+                  </svg>
+                ) : (
+                  <span className={styles.used} />
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Section>
+    );
+  }
+
+  function priceRow(
+    itemId: string,
+    marketId: string,
+    source: keyof OrderPrices,
+    price: UsedPrice,
+    { count, detail }: { count?: number; detail?: ReactNode } = {},
+  ) {
+    const key: ManualPriceKey = {
+      region,
+      itemId,
+      marketId,
+      quality: QUALITY,
+      source,
+    };
+    const manual = manualPrices.find((typed) => sameManualPrice(typed, key));
+    return (
+      <PriceRow
+        key={`${itemId} ${source}`}
+        priceKey={key}
+        count={count}
+        manual={manual}
+        placeholder={
+          manual === undefined && price.status !== "missing"
+            ? formatSilver(price.value)
+            : undefined
+        }
+        status={<PriceBadge price={price}>{seen(price)}</PriceBadge>}
+        detail={detail}
+        missing={price.status === "missing"}
+        onSave={onSave}
+        onRemove={onRemove}
+      />
+    );
+  }
+
+  function breakdown(shown: CraftAlternative, recipe: GameRecipe) {
+    const { materialCost, revenue } = shown;
+    const materials =
+      materialCost.status === "complete" ? materialCost.total : undefined;
+    const spent = sum([materials, shown.stationFee, shown.silverCost]);
+    const madeAtOnce = amountCrafted(recipe, shown.alternative);
+    const sold = revenue.status === "missing" ? undefined : revenue;
+    const result = shown.status === "complete" ? shown : undefined;
+    return (
+      <>
+        <Section title="Materials">
+          <ul className={styles.lines}>
+            {materialCost.lines.map((line) =>
+              priceRow(
+                line.itemId,
+                buyMarketId,
+                line.source,
+                shown.materialPrices.get(line.itemId) ?? MISSING,
+                { count: line.count, detail: lineDetail(line) },
+              ),
+            )}
+          </ul>
+        </Section>
+        <Section title="Return rate">
+          <dl className={styles.figures}>
+            {bonusParts(shown.bonus).map(([label, value]) => (
+              <Figure
+                key={label}
+                label={label}
+                value={value}
+                format={formatPercent}
+              />
+            ))}
+            <Figure
+              label="Production bonus"
+              value={shown.bonus.total}
+              format={formatPercent}
+              total
+            />
+            <Figure
+              label="Return rate"
+              value={shown.rrr}
+              format={formatReturnRate}
+              total
+            />
+          </dl>
+        </Section>
+        <Section title="Costs">
+          <dl className={styles.figures}>
+            <Figure label="Materials" value={materials} />
+            <Figure label="Station fee" value={shown.stationFee} />
+            <Figure label="Silver" value={shown.silverCost} />
+            <Figure label="Total" value={spent} total />
+            {madeAtOnce > 1 && (
+              <Figure
+                label={`Each of ${formatCount(madeAtOnce)}`}
+                value={spent === undefined ? undefined : spent / madeAtOnce}
+              />
+            )}
+          </dl>
+        </Section>
+        <Section title="Revenue">
+          <ul className={styles.lines}>
+            {priceRow(
+              shown.itemId,
+              sellMarketId,
+              revenue.source,
+              shown.itemPrice,
+            )}
+          </ul>
+          <dl className={styles.figures}>
+            <Figure label="Tax" value={sold && -sold.tax} />
+            <Figure label="Setup fee" value={sold && -sold.setupFee} />
+            <Figure label="Net" value={sold?.net} total />
+          </dl>
+        </Section>
+        <Section title="Result">
+          <dl className={styles.figures}>
+            <Figure label="Profit" value={result?.profit} total />
+            <Figure
+              label="Margin"
+              value={result?.margin}
+              format={formatPercent}
+            />
+            {shown.focusCost !== undefined && (
+              <>
+                <Figure
+                  label="Focus"
+                  value={shown.focusCost}
+                  format={formatCount}
+                />
+                <Figure
+                  label="Silver per focus"
+                  value={result?.silverPerFocus}
+                  format={formatSilverPerFocus}
+                />
+              </>
+            )}
+          </dl>
+        </Section>
+      </>
+    );
+  }
+
+  function shownFor(craft: Craft) {
+    const shown =
+      chosen?.itemId === craft.itemId
+        ? (craft.alternatives.find(
+            ({ alternative }) => alternative === chosen.alternative,
+          ) ?? craft)
+        : craft;
+    return (
+      <>
+        {craft.alternatives.length > 1 && recipes(craft, shown)}
+        {breakdown(shown, craft.recipe)}
+      </>
+    );
+  }
+
+  return (
+    <SidePanel
+      heading={craft === undefined ? "" : itemName(craft.itemId)}
+      closeLabel="Close details"
+      open={craft !== undefined}
+      onClose={() => {
+        setChosen(undefined);
+        onClose();
+      }}
+    >
+      {craft !== undefined && shownFor(craft)}
+    </SidePanel>
+  );
+}

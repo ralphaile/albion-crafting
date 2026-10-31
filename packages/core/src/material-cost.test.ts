@@ -55,6 +55,7 @@ describe("materialCost", () => {
         {
           itemId: "T4_PLANKS",
           count: 20,
+          returnable: true,
           effectiveCount: 15,
           source: "sellMin",
           status: "fresh",
@@ -64,6 +65,7 @@ describe("materialCost", () => {
         {
           itemId: "T4_METALBAR",
           count: 12,
+          returnable: true,
           effectiveCount: 9,
           source: "sellMin",
           status: "fresh",
@@ -73,6 +75,7 @@ describe("materialCost", () => {
         {
           itemId: "T4_ARTEFACT_2H_ARCANESTAFF_CRYSTAL",
           count: 1,
+          returnable: false,
           effectiveCount: 1,
           source: "sellMin",
           status: "fresh",
@@ -126,6 +129,7 @@ describe("materialCost", () => {
         {
           itemId: "T4_METALBAR",
           count: 12,
+          returnable: true,
           effectiveCount: 9,
           source: "sellMin",
           status: "missing",

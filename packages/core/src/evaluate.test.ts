@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   type CraftingPlace,
   evaluate,
+  evaluateEach,
   type EvaluatePrices,
   type EvaluateSettings,
   type Evaluation,
@@ -323,6 +324,21 @@ describe("evaluate", () => {
         alternative: 0,
         missingPrices: ["T4_ARMOR_CLOTH_SET1"],
       });
+    });
+
+    it("gives each recipe's result, the default one first", () => {
+      const results = evaluateEach(royalRobe, rrr25, settings, prices);
+
+      expect(results).toMatchObject([
+        { alternative: 0, status: "complete" },
+        { alternative: 1, status: "complete" },
+        {
+          alternative: 2,
+          status: "incomplete",
+          missingPrices: ["T4_ARMOR_CLOTH_SET3"],
+        },
+      ]);
+      expect(results[1]).toEqual(evaluate(royalRobe, rrr25, settings, prices));
     });
 
     it("has no silver per focus for a royal item, which costs no focus", () => {

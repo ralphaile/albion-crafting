@@ -26,10 +26,17 @@ export interface UsedPrices {
   products: readonly UsedItemPrices[];
 }
 
-export type Craft = Evaluation & {
-  recipe: GameRecipe;
-  specialty: boolean;
+// One recipe's result, with the prices it used.
+export type CraftAlternative = Evaluation & {
   itemPrice: UsedPrice;
   materialPrices: ReadonlyMap<string, UsedPrice>;
   oldestMaterialPrice: Exclude<UsedPrice, { status: "missing" }> | undefined;
+};
+
+// The result of the recipe the table uses, and of every recipe for the item,
+// the default one first.
+export type Craft = CraftAlternative & {
+  recipe: GameRecipe;
+  specialty: boolean;
+  alternatives: readonly [CraftAlternative, ...CraftAlternative[]];
 };

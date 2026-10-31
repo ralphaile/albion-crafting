@@ -11,6 +11,7 @@ export type BuyMode = "instant" | "order";
 interface LineBase {
   itemId: string;
   count: number;
+  returnable: boolean;
   effectiveCount: number;
   source: keyof OrderPrices;
 }

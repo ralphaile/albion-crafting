@@ -5,6 +5,7 @@ import {
   formatAgo,
   formatCount,
   formatPercent,
+  formatQuantity,
   formatReturnRate,
   formatSilver,
   formatSilverPerFocus,
@@ -85,5 +86,16 @@ describe("formatAgo", () => {
     [14 * 60, "14 h ago"],
   ])("shows %d minutes as %s", (minutes, expected) => {
     expect(formatAgo(minutes)).toBe(expected);
+  });
+});
+
+describe("formatQuantity", () => {
+  it.each([
+    [6.6384, "6.64"],
+    [102.5, "102.5"],
+    [16, "16"],
+    [1234.5, "1,234.5"],
+  ])("shows %d as %s", (value, expected) => {
+    expect(formatQuantity(value)).toBe(expected);
   });
 });

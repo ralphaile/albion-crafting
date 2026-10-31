@@ -1,9 +1,10 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { MarketData } from "@aoc/market-prices";
 
 import styles from "./App.module.css";
 import { BestCrafts } from "./BestCrafts";
+import { searchWithShownItem, shownItemFromSearch } from "./craft-url.helpers";
 import { CraftingLocationBar } from "./CraftingLocationBar";
 import { filtersFromSearch, searchWithFilters } from "./filters-url.helpers";
 import { NO_FILTERS } from "./filters.constants";
@@ -81,17 +82,31 @@ export function App({
     manualPrices,
   );
 
+  const [shownItemId, setShownItemId] = useState(() =>
+    shownItemFromSearch(window.location.search),
+  );
+  // A craft the route no longer has closes, so the link doesn't keep it. An
+  // error still lists every craft the route has.
+  if (
+    shownItemId !== undefined &&
+    (bestCrafts.status === "error" ||
+      (bestCrafts.status === "ready" && !bestCrafts.updating)) &&
+    !bestCrafts.allCrafts.some(({ itemId }) => itemId === shownItemId)
+  ) {
+    setShownItemId(undefined);
+  }
+
   useEffect(() => {
     const url = new URL(window.location.href);
-    const next = searchWithFilters(
-      searchWithRoute(url.search, routeChoice),
-      filters,
+    const next = searchWithShownItem(
+      searchWithFilters(searchWithRoute(url.search, routeChoice), filters),
+      shownItemId,
     );
     if (next !== url.search) {
       url.search = next;
       window.history.replaceState(window.history.state, "", url);
     }
-  }, [filters, routeChoice]);
+  }, [filters, routeChoice, shownItemId]);
 
   return (
     <div className={styles.app}>
@@ -118,6 +133,8 @@ export function App({
         <CraftingLocationBar route={routeChoice} onChange={setRouteChoice} />
         <BestCrafts
           bestCrafts={bestCrafts}
+          shownItemId={shownItemId}
+          onShowItem={setShownItemId}
           route={route}
           settings={settings}
           filters={filters}

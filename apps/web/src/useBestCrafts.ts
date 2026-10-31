@@ -23,18 +23,21 @@ import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 
+// `allCrafts` keeps the crafts the price filters hide.
 export type BestCraftsResult =
   | { status: "loading" }
   | {
       status: "error";
       error: Error;
       crafts: Craft[];
+      allCrafts: Craft[];
       missingPrices: MissingPrice[];
       retry: () => void;
     }
   | {
       status: "ready";
       crafts: Craft[];
+      allCrafts: Craft[];
       missingPrices: MissingPrice[];
       failures: BatchFailure[];
       updating: boolean;
@@ -244,6 +247,7 @@ export function useBestCrafts(
     return {
       status: "ready",
       crafts: [],
+      allCrafts: [],
       missingPrices: [],
       failures: [],
       updating: false,
@@ -254,6 +258,7 @@ export function useBestCrafts(
       status: "error",
       error: current.fetched.error,
       crafts,
+      allCrafts: evaluated,
       missingPrices: missing,
       retry: () => {
         setAttempt((count) => count + 1);
@@ -264,6 +269,7 @@ export function useBestCrafts(
     return {
       status: "ready",
       crafts,
+      allCrafts: evaluated,
       missingPrices: missing,
       failures: current.fetched.failures,
       updating: !covered,

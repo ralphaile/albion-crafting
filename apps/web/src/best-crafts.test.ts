@@ -198,4 +198,45 @@ describe("evaluateCrafts", () => {
 
     expect(craft?.oldestMaterialPrice).toBeUndefined();
   });
+
+  it("keeps each recipe's result and prices, and uses the most profitable", () => {
+    const withLeatherOrCloth: GameRecipe = {
+      ...broadsword,
+      alternatives: [
+        {
+          focus: 1286,
+          silver: 0,
+          amountCrafted: 1,
+          materials: [
+            { id: "T4_METALBAR", count: 16, returnable: true },
+            { id: "T4_CLOTH", count: 8, returnable: true },
+          ],
+        },
+      ],
+    };
+
+    const [craft] = evaluateCrafts(
+      [withLeatherOrCloth],
+      island,
+      instantBuyAndSell,
+      {
+        ...pricesOnHand,
+        materials: [
+          ...pricesOnHand.materials,
+          prices("T4_CLOTH", seen(20, 90), missing),
+        ],
+      },
+    );
+
+    // 8 cloth at 20 cost 240 less than 8 leather at 50.
+    expect(craft).toMatchObject({ alternative: 1, profit: 1120 });
+    expect(craft?.alternatives).toMatchObject([
+      { alternative: 0, profit: 880 },
+      { alternative: 1, profit: 1120 },
+    ]);
+    expect(craft?.alternatives[0].materialPrices.get("T4_LEATHER")).toEqual(
+      seen(50, 200),
+    );
+    expect(craft?.materialPrices.get("T4_CLOTH")).toEqual(seen(20, 90));
+  });
 });

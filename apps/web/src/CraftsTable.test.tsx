@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { EvaluateSettings } from "@aoc/core";
 import { type GameRecipe, recipes } from "@aoc/crafting-data";
@@ -237,6 +237,19 @@ describe("CraftsTable", () => {
 
     expect(row.getByText("1 price missing")).toBeInTheDocument();
     expect(row.getAllByText("—").length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("opens a craft from anywhere on its row, or from its pencil", () => {
+    const onShowCraft = vi.fn<(itemId: string) => void>();
+    render(<CraftsTable crafts={crafts} focus onShowCraft={onShowCraft} />);
+    const row = rowOf("Adept's Bow 4.0");
+
+    fireEvent.click(row.getByTitle("Adept's Bow 4.0"));
+    fireEvent.click(
+      row.getByRole("button", { name: "Prices for Adept's Bow 4.0" }),
+    );
+
+    expect(onShowCraft.mock.calls).toEqual([["T4_2H_BOW"], ["T4_2H_BOW"]]);
   });
 
   it("leaves out silver per focus without focus, and ranks by profit", () => {
