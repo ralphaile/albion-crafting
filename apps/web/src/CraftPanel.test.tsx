@@ -13,6 +13,8 @@ import { DEFAULT_ROUTE } from "./route.constants";
 import { placeFromChoice } from "./route.helpers";
 import type { Route } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
+import { NO_SPECIALIZATIONS } from "./specializations.constants";
+import type { SpecializationProfile } from "./specializations.types";
 import { useBestCrafts } from "./useBestCrafts";
 import { useManualPrices } from "./useManualPrices";
 import { fakeMarketData } from "../test/fake-market-data";
@@ -66,12 +68,16 @@ function Crafts({
   initial,
   route,
   filters,
+  specializations,
+  onEditSpecializations,
 }: {
   marketData: MarketData;
   store: ManualPriceStore;
   initial: readonly ManualPrice[];
   route: Route;
   filters: Filters;
+  specializations: SpecializationProfile;
+  onEditSpecializations: (treeId: string) => void;
 }) {
   const { manualPrices, saveManualPrice, removeManualPrice } = useManualPrices(
     store,
@@ -84,6 +90,7 @@ function Crafts({
     DEFAULT_SETTINGS,
     filters,
     manualPrices,
+    specializations,
   );
   return (
     <BestCrafts
@@ -96,6 +103,8 @@ function Crafts({
       manualPrices={manualPrices}
       onSaveManualPrice={saveManualPrice}
       onRemoveManualPrice={removeManualPrice}
+      specializations={specializations}
+      onEditSpecializations={onEditSpecializations}
     />
   );
 }
@@ -106,12 +115,14 @@ function renderCrafts({
   products,
   initial = [],
   route = lymhurst,
+  specializations = NO_SPECIALIZATIONS,
 }: {
   filters: Filters;
   materials: ItemPrices[];
   products: ItemPrices[];
   initial?: readonly ManualPrice[];
   route?: Route;
+  specializations?: SpecializationProfile;
 }) {
   const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
     Promise.resolve({
@@ -121,6 +132,7 @@ function renderCrafts({
     }),
   );
   const store = memoryManualPriceStore();
+  const onEditSpecializations = vi.fn<(treeId: string) => void>();
   render(
     <Crafts
       marketData={fakeMarketData({ getPrices })}
@@ -128,15 +140,18 @@ function renderCrafts({
       initial={initial}
       route={route}
       filters={filters}
+      specializations={specializations}
+      onEditSpecializations={onEditSpecializations}
     />,
   );
-  return { getPrices, store };
+  return { getPrices, store, onEditSpecializations };
 }
 
 // The broadsword's leather has no price at Martlock.
 function renderBroadsword(
   initial: readonly ManualPrice[] = [],
   route = lymhurst,
+  specializations: SpecializationProfile = NO_SPECIALIZATIONS,
 ) {
   return renderCrafts({
     filters: broadswordOnly,
@@ -144,6 +159,7 @@ function renderBroadsword(
     products: [priced("T4_MAIN_SWORD", "Caerleon", 5000)],
     initial,
     route,
+    specializations,
   });
 }
 
@@ -240,10 +256,17 @@ describe("CraftPanel", () => {
       "Setup fee": "−125",
       Net: "4,675",
     });
+    expect(figures("Focus")).toEqual({
+      "Mastery 0 × 30": "0",
+      "Broadsword 0 × 250": "0",
+      "Other specializations 0 × 30": "0",
+      FCE: "0",
+      "Base focus": "1,286",
+      Focus: "1,286",
+    });
     expect(figures("Result")).toEqual({
       Profit: "3,417",
       Margin: "271.7%",
-      Focus: "1,286",
       "Silver per focus": "0.4",
     });
   });
@@ -266,6 +289,50 @@ describe("CraftPanel", () => {
       "Return rate": "58.51%",
     });
     expect(detailOf(leather)).toBe("3.32 × 50 = 166");
+  });
+
+  // 29,200 FCE makes the 1,286 base focus 1,286 × 0.5 ^ 2.92 = 169.92.
+  it("shows how the craft's FCE is worked out from the specializations", async () => {
+    renderBroadsword([typedLeather], lymhurst, {
+      sword: {
+        mastery: 100,
+        specializations: { MAIN_SWORD: 100, "2H_CLAYMORE": 40 },
+      },
+    });
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Broadsword 4.0",
+      }),
+    );
+
+    expect(figures("Focus")).toEqual({
+      "Mastery 100 × 30": "3,000",
+      "Broadsword 100 × 250": "25,000",
+      "Other specializations 40 × 30": "1,200",
+      FCE: "29,200",
+      "Base focus": "1,286",
+      Focus: "170",
+    });
+    expect(
+      within(panel()).queryByRole("button", {
+        name: "Fill in specializations",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers to fill in the specializations of a craft with no FCE", async () => {
+    const { onEditSpecializations } = renderBroadsword([typedLeather]);
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Broadsword 4.0",
+      }),
+    );
+
+    fireEvent.click(
+      within(panel()).getByRole("button", { name: "Fill in specializations" }),
+    );
+
+    expect(onEditSpecializations).toHaveBeenCalledWith("sword");
   });
 
   it("leaves out what a missing price keeps from being worked out", async () => {

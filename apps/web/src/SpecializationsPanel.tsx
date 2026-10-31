@@ -11,8 +11,6 @@ import { treeLevels, withLevel } from "./specializations.helpers";
 import type { SpecializationProfile } from "./specializations.types";
 import styles from "./SpecializationsPanel.module.css";
 
-const [FIRST_TREE] = TREE_GROUPS.flatMap(({ options }) => options);
-
 function parseLevel(text: string) {
   const value = Number(text);
   return text.trim() !== "" &&
@@ -65,15 +63,23 @@ function Level({
   );
 }
 
+// The owner keeps whether it's open and which tree it shows, so a craft's
+// panel can open it on that craft's tree.
 export function SpecializationsPanel({
   profile,
   onChange,
+  open,
+  treeId,
+  onShow,
+  onClose,
 }: {
   profile: SpecializationProfile;
   onChange: (profile: SpecializationProfile) => void;
+  open: boolean;
+  treeId: string;
+  onShow: (treeId: string) => void;
+  onClose: () => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const [treeId, setTreeId] = useState(FIRST_TREE?.id ?? "");
   const treeFieldId = useId();
   const tree = craftingTrees.find(({ id }) => id === treeId);
   const levels = treeLevels(profile, treeId);
@@ -88,7 +94,7 @@ export function SpecializationsPanel({
         className={styles.open}
         aria-haspopup="dialog"
         onClick={() => {
-          setOpen(true);
+          onShow(treeId);
         }}
       >
         <svg className={styles.icon} viewBox="0 0 16 16" aria-hidden="true">
@@ -103,9 +109,7 @@ export function SpecializationsPanel({
         heading="Specializations"
         closeLabel="Close specializations"
         open={open}
-        onClose={() => {
-          setOpen(false);
-        }}
+        onClose={onClose}
       >
         <div className={styles.tree}>
           <label htmlFor={treeFieldId} className={styles.label}>
@@ -116,7 +120,7 @@ export function SpecializationsPanel({
             className={styles.select}
             value={treeId}
             onChange={(event) => {
-              setTreeId(event.target.value);
+              onShow(event.target.value);
             }}
           >
             {TREE_GROUPS.map((group) => (

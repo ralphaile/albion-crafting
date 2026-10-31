@@ -53,3 +53,5 @@ export const TREE_GROUPS: readonly OptionGroup[] = [
     "booktype",
   ]),
 ];
+
+export const FIRST_TREE_ID: string = TREE_GROUPS[0]?.options[0]?.id ?? "";

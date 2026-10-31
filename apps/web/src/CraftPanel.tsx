@@ -1,12 +1,20 @@
 import { type ReactNode, useId, useState } from "react";
 
-import type {
-  HideoutProductionBonus,
-  MaterialLine,
-  OrderPrices,
-  ProductionBonus,
+import {
+  FCE_PER_MASTERY_LEVEL,
+  FCE_PER_OTHER_SPEC_LEVEL,
+  FCE_PER_SPEC_LEVEL,
+  type HideoutProductionBonus,
+  type MaterialLine,
+  type OrderPrices,
+  type ProductionBonus,
 } from "@aoc/core";
-import { type GameRecipe, itemName } from "@aoc/crafting-data";
+import {
+  craftingTrees,
+  type GameRecipe,
+  itemName,
+  specializationOf,
+} from "@aoc/crafting-data";
 import type { Region } from "@aoc/market-prices";
 
 import type { Craft, CraftAlternative, UsedPrice } from "./best-crafts.types";
@@ -26,6 +34,8 @@ import { PriceBadge } from "./PriceBadge";
 import { PriceRow } from "./PriceRow";
 import { QUALITY } from "./prices.constants";
 import { SidePanel } from "./SidePanel";
+import { fceParts, treeLevels } from "./specializations.helpers";
+import type { SpecializationProfile } from "./specializations.types";
 
 const MISSING: UsedPrice = { status: "missing", origin: "api" };
 
@@ -47,11 +57,33 @@ function lineDetail(line: MaterialLine) {
   return line.returnable ? cost : `Not returned · ${cost}`;
 }
 
-function amountCrafted(recipe: GameRecipe, alternative: number) {
+function recipeFor(recipe: GameRecipe, alternative: number) {
   return (
-    (alternative === 0 ? recipe : recipe.alternatives[alternative - 1])
-      ?.amountCrafted ?? recipe.amountCrafted
+    (alternative === 0 ? recipe : recipe.alternatives[alternative - 1]) ??
+    recipe
   );
+}
+
+// The levels behind each part of the craft's FCE, and its specialization's
+// name.
+function fceLevels(profile: SpecializationProfile, recipe: GameRecipe) {
+  const { treeId, specializationId } = specializationOf(recipe);
+  const { mastery, specializations } = treeLevels(profile, treeId);
+  const others = Object.entries(specializations)
+    .filter(([id]) => id !== specializationId)
+    .reduce((total, [, level]) => total + level, 0);
+  const name =
+    craftingTrees
+      .find(({ id }) => id === treeId)
+      ?.specializations.find(({ id }) => id === specializationId)?.name ??
+    itemName(recipe.baseId);
+  return {
+    treeId,
+    name,
+    mastery,
+    spec: specializations[specializationId] ?? 0,
+    others,
+  };
 }
 
 function sum(values: readonly (number | undefined)[]) {
@@ -148,6 +180,8 @@ export function CraftPanel({
   manualPrices,
   onSave,
   onRemove,
+  specializations,
+  onEditSpecializations,
   onClose,
 }: {
   craft: Craft | undefined;
@@ -157,6 +191,8 @@ export function CraftPanel({
   manualPrices: readonly ManualPrice[];
   onSave: (price: ManualPrice) => void;
   onRemove: (key: ManualPriceKey) => void;
+  specializations: SpecializationProfile;
+  onEditSpecializations: (treeId: string) => void;
   onClose: () => void;
 }) {
   // Which recipe the panel shows, until it closes or shows another item.
@@ -252,7 +288,7 @@ export function CraftPanel({
     const materials =
       materialCost.status === "complete" ? materialCost.total : undefined;
     const spent = sum([materials, shown.stationFee, shown.silverCost]);
-    const madeAtOnce = amountCrafted(recipe, shown.alternative);
+    const madeAtOnce = recipeFor(recipe, shown.alternative).amountCrafted;
     const sold = revenue.status === "missing" ? undefined : revenue;
     const result = shown.status === "complete" ? shown : undefined;
     return (
@@ -323,6 +359,12 @@ export function CraftPanel({
             <Figure label="Net" value={sold?.net} total />
           </dl>
         </Section>
+        {shown.focusCost !== undefined &&
+          focus(
+            shown.focusCost,
+            recipeFor(recipe, shown.alternative).focus,
+            recipe,
+          )}
         <Section title="Result">
           <dl className={styles.figures}>
             <Figure label="Profit" value={result?.profit} total />
@@ -332,22 +374,55 @@ export function CraftPanel({
               format={formatPercent}
             />
             {shown.focusCost !== undefined && (
-              <>
-                <Figure
-                  label="Focus"
-                  value={shown.focusCost}
-                  format={formatCount}
-                />
-                <Figure
-                  label="Silver per focus"
-                  value={result?.silverPerFocus}
-                  format={formatSilverPerFocus}
-                />
-              </>
+              <Figure
+                label="Silver per focus"
+                value={result?.silverPerFocus}
+                format={formatSilverPerFocus}
+              />
             )}
           </dl>
         </Section>
       </>
+    );
+  }
+
+  function focus(cost: number, baseFocus: number, recipe: GameRecipe) {
+    const fce = fceParts(specializations, recipe);
+    const levels = fceLevels(specializations, recipe);
+    return (
+      <Section title="Focus">
+        <dl className={styles.figures}>
+          <Figure
+            label={`Mastery ${formatCount(levels.mastery)} × ${formatCount(FCE_PER_MASTERY_LEVEL)}`}
+            value={fce.mastery}
+            format={formatCount}
+          />
+          <Figure
+            label={`${levels.name} ${formatCount(levels.spec)} × ${formatCount(FCE_PER_SPEC_LEVEL)}`}
+            value={fce.spec}
+            format={formatCount}
+          />
+          <Figure
+            label={`Other specializations ${formatCount(levels.others)} × ${formatCount(FCE_PER_OTHER_SPEC_LEVEL)}`}
+            value={fce.otherSpecs}
+            format={formatCount}
+          />
+          <Figure label="FCE" value={fce.total} format={formatCount} total />
+          <Figure label="Base focus" value={baseFocus} format={formatCount} />
+          <Figure label="Focus" value={cost} format={formatCount} total />
+        </dl>
+        {fce.total === 0 && (
+          <button
+            type="button"
+            className={styles.action}
+            onClick={() => {
+              onEditSpecializations(levels.treeId);
+            }}
+          >
+            Fill in specializations
+          </button>
+        )}
+      </Section>
     );
   }
 

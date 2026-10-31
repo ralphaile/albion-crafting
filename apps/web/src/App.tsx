@@ -26,7 +26,7 @@ import type { SettingsStore } from "./saved-settings.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
 import { SettingsPanel } from "./SettingsPanel";
-import { NO_SPECIALIZATIONS } from "./specializations.constants";
+import { FIRST_TREE_ID, NO_SPECIALIZATIONS } from "./specializations.constants";
 import type { SpecializationProfile } from "./specializations.types";
 import { SpecializationsPanel } from "./SpecializationsPanel";
 import { useBestCrafts } from "./useBestCrafts";
@@ -79,6 +79,13 @@ export function App({
     SPECIALIZATIONS_SETTING,
     () => savedSpecializations ?? NO_SPECIALIZATIONS,
   );
+  const [specializationsShown, setSpecializationsShown] = useState({
+    open: false,
+    treeId: FIRST_TREE_ID,
+  });
+  const showSpecializations = (treeId: string) => {
+    setSpecializationsShown({ open: true, treeId });
+  };
   const { manualPrices, saveManualPrice, removeManualPrice } = useManualPrices(
     manualPriceStore,
     savedManualPrices,
@@ -137,6 +144,15 @@ export function App({
           <SpecializationsPanel
             profile={specializations}
             onChange={setSpecializations}
+            open={specializationsShown.open}
+            treeId={specializationsShown.treeId}
+            onShow={showSpecializations}
+            onClose={() => {
+              setSpecializationsShown({
+                ...specializationsShown,
+                open: false,
+              });
+            }}
           />
           <SettingsPanel
             settings={settings}
@@ -159,6 +175,8 @@ export function App({
           manualPrices={manualPrices}
           onSaveManualPrice={saveManualPrice}
           onRemoveManualPrice={removeManualPrice}
+          specializations={specializations}
+          onEditSpecializations={showSpecializations}
         />
       </main>
     </div>

@@ -323,10 +323,10 @@ describe("App", () => {
       },
     });
 
-    const result = within(
+    const focusSection = within(
       await screen.findByRole("dialog", { name: "Adept's Broadsword 4.0" }),
-    ).getByRole("region", { name: "Result" });
-    const focus = within(result)
+    ).getByRole("region", { name: "Focus" });
+    const focus = within(focusSection)
       .getAllByRole("term")
       .find((term) => term.textContent === "Focus");
     expect(focus?.nextElementSibling).toHaveTextContent("185");

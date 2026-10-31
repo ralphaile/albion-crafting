@@ -2,15 +2,27 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 
-import { NO_SPECIALIZATIONS } from "./specializations.constants";
+import { FIRST_TREE_ID, NO_SPECIALIZATIONS } from "./specializations.constants";
 import type { SpecializationProfile } from "./specializations.types";
 import { SpecializationsPanel } from "./SpecializationsPanel";
 
 function Editor({ initial }: { initial: SpecializationProfile }) {
   const [profile, setProfile] = useState(initial);
+  const [shown, setShown] = useState({ open: false, treeId: FIRST_TREE_ID });
   return (
     <>
-      <SpecializationsPanel profile={profile} onChange={setProfile} />
+      <SpecializationsPanel
+        profile={profile}
+        onChange={setProfile}
+        open={shown.open}
+        treeId={shown.treeId}
+        onShow={(treeId) => {
+          setShown({ open: true, treeId });
+        }}
+        onClose={() => {
+          setShown({ ...shown, open: false });
+        }}
+      />
       <output aria-label="profile">{JSON.stringify(profile)}</output>
     </>
   );
