@@ -32,6 +32,13 @@
   letter-spacing: 0.005em;
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
 .main {
   display: grid;
   gap: 24px;

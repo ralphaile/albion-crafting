@@ -35,6 +35,7 @@ export function PriceRow({
   missing,
   onSave,
   onRemove,
+  onEntered,
 }: {
   priceKey: ManualPriceKey;
   count?: number | undefined;
@@ -44,6 +45,8 @@ export function PriceRow({
   missing: boolean;
   onSave: (price: ManualPrice) => void;
   onRemove: (key: ManualPriceKey) => void;
+  // After Enter saved or removed the price.
+  onEntered?: () => void;
 }) {
   const statusId = useId();
   const errorId = useId();
@@ -59,18 +62,19 @@ export function PriceRow({
   function commit() {
     const text = draft.text.trim();
     if (text === saved) {
-      return;
+      return false;
     }
     if (text === "") {
       onRemove(priceKey);
-      return;
+      return true;
     }
     const value = parseSilver(text);
     if (value === undefined) {
       setDraft({ ...draft, invalid: true });
-      return;
+      return false;
     }
     onSave({ ...priceKey, value, enteredAt: Date.now() });
+    return true;
   }
 
   return (
@@ -96,7 +100,9 @@ export function PriceRow({
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             event.preventDefault();
-            commit();
+            if (commit()) {
+              onEntered?.();
+            }
           } else if (event.key === "Escape" && draft.text !== saved) {
             // Cancels the typing; a second Escape closes the panel.
             event.preventDefault();

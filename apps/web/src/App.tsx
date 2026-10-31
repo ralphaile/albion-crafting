@@ -9,6 +9,8 @@ import { filtersFromSearch, searchWithFilters } from "./filters-url.helpers";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
+import type { MissingPrice } from "./missing-prices.types";
+import { MissingPricesPanel } from "./MissingPricesPanel";
 import { routeFromSearch, searchWithRoute } from "./route-url.helpers";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import { routeFromChoice } from "./route.helpers";
@@ -25,6 +27,8 @@ import { SettingsPanel } from "./SettingsPanel";
 import { useBestCrafts } from "./useBestCrafts";
 import { useManualPrices } from "./useManualPrices";
 import { useSavedSetting } from "./useSavedSetting";
+
+const NO_MISSING_PRICES: readonly MissingPrice[] = [];
 
 export function App({
   marketData,
@@ -93,11 +97,22 @@ export function App({
     <div className={styles.app}>
       <header className={styles.masthead}>
         <h1 className={styles.title}>Albion Crafting</h1>
-        <SettingsPanel
-          settings={settings}
-          onChange={setSettings}
-          onClearCache={() => marketData.clear()}
-        />
+        <div className={styles.actions}>
+          <MissingPricesPanel
+            missingPrices={
+              bestCrafts.status === "loading"
+                ? NO_MISSING_PRICES
+                : bestCrafts.missingPrices
+            }
+            onSave={saveManualPrice}
+            onRemove={removeManualPrice}
+          />
+          <SettingsPanel
+            settings={settings}
+            onChange={setSettings}
+            onClearCache={() => marketData.clear()}
+          />
+        </div>
       </header>
       <main className={styles.main}>
         <CraftingLocationBar route={routeChoice} onChange={setRouteChoice} />

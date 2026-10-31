@@ -1,8 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { recipes } from "@aoc/crafting-data";
-import type { MarketData } from "@aoc/market-prices";
+import type { ItemPrices, MarketData } from "@aoc/market-prices";
 
 import { App } from "./App";
 import { NO_FILTERS } from "./filters.constants";
@@ -203,6 +203,59 @@ describe("App", () => {
         `Missing prices · ${formatCount(recipes.length - 1)} crafts`,
       ),
     ).toBeInTheDocument();
+  });
+
+  it("lists the missing prices of hidden crafts, and shows a craft once its price is filled", async () => {
+    const lymhurst = (itemId: string, value: number): ItemPrices => ({
+      itemId,
+      marketId: "Lymhurst",
+      quality: 1,
+      sellMin: { status: "fresh", value, observedAt: 0, ageMinutes: 30 },
+      buyMax: { status: "missing" },
+    });
+    const prices = [
+      lymhurst("T4_METALBAR", 100),
+      lymhurst("T4_MAIN_SWORD", 5000),
+    ];
+    await renderApp({
+      savedFilters: {
+        ...NO_FILTERS,
+        tiers: [4],
+        enchants: [0],
+        search: "broadsword",
+        hideIncomplete: true,
+      },
+      marketData: fakeMarketData({
+        getPrices: (itemIds) =>
+          Promise.resolve({
+            prices: prices.filter(({ itemId }) => itemIds.includes(itemId)),
+            failures: [],
+            fetchedAt: 0,
+          }),
+      }),
+    });
+    expect(
+      await screen.findByText("No crafts match your filters"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "1 price missing" }));
+    const leather = within(
+      screen.getByRole("dialog", { name: "Missing prices" }),
+    ).getByRole("textbox", {
+      name: "Worked Leather 4.0, sell order in Lymhurst",
+    });
+    fireEvent.change(leather, { target: { value: "50" } });
+    fireEvent.keyDown(leather, { key: "Enter" });
+
+    expect(
+      within(screen.getByRole("region", { name: "Best crafts" })).getByRole(
+        "rowheader",
+        { name: /Adept's Broadsword/ },
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /missing$/ }),
+    ).not.toBeInTheDocument();
   });
 
   it("saves a setting changed in the panel", async () => {
