@@ -9,6 +9,7 @@ import { CraftingLocationBar } from "./CraftingLocationBar";
 import { filtersFromSearch, searchWithFilters } from "./filters-url.helpers";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
+import { Footer, LegalPage } from "./LegalPages";
 import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
 import type { MissingPrice } from "./missing-prices.types";
 import { MissingPricesPanel } from "./MissingPricesPanel";
@@ -54,6 +55,18 @@ export function App({
   savedSpecializations: SpecializationProfile | undefined;
   savedManualPrices: readonly ManualPrice[];
 }) {
+  const [page, setPage] = useState<"home" | "help" | "privacy">(() =>
+    pageFromHash(window.location.hash),
+  );
+  useEffect(() => {
+    const updatePage = () => {
+      setPage(pageFromHash(window.location.hash));
+    };
+    window.addEventListener("hashchange", updatePage);
+    return () => {
+      window.removeEventListener("hashchange", updatePage);
+    };
+  }, []);
   // A shared link wins over what this browser saved.
   const [filters, setFilters] = useSavedSetting(
     settingsStore,
@@ -127,6 +140,19 @@ export function App({
     }
   }, [filters, routeChoice, shownItemId]);
 
+  if (page !== "home") {
+    return (
+      <div className={styles.app}>
+        <LegalPage
+          page={page}
+          onHome={() => {
+            window.location.hash = "home";
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.app}>
       <header className={styles.masthead}>
@@ -179,6 +205,17 @@ export function App({
           onEditSpecializations={showSpecializations}
         />
       </main>
+      <Footer />
     </div>
   );
+}
+
+function pageFromHash(hash: string): "home" | "help" | "privacy" {
+  if (hash === "#help") {
+    return "help";
+  }
+  if (hash === "#privacy") {
+    return "privacy";
+  }
+  return "home";
 }
