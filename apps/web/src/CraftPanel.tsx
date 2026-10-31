@@ -288,7 +288,11 @@ export function CraftPanel({
     const materials =
       materialCost.status === "complete" ? materialCost.total : undefined;
     const spent = sum([materials, shown.stationFee, shown.silverCost]);
-    const madeAtOnce = recipeFor(recipe, shown.alternative).amountCrafted;
+    const chosenRecipe = recipeFor(recipe, shown.alternative);
+    const madeAtOnce = chosenRecipe.amountCrafted;
+    // A royal item costs no focus, so its focus cost is 0 rather than absent,
+    // and it has no specialization of its own.
+    const focusSpent = chosenRecipe.focus > 0 ? shown.focusCost : undefined;
     const sold = revenue.status === "missing" ? undefined : revenue;
     const result = shown.status === "complete" ? shown : undefined;
     return (
@@ -359,12 +363,8 @@ export function CraftPanel({
             <Figure label="Net" value={sold?.net} total />
           </dl>
         </Section>
-        {shown.focusCost !== undefined &&
-          focus(
-            shown.focusCost,
-            recipeFor(recipe, shown.alternative).focus,
-            recipe,
-          )}
+        {focusSpent !== undefined &&
+          focus(focusSpent, chosenRecipe.focus, recipe)}
         <Section title="Result">
           <dl className={styles.figures}>
             <Figure label="Profit" value={result?.profit} total />
@@ -373,7 +373,7 @@ export function CraftPanel({
               value={result?.margin}
               format={formatPercent}
             />
-            {shown.focusCost !== undefined && (
+            {focusSpent !== undefined && (
               <Figure
                 label="Silver per focus"
                 value={result?.silverPerFocus}

@@ -179,8 +179,8 @@ async function openFromMissingPrices() {
   );
 }
 
-function figures(section: string) {
-  const region = within(panel()).getByRole("region", { name: section });
+function figures(section: string, name?: string) {
+  const region = within(panel(name)).getByRole("region", { name: section });
   return Object.fromEntries(
     within(region)
       .getAllByRole("term")
@@ -333,6 +333,41 @@ describe("CraftPanel", () => {
     );
 
     expect(onEditSpecializations).toHaveBeenCalledWith("sword");
+  });
+
+  it("leaves the focus breakdown out of a royal item, which costs none", async () => {
+    renderCrafts({
+      filters: {
+        ...NO_FILTERS,
+        tiers: [4],
+        enchants: [0],
+        search: "royal robe",
+      },
+      materials: [],
+      products: [priced("T4_ARMOR_CLOTH_ROYAL", "Caerleon", 5000)],
+      specializations: {
+        cloth_armor: {
+          mastery: 100,
+          specializations: { ARMOR_CLOTH_SET1: 100 },
+        },
+      },
+    });
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Royal Robe 4.0",
+      }),
+    );
+
+    const robe = "Adept's Royal Robe 4.0";
+    expect(
+      within(panel(robe)).queryByRole("region", { name: "Focus" }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(panel(robe)).queryByRole("button", {
+        name: "Fill in specializations",
+      }),
+    ).not.toBeInTheDocument();
+    expect(figures("Result", robe)).not.toHaveProperty("Silver per focus");
   });
 
   it("leaves out what a missing price keeps from being worked out", async () => {
