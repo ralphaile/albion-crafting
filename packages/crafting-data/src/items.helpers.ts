@@ -20,3 +20,14 @@ export function iconUrl(id: string): string {
 export function searchItems(query: string): string[] {
   return search(searchIndex, query);
 }
+
+// Like searchItems, but among the given items, materials included.
+export function searchAmong(
+  itemIds: readonly string[],
+  query: string,
+): string[] {
+  return search(
+    itemIds.map((id) => ({ id, text: searchText(`${itemName(id)} ${id}`) })),
+    query,
+  );
+}

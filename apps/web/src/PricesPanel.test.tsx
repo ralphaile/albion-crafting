@@ -10,6 +10,7 @@ import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
 import { DEFAULT_ROUTE } from "./route.constants";
 import type { Route } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
+import { useBestCrafts } from "./useBestCrafts";
 import { useManualPrices } from "./useManualPrices";
 import { fakeMarketData } from "../test/fake-market-data";
 
@@ -59,9 +60,16 @@ function Broadsword({
     store,
     initial,
   );
+  const bestCrafts = useBestCrafts(
+    marketData,
+    route,
+    DEFAULT_SETTINGS,
+    broadswordOnly,
+    manualPrices,
+  );
   return (
     <BestCrafts
-      marketData={marketData}
+      bestCrafts={bestCrafts}
       route={route}
       settings={DEFAULT_SETTINGS}
       filters={broadswordOnly}

@@ -16,17 +16,26 @@ import { craftFilter, recipeFilter } from "./filters.helpers";
 import type { Filters } from "./filters.types";
 import { withManualPrices } from "./manual-prices.helpers";
 import type { ManualPrice } from "./manual-prices.types";
+import { missingPrices } from "./missing-prices.helpers";
+import type { MissingPrice } from "./missing-prices.types";
 import { QUALITY } from "./prices.constants";
 import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 
-export type BestCrafts =
+export type BestCraftsResult =
   | { status: "loading" }
-  | { status: "error"; error: Error; crafts: Craft[]; retry: () => void }
+  | {
+      status: "error";
+      error: Error;
+      crafts: Craft[];
+      missingPrices: MissingPrice[];
+      retry: () => void;
+    }
   | {
       status: "ready";
       crafts: Craft[];
+      missingPrices: MissingPrice[];
       failures: BatchFailure[];
       updating: boolean;
     };
@@ -112,7 +121,7 @@ export function useBestCrafts(
   settings: CraftingSettings,
   filters: Filters,
   manualPrices: readonly ManualPrice[],
-): BestCrafts {
+): BestCraftsResult {
   const { place, buyMarketId, sellMarketId } = route;
   const { server, staleAfterHours, manualStaleAfterDays, preferManualPrices } =
     settings;
@@ -220,15 +229,32 @@ export function useBestCrafts(
     () => evaluated.filter(craftFilter(filters)),
     [evaluated, filters],
   );
+  const missing = useMemo(
+    () =>
+      missingPrices(evaluated, {
+        region: server,
+        buyMarketId,
+        sellMarketId,
+        quality: QUALITY,
+      }),
+    [evaluated, server, buyMarketId, sellMarketId],
+  );
 
   if (selected.length === 0) {
-    return { status: "ready", crafts: [], failures: [], updating: false };
+    return {
+      status: "ready",
+      crafts: [],
+      missingPrices: [],
+      failures: [],
+      updating: false,
+    };
   }
   if (current?.fetched.status === "error" && covered) {
     return {
       status: "error",
       error: current.fetched.error,
       crafts,
+      missingPrices: missing,
       retry: () => {
         setAttempt((count) => count + 1);
       },
@@ -238,6 +264,7 @@ export function useBestCrafts(
     return {
       status: "ready",
       crafts,
+      missingPrices: missing,
       failures: current.fetched.failures,
       updating: !covered,
     };

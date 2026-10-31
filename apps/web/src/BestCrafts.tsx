@@ -1,7 +1,5 @@
 import { useState } from "react";
 
-import type { MarketData } from "@aoc/market-prices";
-
 import styles from "./BestCrafts.module.css";
 import { CraftFilters, type UpdateFilters } from "./CraftFilters";
 import { CraftsTable } from "./CraftsTable";
@@ -12,7 +10,7 @@ import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 import { PricesPanel } from "./PricesPanel";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
-import { useBestCrafts } from "./useBestCrafts";
+import type { BestCraftsResult } from "./useBestCrafts";
 
 const SKELETON_ROWS = 8;
 
@@ -23,7 +21,7 @@ const NO_MANUAL_PRICES: readonly ManualPrice[] = [];
 const IGNORE_MANUAL_PRICE = () => undefined;
 
 export function BestCrafts({
-  marketData,
+  bestCrafts,
   route,
   settings,
   filters = NO_FILTERS,
@@ -33,7 +31,7 @@ export function BestCrafts({
   onSaveManualPrice = IGNORE_MANUAL_PRICE,
   onRemoveManualPrice = IGNORE_MANUAL_PRICE,
 }: {
-  marketData: MarketData;
+  bestCrafts: BestCraftsResult;
   route: Route;
   settings: CraftingSettings;
   filters?: Filters;
@@ -43,13 +41,6 @@ export function BestCrafts({
   onSaveManualPrice?: (price: ManualPrice) => void;
   onRemoveManualPrice?: (key: ManualPriceKey) => void;
 }) {
-  const bestCrafts = useBestCrafts(
-    marketData,
-    route,
-    settings,
-    filters,
-    manualPrices,
-  );
   const filtered = activeFilters(filters).length > 0;
   const [pricesFor, setPricesFor] = useState<string>();
   const crafts =

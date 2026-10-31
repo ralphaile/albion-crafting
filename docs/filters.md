@@ -11,7 +11,7 @@ Different filters combine with AND: a craft has to pass every one of them. Insid
 - **Artifacts**: include them, exclude them, or show only them.
 - **Specialty only**: items that get the crafting location's [specialty bonus](glossary.md#specialty-bonus), or in a hideout, its biome's categories.
 - **Filter by name**: the item's name or ID, in any case. It applies once you stop typing for a moment.
-- **Min profit** and **Min margin %**: whole numbers. They only judge crafts with every price. Crafts with missing prices stay, so you can [finish them by hand](manual-prices.md), unless **Hide crafts with missing prices** is on.
+- **Min profit** and **Min margin %**: whole numbers. They only judge crafts with every price. Crafts with missing prices stay, so you can [finish them by hand](manual-prices.md), unless **Hide crafts with missing prices** is on. The [list of missing prices](manual-prices.md#filling-every-missing-price) keeps their prices either way.
 
 ## Fewer price requests
 
