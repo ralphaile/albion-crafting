@@ -434,5 +434,17 @@ describe("CraftPanel", () => {
       );
       expect(recipe(/Runed Horn/)).not.toHaveAccessibleName(/Used/);
     });
+
+    it("opens again on the recipe the table uses", async () => {
+      await openHorn();
+      fireEvent.click(recipe(/Crystallized Spirit/));
+
+      fireEvent.click(screen.getByRole("button", { name: "Close details" }));
+      fireEvent.click(
+        screen.getByRole("button", { name: `Prices for ${horn}` }),
+      );
+
+      expect(recipe(/Runed Horn/)).toHaveAttribute("aria-pressed", "true");
+    });
   });
 });

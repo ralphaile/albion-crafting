@@ -159,7 +159,7 @@ export function CraftPanel({
   onRemove: (key: ManualPriceKey) => void;
   onClose: () => void;
 }) {
-  // Which recipe the panel shows, while it shows that item.
+  // Which recipe the panel shows, until it closes or shows another item.
   const [chosen, setChosen] = useState<{
     itemId: string;
     alternative: number;
@@ -371,7 +371,10 @@ export function CraftPanel({
       heading={craft === undefined ? "" : itemName(craft.itemId)}
       closeLabel="Close details"
       open={craft !== undefined}
-      onClose={onClose}
+      onClose={() => {
+        setChosen(undefined);
+        onClose();
+      }}
     >
       {craft !== undefined && shownFor(craft)}
     </SidePanel>
