@@ -55,9 +55,10 @@ export function App({
   savedSpecializations: SpecializationProfile | undefined;
   savedManualPrices: readonly ManualPrice[];
 }) {
-  const [page, setPage] = useState<"home" | "help" | "privacy">(() =>
-    pageFromHash(window.location.hash),
-  );
+  const [page, setPage] = useState<{
+    kind: "home" | "help" | "privacy";
+    section?: string;
+  }>(() => pageFromHash(window.location.hash));
   useEffect(() => {
     const updatePage = () => {
       setPage(pageFromHash(window.location.hash));
@@ -140,11 +141,12 @@ export function App({
     }
   }, [filters, routeChoice, shownItemId]);
 
-  if (page !== "home") {
+  if (page.kind !== "home") {
     return (
       <div className={styles.app}>
         <LegalPage
-          page={page}
+          page={page.kind}
+          {...(page.section === undefined ? {} : { helpSection: page.section })}
           onHome={() => {
             window.location.hash = "home";
           }}
@@ -205,17 +207,26 @@ export function App({
           onEditSpecializations={showSpecializations}
         />
       </main>
-      <Footer />
+      <Footer
+        onHelp={() => {
+          setPage({ kind: "help" });
+          window.location.hash = "help";
+        }}
+      />
     </div>
   );
 }
 
-function pageFromHash(hash: string): "home" | "help" | "privacy" {
-  if (hash === "#help") {
-    return "help";
+function pageFromHash(hash: string): {
+  kind: "home" | "help" | "privacy";
+  section?: string;
+} {
+  if (hash.startsWith("#help")) {
+    const section = hash.slice("#help/".length);
+    return { kind: "help", ...(section ? { section } : {}) };
   }
   if (hash === "#privacy") {
-    return "privacy";
+    return { kind: "privacy" };
   }
-  return "home";
+  return { kind: "home" };
 }

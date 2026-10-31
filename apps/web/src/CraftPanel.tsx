@@ -97,12 +97,29 @@ function sum(values: readonly (number | undefined)[]) {
   return total;
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  title,
+  children,
+  help,
+}: {
+  title: string;
+  children: ReactNode;
+  help?: string;
+}) {
   const titleId = useId();
   return (
     <section className={styles.section} aria-labelledby={titleId}>
-      <h3 id={titleId} className={styles.title}>
+      <h3 id={titleId} className={styles.title} aria-label={title}>
         {title}
+        {help !== undefined && (
+          <a
+            className={styles.helpLink}
+            href={`#help/${help}`}
+            aria-label={`Read more about ${title}`}
+          >
+            ?
+          </a>
+        )}
       </h3>
       {children}
     </section>
@@ -203,7 +220,7 @@ export function CraftPanel({
 
   function recipes(craft: Craft, shown: CraftAlternative) {
     return (
-      <Section title="Recipe">
+      <Section title="Recipe" help="artifact">
         <ul className={styles.recipes}>
           {craft.alternatives.map((alternative) => (
             <li key={alternative.alternative}>
@@ -297,7 +314,7 @@ export function CraftPanel({
     const result = shown.status === "complete" ? shown : undefined;
     return (
       <>
-        <Section title="Materials">
+        <Section title="Materials" help="rrr">
           <ul className={styles.lines}>
             {materialCost.lines.map((line) =>
               priceRow(
@@ -310,7 +327,7 @@ export function CraftPanel({
             )}
           </ul>
         </Section>
-        <Section title="Return rate">
+        <Section title="Return rate" help="production-bonus">
           <dl className={styles.figures}>
             {bonusParts(shown.bonus).map(([label, value]) => (
               <Figure
@@ -334,7 +351,7 @@ export function CraftPanel({
             />
           </dl>
         </Section>
-        <Section title="Costs">
+        <Section title="Costs" help="station-fee">
           <dl className={styles.figures}>
             <Figure label="Materials" value={materials} />
             <Figure label="Station fee" value={shown.stationFee} />
@@ -348,7 +365,7 @@ export function CraftPanel({
             )}
           </dl>
         </Section>
-        <Section title="Revenue">
+        <Section title="Revenue" help="sell-orders">
           <ul className={styles.lines}>
             {priceRow(
               shown.itemId,
@@ -365,7 +382,7 @@ export function CraftPanel({
         </Section>
         {focusSpent !== undefined &&
           focus(focusSpent, chosenRecipe.focus, recipe)}
-        <Section title="Result">
+        <Section title="Result" help="formulas">
           <dl className={styles.figures}>
             <Figure label="Profit" value={result?.profit} total />
             <Figure

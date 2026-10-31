@@ -56,11 +56,27 @@ function Help({
       >
         ?
       </button>
+      <a
+        className={styles.helpLink}
+        href={`#help/${helpSection(about)}`}
+        aria-label={`Read more about ${about}`}
+      >
+        ?
+      </a>
       <span id={id} role="tooltip" className={styles.tip} data-pinned={pinned}>
         {children}
       </span>
     </span>
   );
+}
+
+function helpSection(about: string) {
+  if (about === "Use focus") return "focus";
+  if (about === "Station fee") return "station-fee";
+  if (about === "Buy materials by" || about === "Sell by") return "sell-orders";
+  if (about.includes("price")) return "price-badges";
+  if (about === "Daily bonuses") return "production-bonus";
+  return "data";
 }
 
 function Check({
