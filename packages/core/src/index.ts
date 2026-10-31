@@ -8,8 +8,19 @@ export {
   type Recipe,
   type RecipeAlternative,
 } from "./evaluate.types.js";
-export { FOCUS_PER_DAY, MAX_STORED_FOCUS } from "./focus.constants.js";
-export { focusCost, silverPerFocus } from "./focus.helpers.js";
+export {
+  FCE_PER_MASTERY_LEVEL,
+  FCE_PER_OTHER_SPEC_LEVEL,
+  FCE_PER_SPEC_LEVEL,
+  FOCUS_PER_DAY,
+  MAX_STORED_FOCUS,
+} from "./focus.constants.js";
+export {
+  focusCost,
+  silverPerFocus,
+  specializationFce,
+} from "./focus.helpers.js";
+export { type FceParts, type SpecializationLevels } from "./focus.types.js";
 export { hideoutProductionBonus } from "./hideout-bonus.helpers.js";
 export {
   type Hideout,

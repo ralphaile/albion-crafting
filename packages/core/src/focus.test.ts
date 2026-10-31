@@ -1,9 +1,11 @@
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { focusCost, silverPerFocus } from "./index.js";
+import { focusCost, silverPerFocus, specializationFce } from "./index.js";
 
 const fces = fc.double({ min: 0, max: 100_000, noNaN: true });
+
+const levels = fc.integer({ min: 0, max: 100 });
 
 describe("focusCost", () => {
   it.each([
@@ -58,5 +60,38 @@ describe("silverPerFocus", () => {
 
   it("is unknown for a craft that costs no focus", () => {
     expect(silverPerFocus(20_000, 10_000, 0)).toBeUndefined();
+  });
+});
+
+describe("specializationFce", () => {
+  // Sword mastery 100, Broadsword 100, and Claymore 40 among the other swords.
+  it("adds 30 a mastery level, 250 a level of the item's own spec and 30 a level of each other spec", () => {
+    expect(
+      specializationFce({ mastery: 100, spec: 100, otherSpecs: [40, 0, 0] }),
+    ).toEqual({ mastery: 3000, spec: 25_000, otherSpecs: 1200, total: 29_200 });
+  });
+
+  it("is 0 with no levels", () => {
+    expect(
+      specializationFce({ mastery: 0, spec: 0, otherSpecs: [] }).total,
+    ).toBe(0);
+  });
+
+  it("adds the same for a level wherever it comes from in the other specs", () => {
+    fc.assert(
+      fc.property(levels, levels, levels, (mastery, spec, other) => {
+        expect(
+          specializationFce({ mastery, spec, otherSpecs: [other, 0] }).total,
+        ).toBe(
+          specializationFce({ mastery, spec, otherSpecs: [0, other] }).total,
+        );
+      }),
+    );
+  });
+
+  it.each([-1, Number.NaN, Infinity])("refuses a level of %s", (level) => {
+    expect(() =>
+      specializationFce({ mastery: 0, spec: 0, otherSpecs: [level] }),
+    ).toThrow(RangeError);
   });
 });
