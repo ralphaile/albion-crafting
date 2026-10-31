@@ -22,6 +22,7 @@ import type { SettingsStore } from "./saved-settings.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
 import { SettingsPanel } from "./SettingsPanel";
+import { useBestCrafts } from "./useBestCrafts";
 import { useManualPrices } from "./useManualPrices";
 import { useSavedSetting } from "./useSavedSetting";
 
@@ -68,6 +69,13 @@ export function App({
   );
   // One object per choice, so the crafts only recalculate when the route changes.
   const route = useMemo(() => routeFromChoice(routeChoice), [routeChoice]);
+  const bestCrafts = useBestCrafts(
+    marketData,
+    route,
+    settings,
+    filters,
+    manualPrices,
+  );
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -94,7 +102,7 @@ export function App({
       <main className={styles.main}>
         <CraftingLocationBar route={routeChoice} onChange={setRouteChoice} />
         <BestCrafts
-          marketData={marketData}
+          bestCrafts={bestCrafts}
           route={route}
           settings={settings}
           filters={filters}

@@ -23,7 +23,7 @@ import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 
-export type BestCrafts =
+export type BestCraftsResult =
   | { status: "loading" }
   | {
       status: "error";
@@ -121,7 +121,7 @@ export function useBestCrafts(
   settings: CraftingSettings,
   filters: Filters,
   manualPrices: readonly ManualPrice[],
-): BestCrafts {
+): BestCraftsResult {
   const { place, buyMarketId, sellMarketId } = route;
   const { server, staleAfterHours, manualStaleAfterDays, preferManualPrices } =
     settings;

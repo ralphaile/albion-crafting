@@ -5,7 +5,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { recipes, searchItems } from "@aoc/crafting-data";
@@ -25,6 +25,7 @@ import { DEFAULT_ROUTE } from "./route.constants";
 import type { Route } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
+import { useBestCrafts } from "./useBestCrafts";
 import { fakeMarketData, noPrices } from "../test/fake-market-data";
 
 const route: Route = {
@@ -61,10 +62,28 @@ const broadswordPrices = (marketIds: readonly string[]) =>
       : result([priced("T4_MAIN_SWORD", "Caerleon", 5000)]),
   );
 
+const NO_MANUAL_PRICES: readonly ManualPrice[] = [];
+
+function PricedBestCrafts({
+  marketData,
+  ...props
+}: Omit<ComponentProps<typeof BestCrafts>, "bestCrafts"> & {
+  marketData: MarketData;
+}) {
+  const bestCrafts = useBestCrafts(
+    marketData,
+    props.route,
+    props.settings,
+    props.filters ?? NO_FILTERS,
+    props.manualPrices ?? NO_MANUAL_PRICES,
+  );
+  return <BestCrafts bestCrafts={bestCrafts} {...props} />;
+}
+
 function renderBestCrafts(getPrices: MarketData["getPrices"]) {
   const marketData = fakeMarketData({ getPrices });
   render(
-    <BestCrafts
+    <PricedBestCrafts
       marketData={marketData}
       route={route}
       settings={DEFAULT_SETTINGS}
@@ -111,7 +130,11 @@ describe("BestCrafts", () => {
     );
     const marketData = fakeMarketData({ getPrices });
     const withSettings = (settings: CraftingSettings) => (
-      <BestCrafts marketData={marketData} route={route} settings={settings} />
+      <PricedBestCrafts
+        marketData={marketData}
+        route={route}
+        settings={settings}
+      />
     );
     const { rerender } = render(withSettings(DEFAULT_SETTINGS));
     await bestCrafts();
@@ -165,7 +188,7 @@ describe("BestCrafts", () => {
     );
     const marketData = fakeMarketData({ getPrices });
     const withManualPrices = (manualPrices: readonly ManualPrice[]) => (
-      <BestCrafts
+      <PricedBestCrafts
         marketData={marketData}
         route={route}
         settings={DEFAULT_SETTINGS}
@@ -269,7 +292,7 @@ describe("BestCrafts", () => {
       enteredAt: Date.now(),
     });
     render(
-      <BestCrafts
+      <PricedBestCrafts
         marketData={fakeMarketData({
           getPrices: () => Promise.reject(new Error("Failed to fetch")),
         })}
@@ -308,7 +331,7 @@ function Filtered({
   const [filters, setFilters] = useState(initial);
   const [marketData] = useState(() => fakeMarketData({ getPrices }));
   return (
-    <BestCrafts
+    <PricedBestCrafts
       marketData={marketData}
       route={route}
       settings={DEFAULT_SETTINGS}
