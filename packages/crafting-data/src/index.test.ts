@@ -9,6 +9,7 @@ import {
   itemName,
   type GameRecipe,
   recipes,
+  searchAmong,
   searchItems,
 } from "./index.js";
 
@@ -149,6 +150,18 @@ describe("searchItems", () => {
 
   it("leaves out the materials", () => {
     expect(searchItems("titanium steel bar")).toEqual([]);
+  });
+});
+
+describe("searchAmong", () => {
+  const itemIds = ["T5_MAIN_SWORD", "T4_METALBAR", "T5_METALBAR"];
+
+  it("finds materials by name too", () => {
+    expect(searchAmong(itemIds, "titanium steel bar")).toEqual(["T5_METALBAR"]);
+  });
+
+  it("looks only among the items it's given", () => {
+    expect(searchAmong(itemIds, "broadsword")).toEqual(["T5_MAIN_SWORD"]);
   });
 });
 

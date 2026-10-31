@@ -5,5 +5,10 @@ export type {
   MapQuality,
   PowerLevel,
 } from "./hideout.types.js";
-export { iconUrl, itemName, searchItems } from "./items.helpers.js";
+export {
+  iconUrl,
+  itemName,
+  searchAmong,
+  searchItems,
+} from "./items.helpers.js";
 export type { GameRecipe } from "./recipe.types.js";
