@@ -62,3 +62,5 @@ export type Evaluation =
       margin: number | undefined;
       silverPerFocus?: number;
     });
+
+export type Evaluations = readonly [Evaluation, ...Evaluation[]];

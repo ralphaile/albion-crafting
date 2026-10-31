@@ -18,6 +18,7 @@ export function materialCost(
     const base = {
       itemId: id,
       count,
+      returnable,
       effectiveCount: returnable ? count * (1 - returnRate) : count,
       source,
     };

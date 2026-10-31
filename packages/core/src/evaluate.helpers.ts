@@ -3,6 +3,7 @@ import type {
   EvaluatePrices,
   EvaluateSettings,
   Evaluation,
+  Evaluations,
   Recipe,
   RecipeAlternative,
 } from "./evaluate.types.js";
@@ -13,12 +14,13 @@ import { returnRate } from "./return-rate.helpers.js";
 import { revenue } from "./revenue.helpers.js";
 import { stationFee } from "./station-fee.helpers.js";
 
-export function evaluate(
+// The result of each recipe for the item, the default one first.
+export function evaluateEach(
   recipe: Recipe,
   place: CraftingPlace,
   settings: EvaluateSettings,
   prices: EvaluatePrices,
-): Evaluation {
+): Evaluations {
   const dailyBonuses = settings.dailyBonuses ?? [];
   const bonus = placeProductionBonus(place, recipe.craftingCategory, {
     focus: settings.focus,
@@ -104,10 +106,25 @@ export function evaluate(
     ...recipe.alternatives.map((alternative, index) =>
       evaluateAlternative(alternative, index + 1),
     ),
-  ].reduce((best, next) =>
+  ];
+}
+
+// The most profitable recipe with all its prices, or the default one while
+// none has them all.
+export function bestEvaluation(evaluations: Evaluations): Evaluation {
+  return evaluations.reduce((best, next) =>
     next.status === "complete" &&
     (best.status === "incomplete" || next.profit > best.profit)
       ? next
       : best,
   );
+}
+
+export function evaluate(
+  recipe: Recipe,
+  place: CraftingPlace,
+  settings: EvaluateSettings,
+  prices: EvaluatePrices,
+): Evaluation {
+  return bestEvaluation(evaluateEach(recipe, place, settings, prices));
 }
