@@ -34,7 +34,13 @@ Focus cost efficiency, which grows as you specialize in crafting an item. Every 
 focus cost = base focus × 0.5 ^ (FCE / 10000)
 ```
 
-The engine's version is `focusCost()` in `packages/core/src/focus.helpers.ts`. Until you fill in your specializations, FCE is 0 and a craft costs its full base focus.
+FCE comes from the crafting tree you specialized in: its mastery, the item's own specialization, and the tree's other specializations.
+
+```text
+FCE = mastery × 30 + own specialization × 250 + Σ other specializations × 30
+```
+
+`specializationFce()` in `packages/core/src/focus.helpers.ts` works that out. The 30, 250 and 30 are `FCE_PER_MASTERY_LEVEL`, `FCE_PER_SPEC_LEVEL` and `FCE_PER_OTHER_SPEC_LEVEL` in `packages/core/src/focus.constants.ts`. They aren't confirmed in game yet. `focusCost()` in the same helpers file turns that FCE into a focus cost. Until you fill in your [specializations](specializations.md), FCE is 0 and a craft costs its full base focus.
 
 ## Focus
 

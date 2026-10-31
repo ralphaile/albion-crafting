@@ -1,0 +1,217 @@
+.open {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color 120ms ease-out;
+}
+
+.open:hover {
+  border-color: var(--text-faint);
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  fill: var(--surface);
+  stroke: var(--text-muted);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tree {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.select {
+  width: 100%;
+  height: 34px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%)
+      calc(100% - 15px) 50% / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%)
+      calc(100% - 10px) 50% / 5px 5px no-repeat,
+    var(--bg);
+  color: var(--text);
+  font: inherit;
+  appearance: none;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: var(--text-faint);
+}
+
+/* The mastery list, then the specializations, with a rule between them. */
+.levels {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.levels + .levels {
+  margin-top: -12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+
+.level {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.itemIcon {
+  display: grid;
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+.itemIcon img {
+  width: 100%;
+  height: 100%;
+}
+
+.stepper {
+  display: flex;
+  flex: none;
+  height: 32px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.stepper:hover {
+  border-color: var(--text-faint);
+}
+
+.number {
+  width: 5em;
+  height: 32px;
+  padding-block: 0;
+  background: var(--bg);
+  text-align: right;
+  font-variant-numeric: lining-nums tabular-nums;
+  appearance: textfield;
+}
+
+.number::-webkit-inner-spin-button,
+.number::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.stepper .number {
+  width: 3.4em;
+  height: 100%;
+  padding: 0 6px 0 8px;
+  border: 0;
+  background: transparent;
+}
+
+.stepper .number:hover {
+  border-color: transparent;
+}
+
+.spinners {
+  display: flex;
+  flex-direction: column;
+  width: 22px;
+  border-left: 1px solid var(--rule);
+}
+
+.spin {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.spin + .spin {
+  border-top: 1px solid var(--rule);
+}
+
+.spin:hover:enabled {
+  background: var(--surface-hover);
+  color: var(--brass);
+}
+
+.spin:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.spin svg {
+  width: 8px;
+  height: 5px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.action:hover {
+  color: var(--text);
+  text-decoration-style: solid;
+}
+
+.status {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 759px) {
+  .openLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

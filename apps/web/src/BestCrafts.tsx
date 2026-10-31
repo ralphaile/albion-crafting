@@ -8,6 +8,8 @@ import type { Filters } from "./filters.types";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
+import { NO_SPECIALIZATIONS } from "./specializations.constants";
+import type { SpecializationProfile } from "./specializations.types";
 import type { BestCraftsResult } from "./useBestCrafts";
 
 const SKELETON_ROWS = 8;
@@ -17,6 +19,8 @@ const IGNORE_FILTERS: UpdateFilters = () => undefined;
 const NO_MANUAL_PRICES: readonly ManualPrice[] = [];
 
 const IGNORE_MANUAL_PRICE = () => undefined;
+
+const IGNORE_EDIT_SPECIALIZATIONS = () => undefined;
 
 export function BestCrafts({
   bestCrafts,
@@ -30,6 +34,8 @@ export function BestCrafts({
   manualPrices = NO_MANUAL_PRICES,
   onSaveManualPrice = IGNORE_MANUAL_PRICE,
   onRemoveManualPrice = IGNORE_MANUAL_PRICE,
+  specializations = NO_SPECIALIZATIONS,
+  onEditSpecializations = IGNORE_EDIT_SPECIALIZATIONS,
 }: {
   bestCrafts: BestCraftsResult;
   shownItemId: string | undefined;
@@ -42,6 +48,8 @@ export function BestCrafts({
   manualPrices?: readonly ManualPrice[];
   onSaveManualPrice?: (price: ManualPrice) => void;
   onRemoveManualPrice?: (key: ManualPriceKey) => void;
+  specializations?: SpecializationProfile;
+  onEditSpecializations?: (treeId: string) => void;
 }) {
   const filtered = activeFilters(filters).length > 0;
   const crafts =
@@ -131,6 +139,8 @@ export function BestCrafts({
         manualPrices={manualPrices}
         onSave={onSaveManualPrice}
         onRemove={onRemoveManualPrice}
+        specializations={specializations}
+        onEditSpecializations={onEditSpecializations}
         onClose={() => {
           onShowItem(undefined);
         }}

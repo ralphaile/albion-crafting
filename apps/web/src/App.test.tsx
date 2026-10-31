@@ -15,10 +15,12 @@ import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
   ROUTE_SETTING,
+  SPECIALIZATIONS_SETTING,
 } from "./saved-settings.constants";
 import { memorySettingsStore } from "./saved-settings.store";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
+import type { SpecializationProfile } from "./specializations.types";
 import { fakeMarketData, noPrices } from "../test/fake-market-data";
 
 const DEFAULT_ROUTE_SEARCH = "place=1000&buy=Lymhurst&sell=Lymhurst";
@@ -33,12 +35,14 @@ async function renderApp({
   savedFilters,
   savedRoute,
   savedSettings,
+  savedSpecializations,
   savedManualPrices = [],
   marketData = fakeMarketData(),
 }: {
   savedFilters?: Filters;
   savedRoute?: RouteChoice;
   savedSettings?: CraftingSettings;
+  savedSpecializations?: SpecializationProfile;
   savedManualPrices?: readonly ManualPrice[];
   marketData?: MarketData;
 } = {}) {
@@ -60,6 +64,7 @@ async function renderApp({
       savedFilters={savedFilters}
       savedRoute={savedRoute}
       savedSettings={savedSettings}
+      savedSpecializations={savedSpecializations}
       savedManualPrices={savedManualPrices}
     />,
   );
@@ -284,6 +289,47 @@ describe("App", () => {
     await expect
       .poll(() => settingsStore.load(CRAFTING_SETTING))
       .toEqual({ ...DEFAULT_SETTINGS, focus: false });
+  });
+
+  it("saves a specialization level", async () => {
+    const settingsStore = await renderApp();
+
+    fireEvent.click(screen.getByRole("button", { name: "Specializations" }));
+    fireEvent.change(
+      within(screen.getByRole("dialog", { name: "Specializations" })).getByRole(
+        "spinbutton",
+        { name: "Broadsword" },
+      ),
+      { target: { value: "100" } },
+    );
+
+    await expect
+      .poll(() => settingsStore.load(SPECIALIZATIONS_SETTING))
+      .toEqual({ sword: { mastery: 0, specializations: { MAIN_SWORD: 100 } } });
+  });
+
+  // Broadsword mastery 100 and specialization 100 make 28,000 FCE, so its
+  // 1,286 base focus costs 1,286 × 0.5 ^ 2.8 = 184.65.
+  it("prices focus with the saved specializations", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/?tier=4&enchant=0&q=broadsword&item=T4_MAIN_SWORD",
+    );
+    await renderApp({
+      marketData: answering(broadswordPrices),
+      savedSpecializations: {
+        sword: { mastery: 100, specializations: { MAIN_SWORD: 100 } },
+      },
+    });
+
+    const focusSection = within(
+      await screen.findByRole("dialog", { name: "Adept's Broadsword 4.0" }),
+    ).getByRole("region", { name: "Focus" });
+    const focus = within(focusSection)
+      .getAllByRole("term")
+      .find((term) => term.textContent === "Focus");
+    expect(focus?.nextElementSibling).toHaveTextContent("185");
   });
 
   it("opens the craft a link names, keeps it in the link while open, and drops it once closed", async () => {

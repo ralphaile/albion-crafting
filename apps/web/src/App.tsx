@@ -20,11 +20,15 @@ import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
   ROUTE_SETTING,
+  SPECIALIZATIONS_SETTING,
 } from "./saved-settings.constants";
 import type { SettingsStore } from "./saved-settings.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
 import { SettingsPanel } from "./SettingsPanel";
+import { FIRST_TREE_ID, NO_SPECIALIZATIONS } from "./specializations.constants";
+import type { SpecializationProfile } from "./specializations.types";
+import { SpecializationsPanel } from "./SpecializationsPanel";
 import { useBestCrafts } from "./useBestCrafts";
 import { useManualPrices } from "./useManualPrices";
 import { useSavedSetting } from "./useSavedSetting";
@@ -38,6 +42,7 @@ export function App({
   savedFilters,
   savedRoute,
   savedSettings,
+  savedSpecializations,
   savedManualPrices,
 }: {
   marketData: MarketData;
@@ -46,6 +51,7 @@ export function App({
   savedFilters: Filters | undefined;
   savedRoute: RouteChoice | undefined;
   savedSettings: CraftingSettings | undefined;
+  savedSpecializations: SpecializationProfile | undefined;
   savedManualPrices: readonly ManualPrice[];
 }) {
   // A shared link wins over what this browser saved.
@@ -68,6 +74,18 @@ export function App({
     CRAFTING_SETTING,
     () => savedSettings ?? DEFAULT_SETTINGS,
   );
+  const [specializations, setSpecializations] = useSavedSetting(
+    settingsStore,
+    SPECIALIZATIONS_SETTING,
+    () => savedSpecializations ?? NO_SPECIALIZATIONS,
+  );
+  const [specializationsShown, setSpecializationsShown] = useState({
+    open: false,
+    treeId: FIRST_TREE_ID,
+  });
+  const showSpecializations = (treeId: string) => {
+    setSpecializationsShown({ open: true, treeId });
+  };
   const { manualPrices, saveManualPrice, removeManualPrice } = useManualPrices(
     manualPriceStore,
     savedManualPrices,
@@ -80,6 +98,7 @@ export function App({
     settings,
     filters,
     manualPrices,
+    specializations,
   );
 
   const [shownItemId, setShownItemId] = useState(() =>
@@ -122,6 +141,19 @@ export function App({
             onSave={saveManualPrice}
             onRemove={removeManualPrice}
           />
+          <SpecializationsPanel
+            profile={specializations}
+            onChange={setSpecializations}
+            open={specializationsShown.open}
+            treeId={specializationsShown.treeId}
+            onShow={showSpecializations}
+            onClose={() => {
+              setSpecializationsShown({
+                ...specializationsShown,
+                open: false,
+              });
+            }}
+          />
           <SettingsPanel
             settings={settings}
             onChange={setSettings}
@@ -143,6 +175,8 @@ export function App({
           manualPrices={manualPrices}
           onSaveManualPrice={saveManualPrice}
           onRemoveManualPrice={removeManualPrice}
+          specializations={specializations}
+          onEditSpecializations={showSpecializations}
         />
       </main>
     </div>
