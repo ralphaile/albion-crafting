@@ -54,9 +54,7 @@ function profile(): unknown {
 }
 
 function fileInput() {
-  return within(panel()).getByLabelText("Specializations file", {
-    hidden: true,
-  });
+  return within(panel()).getByLabelText("Specializations file");
 }
 
 function chooseFile(contents: string) {
