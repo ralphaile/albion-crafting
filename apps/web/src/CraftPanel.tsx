@@ -3,13 +3,13 @@ import { itemName } from "@aoc/crafting-data";
 import type { Region } from "@aoc/market-prices";
 
 import type { Craft, UsedPrice } from "./best-crafts.types";
+import styles from "./CraftPanel.module.css";
 import { formatAgo, formatSilver } from "./format.helpers";
 import { sameManualPrice } from "./manual-prices.helpers";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 import { PriceBadge } from "./PriceBadge";
 import { PriceRow } from "./PriceRow";
 import { QUALITY } from "./prices.constants";
-import styles from "./PricesPanel.module.css";
 import { SidePanel } from "./SidePanel";
 
 const MISSING: UsedPrice = { status: "missing", origin: "api" };
@@ -52,7 +52,7 @@ function priceLines(
   ];
 }
 
-export function PricesPanel({
+export function CraftPanel({
   craft,
   region,
   buyMarketId,

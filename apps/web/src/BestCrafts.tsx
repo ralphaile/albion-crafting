@@ -2,12 +2,12 @@ import { useState } from "react";
 
 import styles from "./BestCrafts.module.css";
 import { CraftFilters, type UpdateFilters } from "./CraftFilters";
+import { CraftPanel } from "./CraftPanel";
 import { CraftsTable } from "./CraftsTable";
 import { NO_FILTERS } from "./filters.constants";
 import { activeFilters } from "./filters.helpers";
 import type { Filters } from "./filters.types";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
-import { PricesPanel } from "./PricesPanel";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 import type { BestCraftsResult } from "./useBestCrafts";
@@ -119,7 +119,7 @@ export function BestCrafts({
             onShowPrices={setPricesFor}
           />
         ))}
-      <PricesPanel
+      <CraftPanel
         craft={pricedCraft}
         region={settings.server}
         buyMarketId={route.buyMarketId}

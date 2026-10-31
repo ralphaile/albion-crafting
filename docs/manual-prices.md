@@ -1,6 +1,6 @@
 # Manual prices
 
-AODP has no price for an item until a player running its client looks at it in that market, so some crafts can't be priced, mostly ones with artifacts and anything sold in the Rests. You can type those prices yourself, or type over any price you think is wrong. In the code, a typed price is a `ManualPrice` in `apps/web/src/manual-prices.types.ts`, a craft's panel is `apps/web/src/PricesPanel.tsx`, and the list of missing prices is `apps/web/src/MissingPricesPanel.tsx`.
+AODP has no price for an item until a player running its client looks at it in that market, so some crafts can't be priced, mostly ones with artifacts and anything sold in the Rests. You can type those prices yourself, or type over any price you think is wrong. In the code, a typed price is a `ManualPrice` in `apps/web/src/manual-prices.types.ts`, a craft's panel is `apps/web/src/CraftPanel.tsx`, and the list of missing prices is `apps/web/src/MissingPricesPanel.tsx`.
 
 ## Typing a price
 

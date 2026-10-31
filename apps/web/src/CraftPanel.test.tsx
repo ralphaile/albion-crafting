@@ -124,7 +124,7 @@ function type(name: string, text: string, key = "Enter") {
   fireEvent.keyDown(field(name), { key });
 }
 
-describe("PricesPanel", () => {
+describe("CraftPanel", () => {
   it("lists the item's sell price and each material's buy price", async () => {
     renderBroadsword();
     await openFromMissingPrices();
