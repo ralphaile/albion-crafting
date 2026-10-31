@@ -5,6 +5,7 @@ import type { ItemPrices, MarketData } from "@aoc/market-prices";
 
 import { BestCrafts } from "./BestCrafts";
 import { NO_FILTERS } from "./filters.constants";
+import type { Filters } from "./filters.types";
 import { memoryManualPriceStore } from "./manual-prices.store";
 import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
 import { DEFAULT_ROUTE } from "./route.constants";
@@ -58,16 +59,18 @@ const typedLeather: ManualPrice = {
   enteredAt: Date.now(),
 };
 
-function Broadsword({
+function Crafts({
   marketData,
   store,
   initial,
   route,
+  filters,
 }: {
   marketData: MarketData;
   store: ManualPriceStore;
   initial: readonly ManualPrice[];
   route: Route;
+  filters: Filters;
 }) {
   const { manualPrices, saveManualPrice, removeManualPrice } = useManualPrices(
     store,
@@ -77,7 +80,7 @@ function Broadsword({
     marketData,
     route,
     DEFAULT_SETTINGS,
-    broadswordOnly,
+    filters,
     manualPrices,
   );
   return (
@@ -85,7 +88,7 @@ function Broadsword({
       bestCrafts={bestCrafts}
       route={route}
       settings={DEFAULT_SETTINGS}
-      filters={broadswordOnly}
+      filters={filters}
       manualPrices={manualPrices}
       onSaveManualPrice={saveManualPrice}
       onRemoveManualPrice={removeManualPrice}
@@ -93,35 +96,55 @@ function Broadsword({
   );
 }
 
-// The broadsword's leather has no price at Martlock.
-function renderBroadsword(
-  initial: readonly ManualPrice[] = [],
+function renderCrafts({
+  filters,
+  materials,
+  products,
+  initial = [],
   route = lymhurst,
-) {
+}: {
+  filters: Filters;
+  materials: ItemPrices[];
+  products: ItemPrices[];
+  initial?: readonly ManualPrice[];
+  route?: Route;
+}) {
   const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
     Promise.resolve({
-      prices:
-        marketIds[0] === "Martlock"
-          ? [priced("T4_METALBAR", "Martlock", 100)]
-          : [priced("T4_MAIN_SWORD", "Caerleon", 5000)],
+      prices: marketIds[0] === "Martlock" ? materials : products,
       failures: [],
       fetchedAt: 0,
     }),
   );
   const store = memoryManualPriceStore();
   render(
-    <Broadsword
+    <Crafts
       marketData={fakeMarketData({ getPrices })}
       store={store}
       initial={initial}
       route={route}
+      filters={filters}
     />,
   );
   return { getPrices, store };
 }
 
-function panel() {
-  return screen.getByRole("dialog", { name: "Adept's Broadsword 4.0" });
+// The broadsword's leather has no price at Martlock.
+function renderBroadsword(
+  initial: readonly ManualPrice[] = [],
+  route = lymhurst,
+) {
+  return renderCrafts({
+    filters: broadswordOnly,
+    materials: [priced("T4_METALBAR", "Martlock", 100)],
+    products: [priced("T4_MAIN_SWORD", "Caerleon", 5000)],
+    initial,
+    route,
+  });
+}
+
+function panel(name = "Adept's Broadsword 4.0") {
+  return screen.getByRole("dialog", { name });
 }
 
 function field(name: string) {
@@ -339,5 +362,73 @@ describe("CraftPanel", () => {
     expect(
       screen.queryByRole("dialog", { name: "Adept's Broadsword 4.0" }),
     ).not.toBeInTheDocument();
+  });
+
+  // A Mistcaller takes either its Runed Horn or a token, with the same planks and cloth.
+  describe("for an item with two recipes", () => {
+    const horn = "Adept's Mistcaller 4.0";
+    const token = "Adept's Crystallized Spirit 4.0, sell order in Martlock";
+
+    async function openHorn() {
+      renderCrafts({
+        filters: { ...broadswordOnly, search: "mistcaller" },
+        materials: [
+          priced("T4_PLANKS", "Martlock", 100),
+          priced("T4_CLOTH", "Martlock", 100),
+          priced("T4_ARTEFACT_OFF_HORN_KEEPER", "Martlock", 2000),
+        ],
+        products: [priced("T4_OFF_HORN_KEEPER", "Caerleon", 9000)],
+      });
+      fireEvent.click(
+        await screen.findByRole("button", { name: `Prices for ${horn}` }),
+      );
+    }
+
+    function recipe(name: RegExp) {
+      const region = within(panel(horn)).getByRole("region", {
+        name: "Recipe",
+      });
+      return within(region).getByRole("button", { name });
+    }
+
+    it("shows the recipe the table uses, and what the other one lacks", async () => {
+      await openHorn();
+
+      expect(recipe(/Runed Horn/)).toHaveAttribute("aria-pressed", "true");
+      expect(recipe(/Runed Horn/)).toHaveAccessibleName(/Used in the table$/);
+      expect(recipe(/Crystallized Spirit/)).toHaveTextContent(
+        "Adept's Crystallized Spirit 4.01 price missing",
+      );
+      expect(
+        within(panel(horn)).queryByRole("textbox", { name: token }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows the other recipe's prices to type, and the table switches once it's cheaper", async () => {
+      await openHorn();
+
+      fireEvent.click(recipe(/Crystallized Spirit/));
+      expect(recipe(/Crystallized Spirit/)).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      fireEvent.change(
+        within(panel(horn)).getByRole("textbox", { name: token }),
+        {
+          target: { value: "500" },
+        },
+      );
+      fireEvent.keyDown(
+        within(panel(horn)).getByRole("textbox", { name: token }),
+        {
+          key: "Enter",
+        },
+      );
+
+      expect(recipe(/Crystallized Spirit/)).toHaveAccessibleName(
+        /Used in the table$/,
+      );
+      expect(recipe(/Runed Horn/)).not.toHaveAccessibleName(/Used/);
+    });
   });
 });

@@ -1,4 +1,4 @@
-import { type ReactNode, useId } from "react";
+import { type ReactNode, useId, useState } from "react";
 
 import type {
   HideoutProductionBonus,
@@ -98,6 +98,30 @@ function Figure({
   );
 }
 
+// The materials that tell a recipe apart from the item's other ones, such as
+// an artifact or the token used instead.
+function recipeLabel(
+  shown: CraftAlternative,
+  alternatives: readonly CraftAlternative[],
+) {
+  const inEvery = (itemId: string) =>
+    alternatives.every(({ materialCost }) =>
+      materialCost.lines.some((line) => line.itemId === itemId),
+    );
+  return shown.materialCost.lines
+    .filter(({ itemId }) => !inEvery(itemId))
+    .map(({ itemId }) => itemName(itemId))
+    .join(" + ");
+}
+
+function recipeResult(alternative: CraftAlternative) {
+  if (alternative.status === "complete") {
+    return formatSilver(alternative.profit);
+  }
+  const missing = alternative.missingPrices.length;
+  return `${formatCount(missing)} ${missing === 1 ? "price" : "prices"} missing`;
+}
+
 // What each part adds to the production bonus, which sets the return rate.
 function bonusParts(
   bonus: ProductionBonus | HideoutProductionBonus,
@@ -135,6 +159,59 @@ export function CraftPanel({
   onRemove: (key: ManualPriceKey) => void;
   onClose: () => void;
 }) {
+  // Which recipe the panel shows, while it shows that item.
+  const [chosen, setChosen] = useState<{
+    itemId: string;
+    alternative: number;
+  }>();
+
+  function recipes(craft: Craft, shown: CraftAlternative) {
+    return (
+      <Section title="Recipe">
+        <ul className={styles.recipes}>
+          {craft.alternatives.map((alternative) => (
+            <li key={alternative.alternative}>
+              <button
+                type="button"
+                className={styles.recipe}
+                aria-pressed={alternative.alternative === shown.alternative}
+                onClick={() => {
+                  setChosen({
+                    itemId: craft.itemId,
+                    alternative: alternative.alternative,
+                  });
+                }}
+              >
+                <span className={styles.recipeName}>
+                  {recipeLabel(alternative, craft.alternatives)}
+                </span>
+                <span
+                  className={styles.recipeResult}
+                  data-missing={alternative.status === "incomplete"}
+                >
+                  {recipeResult(alternative)}
+                </span>
+                {alternative.alternative === craft.alternative ? (
+                  <svg
+                    className={styles.used}
+                    viewBox="0 0 16 16"
+                    aria-label="Used in the table"
+                    role="img"
+                  >
+                    <title>Used in the table</title>
+                    <path d="M3 8.5l3 3 7-7" />
+                  </svg>
+                ) : (
+                  <span className={styles.used} />
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Section>
+    );
+  }
+
   function priceRow(
     itemId: string,
     marketId: string,
@@ -274,6 +351,21 @@ export function CraftPanel({
     );
   }
 
+  function shownFor(craft: Craft) {
+    const shown =
+      chosen?.itemId === craft.itemId
+        ? (craft.alternatives.find(
+            ({ alternative }) => alternative === chosen.alternative,
+          ) ?? craft)
+        : craft;
+    return (
+      <>
+        {craft.alternatives.length > 1 && recipes(craft, shown)}
+        {breakdown(shown, craft.recipe)}
+      </>
+    );
+  }
+
   return (
     <SidePanel
       heading={craft === undefined ? "" : itemName(craft.itemId)}
@@ -281,7 +373,7 @@ export function CraftPanel({
       open={craft !== undefined}
       onClose={onClose}
     >
-      {craft !== undefined && breakdown(craft, craft.recipe)}
+      {craft !== undefined && shownFor(craft)}
     </SidePanel>
   );
 }
