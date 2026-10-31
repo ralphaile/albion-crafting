@@ -1,6 +1,6 @@
 # Crafting settings
 
-The **Settings** button at the top right opens a panel over the right of the page. It closes on Escape, a click outside it, or ×. Each setting has a **?** that explains it. In the code, the settings are `CraftingSettings` in `apps/web/src/settings.types.ts`, and the panel is `apps/web/src/SettingsPanel.tsx`.
+The **Settings** button at the top right, just its icon on phones, opens a panel over the right of the page. It closes on Escape, a click outside it, or ×. Each setting has a **?** that explains it. In the code, the settings are `CraftingSettings` in `apps/web/src/settings.types.ts`, and the panel is `apps/web/src/SettingsPanel.tsx`.
 
 | Setting                        | What it changes                                                                                                                                | Default     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |

@@ -1,6 +1,6 @@
 # Manual prices
 
-AODP has no price for an item until a player running its client looks at it in that market, so some crafts can't be priced, mostly ones with artifacts and anything sold in the Rests. You can type those prices yourself, or type over any price you think is wrong. In the code, a typed price is a `ManualPrice` in `apps/web/src/manual-prices.types.ts`, and the panel is `apps/web/src/PricesPanel.tsx`.
+AODP has no price for an item until a player running its client looks at it in that market, so some crafts can't be priced, mostly ones with artifacts and anything sold in the Rests. You can type those prices yourself, or type over any price you think is wrong. In the code, a typed price is a `ManualPrice` in `apps/web/src/manual-prices.types.ts`, a craft's panel is `apps/web/src/PricesPanel.tsx`, and the list of missing prices is `apps/web/src/MissingPricesPanel.tsx`.
 
 ## Typing a price
 
@@ -14,6 +14,18 @@ The first line is the item, at the market you sell in. Under it is each material
 - **Emptying a field** and pressing Enter removes your price, so AODP's is used again.
 
 For an item with more than one recipe, such as a token instead of its artifact, the panel lists the materials of the recipe the table uses: the most profitable one with all its prices, or the first in the game files while none has them all.
+
+## Filling every missing price
+
+When a craft has no price, a red **N prices missing** button shows next to **Settings**, and on phones, just the pencil and the number. It opens every price the table is missing, in one panel, so you can fill them in one pass. That's most useful when you sell in a Rest, where AODP rarely has prices.
+
+- Each price is listed once, for its item, market and order, with how many crafts need it. The one the most crafts need comes first.
+- The list follows the route and the filters, but it still lists the prices of crafts that **Hide crafts with missing prices** hides. Fill them and those crafts join the table.
+- **Enter** saves a price and moves to the next one, and so does **Tab**. A saved price drops off the list, and the table re-ranks straight away.
+- **Search** narrows the list by name or ID, materials included.
+- The list shows 50 prices a page.
+
+The list comes from `missingPrices()` in `apps/web/src/missing-prices.helpers.ts`.
 
 ## Which price is used
 
