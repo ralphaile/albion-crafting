@@ -1,7 +1,12 @@
+import { type FceParts, specializationFce } from "@aoc/core";
+import { type GameRecipe, recipes, specializationOf } from "@aoc/crafting-data";
+
 import type {
   SpecializationProfile,
   TreeLevels,
 } from "./specializations.types";
+
+const recipesById = new Map(recipes.map((recipe) => [recipe.itemId, recipe]));
 
 const NO_LEVELS: TreeLevels = { mastery: 0, specializations: {} };
 
@@ -35,4 +40,30 @@ export function withLevel(
   return mastery > 0 || Object.keys(specializations).length > 0
     ? { ...rest, [treeId]: { mastery, specializations } }
     : rest;
+}
+
+// The item's own specialization, its tree's mastery, and the tree's other
+// specializations.
+export function fceParts(
+  profile: SpecializationProfile,
+  recipe: Pick<GameRecipe, "shopSubcategory" | "baseId">,
+): FceParts {
+  const { treeId, specializationId } = specializationOf(recipe);
+  const { mastery, specializations } = treeLevels(profile, treeId);
+  return specializationFce({
+    mastery,
+    spec: specializations[specializationId] ?? 0,
+    otherSpecs: Object.entries(specializations)
+      .filter(([id]) => id !== specializationId)
+      .map(([, level]) => level),
+  });
+}
+
+export function fceFor(
+  profile: SpecializationProfile,
+): (itemId: string) => number {
+  return (itemId) => {
+    const recipe = recipesById.get(itemId);
+    return recipe === undefined ? 0 : fceParts(profile, recipe).total;
+  };
 }

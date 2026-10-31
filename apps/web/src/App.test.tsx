@@ -20,6 +20,7 @@ import {
 import { memorySettingsStore } from "./saved-settings.store";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
+import type { SpecializationProfile } from "./specializations.types";
 import { fakeMarketData, noPrices } from "../test/fake-market-data";
 
 const DEFAULT_ROUTE_SEARCH = "place=1000&buy=Lymhurst&sell=Lymhurst";
@@ -34,12 +35,14 @@ async function renderApp({
   savedFilters,
   savedRoute,
   savedSettings,
+  savedSpecializations,
   savedManualPrices = [],
   marketData = fakeMarketData(),
 }: {
   savedFilters?: Filters;
   savedRoute?: RouteChoice;
   savedSettings?: CraftingSettings;
+  savedSpecializations?: SpecializationProfile;
   savedManualPrices?: readonly ManualPrice[];
   marketData?: MarketData;
 } = {}) {
@@ -61,7 +64,7 @@ async function renderApp({
       savedFilters={savedFilters}
       savedRoute={savedRoute}
       savedSettings={savedSettings}
-      savedSpecializations={undefined}
+      savedSpecializations={savedSpecializations}
       savedManualPrices={savedManualPrices}
     />,
   );
@@ -303,6 +306,30 @@ describe("App", () => {
     await expect
       .poll(() => settingsStore.load(SPECIALIZATIONS_SETTING))
       .toEqual({ sword: { mastery: 0, specializations: { MAIN_SWORD: 100 } } });
+  });
+
+  // Broadsword mastery 100 and specialization 100 make 28,000 FCE, so its
+  // 1,286 base focus costs 1,286 × 0.5 ^ 2.8 = 184.65.
+  it("prices focus with the saved specializations", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/?tier=4&enchant=0&q=broadsword&item=T4_MAIN_SWORD",
+    );
+    await renderApp({
+      marketData: answering(broadswordPrices),
+      savedSpecializations: {
+        sword: { mastery: 100, specializations: { MAIN_SWORD: 100 } },
+      },
+    });
+
+    const result = within(
+      await screen.findByRole("dialog", { name: "Adept's Broadsword 4.0" }),
+    ).getByRole("region", { name: "Result" });
+    const focus = within(result)
+      .getAllByRole("term")
+      .find((term) => term.textContent === "Focus");
+    expect(focus?.nextElementSibling).toHaveTextContent("185");
   });
 
   it("opens the craft a link names, keeps it in the link while open, and drops it once closed", async () => {

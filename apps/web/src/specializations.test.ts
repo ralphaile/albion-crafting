@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { craftingTrees } from "@aoc/crafting-data";
 
 import { TREE_GROUPS } from "./specializations.constants";
-import { withLevel } from "./specializations.helpers";
+import { fceFor, fceParts, withLevel } from "./specializations.helpers";
 import { parseSpecializations } from "./specializations.schema";
 
 describe("parseSpecializations", () => {
@@ -93,5 +93,42 @@ describe("the tree groups", () => {
     expect(
       TREE_GROUPS.flatMap(({ options }) => options.map(({ id }) => id)).sort(),
     ).toEqual(craftingTrees.map(({ id }) => id).sort());
+  });
+});
+
+describe("fceParts", () => {
+  const profile = {
+    sword: {
+      mastery: 100,
+      specializations: { MAIN_SWORD: 100, "2H_CLAYMORE": 40 },
+    },
+  };
+
+  it("counts the item's own specialization, the mastery and the tree's other specializations", () => {
+    expect(
+      fceParts(profile, { shopSubcategory: "sword", baseId: "T5_MAIN_SWORD" }),
+    ).toEqual({ mastery: 3000, spec: 25_000, otherSpecs: 1200, total: 29_200 });
+  });
+
+  it("is 0 for a tree with no levels", () => {
+    expect(
+      fceParts(profile, { shopSubcategory: "axe", baseId: "T5_MAIN_AXE" })
+        .total,
+    ).toBe(0);
+  });
+});
+
+describe("fceFor", () => {
+  const fce = fceFor({
+    sword: { mastery: 100, specializations: { MAIN_SWORD: 100 } },
+  });
+
+  it("gives an item's FCE at every tier and enchantment", () => {
+    expect(fce("T5_MAIN_SWORD@1")).toBe(28_000);
+    expect(fce("T8_MAIN_SWORD@4")).toBe(28_000);
+  });
+
+  it("is 0 for an item it has no recipe for", () => {
+    expect(fce("T4_METALBAR")).toBe(0);
   });
 });

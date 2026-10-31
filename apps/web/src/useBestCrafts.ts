@@ -22,6 +22,9 @@ import { QUALITY } from "./prices.constants";
 import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
+import { NO_SPECIALIZATIONS } from "./specializations.constants";
+import { fceFor } from "./specializations.helpers";
+import type { SpecializationProfile } from "./specializations.types";
 
 // `allCrafts` keeps the crafts the price filters hide.
 export type BestCraftsResult =
@@ -124,6 +127,7 @@ export function useBestCrafts(
   settings: CraftingSettings,
   filters: Filters,
   manualPrices: readonly ManualPrice[],
+  specializations: SpecializationProfile = NO_SPECIALIZATIONS,
 ): BestCraftsResult {
   const { place, buyMarketId, sellMarketId } = route;
   const { server, staleAfterHours, manualStaleAfterDays, preferManualPrices } =
@@ -218,8 +222,11 @@ export function useBestCrafts(
     ],
   );
   const routeSettings = useMemo(
-    () => settingsForRoute(settings, route),
-    [settings, route],
+    () => ({
+      ...settingsForRoute(settings, route),
+      fce: fceFor(specializations),
+    }),
+    [settings, route, specializations],
   );
   const evaluated = useMemo(
     () =>

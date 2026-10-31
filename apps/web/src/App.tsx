@@ -91,6 +91,7 @@ export function App({
     settings,
     filters,
     manualPrices,
+    specializations,
   );
 
   const [shownItemId, setShownItemId] = useState(() =>
