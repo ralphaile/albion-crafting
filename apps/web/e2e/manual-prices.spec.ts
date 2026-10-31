@@ -100,6 +100,7 @@ test("a newer AODP price replaces a typed one, unless you always prefer yours", 
     "Sell order · Lymhurst · typed just now",
   );
   await page.keyboard.press("Escape");
+  await expect(page).not.toHaveURL(/item=/);
 
   // Two hours later, AODP has a sword price seen 30 minutes ago.
   await answerPrices(page, [
