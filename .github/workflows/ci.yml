@@ -20,7 +20,8 @@ jobs:
   checks:
     name: Checks
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    # Downloading every icon takes about 7 minutes when the cache is empty.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -39,10 +40,13 @@ jobs:
       - name: Coverage summary
         if: ${{ !cancelled() && hashFiles('coverage/coverage-summary.json') != '' }}
         run: node .github/scripts/coverage-summary.js >> "$GITHUB_STEP_SUMMARY"
-      # A deploy replaces the whole site, so it publishes a new snapshot too.
+      # A deploy replaces the whole site, so it publishes a new snapshot and
+      # the icons too.
       - name: Add the price snapshot to the site
         if: github.ref == 'refs/heads/main'
         run: pnpm --filter @aoc/web run prices:snapshot
+      - if: github.ref == 'refs/heads/main'
+        uses: ./.github/actions/item-icons
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.ref == 'refs/heads/main'
         with:
