@@ -3,24 +3,30 @@ import {
   specializationName,
   specializationOf,
 } from "./crafting-trees.helpers.js";
-import { recipes } from "./game-data.constants.js";
+import { recipes, refiningRecipes } from "./game-data.constants.js";
 import { itemName } from "./items.helpers.js";
 
 interface Entry extends Specialization {
   isArtifact: boolean;
+  refining: boolean;
   tier: number;
 }
 
+// Refining's specializations are its tiers, so they go lowest first.
 function byPlainThenName(a: Entry, b: Entry) {
   return (
-    Number(a.isArtifact) - Number(b.isArtifact) || a.name.localeCompare(b.name)
+    Number(a.isArtifact) - Number(b.isArtifact) ||
+    (a.refining ? a.tier - b.tier : 0) ||
+    a.name.localeCompare(b.name)
   );
 }
 
 function trees(): CraftingTree[] {
   const entries = new Map<string, Map<string, Entry>>();
   // Royal items cost no focus, so no FCE applies to them.
-  for (const recipe of recipes.filter(({ focus }) => focus > 0)) {
+  for (const recipe of [...recipes, ...refiningRecipes].filter(
+    ({ focus }) => focus > 0,
+  )) {
     const { treeId, specializationId } = specializationOf(recipe);
     const tree = entries.get(treeId) ?? new Map<string, Entry>();
     entries.set(treeId, tree);
@@ -31,6 +37,7 @@ function trees(): CraftingTree[] {
         name: specializationName(itemName(recipe.baseId)),
         itemId: recipe.baseId,
         isArtifact: recipe.isArtifact,
+        refining: recipe.refining ?? false,
         tier: recipe.tier,
       });
     }

@@ -1,14 +1,31 @@
 import { describe, expect, it } from "vitest";
 
-import { craftingTrees, recipes, specializationOf } from "./index.js";
+import {
+  craftingTrees,
+  recipes,
+  refiningRecipes,
+  specializationOf,
+} from "./index.js";
 
 function tree(id: string) {
   return craftingTrees.find((candidate) => candidate.id === id);
 }
 
 describe("craftingTrees", () => {
-  it("has a tree for each weapon type, armor piece and offhand type, and bags and capes", () => {
-    expect(craftingTrees).toHaveLength(31);
+  it("has a tree for each weapon type, armor piece and offhand type, bags, capes and each refined resource", () => {
+    expect(craftingTrees).toHaveLength(36);
+  });
+
+  it("makes each tier of a refined resource a specialization, lowest first", () => {
+    expect(tree("metalbars")?.specializations.map(({ id }) => id)).toEqual([
+      "T2_METALBAR",
+      "T3_METALBAR",
+      "T4_METALBAR",
+      "T5_METALBAR",
+      "T6_METALBAR",
+      "T7_METALBAR",
+      "T8_METALBAR",
+    ]);
   });
 
   it("puts bags and satchels of insight in one tree", () => {
@@ -53,7 +70,7 @@ describe("craftingTrees", () => {
   });
 
   it("has the specialization of every craft that costs focus", () => {
-    const missing = recipes
+    const missing = [...recipes, ...refiningRecipes]
       .filter(({ focus }) => focus > 0)
       .filter((recipe) => {
         const { treeId, specializationId } = specializationOf(recipe);
@@ -76,6 +93,17 @@ describe("specializationOf", () => {
         baseId: "T5_MAIN_SWORD",
       }),
     ).toEqual({ treeId: "sword", specializationId: "MAIN_SWORD" });
+  });
+
+  it("is the tier of a refined resource, at every enchantment", () => {
+    expect(
+      specializationOf({
+        shopCategory: "crafting",
+        shopSubcategory: "metalbars",
+        baseId: "T5_METALBAR",
+        refining: true,
+      }),
+    ).toEqual({ treeId: "metalbars", specializationId: "T5_METALBAR" });
   });
 
   it("puts a satchel of insight in the bags tree", () => {
