@@ -124,6 +124,7 @@ The total crafting bonus where you craft, written as a fraction (0.18 is 18%). C
 - **City or [Rest](#rest):** a base of 0.18, plus 0.15 for its [specialty](#specialty-bonus), plus any [daily bonus](#daily-bonus), plus 0.59 with [focus](#focus).
 - **Island:** a base of 0, with no specialty.
 - **Hideout:** the [power level](#power-level)'s general bonus, plus, for its [biome](#biome)'s 5 categories, the [map quality](#hideout-map-quality) bonus and the power level's specialist bonus. Then any daily bonus, and 0.59 with focus.
+- **Refining**, such as metal bars: a base of 0.18 in a city and 0.15 in a Rest, plus 0.40 in the royal city that specializes in it, such as Thetford for ore. In a hideout it's a flat 0.15, without the power level or map quality. Then any daily bonus, and 0.59 with focus. A T5 metal bar in Thetford returns 36.71% without focus and 53.92% with it.
 
 The engine's version for cities, Rests and islands is `productionBonus()` in `packages/core/src/production-bonus.helpers.ts`. It returns each part on its own.
 
