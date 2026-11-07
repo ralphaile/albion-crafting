@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import styles from "./BestCrafts.module.css";
 import { CraftFilters, type UpdateFilters } from "./CraftFilters";
 import { CraftPanel } from "./CraftPanel";
@@ -58,6 +60,12 @@ export function BestCrafts({
   const crafts =
     bestCrafts.status === "loading" ? undefined : bestCrafts.crafts;
   const updating = bestCrafts.status === "ready" && bestCrafts.updating;
+  // A new route, filter or setting starts the table at its first page again;
+  // new prices don't.
+  const listId = useMemo(
+    () => ({ route, filters, settings }),
+    [route, filters, settings],
+  );
   const shownCraft =
     bestCrafts.status === "loading"
       ? undefined
@@ -119,6 +127,8 @@ export function BestCrafts({
             crafts={crafts}
             focus={settings.focus}
             onShowCraft={onShowItem}
+            listId={listId}
+            holdOrder={updating}
           />
         ))}
       <CraftPanel

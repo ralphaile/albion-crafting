@@ -305,6 +305,46 @@ describe("CraftsTable", () => {
     expect(rangeShown()).toMatch(/^Crafts 1–50 of/);
   });
 
+  it("keeps its order and page while prices update, and re-ranks once they're in", () => {
+    const listId = {};
+    const table = (given: readonly Craft[], holdOrder: boolean) => (
+      <CraftsTable crafts={given} focus listId={listId} holdOrder={holdOrder} />
+    );
+    const { rerender } = render(table(crafts, false));
+    const swapped = crafts.map((each) =>
+      each.itemId === "T4_MAIN_AXE" ? { ...each, profit: 1_000_000 } : each,
+    );
+
+    rerender(table(swapped, true));
+
+    expect(itemsInOrder()).toEqual([
+      "Adept's Broadsword 4.0",
+      "Adept's Battleaxe 4.0",
+      "Adept's Bow 4.0",
+    ]);
+    expect(rowOf("Adept's Battleaxe 4.0").getByText("1,000,000")).toBeVisible();
+
+    rerender(table(swapped, false));
+
+    expect(itemsInOrder()).toEqual([
+      "Adept's Battleaxe 4.0",
+      "Adept's Broadsword 4.0",
+      "Adept's Bow 4.0",
+    ]);
+  });
+
+  it("stays on its page when the same list gets new prices", () => {
+    const listId = {};
+    const { rerender } = render(
+      <CraftsTable crafts={unpriced} focus listId={listId} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Page 2" }));
+
+    rerender(<CraftsTable crafts={[...unpriced]} focus listId={listId} />);
+
+    expect(rangeShown()).toMatch(/^Crafts 51–100 of/);
+  });
+
   it("has no pages when every craft fits on one", () => {
     renderTable();
 
