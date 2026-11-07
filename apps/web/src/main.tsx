@@ -27,7 +27,7 @@ if (!root) {
 }
 
 const [marketData, settingsStore, manualPriceStore] = await Promise.all([
-  openMarketData(),
+  openMarketData({ snapshotUrl: `${import.meta.env.BASE_URL}prices/` }),
   openSettingsStore(),
   openManualPriceStore(),
 ]);
