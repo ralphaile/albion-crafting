@@ -1,12 +1,19 @@
 import { type FceParts, specializationFce } from "@aoc/core";
-import { type GameRecipe, recipes, specializationOf } from "@aoc/crafting-data";
+import {
+  type GameRecipe,
+  recipes,
+  refiningRecipes,
+  specializationOf,
+} from "@aoc/crafting-data";
 
 import type {
   SpecializationProfile,
   TreeLevels,
 } from "./specializations.types";
 
-const recipesById = new Map(recipes.map((recipe) => [recipe.itemId, recipe]));
+const recipesById = new Map(
+  [...recipes, ...refiningRecipes].map((recipe) => [recipe.itemId, recipe]),
+);
 
 const NO_LEVELS: TreeLevels = { mastery: 0, specializations: {} };
 
@@ -46,7 +53,10 @@ export function withLevel(
 // specializations.
 export function fceParts(
   profile: SpecializationProfile,
-  recipe: Pick<GameRecipe, "shopCategory" | "shopSubcategory" | "baseId">,
+  recipe: Pick<
+    GameRecipe,
+    "shopCategory" | "shopSubcategory" | "baseId" | "refining"
+  >,
 ): FceParts {
   const { treeId, specializationId } = specializationOf(recipe);
   const { mastery, specializations } = treeLevels(profile, treeId);
