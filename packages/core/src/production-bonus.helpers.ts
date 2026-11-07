@@ -13,13 +13,16 @@ export function productionBonus(
   craftingCategory: string | undefined,
   options: ProductionBonusOptions = {},
 ): ProductionBonus {
+  const specialties = options.refining
+    ? location.refiningSpecialties
+    : location.specialties;
   return withTotal(
     {
-      base: location.craftingBonus,
+      base: options.refining ? location.refiningBonus : location.craftingBonus,
       specialty:
         craftingCategory === undefined
           ? 0
-          : (location.specialties[craftingCategory] ?? 0),
+          : (specialties[craftingCategory] ?? 0),
       ...dailyAndFocus(craftingCategory, options),
     },
     options.override,

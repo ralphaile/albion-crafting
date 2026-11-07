@@ -65,6 +65,8 @@ const lymhurst = {
     name: "Lymhurst",
     craftingBonus: 0.18,
     specialties: { sword: 0.15, bow: 0.15 },
+    refiningBonus: 0.18,
+    refiningSpecialties: {},
   },
 };
 

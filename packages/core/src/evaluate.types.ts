@@ -15,8 +15,10 @@ export interface RecipeAlternative {
   materials: readonly Material[];
 }
 
+// A refining recipe, such as a metal bar, gets the place's refining bonuses.
 export interface Recipe extends RecipeAlternative {
   itemId: string;
+  refining?: boolean;
   craftingCategory?: string;
   itemValue?: number;
   alternatives: readonly RecipeAlternative[];

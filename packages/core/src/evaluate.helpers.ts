@@ -22,15 +22,19 @@ export function evaluateEach(
   prices: EvaluatePrices,
 ): Evaluations {
   const dailyBonuses = settings.dailyBonuses ?? [];
+  const refining = recipe.refining ?? false;
   const bonus = placeProductionBonus(place, recipe.craftingCategory, {
+    refining,
     focus: settings.focus,
     dailyBonuses,
   });
   const rrr = returnRate(bonus.total);
   const rrrWithoutFocus = settings.focus
     ? returnRate(
-        placeProductionBonus(place, recipe.craftingCategory, { dailyBonuses })
-          .total,
+        placeProductionBonus(place, recipe.craftingCategory, {
+          refining,
+          dailyBonuses,
+        }).total,
       )
     : rrr;
   const fee = stationFee(recipe.itemValue, settings.stationFee);

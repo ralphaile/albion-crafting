@@ -8,6 +8,8 @@ const lymhurst: CraftingPlace = {
     name: "Lymhurst",
     craftingBonus: 0.18,
     specialties: { sword: 0.15 },
+    refiningBonus: 0.18,
+    refiningSpecialties: {},
   },
 };
 const forestHideout: CraftingPlace = {
@@ -15,6 +17,7 @@ const forestHideout: CraftingPlace = {
     biome: { specialties: ["sword"] },
     mapQuality: { specialtyBonus: 0.26 },
     powerLevel: { generalBonus: 0.26, specialistBonus: 0.3 },
+    refiningBonus: 0.15,
   },
 };
 
