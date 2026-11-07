@@ -17,3 +17,6 @@ export {
 export { markets } from "./markets.constants.js";
 export { type Market } from "./markets.types.js";
 export { type ItemPrices, type ObservedPrice } from "./prices.types.js";
+export { snapshotReader } from "./snapshot.client.js";
+export { fetchPriceSnapshots } from "./snapshot-fetch.helpers.js";
+export { snapshotPath } from "./snapshot.helpers.js";
