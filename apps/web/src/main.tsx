@@ -23,6 +23,13 @@ import {
 } from "./saved-settings.constants";
 import { openSettingsStore } from "./saved-settings.store";
 
+// Keeps item icons for later visits. Without it, icons just load each visit.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register(`${import.meta.env.BASE_URL}icon-cache.js`)
+    .catch(() => undefined);
+}
+
 const root = document.getElementById("root");
 if (!root) {
   throw new Error("Missing #root element in index.html");
