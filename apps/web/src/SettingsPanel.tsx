@@ -79,7 +79,8 @@ function helpSection(about: string) {
   if (about.includes("price")) return "price-badges";
   if (about === "Daily bonuses") return "production-bonus";
   if (about === "Low volume under") return "daily-volume";
-  if (about.includes("utlier")) return "outliers";
+  if (about === "Outlier beyond" || about === "Use 7-day average for outliers")
+    return "outliers";
   return "data";
 }
 

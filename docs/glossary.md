@@ -107,6 +107,12 @@ station fee = item value × 0.1125 × fee per 100 nutrition / 100
 
 The engine's version is `stationFee()` in `packages/core/src/station-fee.helpers.ts`. It gives the fee for one craft, and every recipe crafts one item. A fee of 0, such as on your own island, costs nothing. The shapeshifter staffs have no [item value](#item-value), so at a paid station their fee is unknown. The fee is a [setting](settings.md), 500 by default, because station owners set anything from 0 to about 1,000.
 
+## Outliers
+
+An AODP price more than twice, or under half, the item's average sale price over the newest 7 days AODP has. **Outlier beyond** in [settings](settings.md) changes the 2. One odd listing, such as a T4_BAG at 17,999 in Caerleon against an average of about 4,400, can put a craft at the top of the list that isn't worth making. The price's badge turns into a warning, and its tooltip shows the price and the average. With **Use 7-day average for outliers**, crafts are worked out with the average instead, and the badge says so. Materials are judged in the buy market and products in the sell market. Prices you typed, and items with no sales in those days, aren't judged.
+
+`withOutliers()` in `apps/web/src/outliers.helpers.ts` does this, after picking between AODP's and [manual prices](manual-prices.md).
+
 ## Power level
 
 A hideout's power level, from 1 to 9, adds to its [production bonus](#production-bonus) in two parts: a general bonus for everything crafted there, and a specialist bonus for its [biome](#biome)'s 5 crafting categories. At level 9 they're 0.26 and 0.30. A level 9 hideout on a quality 6 map, crafting its specialty, reaches a production bonus of 0.82, or 1.41 with [focus](#focus).
