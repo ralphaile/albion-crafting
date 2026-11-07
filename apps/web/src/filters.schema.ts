@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  ALL_CATEGORIES,
   CATEGORIES,
   ENCHANTS,
   MAX_DAILY_VOLUME,
@@ -8,6 +9,8 @@ import {
   MAX_PROFIT,
   MAX_SEARCH_LENGTH,
   NO_FILTERS,
+  REFINED_TYPES,
+  REFINING_TIERS,
   TIERS,
 } from "./filters.constants";
 import type { Filters } from "./filters.types";
@@ -21,9 +24,10 @@ function choices<T>(allowed: readonly T[]) {
 }
 
 const filtersSchema = z.object({
-  tiers: choices(TIERS),
+  mode: z.enum(["crafting", "refining"]).catch("crafting"),
+  tiers: choices(REFINING_TIERS),
   enchants: choices(ENCHANTS),
-  categories: choices(CATEGORIES.map(({ id }) => id)),
+  categories: choices(ALL_CATEGORIES.map(({ id }) => id)),
   artifacts: z.enum(["include", "exclude", "only"]).catch("include"),
   minProfit: z
     .int()
@@ -52,6 +56,21 @@ const filtersSchema = z.object({
     .catch(""),
 });
 
+// Keeps the tiers and categories the mode has. Refining has no artifacts.
+export function inMode(filters: Filters): Filters {
+  const refining = filters.mode === "refining";
+  const tiers = refining ? REFINING_TIERS : TIERS;
+  const categories = (refining ? REFINED_TYPES : CATEGORIES).map(
+    ({ id }) => id,
+  );
+  return {
+    ...filters,
+    tiers: filters.tiers.filter((tier) => tiers.includes(tier)),
+    categories: filters.categories.filter((id) => categories.includes(id)),
+    artifacts: refining ? NO_FILTERS.artifacts : filters.artifacts,
+  };
+}
+
 // Each field that doesn't fit falls back to no filter, so a bad link or an old
 // save never stops the app from opening.
 export function parseFilters(raw: unknown): Filters {
@@ -60,5 +79,5 @@ export function parseFilters(raw: unknown): Filters {
     return NO_FILTERS;
   }
   const { minProfit, minMarginPercent, minDailyVolume, ...rest } = parsed.data;
-  return { ...rest, minProfit, minMarginPercent, minDailyVolume };
+  return inMode({ ...rest, minProfit, minMarginPercent, minDailyVolume });
 }

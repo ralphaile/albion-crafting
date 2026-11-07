@@ -1,7 +1,7 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { type CraftingPlace, pricesNeeded, type PricesNeeded } from "@aoc/core";
-import { recipes } from "@aoc/crafting-data";
+import { recipes, refiningRecipes } from "@aoc/crafting-data";
 import type {
   AodpEvent,
   BatchFailure,
@@ -320,11 +320,12 @@ async function fetchPrices(
 
 // Only the filters that need no prices, so a new minimum doesn't refetch.
 function useSelectedRecipes(filters: Filters, place: CraftingPlace) {
-  const { tiers, enchants, categories, artifacts, specialtyOnly } = filters;
+  const { mode, tiers, enchants, categories, artifacts, specialtyOnly } =
+    filters;
   const search = filters.search.trim();
   return useMemo(
     () =>
-      recipes.filter(
+      (mode === "refining" ? refiningRecipes : recipes).filter(
         recipeFilter(
           {
             ...NO_FILTERS,
@@ -338,7 +339,16 @@ function useSelectedRecipes(filters: Filters, place: CraftingPlace) {
           place,
         ),
       ),
-    [tiers, enchants, categories, artifacts, specialtyOnly, search, place],
+    [
+      mode,
+      tiers,
+      enchants,
+      categories,
+      artifacts,
+      specialtyOnly,
+      search,
+      place,
+    ],
   );
 }
 

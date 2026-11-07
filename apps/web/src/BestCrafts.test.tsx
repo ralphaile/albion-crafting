@@ -9,7 +9,7 @@ import {
 import { type ComponentProps, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { recipes, searchItems } from "@aoc/crafting-data";
+import { recipes, refiningRecipes, searchItems } from "@aoc/crafting-data";
 import type {
   ItemPrices,
   MarketData,
@@ -710,6 +710,45 @@ describe("BestCrafts with filters", () => {
         .getAllByRole("button")
         .map((chip) => chip.textContent),
     ).toEqual(["Bag", "Cape"]);
+  });
+
+  it("ranks refining with its own tiers and categories, and keeps it on Clear all", async () => {
+    const getPrices = renderFiltered({ ...swords, tiers: [4] });
+    await bestCrafts();
+    const chips = () =>
+      within(screen.getByRole("list", { name: "Active filters" }))
+        .getAllByRole("button")
+        .map((chip) => chip.textContent);
+
+    expect(
+      screen.queryByRole("button", { name: "T2" }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: "Refining" }));
+    expect(chips()).toEqual(["Tier 4"]);
+    expect(screen.getByRole("radio", { name: "Exclude" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "T2" }));
+    fireEvent.click(categoryButton());
+    fireEvent.click(screen.getByRole("checkbox", { name: "Metal bar" }));
+    expect(chips()).toEqual(["Tier 2", "Tier 4", "Metal bar"]);
+
+    await waitFor(() => {
+      expect(
+        [...askedFor(getPrices, getPrices.mock.calls.length - 1)].sort(),
+      ).toEqual(
+        refiningRecipes
+          .filter(
+            ({ shopSubcategory, tier }) =>
+              shopSubcategory === "metalbars" && (tier === 2 || tier === 4),
+          )
+          .map(({ itemId }) => itemId)
+          .sort(),
+      );
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear all" }));
+    expect(screen.getByRole("radio", { name: "Refining" })).toBeChecked();
   });
 
   it("picks categories from a list that closes on Escape or a click outside", async () => {

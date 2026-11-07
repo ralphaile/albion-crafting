@@ -3,12 +3,12 @@ import { categoryOf, type GameRecipe, searchItems } from "@aoc/crafting-data";
 
 import { soldPerDay } from "./best-crafts.helpers";
 import type { Craft } from "./best-crafts.types";
-import { CATEGORIES } from "./filters.constants";
+import { ALL_CATEGORIES } from "./filters.constants";
 import type { ActiveFilter, ArtifactFilter, Filters } from "./filters.types";
 import { formatCount, formatSilver } from "./format.helpers";
 
 export function categoryLabel(id: string) {
-  return CATEGORIES.find((option) => option.id === id)?.label ?? id;
+  return ALL_CATEGORIES.find((option) => option.id === id)?.label ?? id;
 }
 
 function includesOrEmpty<T>(selected: readonly T[], value: T) {
@@ -38,7 +38,10 @@ export function recipeFilter(
     includesOrEmpty(filters.enchants, recipe.enchant) &&
     includesOrEmpty(filters.categories, categoryOf(recipe)) &&
     matchesArtifacts(recipe, filters.artifacts) &&
-    (!filters.specialtyOnly || hasSpecialty(place, recipe.craftingCategory)) &&
+    (!filters.specialtyOnly ||
+      hasSpecialty(place, recipe.craftingCategory, {
+        refining: recipe.refining ?? false,
+      })) &&
     (found === undefined || found.has(recipe.itemId));
 }
 

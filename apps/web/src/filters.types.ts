@@ -1,6 +1,11 @@
 export type ArtifactFilter = "include" | "exclude" | "only";
 
+export type CraftMode = "crafting" | "refining";
+
+// `mode` picks what's ranked. It's kept with the filters, so it's saved and in
+// the link, but it isn't one: it gets no chip, and Clear all keeps it.
 export interface Filters {
+  mode: CraftMode;
   tiers: readonly number[];
   enchants: readonly number[];
   categories: readonly string[];

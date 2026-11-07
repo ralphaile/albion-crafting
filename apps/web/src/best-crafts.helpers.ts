@@ -56,7 +56,9 @@ export function evaluateCrafts(
     return {
       ...bestEvaluation(alternatives),
       recipe,
-      specialty: hasSpecialty(place, recipe.craftingCategory),
+      specialty: hasSpecialty(place, recipe.craftingCategory, {
+        refining: recipe.refining ?? false,
+      }),
       dailyVolume: "unknown" as const,
       alternatives,
     };
