@@ -99,6 +99,8 @@ const lymhurst: CraftingPlace = {
     name: "Lymhurst",
     craftingBonus: 0.18,
     specialties: { sword: 0.15, cloth_helmet: 0.15 },
+    refiningBonus: 0.18,
+    refiningSpecialties: {},
   },
 };
 

@@ -16,8 +16,22 @@ const fixtures = fileURLToPath(
 );
 
 const cities: CraftingLocation[] = [
-  { id: "0000", name: "Thetford", craftingBonus: 0.18, specialties: {} },
-  { id: "1000", name: "Lymhurst", craftingBonus: 0.18, specialties: {} },
+  {
+    id: "0000",
+    name: "Thetford",
+    craftingBonus: 0.18,
+    specialties: {},
+    refiningBonus: 0.18,
+    refiningSpecialties: {},
+  },
+  {
+    id: "1000",
+    name: "Lymhurst",
+    craftingBonus: 0.18,
+    specialties: {},
+    refiningBonus: 0.18,
+    refiningSpecialties: {},
+  },
 ];
 
 function zone(

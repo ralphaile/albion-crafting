@@ -66,6 +66,7 @@ export function placeFromChoice(choice: PlaceChoice): CraftingPlace {
         hideouts.powerLevels,
         ({ level }) => level === choice.level,
       ),
+      refiningBonus: hideouts.refiningBonus,
     },
   };
 }

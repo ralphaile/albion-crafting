@@ -23,6 +23,7 @@ export function extractLocations(
 
   const locations: CraftingLocation[] = [];
   const islandBonuses = new Set<number>();
+  const islandRefiningBonuses = new Set<number>();
   const unnamed: string[] = [];
   for (const location of craftinglocation) {
     const id = location["@clusterid"];
@@ -35,31 +36,30 @@ export function extractLocations(
       unnamed.push(id);
     }
     islandBonuses.add(bonus["@islandvalue"]);
+    islandRefiningBonuses.add(location.refiningbonus["@islandvalue"] ?? 0);
+    const modifiers = (isRefining: boolean) =>
+      Object.fromEntries(
+        location.craftingmodifier
+          .filter((modifier) => refining.has(modifier["@name"]) === isRefining)
+          .map((modifier) => [modifier["@name"], modifier["@value"]]),
+      );
     locations.push({
       id,
       name: name ?? id,
       craftingBonus: bonus["@value"],
-      specialties: Object.fromEntries(
-        location.craftingmodifier
-          .filter((modifier) => !refining.has(modifier["@name"]))
-          .map((modifier) => [modifier["@name"], modifier["@value"]]),
-      ),
+      specialties: modifiers(false),
+      refiningBonus: location.refiningbonus["@value"],
+      refiningSpecialties: modifiers(true),
     });
   }
 
-  const [islandBonus, ...otherIslandBonuses] = [...islandBonuses];
-  if (islandBonus === undefined || otherIslandBonuses.length > 0) {
-    throw new Error(
-      `Expected the cities and Rests to give islands one crafting bonus, but found ${
-        islandBonus === undefined ? "none" : [...islandBonuses].join(", ")
-      }`,
-    );
-  }
   locations.push({
     id: "island",
     name: "Island",
-    craftingBonus: islandBonus,
+    craftingBonus: single(islandBonuses, "crafting"),
     specialties: {},
+    refiningBonus: single(islandRefiningBonuses, "refining"),
+    refiningSpecialties: {},
   });
 
   return {
@@ -71,4 +71,16 @@ export function extractLocations(
             `No name in formatted/world.json for these clusters, so the app shows their IDs: ${unnamed.join(", ")}`,
           ],
   };
+}
+
+function single(bonuses: ReadonlySet<number>, kind: string): number {
+  const [bonus, ...others] = [...bonuses];
+  if (bonus === undefined || others.length > 0) {
+    throw new Error(
+      `Expected the cities and Rests to give islands one ${kind} bonus, but found ${
+        bonus === undefined ? "none" : [...bonuses].join(", ")
+      }`,
+    );
+  }
+  return bonus;
 }

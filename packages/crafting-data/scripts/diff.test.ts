@@ -41,6 +41,8 @@ const data: GeneratedData = {
       name: "Thetford",
       craftingBonus: 0.18,
       specialties: { mace: 0.15 },
+      refiningBonus: 0.18,
+      refiningSpecialties: {},
     },
   ],
   hideouts: {
@@ -159,6 +161,8 @@ describe("diffData", () => {
           name: "Thetford",
           craftingBonus: 0.18,
           specialties: { mace: 0.2, firestaff: 0.15 },
+          refiningBonus: 0.18,
+          refiningSpecialties: {},
         },
       ],
       hideouts: {
