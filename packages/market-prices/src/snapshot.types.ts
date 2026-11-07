@@ -16,7 +16,7 @@ export interface PriceSnapshot {
 }
 
 // Which sides of a price row came from the snapshot.
-export interface SnapshotMarks {
+interface SnapshotMarks {
   sellFromSnapshot?: boolean;
   buyFromSnapshot?: boolean;
 }
