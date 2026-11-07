@@ -127,6 +127,53 @@ describe("evaluateCrafts", () => {
     });
   });
 
+  it("uses the recipe you chose and marks the craft, but not for a recipe the item doesn't have", () => {
+    const twoRecipes: GameRecipe = {
+      ...broadsword,
+      alternatives: [
+        {
+          focus: 1286,
+          silver: 0,
+          amountCrafted: 1,
+          materials: [
+            { id: "T4_METALBAR", count: 16, returnable: true },
+            { id: "T4_PLANKS", count: 8, returnable: true },
+          ],
+        },
+      ],
+    };
+
+    const [best] = evaluateCrafts(
+      [twoRecipes],
+      island,
+      instantBuyAndSell,
+      pricesOnHand,
+    );
+    const [chosen] = evaluateCrafts(
+      [twoRecipes],
+      island,
+      instantBuyAndSell,
+      pricesOnHand,
+      { T4_MAIN_SWORD: 1 },
+    );
+    const [unknown] = evaluateCrafts(
+      [twoRecipes],
+      island,
+      instantBuyAndSell,
+      pricesOnHand,
+      { T4_MAIN_SWORD: 2 },
+    );
+
+    expect(best).toMatchObject({ alternative: 0, status: "complete" });
+    expect(best?.recipeChosen).toBeUndefined();
+    expect(chosen).toMatchObject({
+      alternative: 1,
+      status: "incomplete",
+      recipeChosen: true,
+    });
+    expect(unknown).toEqual(best);
+  });
+
   it("marks a craft incomplete when a price it needs wasn't fetched", () => {
     const [craft] = evaluateCrafts(
       [axe],

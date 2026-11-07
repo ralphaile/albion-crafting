@@ -2,6 +2,8 @@ import { parseFilters } from "./filters.schema";
 import type { Filters } from "./filters.types";
 import { parsePlan } from "./plan.schema";
 import type { CraftingPlan } from "./plan.types";
+import { parseRecipeChoices } from "./recipe-choices.schema";
+import type { RecipeChoices } from "./recipe-choices.types";
 import { parseRoute } from "./route.schema";
 import type { RouteChoice } from "./route.types";
 import type { SavedSetting } from "./saved-settings.types";
@@ -38,4 +40,10 @@ export const PLAN_SETTING: SavedSetting<CraftingPlan> = {
   id: "plan",
   version: 1,
   parse: parsePlan,
+};
+
+export const RECIPE_CHOICES_SETTING: SavedSetting<RecipeChoices> = {
+  id: "recipeChoices",
+  version: 1,
+  parse: parseRecipeChoices,
 };

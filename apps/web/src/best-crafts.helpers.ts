@@ -1,5 +1,5 @@
 import {
-  bestEvaluation,
+  chosenEvaluation,
   type CraftingPlace,
   evaluateEach,
   type EvaluateSettings,
@@ -16,6 +16,8 @@ import type {
   UsedPrice,
   UsedPrices,
 } from "./best-crafts.types";
+import { NO_RECIPE_CHOICES } from "./recipe-choices.constants";
+import type { RecipeChoices } from "./recipe-choices.types";
 
 const MISSING: UsedPrice = { status: "missing", origin: "api" };
 
@@ -24,6 +26,7 @@ export function evaluateCrafts(
   place: CraftingPlace,
   settings: EvaluateSettings,
   prices: UsedPrices,
+  choices: RecipeChoices = NO_RECIPE_CHOICES,
 ): Craft[] {
   const materials = byItem(prices.materials);
   const products = byItem(prices.products);
@@ -53,9 +56,12 @@ export function evaluateCrafts(
       withPrices(first),
       ...others.map(withPrices),
     ];
+    const choice = choices[recipe.itemId];
+    const chosen = choice !== undefined && choice < alternatives.length;
     return {
-      ...bestEvaluation(alternatives),
+      ...chosenEvaluation(alternatives, chosen ? choice : undefined),
       recipe,
+      ...(chosen && { recipeChosen: true as const }),
       specialty: hasSpecialty(place, recipe.craftingCategory, {
         refining: recipe.refining ?? false,
       }),
