@@ -59,10 +59,16 @@ export const OFFHAND_TYPES: readonly Option[] = [
   { id: "torchtype", label: "Torch" },
 ];
 
+export const ACCESSORY_TYPES: readonly Option[] = [
+  { id: "bags", label: "Bag" },
+  { id: "capes", label: "Cape" },
+];
+
 export const CATEGORIES: readonly Option[] = [
   ...WEAPON_TYPES,
   ...ARMOR_PIECES,
   ...OFFHAND_TYPES,
+  ...ACCESSORY_TYPES,
 ];
 
 export const MAX_SEARCH_LENGTH = 100;

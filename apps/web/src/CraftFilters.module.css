@@ -206,7 +206,7 @@
   grid-auto-flow: column;
 }
 
-.offhand .options {
+.inline .options {
   grid-auto-flow: column;
   justify-content: start;
 }
