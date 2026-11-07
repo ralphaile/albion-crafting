@@ -61,6 +61,7 @@ const { prices, failures, fetchedAt } = await marketData.getPrices(
 
 - **The status line** above the table says when the oldest price on screen was fetched. While prices are fetched, it counts the batches, or counts down a wait for AODP's request limit.
 - **Refresh prices** fetches every price again. **Cancel** stops a fetch and keeps what arrived.
+- **History** for each product in the sell market is fetched with the prices, for its [daily volume](glossary.md#daily-volume). Its batches count in the status line, and a failed one gets the same banner. **Refresh prices** doesn't fetch it again, since it's reused for 6 hours.
 - **While prices arrive,** the table updates at most once a second, and the rows already shown keep their places and page. It re-ranks once the fetch ends. On a first load, a craft shows once its own price has come.
 - **Failed batches** get a banner. **Retry failed** fetches just those. When every batch fails, it says whether AODP was unreachable or the browser is offline, and how old the prices kept are.
 - **Without IndexedDB,** as in some private windows, a note says prices are only kept until the page closes.
@@ -73,8 +74,8 @@ const { history } = await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1]);
 //    averagePrice: 4441.15, averageDailyVolume: 155, newestDay: 1792281600000 }]
 ```
 
-- **Arguments:** the same as `getPrices`, with `days` in place of `staleAfterMinutes`. It returns `{ history, failures, fetchedAt }`.
-- **Reuse:** history is reused for 6 hours. Ask for it only for the results on screen, such as the top 100, not for every recipe.
+- **Arguments:** the same as `getPrices`, with `days` in place of `staleAfterMinutes`. It returns `{ history, failures, fetchedAt }`, and `onPartial` gets `{ history, fetchedAt }`.
+- **Reuse:** history is reused for 6 hours. A batch of 170 items is about 180 KB, so every product in one sell market is about 35 requests.
 - **From AODP's daily history** (`time-scale=24`), averaged over its newest 7 days. `days` changes the 7.
   - `averageDailyVolume`: how many sold in those days, divided by 7. A day without a point counts as none sold.
   - `averagePrice`: the average sale price, weighted by how many sold each day, or `undefined` when none sold.

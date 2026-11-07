@@ -77,6 +77,7 @@ function helpSection(about: string) {
   if (about === "Buy materials by" || about === "Sell by") return "sell-orders";
   if (about.includes("price")) return "price-badges";
   if (about === "Daily bonuses") return "production-bonus";
+  if (about === "Low volume under") return "daily-volume";
   return "data";
 }
 

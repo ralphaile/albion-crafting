@@ -14,6 +14,7 @@ The **Settings** button at the top right, just its icon on phones, opens a panel
 | Manual prices stale after      | Days until a [price you typed](manual-prices.md) counts as stale, and a fresh AODP price replaces it, 1 to 30                                  | 3           |
 | Always prefer my manual prices | Uses a price you typed whenever there is one, even when AODP's is newer                                                                        | Off         |
 | Server                         | The game server whose prices to fetch: Americas, Europe or Asia                                                                                | Americas    |
+| Low volume under               | Crafts that sell fewer than this a day in the sell market are marked Low, the [daily volume](glossary.md#daily-volume), 0 to 10,000            | 5           |
 
 A change applies straight away. A new server or **Stale after** time asks for prices again, and the browser's [cache](market-prices.md) answers with any it fetched in the last 15 minutes. Every other setting re-ranks the prices already fetched.
 
