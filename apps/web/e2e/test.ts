@@ -43,6 +43,15 @@ const NO_DATA_DATE = "0001-01-01T00:00:00";
 const AODP_PRICES =
   /^https:\/\/[a-z]+\.albion-online-data\.com\/api\/v2\/stats\/prices\/([^/]+)\.json$/;
 
+const AODP_HISTORY =
+  /^https:\/\/[a-z]+\.albion-online-data\.com\/api\/v2\/stats\/history\/([^/]+)\.json$/;
+
+export interface FakeSales {
+  itemId: string;
+  marketId: string;
+  perDay: number;
+}
+
 function aodpDate(ageMinutes: number) {
   return new Date(Date.now() - ageMinutes * 60_000).toISOString().slice(0, 19);
 }
@@ -104,6 +113,36 @@ export async function answerPrices(page: Page, prices: readonly FakePrice[]) {
           ),
         );
       await route.fulfill({ json: rows });
+    },
+  );
+}
+
+// A week of sales for each item it's given. Any other item has no history,
+// as AODP answers for an item nobody bought.
+export async function answerHistory(page: Page, sales: readonly FakeSales[]) {
+  await page.route(
+    (url) => AODP_HISTORY.test(url.origin + url.pathname),
+    async (route) => {
+      const url = new URL(route.request().url());
+      const [, path = ""] = AODP_HISTORY.exec(url.origin + url.pathname) ?? [];
+      const itemIds = path.split(",").map(decodeURIComponent);
+      const marketIds = (url.searchParams.get("locations") ?? "").split(",");
+      const series = sales
+        .filter(
+          ({ itemId, marketId }) =>
+            itemIds.includes(itemId) && marketIds.includes(marketId),
+        )
+        .map(({ itemId, marketId, perDay }) => ({
+          location: marketId,
+          item_id: itemId,
+          quality: 1,
+          data: Array.from({ length: 7 }, (_, day) => ({
+            item_count: perDay,
+            avg_price: 1000,
+            timestamp: aodpDate((day + 1) * 24 * 60),
+          })),
+        }));
+      await route.fulfill({ json: series });
     },
   );
 }
@@ -170,6 +209,7 @@ export const test = base.extend<{ problems: string[] }>({
         route.fulfill({ contentType: "image/svg+xml", body: STAND_IN_ICON }),
     );
     await answerPrices(page, []);
+    await answerHistory(page, []);
     await respondWith(page, ...defaultRecordedResponses);
 
     await runTest(page);

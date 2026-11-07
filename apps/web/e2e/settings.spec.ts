@@ -31,6 +31,7 @@ test("turning focus off re-ranks without focus, and stays off next visit", async
   await expect(topRow.getByRole("cell")).toHaveText([
     "2,955",
     "171.8%",
+    "no history",
     "1,504",
     "4,675",
     "24.8%",
