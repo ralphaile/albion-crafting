@@ -31,6 +31,10 @@
   color: var(--price-missing);
 }
 
+.badge[data-kind="outlier"] .icon {
+  color: var(--price-stale);
+}
+
 .trigger {
   padding: 0;
   border: 0;

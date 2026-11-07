@@ -52,6 +52,26 @@ describe("PriceBadge", () => {
       "Missing",
       "item, Missing",
     ],
+    [
+      "an outlier",
+      {
+        ...seen(17_999, 30),
+        origin: "api",
+        outlier: { seen: 17_999, average: 4441, usingAverage: false },
+      },
+      "Outlier 17,999, seen 30 min ago. 7-day average 4,441",
+      "item, Outlier",
+    ],
+    [
+      "the average used in place of an outlier",
+      {
+        ...seen(4441, 30),
+        origin: "api",
+        outlier: { seen: 17_999, average: 4441, usingAverage: true },
+      },
+      "Using 7-day average 4,441 in place of outlier 17,999, seen 30 min ago",
+      "item, Using 7-day average",
+    ],
   ] satisfies [string, UsedPrice, string, string][])(
     "names %s",
     (_price, price, title, text) => {
