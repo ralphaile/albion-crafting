@@ -6,13 +6,19 @@ import {
 
 import type { Craft } from "./best-crafts.types";
 import { MAX_PLAN_QUANTITY } from "./plan.constants";
-import { addToPlan, newEntry, plannedQuantity } from "./plan.helpers";
+import {
+  addToPlan,
+  chosenRecipe,
+  newEntry,
+  plannedQuantity,
+} from "./plan.helpers";
 import type { CraftingPlan } from "./plan.types";
 import type { RouteChoice } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 
 // The ranked crafts with every price and a focus cost. Each is capped at
-// `maxQuantity`, or at what sells in a day when that's known and lower.
+// `maxQuantity`, or at what sells in a day when that's known and lower. A
+// craft's profit is per item, and its recipe can make several at once.
 export function focusCandidates(
   crafts: readonly Craft[],
   maxQuantity: number,
@@ -27,15 +33,16 @@ export function focusCandidates(
       return [];
     }
     const { dailyVolume } = craft;
+    const { amountCrafted } = chosenRecipe(craft.recipe, craft.alternative);
     return [
       {
         itemId: craft.itemId,
         alternative: craft.alternative,
-        amountCrafted: craft.recipe.amountCrafted,
+        amountCrafted,
         focusPerCraft: craft.focusCost,
         costPerCraft:
           craft.materialCost.total + (craft.stationFee ?? 0) + craft.silverCost,
-        profitPerCraft: craft.profit,
+        profitPerCraft: craft.profit * amountCrafted,
         silverPerFocus: craft.silverPerFocus,
         maxQuantity:
           typeof dailyVolume === "number"
