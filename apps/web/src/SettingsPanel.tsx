@@ -505,7 +505,7 @@ export function SettingsPanel({
             onChange={(useAverageForOutliers) => {
               set("useAverageForOutliers", useAverageForOutliers);
             }}
-            help="Works out crafts with the 7-day average in place of an outlier price."
+            help="Works out crafts with the 7-day average in place of an outlier price. Only an outlier that makes a craft look better is replaced: a product price above its average, or a material price below it."
           />
           <WholeNumber
             label="Low volume under"

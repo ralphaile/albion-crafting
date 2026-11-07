@@ -99,6 +99,39 @@ describe("withOutliers", () => {
     });
   });
 
+  it("keeps a product price below its average, such as a low buy order", () => {
+    const [bag] = withOutliers(
+      { materials: [], products: [at("T4_BAG", api(17_999), api(1500))] },
+      bagWeek,
+      { ratio: 2, useAverage: true },
+    ).products;
+
+    expect(bag?.buyMax).toEqual({
+      ...api(1500),
+      outlier: { seen: 1500, average: 4441.15, usingAverage: false },
+    });
+  });
+
+  it("uses the average for a material below it, and keeps one above it", () => {
+    const [bar] = withOutliers(
+      {
+        materials: [at("T4_METALBAR", api(900), api(20))],
+        products: [],
+      },
+      { materials: [averaging("T4_METALBAR", 100)], products: [] },
+      { ratio: 3, useAverage: true },
+    ).materials;
+
+    expect(bar?.sellMin).toMatchObject({
+      value: 900,
+      outlier: { seen: 900, usingAverage: false },
+    });
+    expect(bar?.buyMax).toMatchObject({
+      value: 100,
+      outlier: { seen: 20, usingAverage: true },
+    });
+  });
+
   it("judges material prices against the materials' history", () => {
     const [bar] = withOutliers(
       {

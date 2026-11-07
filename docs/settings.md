@@ -14,7 +14,7 @@ The **Settings** button at the top right, just its icon on phones, opens a panel
 | Manual prices stale after      | Days until a [price you typed](manual-prices.md) counts as stale, and a fresh AODP price replaces it, 1 to 30                                  | 3           |
 | Always prefer my manual prices | Uses a price you typed whenever there is one, even when AODP's is newer                                                                        | Off         |
 | Outlier beyond                 | An AODP price this many times above or below its 7-day average is an [outlier](glossary.md#outliers), 2 to 100                                 | 2           |
-| Use 7-day average for outliers | Works out crafts with the 7-day average in place of an outlier price                                                                           | Off         |
+| Use 7-day average for outliers | Works out crafts with the 7-day average in place of an outlier that flatters them: a product price above it, or a material price below it      | Off         |
 | Server                         | The game server whose prices to fetch: Americas, Europe or Asia                                                                                | Americas    |
 | Low volume under               | Crafts that sell fewer than this a day in the sell market are marked Low, the [daily volume](glossary.md#daily-volume), 0 to 10,000            | 5           |
 

@@ -12,28 +12,38 @@ export interface OutlierOptions {
   useAverage: boolean;
 }
 
-// Only AODP's prices are judged: a price you typed is taken as meant.
+type Side = "materials" | "products";
+
+// Only AODP's prices are judged: a price you typed is taken as meant. The
+// average only replaces an outlier that flatters the craft, a product above
+// it or a material below it. The other way, such as a low buy order on a slow
+// item, the price is likely what you'd really get or pay.
 function judged(
   price: UsedPrice,
   average: number,
+  side: Side,
   { ratio, useAverage }: OutlierOptions,
 ): UsedPrice {
   if (price.status === "missing" || price.origin !== "api") {
     return price;
   }
-  if (price.value <= average * ratio && price.value >= average / ratio) {
+  const above = price.value > average * ratio;
+  const below = price.value < average / ratio;
+  if (!above && !below) {
     return price;
   }
+  const usingAverage = useAverage && (side === "products" ? above : below);
   return {
     ...price,
-    value: useAverage ? average : price.value,
-    outlier: { seen: price.value, average, usingAverage: useAverage },
+    value: usingAverage ? average : price.value,
+    outlier: { seen: price.value, average, usingAverage },
   };
 }
 
 function judgedAt(
   rows: readonly UsedItemPrices[],
   history: readonly HistorySummary[],
+  side: Side,
   options: OutlierOptions,
 ): UsedItemPrices[] {
   const averages = new Map(
@@ -45,8 +55,8 @@ function judgedAt(
       ? row
       : {
           ...row,
-          sellMin: judged(row.sellMin, average, options),
-          buyMax: judged(row.buyMax, average, options),
+          sellMin: judged(row.sellMin, average, side, options),
+          buyMax: judged(row.buyMax, average, side, options),
         };
   });
 }
@@ -60,7 +70,12 @@ export function withOutliers(
   options: OutlierOptions,
 ): UsedPrices {
   return {
-    materials: judgedAt(prices.materials, history.materials, options),
-    products: judgedAt(prices.products, history.products, options),
+    materials: judgedAt(
+      prices.materials,
+      history.materials,
+      "materials",
+      options,
+    ),
+    products: judgedAt(prices.products, history.products, "products", options),
   };
 }

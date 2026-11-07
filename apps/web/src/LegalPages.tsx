@@ -88,7 +88,7 @@ const GLOSSARY = [
   [
     "outliers",
     "Outliers",
-    "An AODP price more than twice or under half the item's average sale price over the newest 7 days, or the ratio set in Settings. One odd listing can make a craft look far better than it is. The badge warns of it, and the Use 7-day average setting works out crafts with the average instead. Prices you typed are never judged.",
+    "An AODP price more than twice or under half the item's average sale price over the newest 7 days, or the ratio set in Settings. One odd listing can make a craft look far better than it is. The badge warns of it, and the Use 7-day average setting works out crafts with the average instead, where the outlier makes a craft look better: a product price above its average, or a material price below it. Prices you typed are never judged.",
   ],
   [
     "map-quality",
