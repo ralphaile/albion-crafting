@@ -17,6 +17,7 @@ export {
 } from "./focus.constants.js";
 export {
   focusCost,
+  focusDays,
   silverPerFocus,
   specializationFce,
 } from "./focus.helpers.js";

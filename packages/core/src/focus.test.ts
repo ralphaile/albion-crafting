@@ -1,7 +1,12 @@
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { focusCost, silverPerFocus, specializationFce } from "./index.js";
+import {
+  focusCost,
+  focusDays,
+  silverPerFocus,
+  specializationFce,
+} from "./index.js";
 
 const fces = fc.double({ min: 0, max: 100_000, noNaN: true });
 
@@ -93,5 +98,38 @@ describe("specializationFce", () => {
     expect(() =>
       specializationFce({ mastery: 0, spec: 0, otherSpecs: [level] }),
     ).toThrow(RangeError);
+  });
+});
+
+describe("focusDays", () => {
+  it("is 0 when the focus stored covers what's needed", () => {
+    expect(focusDays(0, 0)).toBe(0);
+    expect(focusDays(10_000, 10_000)).toBe(0);
+  });
+
+  it("counts the days of 10,000 regained focus for the rest", () => {
+    expect(focusDays(10_001, 10_000)).toBe(1);
+    expect(focusDays(45_000, 10_000)).toBe(4);
+    expect(focusDays(25_000, 0)).toBe(3);
+  });
+
+  it("counts no more stored focus than a character can store", () => {
+    expect(focusDays(50_000, 80_000)).toBe(2);
+    expect(focusDays(10_000, -5)).toBe(1);
+  });
+
+  it("never takes longer with more focus stored", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 1_000_000 }),
+        fc.integer({ min: 0, max: 30_000 }),
+        fc.integer({ min: 0, max: 30_000 }),
+        (needed, a, b) => {
+          expect(focusDays(needed, Math.max(a, b))).toBeLessThanOrEqual(
+            focusDays(needed, Math.min(a, b)),
+          );
+        },
+      ),
+    );
   });
 });
