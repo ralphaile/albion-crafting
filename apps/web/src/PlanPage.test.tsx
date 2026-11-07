@@ -261,4 +261,37 @@ describe("PlanPage", () => {
     await screen.findByRole("list", { name: `Materials for ${BROADSWORD}` });
     expect(total("Plan totals", "Profit")).toMatch(/^−/);
   });
+
+  it("keeps the last prices on screen when a later request fails", async () => {
+    const working = answering(broadswordPrices);
+    let requests = 0;
+    const getPrices: MarketData["getPrices"] = (...args) => {
+      requests += 1;
+      return requests > 1
+        ? Promise.reject(new Error("offline"))
+        : working.getPrices(...args);
+    };
+    renderPlan({ ...working, getPrices });
+    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
+    const location = screen.getByRole("region", { name: "Location 1" });
+    addBroadsword(location);
+    await screen.findByRole("list", { name: `Materials for ${BROADSWORD}` });
+
+    fireEvent.change(within(location).getByLabelText("Add an item"), {
+      target: { value: "bag" },
+    });
+    fireEvent.click(
+      within(location).getByRole("button", { name: "Add Adept's Bag 4.0" }),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn’t fetch prices",
+    );
+    expect(
+      within(location).getByRole("row", { name: new RegExp(BROADSWORD) }),
+    ).not.toHaveTextContent("Missing");
+    expect(total("Plan totals", "Missing prices")).toBe(
+      "Fine Cloth 4.0, Adept's Bag 4.0",
+    );
+  });
 });

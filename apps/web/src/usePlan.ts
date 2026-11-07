@@ -20,7 +20,8 @@ import type { SpecializationProfile } from "./specializations.types";
 
 // `prices` has each location's prices, in the plan's order, with the typed
 // ones chosen where they win. While `updating`, a price the plan has only just
-// needed is missing until it arrives.
+// needed is missing until it arrives. `failed` keeps the last prices that
+// arrived on screen after a later request failed.
 export type PlanState =
   | { status: "loading" }
   | { status: "error"; error: Error }
@@ -29,6 +30,7 @@ export type PlanState =
       result: PlanResult;
       prices: UsedPrices[];
       updating: boolean;
+      failed: boolean;
     };
 
 // Each market's prices, and their 7-day history to judge outliers by.
@@ -39,7 +41,11 @@ interface MarketAnswer {
 
 type Fetched =
   | { status: "error"; error: Error }
-  | { status: "ready"; byMarket: ReadonlyMap<string, MarketAnswer> };
+  | {
+      status: "ready";
+      byMarket: ReadonlyMap<string, MarketAnswer>;
+      failed: boolean;
+    };
 
 const NO_ANSWER: MarketAnswer = { prices: [], history: [] };
 
@@ -86,19 +92,27 @@ function usePlanPrices(
         if (active) {
           setFetched({
             key,
-            fetched: { status: "ready", byMarket: new Map(entries) },
+            fetched: {
+              status: "ready",
+              byMarket: new Map(entries),
+              failed: false,
+            },
           });
         }
       },
       (error: unknown) => {
         if (active) {
-          setFetched({
+          setFetched((last) => ({
             key,
-            fetched: {
-              status: "error",
-              error: error instanceof Error ? error : new Error(String(error)),
-            },
-          });
+            fetched:
+              last?.fetched.status === "ready"
+                ? { ...last.fetched, failed: true }
+                : {
+                    status: "error",
+                    error:
+                      error instanceof Error ? error : new Error(String(error)),
+                  },
+          }));
         }
       },
     );
@@ -158,6 +172,12 @@ export function usePlan(
       })),
       { ...settings, fce: fceFor(specializations) },
     );
-    return { status: "ready", result, prices, updating: !current };
+    return {
+      status: "ready",
+      result,
+      prices,
+      updating: !current,
+      failed: fetched.failed,
+    };
   }, [answer, plan, settings, manualPrices, specializations]);
 }
