@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { type PlanResult, evaluatePlan } from "@aoc/core";
-import type { ItemPrices, MarketData } from "@aoc/market-prices";
+import type {
+  HistorySummary,
+  ItemPrices,
+  MarketData,
+} from "@aoc/market-prices";
 
 import type { UsedItemPrices, UsedPrices } from "./best-crafts.types";
 import { withManualPrices } from "./manual-prices.helpers";
 import type { ManualPrice } from "./manual-prices.types";
+import { withOutliers } from "./outliers.helpers";
 import { planLocations, planMarkets } from "./plan.helpers";
 import type { CraftingPlan } from "./plan.types";
 import { QUALITY } from "./prices.constants";
@@ -26,9 +31,17 @@ export type PlanState =
       updating: boolean;
     };
 
+// Each market's prices, and their 7-day history to judge outliers by.
+interface MarketAnswer {
+  prices: readonly ItemPrices[];
+  history: readonly HistorySummary[];
+}
+
 type Fetched =
   | { status: "error"; error: Error }
-  | { status: "ready"; byMarket: ReadonlyMap<string, readonly ItemPrices[]> };
+  | { status: "ready"; byMarket: ReadonlyMap<string, MarketAnswer> };
+
+const NO_ANSWER: MarketAnswer = { prices: [], history: [] };
 
 function byItem(prices: readonly UsedItemPrices[]) {
   return new Map(prices.map((price) => [price.itemId, price]));
@@ -53,13 +66,20 @@ function usePlanPrices(
     const needed = JSON.parse(neededKey) as [string, string[]][];
     Promise.all(
       needed.map(async ([marketId, itemIds]) => {
-        const { prices } = await marketData.getPrices(
-          itemIds,
-          [marketId],
-          [QUALITY],
-          { region: server, staleAfterMinutes: staleAfterHours * 60 },
-        );
-        return [marketId, prices] as const;
+        // Without history, prices are only not judged as outliers.
+        const [{ prices }, history] = await Promise.all([
+          marketData.getPrices(itemIds, [marketId], [QUALITY], {
+            region: server,
+            staleAfterMinutes: staleAfterHours * 60,
+          }),
+          marketData
+            .getHistory(itemIds, [marketId], [QUALITY], { region: server })
+            .then(
+              (result) => result.history,
+              () => [],
+            ),
+        ]);
+        return [marketId, { prices, history }] as const;
       }),
     ).then(
       (entries) => {
@@ -107,12 +127,11 @@ export function usePlan(
     if (fetched.status === "error") {
       return fetched;
     }
-    const prices = plan.locations.map(({ route }) =>
-      withManualPrices(
-        {
-          materials: fetched.byMarket.get(route.buyMarketId) ?? [],
-          products: fetched.byMarket.get(route.sellMarketId) ?? [],
-        },
+    const prices = plan.locations.map(({ route }) => {
+      const buy = fetched.byMarket.get(route.buyMarketId) ?? NO_ANSWER;
+      const sell = fetched.byMarket.get(route.sellMarketId) ?? NO_ANSWER;
+      const chosen = withManualPrices(
+        { materials: buy.prices, products: sell.prices },
         manualPrices,
         {
           region: settings.server,
@@ -122,8 +141,16 @@ export function usePlan(
           manualStaleAfterMinutes: settings.manualStaleAfterDays * 24 * 60,
           preferManual: settings.preferManualPrices,
         },
-      ),
-    );
+      );
+      return withOutliers(
+        chosen,
+        { materials: buy.history, products: sell.history },
+        {
+          ratio: settings.outlierRatio,
+          useAverage: settings.useAverageForOutliers,
+        },
+      );
+    });
     const result = evaluatePlan(
       planLocations(plan, (_route, index) => ({
         materials: byItem(prices[index]?.materials ?? []),
