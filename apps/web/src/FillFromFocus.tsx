@@ -4,46 +4,35 @@ import type { FocusBudget } from "@aoc/core";
 
 import styles from "./FillFromFocus.module.css";
 import { formatCount } from "./format.helpers";
+import { wholeNumber } from "./number-input.helpers";
 import { MAX_PLAN_QUANTITY } from "./plan.constants";
 
 export type FillBudget = FocusBudget & { maxQuantity: number };
 
-const DEFAULT_FOCUS = "10000";
 const DEFAULT_MAX_QUANTITY = "100";
-const MAX_FOCUS = 1_000_000;
 const MAX_SILVER = 1_000_000_000_000;
 
-function whole(text: string, min: number, max: number): number | undefined {
-  const value = Number(text);
-  return text.trim() !== "" &&
-    Number.isInteger(value) &&
-    value >= min &&
-    value <= max
-    ? value
-    : undefined;
-}
-
-// Asks for a focus budget and fills the plan with the best crafts for it.
+// Fills the plan with the best crafts for `focus`, the focus you have.
 // `unavailable` says why it can't, if it can't.
 export function FillFromFocus({
+  focus,
   onFill,
   unavailable,
 }: {
+  focus: number | undefined;
   onFill: (budget: FillBudget) => number;
   unavailable: string | undefined;
 }) {
-  const [focus, setFocus] = useState(DEFAULT_FOCUS);
   const [maxQuantity, setMaxQuantity] = useState(DEFAULT_MAX_QUANTITY);
   const [silver, setSilver] = useState("");
   const [added, setAdded] = useState<number>();
-  const focusId = useId();
   const maxId = useId();
   const silverId = useId();
 
   const budget = {
-    focus: whole(focus, 1, MAX_FOCUS),
-    maxQuantity: whole(maxQuantity, 1, MAX_PLAN_QUANTITY),
-    silver: silver.trim() === "" ? null : whole(silver, 1, MAX_SILVER),
+    focus,
+    maxQuantity: wholeNumber(maxQuantity, 1, MAX_PLAN_QUANTITY),
+    silver: silver.trim() === "" ? null : wholeNumber(silver, 1, MAX_SILVER),
   };
   const valid =
     budget.focus !== undefined &&
@@ -72,16 +61,6 @@ export function FillFromFocus({
         );
       }}
     >
-      <label htmlFor={focusId}>Focus</label>
-      <input
-        id={focusId}
-        type="number"
-        min={1}
-        value={focus}
-        onChange={(event) => {
-          setFocus(event.target.value);
-        }}
-      />
       <label htmlFor={maxId}>Max per item</label>
       <input
         id={maxId}

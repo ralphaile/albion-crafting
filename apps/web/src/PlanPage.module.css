@@ -17,6 +17,22 @@
   font-family: var(--font-display);
 }
 
+.focusBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.focusBar > label {
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+.focusBar > input {
+  width: 11ch;
+}
+
 .location {
   display: grid;
   gap: 10px;

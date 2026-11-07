@@ -326,6 +326,26 @@ describe("PlanPage", () => {
     );
   });
 
+  it("says how many days of focus the plan takes with the focus you have", async () => {
+    renderPlan();
+    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
+    addBroadsword(screen.getByRole("region", { name: "Location 1" }));
+    await screen.findByRole("list", { name: `Materials for ${BROADSWORD}` });
+
+    expect(total("Plan totals", "Days of focus")).toBe("Enough now");
+
+    fireEvent.change(screen.getByLabelText(`Quantity of ${BROADSWORD}`), {
+      target: { value: "40" },
+    });
+    expect(total("Plan totals", "Focus")).toBe("51,440");
+    expect(total("Plan totals", "Days of focus")).toBe("5 days");
+
+    fireEvent.change(screen.getByLabelText("Focus you have"), {
+      target: { value: "30000" },
+    });
+    expect(total("Plan totals", "Days of focus")).toBe("3 days");
+  });
+
   it("lets a quantity be cleared and typed again, and keeps the last good one until then", async () => {
     renderPlan();
     fireEvent.click(screen.getByRole("button", { name: "Add location" }));
