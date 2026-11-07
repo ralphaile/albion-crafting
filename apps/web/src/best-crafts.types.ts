@@ -1,10 +1,21 @@
 import type { Evaluation, PriceOrigin } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
-import type { ItemPrices, ObservedPrice } from "@aoc/market-prices";
+import type {
+  HistorySummary,
+  ItemPrices,
+  ObservedPrice,
+} from "@aoc/market-prices";
 
 export interface CraftPrices {
   materials: readonly ItemPrices[];
   products: readonly ItemPrices[];
+}
+
+// The materials' history in the buy market, and the products' in the sell
+// market.
+export interface CraftHistory {
+  materials: readonly HistorySummary[];
+  products: readonly HistorySummary[];
 }
 
 // How many sell a day in the sell market. "none" when AODP has no history of
