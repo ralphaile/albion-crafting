@@ -80,12 +80,17 @@ export function routeFromChoice({
 }
 
 // A sell-only market like the Black Market has no sell orders, only buy orders.
+export function sellsOnlyToBuyOrders(marketId: string): boolean {
+  return markets.some(
+    ({ id, sellOnly }) => id === marketId && sellOnly === true,
+  );
+}
+
 export function settingsForRoute(
   settings: EvaluateSettings,
   route: Route,
 ): EvaluateSettings {
-  const sellOnly = markets.some(
-    ({ id, sellOnly }) => id === route.sellMarketId && sellOnly === true,
-  );
-  return sellOnly ? { ...settings, sellMode: "blackMarket" } : settings;
+  return sellsOnlyToBuyOrders(route.sellMarketId)
+    ? { ...settings, sellMode: "blackMarket" }
+    : settings;
 }
