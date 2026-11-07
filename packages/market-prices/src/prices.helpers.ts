@@ -18,8 +18,9 @@ function aged(
     now = Date.now(),
     staleAfterMinutes = DEFAULT_STALE_AFTER_MINUTES,
   }: NormalizeOptions,
+  atLeastMinutes = 0,
 ): ObservedPrice {
-  const ageMs = Math.max(0, now - observedAt);
+  const ageMs = Math.max(0, now - observedAt, atLeastMinutes * MINUTE_MS);
   return {
     status: ageMs > staleAfterMinutes * MINUTE_MS ? "stale" : "fresh",
     value,
@@ -62,7 +63,8 @@ export function normalizePrices(
 }
 
 // The same prices with their age and fresh or stale worked out again at `now`,
-// from when AODP saw them.
+// from when AODP saw them. An age never goes down, so a `now` from before the
+// prices were fetched keeps the age they came with.
 export function agePrices(
   rows: readonly ItemPrices[],
   options: NormalizeOptions,
@@ -75,6 +77,7 @@ export function agePrices(
           price.observedAt,
           price.fromSnapshot === true,
           options,
+          price.ageMinutes,
         );
   return rows.map((row) => ({
     ...row,
