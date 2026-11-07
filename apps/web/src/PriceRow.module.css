@@ -20,9 +20,7 @@
 
 .name {
   grid-area: name;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .count {
@@ -46,8 +44,10 @@
   color: var(--loss);
 }
 
+/* Stays at the top right when the name wraps. */
 .input {
   grid-area: input;
+  align-self: start;
   width: 100%;
   height: 34px;
   padding-block: 0;
