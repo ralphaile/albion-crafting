@@ -3,14 +3,16 @@ import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { type CraftingPlace, pricesNeeded, type PricesNeeded } from "@aoc/core";
 import { recipes } from "@aoc/crafting-data";
 import type {
+  AodpEvent,
   BatchFailure,
+  HistorySummary,
   MarketData,
+  PartialHistory,
   PartialPrices,
-  PricesOptions,
   Region,
 } from "@aoc/market-prices";
 
-import { evaluateCrafts } from "./best-crafts.helpers";
+import { evaluateCrafts, withDailyVolumes } from "./best-crafts.helpers";
 import type { Craft, CraftPrices } from "./best-crafts.types";
 import { NO_FILTERS } from "./filters.constants";
 import { craftFilter, recipeFilter } from "./filters.helpers";
@@ -68,9 +70,11 @@ export type BestCraftsResult = PriceActions &
       }
   );
 
+// `history` is the products' history in the sell market.
 interface ReadyPrices {
   status: "ready";
   prices: CraftPrices;
+  history: readonly HistorySummary[];
   failures: BatchFailure[];
   batches: number;
   fetchedAt: number | undefined;
@@ -95,7 +99,16 @@ interface Progress extends FetchProgress {
   attempt: number;
 }
 
-type Side = "materials" | "products";
+type Side = "materials" | "products" | "history";
+
+interface FetchOptions {
+  region: Region;
+  staleAfterMinutes: number;
+  force: boolean;
+  refetch: readonly string[];
+  signal: AbortSignal;
+  onEvent: (event: AodpEvent) => void;
+}
 
 const QUALITIES = [QUALITY];
 
@@ -105,80 +118,123 @@ const NO_PRICES: CraftPrices = { materials: [], products: [] };
 
 const NO_ITEMS: readonly string[] = [];
 
+const NO_HISTORY: readonly HistorySummary[] = [];
+
 function oldest(...times: (number | undefined)[]): number | undefined {
   const known = times.filter((time) => time !== undefined);
   return known.length === 0 ? undefined : Math.min(...known);
 }
 
+// The prices' `fetchedAt` leaves out the history, which is reused for longer.
 function readyPrices(
   materials: PartialPrices,
   products: PartialPrices,
+  history: PartialHistory | undefined,
 ): ReadyPrices {
   return {
     status: "ready",
     prices: { materials: materials.prices, products: products.prices },
+    history: history?.history ?? NO_HISTORY,
     failures: [],
     batches: 0,
     fetchedAt: oldest(materials.fetchedAt, products.fetchedAt),
   };
 }
 
-// Reads a side's prices once, until newer ones arrive.
-function readOnce(read: () => PartialPrices): () => PartialPrices {
-  let prices: PartialPrices | undefined;
-  return () => (prices ??= read());
+// Reads a side once, until newer rows arrive.
+function readOnce<T>(read: () => T): () => T {
+  let rows: T | undefined;
+  return () => (rows ??= read());
 }
 
-// `onPartial` is called as prices arrive, once both sides have some, and
-// `read` gets the prices known so far.
+// Fetches the materials' prices in the buy market, and the products' prices
+// and history in the sell market. `onPartial` is called as they arrive, once
+// both sides of the prices have some, and `read` gets what's known so far.
 async function fetchPrices(
   marketData: MarketData,
   needed: PricesNeeded,
   buyMarketId: string,
   sellMarketId: string,
-  options: PricesOptions,
+  { region, staleAfterMinutes, force, refetch, signal, onEvent }: FetchOptions,
   onPartial: (read: () => ReadyPrices) => void,
   onProgress: (done: number, total: number) => void,
 ): Promise<Fetched> {
-  const known: Partial<Record<Side, () => PartialPrices>> = {};
+  const known: {
+    materials?: () => PartialPrices;
+    products?: () => PartialPrices;
+    history?: () => PartialHistory;
+  } = {};
   const counts: Record<Side, { done: number; total: number }> = {
     materials: { done: 0, total: 0 },
     products: { done: 0, total: 0 },
+    history: { done: 0, total: 0 },
+  };
+  const sum = (count: "done" | "total") =>
+    counts.materials[count] + counts.products[count] + counts.history[count];
+  const report = (side: Side) => (event: AodpEvent) => {
+    onEvent(event);
+    if (event.type === "progress") {
+      counts[side] = { done: event.done, total: event.total };
+      onProgress(sum("done"), sum("total"));
+    }
+  };
+  const showKnown = () => {
+    const { materials, products, history } = known;
+    if (materials && products) {
+      onPartial(() => readyPrices(materials(), products(), history?.()));
+    }
   };
   const ask = async (
-    side: Side,
+    side: "materials" | "products",
     itemIds: readonly string[],
     marketId: string,
   ) => {
     const result = await marketData.getPrices(itemIds, [marketId], QUALITIES, {
-      ...options,
-      onEvent: (event) => {
-        options.onEvent?.(event);
-        if (event.type === "progress") {
-          counts[side] = { done: event.done, total: event.total };
-          onProgress(
-            counts.materials.done + counts.products.done,
-            counts.materials.total + counts.products.total,
-          );
-        }
-      },
+      region,
+      staleAfterMinutes,
+      force,
+      refetch,
+      signal,
+      onEvent: report(side),
       onPartial: (read) => {
         known[side] = readOnce(read);
-        const { materials, products } = known;
-        if (materials && products) {
-          onPartial(() => readyPrices(materials(), products()));
-        }
+        showKnown();
       },
     });
     known[side] = () => result;
     return result;
   };
+  // History is reused for hours, so Refresh prices doesn't force it.
+  const askHistory = async () => {
+    const result = await marketData.getHistory(
+      needed.products,
+      [sellMarketId],
+      QUALITIES,
+      {
+        region,
+        refetch,
+        signal,
+        onEvent: report("history"),
+        onPartial: (read) => {
+          known.history = readOnce(read);
+          showKnown();
+        },
+      },
+    );
+    known.history = () => result;
+    return result;
+  };
   try {
-    const [materials, products] = await Promise.all([
+    const [materials, products, history] = await Promise.all([
       ask("materials", needed.materials, buyMarketId),
       ask("products", needed.products, sellMarketId),
+      askHistory(),
     ]);
-    const failures = [...materials.failures, ...products.failures];
+    const failures = [
+      ...materials.failures,
+      ...products.failures,
+      ...history.failures,
+    ];
     const [firstFailure] = failures;
     if (
       firstFailure !== undefined &&
@@ -187,9 +243,9 @@ async function fetchPrices(
       return { status: "error", error: firstFailure.error };
     }
     return {
-      ...readyPrices(materials, products),
+      ...readyPrices(materials, products, history),
       failures,
-      batches: counts.materials.total + counts.products.total,
+      batches: sum("total"),
     };
   } catch (error) {
     return {
@@ -370,6 +426,7 @@ export function useBestCrafts(
               : {
                   status: "ready",
                   prices: NO_PRICES,
+                  history: NO_HISTORY,
                   failures: [],
                   batches: 0,
                   fetchedAt: undefined,
@@ -448,9 +505,15 @@ export function useBestCrafts(
         : evaluateCrafts(priced, place, routeSettings, prices),
     [priced, place, routeSettings, prices],
   );
+  const history =
+    current?.fetched.status === "ready" ? current.fetched.history : NO_HISTORY;
+  const withVolumes = useMemo(
+    () => withDailyVolumes(evaluated, history),
+    [evaluated, history],
+  );
   const crafts = useMemo(
-    () => evaluated.filter(craftFilter(filters)),
-    [evaluated, filters],
+    () => withVolumes.filter(craftFilter(filters)),
+    [withVolumes, filters],
   );
   const missing = useMemo(
     () =>
@@ -517,7 +580,7 @@ export function useBestCrafts(
       status: "error",
       error: current.fetched.error,
       crafts,
-      allCrafts: evaluated,
+      allCrafts: withVolumes,
       missingPrices: missing,
     };
   }
@@ -526,7 +589,7 @@ export function useBestCrafts(
       ...actions,
       status: "ready",
       crafts,
-      allCrafts: evaluated,
+      allCrafts: withVolumes,
       missingPrices: missing,
       failures: current.fetched.failures,
       batches: current.fetched.batches,

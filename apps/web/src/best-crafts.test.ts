@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { CraftingPlace, EvaluateSettings } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
 
-import { evaluateCrafts } from "./best-crafts.helpers";
+import { evaluateCrafts, withDailyVolumes } from "./best-crafts.helpers";
 import type {
   UsedItemPrices,
   UsedPrice,
@@ -238,5 +238,45 @@ describe("evaluateCrafts", () => {
       seen(50, 200),
     );
     expect(craft?.materialPrices.get("T4_CLOTH")).toEqual(seen(20, 90));
+  });
+});
+
+describe("withDailyVolumes", () => {
+  const crafts = evaluateCrafts(
+    [broadsword, axe],
+    island,
+    instantBuyAndSell,
+    pricesOnHand,
+  );
+
+  it('gives each craft how many sell a day, "none" without history, and "unknown" until it comes', () => {
+    const [sword, battleaxe] = withDailyVolumes(crafts, [
+      {
+        itemId: "T4_MAIN_SWORD",
+        marketId: "Lymhurst",
+        quality: 1,
+        averagePrice: 3100,
+        averageDailyVolume: 12.5,
+        newestDay: Date.UTC(2026, 9, 25),
+      },
+    ]);
+    const [, noHistory] = withDailyVolumes(crafts, [
+      {
+        itemId: "T4_MAIN_AXE",
+        marketId: "Lymhurst",
+        quality: 1,
+        averagePrice: undefined,
+        averageDailyVolume: 0,
+        newestDay: undefined,
+      },
+    ]);
+
+    expect(crafts.map(({ dailyVolume }) => dailyVolume)).toEqual([
+      "unknown",
+      "unknown",
+    ]);
+    expect(sword?.dailyVolume).toBe(12.5);
+    expect(battleaxe?.dailyVolume).toBe("unknown");
+    expect(noHistory?.dailyVolume).toBe("none");
   });
 });

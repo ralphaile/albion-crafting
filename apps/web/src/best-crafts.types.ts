@@ -7,6 +7,11 @@ export interface CraftPrices {
   products: readonly ItemPrices[];
 }
 
+// How many sell a day in the sell market. "none" when AODP has no history of
+// it there, as is common in Black Zone markets. "unknown" until its history
+// arrives, or when fetching it failed.
+export type DailyVolume = number | "none" | "unknown";
+
 export type SeenPrice = Exclude<ObservedPrice, { status: "missing" }>;
 
 // When there's both an API price and a typed one, `passedOver` is the one not
@@ -38,5 +43,6 @@ export type CraftAlternative = Evaluation & {
 export type Craft = CraftAlternative & {
   recipe: GameRecipe;
   specialty: boolean;
+  dailyVolume: DailyVolume;
   alternatives: readonly [CraftAlternative, ...CraftAlternative[]];
 };
