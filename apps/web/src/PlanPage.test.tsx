@@ -9,6 +9,7 @@ import type { CraftingPlan } from "./plan.types";
 import { PlanPage } from "./PlanPage";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import { DEFAULT_SETTINGS } from "./settings.constants";
+import type { CraftingSettings } from "./settings.types";
 import { NO_SPECIALIZATIONS } from "./specializations.constants";
 import { fakeMarketData } from "../test/fake-market-data";
 
@@ -44,9 +45,11 @@ const broadswordPrices = [
 function Harness({
   marketData,
   initial,
+  settings,
 }: {
   marketData: MarketData;
   initial: CraftingPlan;
+  settings: CraftingSettings;
 }) {
   const [plan, setPlan] = useState(initial);
   return (
@@ -55,7 +58,7 @@ function Harness({
       plan={plan}
       onChange={setPlan}
       route={DEFAULT_ROUTE_CHOICE}
-      settings={DEFAULT_SETTINGS}
+      settings={settings}
       manualPrices={[]}
       specializations={NO_SPECIALIZATIONS}
     />
@@ -65,8 +68,11 @@ function Harness({
 function renderPlan(
   marketData: MarketData = answering(broadswordPrices),
   initial: CraftingPlan = NO_PLAN,
+  settings: CraftingSettings = DEFAULT_SETTINGS,
 ) {
-  render(<Harness marketData={marketData} initial={initial} />);
+  render(
+    <Harness marketData={marketData} initial={initial} settings={settings} />,
+  );
 }
 
 function addBroadsword(location: HTMLElement) {
@@ -238,5 +244,52 @@ describe("PlanPage", () => {
     expect(writeText.mock.calls[0]?.[0]).toMatch(
       /^Lymhurst\n {2}\d+ × Steel Bar 4\.0 at 100 = /,
     );
+  });
+
+  it("uses an item's 7-day average when its price is an outlier and Settings says to", async () => {
+    const marketData = {
+      ...answering(broadswordPrices),
+      getHistory: vi.fn<MarketData["getHistory"]>(() =>
+        Promise.resolve({
+          history: [
+            {
+              itemId: "T4_MAIN_SWORD",
+              marketId: "Lymhurst",
+              quality: 1,
+              averagePrice: 500,
+              averageDailyVolume: 10,
+              newestDay: 0,
+            },
+          ],
+          failures: [],
+          fetchedAt: 0,
+        }),
+      ),
+    };
+    const plan: CraftingPlan = {
+      locations: [
+        {
+          id: "city",
+          route: DEFAULT_ROUTE_CHOICE,
+          entries: [
+            {
+              id: "a",
+              itemId: "T4_MAIN_SWORD",
+              alternative: 0,
+              quantity: 1,
+              focus: true,
+              dailyBonus: 0,
+            },
+          ],
+        },
+      ],
+    };
+    renderPlan(marketData, plan, {
+      ...DEFAULT_SETTINGS,
+      useAverageForOutliers: true,
+    });
+
+    await screen.findByRole("list", { name: `Materials for ${BROADSWORD}` });
+    expect(total("Plan totals", "Profit")).toMatch(/^−/);
   });
 });
