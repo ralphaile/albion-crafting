@@ -217,6 +217,16 @@ describe("withManualPrices", () => {
     });
   });
 
+  it("uses a typed price over the snapshot's, even when the snapshot's is newer", () => {
+    const snapshot = { ...seen(100, 30), fromSnapshot: true };
+
+    expect(barsUsed(snapshot, 90)?.sellMin).toEqual({
+      ...seen(120, 90),
+      origin: "manual",
+      passedOver: snapshot,
+    });
+  });
+
   it("uses the typed price whenever there is one when manual prices are preferred", () => {
     expect(
       barsUsed(seen(100, 30), 90, { preferManual: true })?.sellMin,

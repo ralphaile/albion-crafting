@@ -581,6 +581,145 @@ describe.each([
     });
   });
 
+  describe("getPrices with a snapshot", () => {
+    const SNAPSHOT_URL = "https://site.test/prices/";
+    const SNAPSHOT_SEEN = Date.UTC(2026, 9, 26, 10, 0);
+
+    // Serves the site's snapshot files, and notes which ones are asked for.
+    function fakeSnapshot(files: Record<string, Record<string, unknown>>) {
+      const requested: string[] = [];
+      server.use(
+        http.get(`${SNAPSHOT_URL}*`, ({ request }) => {
+          const path = new URL(request.url).pathname.replace("/prices/", "");
+          requested.push(path);
+          return path in files
+            ? HttpResponse.json(files[path])
+            : new HttpResponse(null, { status: 404 });
+        }),
+      );
+      return requested;
+    }
+
+    const caerleon = {
+      fetchedAt: SNAPSHOT_SEEN,
+      rows: [
+        ["T4_BAG", 900, "2026-10-26T10:00:00", 800, "2026-10-26T10:00:00"],
+        ["T5_BAG", 1900, "2026-10-26T10:00:00", 0, NO_DATA],
+      ],
+    };
+
+    function fromSnapshot(value: number) {
+      return {
+        status: "fresh",
+        value,
+        observedAt: SNAPSHOT_SEEN,
+        ageMinutes: 120,
+        fromSnapshot: true,
+      };
+    }
+
+    it("prices the items AODP can't answer for from the snapshot, on a first visit", async () => {
+      const { failing } = fakeAodp();
+      failing.add("T4_BAG");
+      const requested = fakeSnapshot({ "west/caerleon.json": caerleon });
+      const marketData = await openMarketData({ snapshotUrl: SNAPSHOT_URL });
+
+      const result = await marketData.getPrices(
+        ["T4_BAG", "T5_BAG"],
+        ["Caerleon"],
+        [1],
+      );
+
+      expect(result.prices).toEqual([
+        {
+          itemId: "T4_BAG",
+          marketId: "Caerleon",
+          quality: 1,
+          sellMin: fromSnapshot(900),
+          buyMax: fromSnapshot(800),
+        },
+        {
+          itemId: "T5_BAG",
+          marketId: "Caerleon",
+          quality: 1,
+          sellMin: fromSnapshot(1900),
+          buyMax: { status: "missing" },
+        },
+      ]);
+      expect(result.failures).toHaveLength(1);
+      expect(result.fetchedAt).toBe(SNAPSHOT_SEEN);
+      expect(requested).toEqual(["west/caerleon.json"]);
+    });
+
+    it("keeps each side's saved price when it's newer than the snapshot's", async () => {
+      const { failing } = fakeAodp();
+      fakeSnapshot({ "west/caerleon.json": caerleon });
+      const marketData = await openMarketData({ snapshotUrl: SNAPSHOT_URL });
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+      minutesLater(20);
+      failing.add("T4_BAG");
+      const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+      expect(result.prices[0]?.sellMin).toEqual({
+        status: "fresh",
+        value: 1000,
+        observedAt: SEEN,
+        ageMinutes: 35,
+      });
+      expect(result.prices[0]?.buyMax).toMatchObject({
+        value: 800,
+        fromSnapshot: true,
+      });
+    });
+
+    it("doesn't download the snapshot while AODP answers", async () => {
+      fakeAodp();
+      const requested = fakeSnapshot({ "west/caerleon.json": caerleon });
+      const marketData = await openMarketData({ snapshotUrl: SNAPSHOT_URL });
+
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+      expect(requested).toEqual([]);
+    });
+
+    it("downloads each server's market once, however often AODP fails", async () => {
+      const { failing } = fakeAodp();
+      failing.add("T4_BAG");
+      const requested = fakeSnapshot({});
+      const marketData = await openMarketData({ snapshotUrl: SNAPSHOT_URL });
+
+      await marketData.getPrices(["T4_BAG"], ["Caerleon", "Black Market"], [1]);
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1], {
+        force: true,
+      });
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1], {
+        region: "east",
+      });
+
+      expect(requested.sort()).toEqual([
+        "east/caerleon.json",
+        "west/black-market.json",
+        "west/caerleon.json",
+      ]);
+    });
+
+    it.each([
+      ["missing", {}],
+      ["unreadable", { "west/caerleon.json": { rows: "lots" } }],
+    ])("counts a %s snapshot as none", async (_case, files) => {
+      const { failing } = fakeAodp();
+      failing.add("T4_BAG");
+      fakeSnapshot(files);
+      const marketData = await openMarketData({ snapshotUrl: SNAPSHOT_URL });
+
+      const result = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+
+      expect(result.prices).toEqual([]);
+      expect(result.fetchedAt).toBeUndefined();
+    });
+  });
+
   describe("getHistory", () => {
     it("sums up the newest 7 days, and reuses history fetched less than 6 hours ago", async () => {
       const { requests } = fakeAodp();

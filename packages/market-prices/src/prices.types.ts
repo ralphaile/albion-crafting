@@ -1,5 +1,7 @@
 import type { OrderPrices } from "@aoc/core";
 
+// `fromSnapshot` is a price from the site's snapshot, used when AODP couldn't
+// answer.
 export type ObservedPrice =
   | { status: "missing" }
   | {
@@ -7,6 +9,7 @@ export type ObservedPrice =
       value: number;
       observedAt: number;
       ageMinutes: number;
+      fromSnapshot?: boolean;
     };
 
 export interface ItemPrices extends OrderPrices {

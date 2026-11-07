@@ -57,7 +57,10 @@ function usedPrice(
   if (manual === undefined) {
     return { ...api, origin: "api" };
   }
-  if (choosePrice(api, manual, { preferManual }) === "api") {
+  // A typed price beats the snapshot's, however old.
+  const preferred =
+    preferManual || (api.status !== "missing" && api.fromSnapshot === true);
+  if (choosePrice(api, manual, { preferManual: preferred }) === "api") {
     return { ...api, origin: "api", passedOver: manual };
   }
   return api.status === "missing"
