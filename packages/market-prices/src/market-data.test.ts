@@ -4,6 +4,7 @@ import { delay, http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  type PartialHistory,
   type PartialPrices,
   type PricesResult,
   openMarketData,
@@ -652,6 +653,25 @@ describe.each([
           newestDay: undefined,
         },
       ]);
+    });
+
+    it("reports the history it has at once, then each batch as it arrives", async () => {
+      fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1]);
+      const partials: PartialHistory[] = [];
+
+      const result = await marketData.getHistory(
+        ["T4_BAG", "T5_BAG"],
+        ["Caerleon"],
+        [1],
+        { onPartial: (read) => partials.push(read()) },
+      );
+
+      expect(
+        partials.map(({ history }) => history.map(({ itemId }) => itemId)),
+      ).toEqual([["T4_BAG"], ["T4_BAG", "T5_BAG"]]);
+      expect(partials.at(-1)?.history).toEqual(result.history);
     });
 
     it("doesn't take prices for history", async () => {

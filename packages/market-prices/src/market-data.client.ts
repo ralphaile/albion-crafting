@@ -72,12 +72,26 @@ export async function openMarketData(): Promise<MarketData> {
       );
       return { prices: normalizePrices(rows, options), failures, fetchedAt };
     },
-    async getHistory(itemIds, marketIds, qualities, options) {
+    async getHistory(itemIds, marketIds, qualities, options = {}) {
+      const { onPartial, ...fetchOptions } = options;
       const { rows, failures, fetchedAt } = await cachedHistory(
         itemIds,
         marketIds,
         qualities,
-        options,
+        {
+          ...fetchOptions,
+          ...(onPartial && {
+            onPartial: (read) => {
+              onPartial(() => {
+                const partial = read();
+                return {
+                  history: summarizeHistory(partial.rows, options),
+                  fetchedAt: partial.fetchedAt,
+                };
+              });
+            },
+          }),
+        },
       );
       return { history: summarizeHistory(rows, options), failures, fetchedAt };
     },
