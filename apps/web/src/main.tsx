@@ -17,6 +17,7 @@ import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
   PLAN_SETTING,
+  RECIPE_CHOICES_SETTING,
   ROUTE_SETTING,
   SPECIALIZATIONS_SETTING,
 } from "./saved-settings.constants";
@@ -40,6 +41,7 @@ const [
   savedSettings,
   savedSpecializations,
   savedPlan,
+  savedRecipeChoices,
   savedManualPrices,
 ] = await Promise.all([
   settingsStore.load(FILTERS_SETTING),
@@ -47,6 +49,7 @@ const [
   settingsStore.load(CRAFTING_SETTING),
   settingsStore.load(SPECIALIZATIONS_SETTING),
   settingsStore.load(PLAN_SETTING),
+  settingsStore.load(RECIPE_CHOICES_SETTING),
   manualPriceStore.list(),
 ]);
 
@@ -61,6 +64,7 @@ createRoot(root).render(
       savedSettings={savedSettings}
       savedSpecializations={savedSpecializations}
       savedPlan={savedPlan}
+      savedRecipeChoices={savedRecipeChoices}
       savedManualPrices={savedManualPrices}
     />
   </StrictMode>,

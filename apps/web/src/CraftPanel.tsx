@@ -1,4 +1,4 @@
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useId } from "react";
 
 import {
   FCE_PER_MASTERY_LEVEL,
@@ -29,12 +29,14 @@ import {
   formatSilver,
   formatSilverPerFocus,
 } from "./format.helpers";
+import { ItemIcon } from "./ItemIcon";
 import { sameManualPrice } from "./manual-prices.helpers";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 import type { AddToPlanHandler } from "./plan.types";
 import { PriceBadge } from "./PriceBadge";
 import { PriceRow } from "./PriceRow";
 import { QUALITY } from "./prices.constants";
+import type { ChooseRecipeHandler } from "./recipe-choices.types";
 import { SidePanel } from "./SidePanel";
 import { fceParts, treeLevels } from "./specializations.helpers";
 import type { SpecializationProfile } from "./specializations.types";
@@ -158,18 +160,17 @@ function Figure({
 
 // The materials that tell a recipe apart from the item's other ones, such as
 // an artifact or the token used instead.
-function recipeLabel(
+function differingMaterials(
   shown: CraftAlternative,
   alternatives: readonly CraftAlternative[],
-) {
+): string[] {
   const inEvery = (itemId: string) =>
     alternatives.every(({ materialCost }) =>
       materialCost.lines.some((line) => line.itemId === itemId),
     );
   return shown.materialCost.lines
-    .filter(({ itemId }) => !inEvery(itemId))
-    .map(({ itemId }) => itemName(itemId))
-    .join(" + ");
+    .map(({ itemId }) => itemId)
+    .filter((itemId) => !inEvery(itemId));
 }
 
 function recipeResult(alternative: CraftAlternative) {
@@ -212,6 +213,7 @@ export function CraftPanel({
   onRemove,
   specializations,
   onEditSpecializations,
+  onChooseRecipe,
   onAddToPlan,
   onClose,
 }: {
@@ -224,57 +226,78 @@ export function CraftPanel({
   onRemove: (key: ManualPriceKey) => void;
   specializations: SpecializationProfile;
   onEditSpecializations: (treeId: string) => void;
+  onChooseRecipe: ChooseRecipeHandler;
   onAddToPlan?: AddToPlanHandler;
   onClose: () => void;
 }) {
-  // Which recipe the panel shows, until it closes or shows another item.
-  const [chosen, setChosen] = useState<{
-    itemId: string;
-    alternative: number;
-  }>();
-
-  function recipes(craft: Craft, shown: CraftAlternative) {
+  // A recipe button is pressed when you chose it, and the tick is on the
+  // recipe the table uses, chosen or the most profitable.
+  function recipes(craft: Craft) {
     return (
       <Section title="Recipe" help="artifact">
         <ul className={styles.recipes}>
-          {craft.alternatives.map((alternative) => (
-            <li key={alternative.alternative}>
-              <button
-                type="button"
-                className={styles.recipe}
-                aria-pressed={alternative.alternative === shown.alternative}
-                onClick={() => {
-                  setChosen({
-                    itemId: craft.itemId,
-                    alternative: alternative.alternative,
-                  });
-                }}
-              >
-                <span className={styles.recipeName}>
-                  {recipeLabel(alternative, craft.alternatives)}
-                </span>
-                <span
-                  className={styles.recipeResult}
-                  data-missing={alternative.status === "incomplete"}
+          {craft.alternatives.map((alternative) => {
+            const materials = differingMaterials(
+              alternative,
+              craft.alternatives,
+            );
+            return (
+              <li key={alternative.alternative}>
+                <button
+                  type="button"
+                  className={styles.recipe}
+                  aria-pressed={
+                    craft.recipeChosen === true &&
+                    alternative.alternative === craft.alternative
+                  }
+                  onClick={() => {
+                    onChooseRecipe(craft.itemId, alternative.alternative);
+                  }}
                 >
-                  {recipeResult(alternative)}
-                </span>
-                {alternative.alternative === craft.alternative ? (
-                  <svg
-                    className={styles.used}
-                    viewBox="0 0 16 16"
-                    aria-label="Used in the table"
-                    role="img"
+                  <span className={styles.recipeIcons}>
+                    {materials.map((itemId) => (
+                      <ItemIcon key={itemId} id={itemId} />
+                    ))}
+                  </span>
+                  <span className={styles.recipeName}>
+                    {materials.map(itemName).join(" + ")}
+                  </span>
+                  <span
+                    className={styles.recipeResult}
+                    data-missing={alternative.status === "incomplete"}
                   >
-                    <title>Used in the table</title>
-                    <path d="M3 8.5l3 3 7-7" />
-                  </svg>
-                ) : (
-                  <span className={styles.used} />
-                )}
-              </button>
-            </li>
-          ))}
+                    {recipeResult(alternative)}
+                  </span>
+                  {alternative.alternative === craft.alternative ? (
+                    <svg
+                      className={styles.used}
+                      viewBox="0 0 16 16"
+                      aria-label="Used in the table"
+                      role="img"
+                    >
+                      <title>Used in the table</title>
+                      <path d="M3 8.5l3 3 7-7" />
+                    </svg>
+                  ) : (
+                    <span className={styles.used} />
+                  )}
+                </button>
+              </li>
+            );
+          })}
+          <li>
+            <button
+              type="button"
+              className={styles.recipe}
+              aria-pressed={craft.recipeChosen !== true}
+              onClick={() => {
+                onChooseRecipe(craft.itemId, undefined);
+              }}
+            >
+              <span className={styles.recipeIcons} />
+              <span className={styles.recipeName}>Most profitable</span>
+            </button>
+          </li>
         </ul>
       </Section>
     );
@@ -461,24 +484,18 @@ export function CraftPanel({
   }
 
   function shownFor(craft: Craft) {
-    const shown =
-      chosen?.itemId === craft.itemId
-        ? (craft.alternatives.find(
-            ({ alternative }) => alternative === chosen.alternative,
-          ) ?? craft)
-        : craft;
     return (
       <>
         {onAddToPlan && (
           <AddToPlan
             name={itemName(craft.itemId)}
             onAdd={(quantity) => {
-              onAddToPlan(craft.itemId, shown.alternative, quantity);
+              onAddToPlan(craft.itemId, craft.alternative, quantity);
             }}
           />
         )}
-        {craft.alternatives.length > 1 && recipes(craft, shown)}
-        {breakdown(shown, craft.recipe)}
+        {craft.alternatives.length > 1 && recipes(craft)}
+        {breakdown(craft, craft.recipe)}
       </>
     );
   }
@@ -488,10 +505,7 @@ export function CraftPanel({
       heading={craft === undefined ? "" : itemName(craft.itemId)}
       closeLabel="Close details"
       open={craft !== undefined}
-      onClose={() => {
-        setChosen(undefined);
-        onClose();
-      }}
+      onClose={onClose}
     >
       {craft !== undefined && shownFor(craft)}
     </SidePanel>

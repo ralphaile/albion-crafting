@@ -9,6 +9,8 @@ import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 import { memoryManualPriceStore } from "./manual-prices.store";
 import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
+import { NO_RECIPE_CHOICES } from "./recipe-choices.constants";
+import { chooseRecipe } from "./recipe-choices.helpers";
 import { DEFAULT_ROUTE } from "./route.constants";
 import { placeFromChoice } from "./route.helpers";
 import type { Route } from "./route.types";
@@ -89,6 +91,7 @@ function Crafts({
     initial,
   );
   const [shownItemId, setShownItemId] = useState<string>();
+  const [recipeChoices, setRecipeChoices] = useState(NO_RECIPE_CHOICES);
   const bestCrafts = useBestCrafts(
     marketData,
     route,
@@ -96,6 +99,7 @@ function Crafts({
     filters,
     manualPrices,
     specializations,
+    recipeChoices,
   );
   return (
     <BestCrafts
@@ -110,6 +114,11 @@ function Crafts({
       onRemoveManualPrice={removeManualPrice}
       specializations={specializations}
       onEditSpecializations={onEditSpecializations}
+      onChooseRecipe={(itemId, alternative) => {
+        setRecipeChoices((current) =>
+          chooseRecipe(current, itemId, alternative),
+        );
+      }}
     />
   );
 }
@@ -541,47 +550,74 @@ describe("CraftPanel", () => {
       return within(region).getByRole("button", { name });
     }
 
-    it("shows the recipe the table uses, and what the other one lacks", async () => {
+    function row() {
+      return screen.getByRole("row", {
+        name: /Adept's Mistcaller/,
+        hidden: true,
+      });
+    }
+
+    it("shows each recipe with what tells it apart, and ticks the one the table uses", async () => {
       await openHorn();
 
-      expect(recipe(/Runed Horn/)).toHaveAttribute("aria-pressed", "true");
       expect(recipe(/Runed Horn/)).toHaveAccessibleName(/Used in the table$/);
+      expect(recipe(/Runed Horn/)).toHaveAttribute("aria-pressed", "false");
+      expect(recipe(/Most profitable/)).toHaveAttribute("aria-pressed", "true");
       expect(recipe(/Crystallized Spirit/)).toHaveTextContent(
         "Adept's Crystallized Spirit 4.01 price missing",
       );
-      expect(
-        within(panel(horn)).queryByRole("textbox", { name: token }),
-      ).not.toBeInTheDocument();
+      expect(within(row()).queryByText("Your recipe")).not.toBeInTheDocument();
     });
 
-    it("shows the other recipe's prices to type, and the table switches once it's cheaper", async () => {
+    it("uses the recipe you choose in the table, even missing a price, until you go back to the most profitable", async () => {
       await openHorn();
 
       fireEvent.click(recipe(/Crystallized Spirit/));
+
       expect(recipe(/Crystallized Spirit/)).toHaveAttribute(
         "aria-pressed",
         "true",
       );
-      fireEvent.change(
-        within(panel(horn)).getByRole("textbox", { name: token }),
-        {
-          target: { value: "500" },
-        },
-      );
-      fireEvent.keyDown(
-        within(panel(horn)).getByRole("textbox", { name: token }),
-        {
-          key: "Enter",
-        },
-      );
-
       expect(recipe(/Crystallized Spirit/)).toHaveAccessibleName(
         /Used in the table$/,
       );
-      expect(recipe(/Runed Horn/)).not.toHaveAccessibleName(/Used/);
+      expect(within(row()).getByText("Your recipe")).toBeInTheDocument();
+      expect(
+        within(row()).getByRole("button", {
+          name: "1 price missing",
+          hidden: true,
+        }),
+      ).toBeInTheDocument();
+      expect(
+        within(panel(horn)).getByRole("textbox", { name: token }),
+      ).toBeInTheDocument();
+
+      fireEvent.click(recipe(/Most profitable/));
+
+      expect(recipe(/Runed Horn/)).toHaveAccessibleName(/Used in the table$/);
+      expect(within(row()).queryByText("Your recipe")).not.toBeInTheDocument();
     });
 
-    it("opens again on the recipe the table uses", async () => {
+    it("changes the row's profit when you switch from the artifact to the token", async () => {
+      await openHorn();
+      const profit = () =>
+        within(row()).getAllByRole("cell", { hidden: true })[0];
+      const withHorn = profit()?.textContent;
+
+      fireEvent.click(recipe(/Crystallized Spirit/));
+      const tokenPrice = within(panel(horn)).getByRole("textbox", {
+        name: token,
+      });
+      fireEvent.change(tokenPrice, { target: { value: "500" } });
+      fireEvent.keyDown(tokenPrice, { key: "Enter" });
+
+      expect(profit()?.textContent).not.toBe(withHorn);
+      fireEvent.click(recipe(/Runed Horn/));
+      expect(profit()?.textContent).toBe(withHorn);
+      expect(recipe(/Runed Horn/)).toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("keeps your choice when the panel closes and opens again", async () => {
       await openHorn();
       fireEvent.click(recipe(/Crystallized Spirit/));
 
@@ -590,7 +626,10 @@ describe("CraftPanel", () => {
         screen.getByRole("button", { name: `Prices for ${horn}` }),
       );
 
-      expect(recipe(/Runed Horn/)).toHaveAttribute("aria-pressed", "true");
+      expect(recipe(/Crystallized Spirit/)).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
     });
   });
 });
