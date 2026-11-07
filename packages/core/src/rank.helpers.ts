@@ -1,10 +1,6 @@
 import type { Evaluation } from "./evaluate.types.js";
 import type { SortDirection, SortKey } from "./rank.types.js";
 
-export function defaultSortKey(focus: boolean): SortKey {
-  return focus ? "silverPerFocus" : "profit";
-}
-
 export function rank<T extends Evaluation>(
   results: readonly T[],
   sortKey: SortKey,

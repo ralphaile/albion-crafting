@@ -6,12 +6,7 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import {
-  defaultSortKey,
-  rank,
-  type SortDirection,
-  type SortKey,
-} from "@aoc/core";
+import { rank, type SortDirection, type SortKey } from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
 
 import type { Craft, UsedPrice } from "./best-crafts.types";
@@ -248,7 +243,7 @@ export function CraftsTable({
   const [chosenSort, setChosenSort] = useState<Sort>();
   const sort: Sort =
     chosenSort === undefined || (chosenSort.key === "silverPerFocus" && !focus)
-      ? { key: defaultSortKey(focus), direction: "descending" }
+      ? { key: "profit", direction: "descending" }
       : chosenSort;
   const { key: sortKey, direction } = sort;
   // Remembers what the page was chosen for, so new crafts or a new sort start again at the first page.

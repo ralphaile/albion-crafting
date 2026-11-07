@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  defaultSortKey,
-  evaluate,
-  type Evaluation,
-  rank,
-  type SortKey,
-} from "./index.js";
+import { evaluate, type Evaluation, rank, type SortKey } from "./index.js";
 
 const template = evaluate(
   {
@@ -121,12 +115,5 @@ describe("rank", () => {
     rank(given, "profit");
 
     expect(ids(given)).toEqual(["B", "C"]);
-  });
-});
-
-describe("defaultSortKey", () => {
-  it("sorts by silver per focus with focus, and by profit without", () => {
-    expect(defaultSortKey(true)).toBe("silverPerFocus");
-    expect(defaultSortKey(false)).toBe("profit");
   });
 });
