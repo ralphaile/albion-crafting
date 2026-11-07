@@ -125,6 +125,22 @@ function sameRoute(a: RouteChoice, b: RouteChoice): boolean {
   );
 }
 
+// How many of the item and recipe the plan already has at the route.
+export function plannedQuantity(
+  plan: CraftingPlan,
+  route: RouteChoice,
+  itemId: string,
+  alternative: number,
+): number {
+  return (
+    plan.locations
+      .find((location) => sameRoute(location.route, route))
+      ?.entries.find(
+        (entry) => entry.itemId === itemId && entry.alternative === alternative,
+      )?.quantity ?? 0
+  );
+}
+
 // Adds to the location with the same route, made if there's none yet. The same
 // item and recipe already there gets the quantity added.
 export function addToPlan(
