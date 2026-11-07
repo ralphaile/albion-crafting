@@ -1,13 +1,24 @@
 # Crafting plan
 
-A plan says what you'll craft where, and how many: "10 broadswords in Lymhurst, 5 in a Forest hideout". This is the model and the maths. The screen to build one comes later.
+A plan says what you'll craft where, and how many: "10 broadswords in Lymhurst, 5 in a Forest hideout". It has its own page, **Plan** at the top of the app (`#plan`).
+
+## The page
+
+`apps/web/src/PlanPage.tsx`:
+
+- **Add location** adds a location with the route chosen on the best-crafts page. Each location has its own route bar to change where it crafts, buys and sells, and a button to remove it.
+- **Add an item** searches items by name and adds one at quantity 1, with focus. Each entry's enchantment, recipe, quantity, focus and daily bonus can be changed in its row.
+- **Each row** shows the materials to buy after returns, the focus, the station fee and the profit. The materials and the profit carry the same price badges as the best-crafts table: fresh, stale, typed or missing. An entry without every price says which ones it's missing instead of a profit.
+- **Totals** for each location and for the plan: silver to invest, focus and profit, and the missing prices.
+
+`usePlan()` asks each market once for every item the plan needs there, so editing a quantity or focus needs no new request. Prices use the same settings as the best-crafts table: the server, when a price goes stale, and the typed prices.
 
 ## The model
 
 `apps/web/src/plan.types.ts`:
 
 - **`CraftingPlan`:** a list of locations.
-- **A location:** a route, the same as the one above the table: the crafting place (a city, Rest, island, or a hideout with its biome, map quality and power level), and the markets it buys materials in and sells items in.
+- **A location:** a route, the same as the one above the table: the crafting place (a city, Rest, island, or a hideout with its biome, map quality and power level), and the markets it buys materials in and sells items in. A location selling at the Black Market sells to its buy orders.
 - **An entry:** an item with its enchantment, as a market ID such as `T5_MAIN_SWORD@1`, which recipe (`alternative` 0 is the usual one, 1 on its alternatives), the quantity, whether to use focus, and its daily bonus: 0, 0.1 or 0.2 for the item's own crafting category.
 
 ## Saved in the browser
