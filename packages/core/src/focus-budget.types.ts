@@ -1,5 +1,7 @@
 // One craft the budget can pick: what a single craft makes, costs and earns.
-// `maxQuantity` caps the items made, for example at what sells in a day.
+// `silverPerFocus` is what the focus adds to its profit, per focus, as in the
+// best-crafts table. `maxQuantity` caps the items made, for example at what
+// sells in a day.
 export interface FocusCandidate {
   itemId: string;
   alternative: number;
@@ -7,6 +9,7 @@ export interface FocusCandidate {
   focusPerCraft: number;
   costPerCraft: number;
   profitPerCraft: number;
+  silverPerFocus: number;
   maxQuantity: number;
 }
 
