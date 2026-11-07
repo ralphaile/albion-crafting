@@ -6,6 +6,7 @@ import type {
   Recipe,
 } from "./evaluate.types.js";
 import type { DailyBonus } from "./production-bonus.types.js";
+import type { SellMode } from "./revenue.types.js";
 
 // `quantity` is how many items you want. They're made in whole crafts, so a
 // recipe that makes 4 at once makes 8 for a quantity of 5.
@@ -17,10 +18,12 @@ export interface PlanEntry {
   dailyBonuses: readonly DailyBonus[];
 }
 
-// Each place has the prices of the markets it buys and sells in.
+// Each place has the prices of the markets it buys and sells in. `sellMode`
+// overrides the plan's, as a sell-only market such as the Black Market needs.
 export interface PlanLocation {
   place: CraftingPlace;
   prices: EvaluatePrices;
+  sellMode?: SellMode;
   entries: readonly PlanEntry[];
 }
 
