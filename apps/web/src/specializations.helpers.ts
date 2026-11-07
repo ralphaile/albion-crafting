@@ -46,7 +46,7 @@ export function withLevel(
 // specializations.
 export function fceParts(
   profile: SpecializationProfile,
-  recipe: Pick<GameRecipe, "shopSubcategory" | "baseId">,
+  recipe: Pick<GameRecipe, "shopCategory" | "shopSubcategory" | "baseId">,
 ): FceParts {
   const { treeId, specializationId } = specializationOf(recipe);
   const { mastery, specializations } = treeLevels(profile, treeId);

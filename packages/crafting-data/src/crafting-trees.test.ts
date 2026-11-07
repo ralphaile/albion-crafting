@@ -7,8 +7,22 @@ function tree(id: string) {
 }
 
 describe("craftingTrees", () => {
-  it("has a tree for each weapon type, armor piece and offhand type", () => {
-    expect(craftingTrees).toHaveLength(29);
+  it("has a tree for each weapon type, armor piece and offhand type, and bags and capes", () => {
+    expect(craftingTrees).toHaveLength(31);
+  });
+
+  it("puts bags and satchels of insight in one tree", () => {
+    expect(tree("bags")?.specializations).toEqual([
+      { id: "BAG", name: "Bag", itemId: "T4_BAG" },
+      {
+        id: "BAG_INSIGHT",
+        name: "Satchel of Insight",
+        itemId: "T4_BAG_INSIGHT",
+      },
+    ]);
+    expect(tree("capes")?.specializations).toEqual([
+      { id: "CAPE", name: "Cape", itemId: "T4_CAPE" },
+    ]);
   });
 
   it("lists a tree's plain items, then its artifacts, each by name", () => {
@@ -57,9 +71,20 @@ describe("specializationOf", () => {
   it("is the item at every tier and enchantment, in its shop subcategory", () => {
     expect(
       specializationOf({
+        shopCategory: "weapons",
         shopSubcategory: "sword",
         baseId: "T5_MAIN_SWORD",
       }),
     ).toEqual({ treeId: "sword", specializationId: "MAIN_SWORD" });
+  });
+
+  it("puts a satchel of insight in the bags tree", () => {
+    expect(
+      specializationOf({
+        shopCategory: "bags",
+        shopSubcategory: "satchels",
+        baseId: "T6_BAG_INSIGHT",
+      }),
+    ).toEqual({ treeId: "bags", specializationId: "BAG_INSIGHT" });
   });
 });

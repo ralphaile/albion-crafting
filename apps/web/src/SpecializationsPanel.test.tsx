@@ -124,7 +124,12 @@ describe("SpecializationsPanel", () => {
       within(panel())
         .getAllByRole("group")
         .map((group) => group.getAttribute("label")),
-    ).toEqual(["Warrior's Forge", "Hunter's Lodge", "Mage's Tower"]);
+    ).toEqual([
+      "Warrior's Forge",
+      "Hunter's Lodge",
+      "Mage's Tower",
+      "Toolmaker",
+    ]);
   });
 
   it("sets the levels of another tree", () => {
