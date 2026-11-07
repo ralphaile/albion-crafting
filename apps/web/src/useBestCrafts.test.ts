@@ -9,6 +9,7 @@ import type {
 } from "@aoc/market-prices";
 
 import { NO_FILTERS } from "./filters.constants";
+import type { Filters } from "./filters.types";
 import type { ManualPrice } from "./manual-prices.types";
 import { DEFAULT_ROUTE } from "./route.constants";
 import type { Route } from "./route.types";
@@ -159,6 +160,76 @@ describe("useBestCrafts", () => {
     expect(
       getPrices.mock.calls.map(([, , , options]) => options?.force),
     ).toEqual([false, false, true, true, false, false]);
+  });
+
+  it("forces only the refresh's own fetch, not the next one for wider filters", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
+      Promise.resolve({ ...pricesAt(marketIds, 0), failures: [] }),
+    );
+    const marketData = fakeMarketData({ getPrices });
+    const { result, rerender } = renderHook(
+      (filters: Filters) =>
+        useBestCrafts(
+          marketData,
+          route,
+          DEFAULT_SETTINGS,
+          filters,
+          NO_MANUAL_PRICES,
+        ),
+      { initialProps: swords },
+    );
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ updating: false });
+    });
+    act(() => {
+      result.current.refresh();
+    });
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ updating: false });
+    });
+    expect(getPrices).toHaveBeenCalledTimes(4);
+
+    rerender({ ...NO_FILTERS, categories: ["sword", "axe"] });
+    await waitFor(() => {
+      expect(getPrices).toHaveBeenCalledTimes(6);
+    });
+
+    expect(
+      getPrices.mock.calls.map(([, , , options]) => options?.force),
+    ).toEqual([false, false, true, true, false, false]);
+  });
+
+  it("stops quietly when cancelled before any price came", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>(
+      (itemIds, _marketIds, _qualities, options = {}) =>
+        new Promise((resolve) => {
+          options.signal?.addEventListener("abort", () => {
+            resolve({
+              prices: [],
+              fetchedAt: undefined,
+              failures: [
+                { itemIds: [...itemIds], error: new Error("Aborted") },
+              ],
+            });
+          });
+        }),
+    );
+    const { result } = renderBestCrafts(getPrices);
+    await waitFor(() => {
+      expect(getPrices).toHaveBeenCalledTimes(2);
+    });
+
+    act(() => {
+      result.current.cancel();
+    });
+
+    await waitFor(() => {
+      expect(result.current).toMatchObject({
+        status: "ready",
+        failures: [],
+        progress: undefined,
+      });
+    });
   });
 
   it("stops when cancelled, and keeps the prices it has without calling it a failure", async () => {

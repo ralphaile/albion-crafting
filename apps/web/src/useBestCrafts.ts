@@ -29,7 +29,7 @@ import type { SpecializationProfile } from "./specializations.types";
 
 // How far a fetch has got, in batches, and until when it waits for the rate
 // limit, if it does.
-export interface FetchProgress {
+interface FetchProgress {
   done: number;
   total: number;
   waitingUntil: number | undefined;
@@ -357,13 +357,27 @@ export function useBestCrafts(
     ).then((fetched) => {
       clearTimeout(timer);
       if (active) {
-        // Stopping a fetch on purpose isn't a failure.
+        // Stopping a fetch on purpose isn't a failure, even before any price came.
         answerWith(
-          cancelled && fetched.status === "ready"
-            ? { ...fetched, failures: [] }
-            : fetched,
+          !cancelled
+            ? fetched
+            : fetched.status === "ready"
+              ? { ...fetched, failures: [] }
+              : {
+                  status: "ready",
+                  prices: NO_PRICES,
+                  failures: [],
+                  batches: 0,
+                  fetchedAt: undefined,
+                },
           true,
         );
+        // A refresh forces only its own fetch, not the next filter or route's.
+        if (force) {
+          setRequest((last) =>
+            last.attempt === attempt ? { attempt, force: false } : last,
+          );
+        }
       }
     });
     return () => {
