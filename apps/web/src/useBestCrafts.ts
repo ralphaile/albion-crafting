@@ -109,12 +109,9 @@ const SIDES: readonly Side[] = [
   "productHistory",
 ];
 
-// The items to fetch again even when they're recent, kept apart for prices
-// and history so a failed history batch doesn't refetch prices that came.
-interface Refetch {
-  prices: readonly string[];
-  history: readonly string[];
-}
+// The items to fetch again even when they're recent, kept apart for each
+// request so a batch that failed in one doesn't refetch what came in another.
+type Refetch = Record<Side, readonly string[]>;
 
 interface FetchOptions {
   region: Region;
@@ -140,7 +137,12 @@ const NO_HISTORY: CraftHistory = {
   products: NO_SUMMARIES,
 };
 
-const NO_REFETCH: Refetch = { prices: NO_ITEMS, history: NO_ITEMS };
+const NO_REFETCH: Refetch = {
+  materials: NO_ITEMS,
+  products: NO_ITEMS,
+  materialHistory: NO_ITEMS,
+  productHistory: NO_ITEMS,
+};
 
 function oldest(...times: (number | undefined)[]): number | undefined {
   const known = times.filter((time) => time !== undefined);
@@ -241,7 +243,7 @@ async function fetchPrices(
       region,
       staleAfterMinutes,
       force,
-      refetch: refetch.prices,
+      refetch: refetch[side],
       signal,
       onEvent: report(side),
       onPartial: (read) => {
@@ -260,7 +262,7 @@ async function fetchPrices(
   ) => {
     const result = await marketData.getHistory(itemIds, [marketId], QUALITIES, {
       region,
-      refetch: refetch.history,
+      refetch: refetch[side],
       signal,
       onEvent: report(side),
       onPartial: (read) => {
@@ -279,14 +281,11 @@ async function fetchPrices(
         askHistory("materialHistory", needed.materials, buyMarketId),
         askHistory("productHistory", needed.products, sellMarketId),
       ]);
-    const historyFailures = [
-      ...materialHistory.failures,
-      ...productHistory.failures,
-    ];
     const failures = [
       ...materials.failures,
       ...products.failures,
-      ...historyFailures,
+      ...materialHistory.failures,
+      ...productHistory.failures,
     ];
     const [firstFailure] = failures;
     if (
@@ -304,8 +303,10 @@ async function fetchPrices(
       }),
       failures,
       failed: {
-        prices: itemsOf([...materials.failures, ...products.failures]),
-        history: itemsOf(historyFailures),
+        materials: itemsOf(materials.failures),
+        products: itemsOf(products.failures),
+        materialHistory: itemsOf(materialHistory.failures),
+        productHistory: itemsOf(productHistory.failures),
       },
       batches: sum("total"),
     };

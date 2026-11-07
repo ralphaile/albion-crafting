@@ -226,7 +226,7 @@ describe("useBestCrafts", () => {
     ).toEqual([false, false, true, true, false, false]);
   });
 
-  it("retries a failed history batch for its history only, not its prices", async () => {
+  it("retries a failed batch of the materials' history for it alone, not the products' history or any prices", async () => {
     const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
       Promise.resolve({ ...pricesAt(marketIds, 0), failures: [] }),
     );
@@ -256,6 +256,7 @@ describe("useBestCrafts", () => {
     expect(getHistory.mock.calls[2]?.[3]?.refetch).toEqual(
       getHistory.mock.calls[0]?.[0],
     );
+    expect(getHistory.mock.calls[3]?.[3]?.refetch).toEqual([]);
     expect(
       getPrices.mock.calls.slice(2).map(([, , , options]) => options?.refetch),
     ).toEqual([[], []]);
