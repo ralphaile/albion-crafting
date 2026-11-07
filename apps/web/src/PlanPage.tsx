@@ -1,6 +1,11 @@
 import { useId, useState } from "react";
 
-import type { PlanTotals, PlannedEntry } from "@aoc/core";
+import {
+  focusDays,
+  MAX_STORED_FOCUS,
+  type PlanTotals,
+  type PlannedEntry,
+} from "@aoc/core";
 import { type GameRecipe, itemName, searchItems } from "@aoc/crafting-data";
 import type { MarketData } from "@aoc/market-prices";
 
@@ -9,6 +14,7 @@ import { CraftingLocationBar } from "./CraftingLocationBar";
 import { type FillBudget, FillFromFocus } from "./FillFromFocus";
 import { formatCount, formatQuantity, formatSilver } from "./format.helpers";
 import type { ManualPrice } from "./manual-prices.types";
+import { wholeNumber } from "./number-input.helpers";
 import { MAX_PLAN_QUANTITY } from "./plan.constants";
 import type { CraftingPlan, PlanEntry } from "./plan.types";
 import styles from "./PlanPage.module.css";
@@ -24,6 +30,8 @@ import { type PlanState, usePlan } from "./usePlan";
 type Location = CraftingPlan["locations"][number];
 
 const MAX_MATCHES = 6;
+
+const DEFAULT_STORED_FOCUS = "10000";
 
 const MISSING: UsedPrice = { status: "missing", origin: "api" };
 
@@ -49,14 +57,17 @@ function newId(): string {
   return crypto.randomUUID();
 }
 
+// `days` is the days of focus the totals take, when it's known.
 function Totals({
   totals,
   label,
   updating,
+  days,
 }: {
   totals: PlanTotals;
   label: string;
   updating: boolean;
+  days?: number | undefined;
 }) {
   const incomplete = totals.status === "incomplete" && !updating;
   return (
@@ -69,6 +80,16 @@ function Totals({
         <dt>Focus</dt>
         <dd>{formatCount(totals.focus)}</dd>
       </div>
+      {days !== undefined && (
+        <div>
+          <dt>Days of focus</dt>
+          <dd>
+            {days === 0
+              ? "Enough now"
+              : `${formatCount(days)} ${days === 1 ? "day" : "days"}`}
+          </dd>
+        </div>
+      )}
       <div>
         <dt>Profit</dt>
         <dd className={totals.profit < 0 ? styles.loss : undefined}>
@@ -432,6 +453,9 @@ export function PlanPage({
     manualPrices,
     specializations,
   );
+  const [stored, setStored] = useState(DEFAULT_STORED_FOCUS);
+  const storedFocus = wholeNumber(stored, 0, MAX_STORED_FOCUS);
+  const storedId = useId();
   const setLocation = (index: number, location: Location) => {
     onChange({
       locations: plan.locations.map((other, i) =>
@@ -457,14 +481,36 @@ export function PlanPage({
           Add location
         </button>
       </div>
-      {onFill && (
-        <FillFromFocus onFill={onFill} unavailable={fillUnavailable} />
-      )}
+      <div className={styles.focusBar}>
+        <label htmlFor={storedId}>Focus you have</label>
+        <input
+          id={storedId}
+          type="number"
+          min={0}
+          max={MAX_STORED_FOCUS}
+          value={stored}
+          onChange={(event) => {
+            setStored(event.target.value);
+          }}
+        />
+        {onFill && (
+          <FillFromFocus
+            focus={storedFocus}
+            onFill={onFill}
+            unavailable={fillUnavailable}
+          />
+        )}
+      </div>
       {state.status === "ready" && (
         <Totals
           totals={state.result.totals}
           label="Plan totals"
           updating={state.updating}
+          days={
+            storedFocus === undefined
+              ? undefined
+              : focusDays(state.result.totals.focus, storedFocus)
+          }
         />
       )}
       {(state.status === "error" ||

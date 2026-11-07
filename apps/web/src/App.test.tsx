@@ -482,7 +482,7 @@ describe("App", () => {
     });
     const fill = screen.getByRole("form", { name: "Fill from focus" });
 
-    fireEvent.change(within(fill).getByLabelText("Focus"), {
+    fireEvent.change(screen.getByLabelText("Focus you have"), {
       target: { value: "5000" },
     });
     await waitFor(() => {
