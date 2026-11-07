@@ -224,6 +224,41 @@ describe("useBestCrafts", () => {
     ).toEqual([false, false, true, true, false, false]);
   });
 
+  it("retries a failed history batch for its history only, not its prices", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
+      Promise.resolve({ ...pricesAt(marketIds, 0), failures: [] }),
+    );
+    const getHistory = vi
+      .fn<MarketData["getHistory"]>(() =>
+        Promise.resolve({ history: [], failures: [], fetchedAt: 0 }),
+      )
+      .mockImplementationOnce((itemIds) =>
+        Promise.resolve({
+          history: [],
+          failures: [{ itemIds: [...itemIds], error: new Error("AODP: 503") }],
+          fetchedAt: undefined,
+        }),
+      );
+    const { result } = renderBestCrafts(getPrices, getHistory);
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ updating: false });
+    });
+
+    act(() => {
+      result.current.retry();
+    });
+    await waitFor(() => {
+      expect(getHistory).toHaveBeenCalledTimes(2);
+    });
+
+    expect(getHistory.mock.calls[1]?.[3]?.refetch).toEqual(
+      getHistory.mock.calls[0]?.[0],
+    );
+    expect(
+      getPrices.mock.calls.slice(2).map(([, , , options]) => options?.refetch),
+    ).toEqual([[], []]);
+  });
+
   it("forces only the refresh's own fetch, not the next one for wider filters", async () => {
     const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
       Promise.resolve({ ...pricesAt(marketIds, 0), failures: [] }),
