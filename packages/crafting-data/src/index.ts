@@ -4,7 +4,7 @@ export type {
   SpecializationOf,
 } from "./crafting-tree.types.js";
 export { craftingTrees } from "./crafting-trees.constants.js";
-export { specializationOf } from "./crafting-trees.helpers.js";
+export { categoryOf, specializationOf } from "./crafting-trees.helpers.js";
 export { craftingLocations, hideouts, recipes } from "./game-data.constants.js";
 export type {
   Biome,

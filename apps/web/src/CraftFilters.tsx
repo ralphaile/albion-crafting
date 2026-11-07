@@ -12,6 +12,7 @@ import styles from "./CraftFilters.module.css";
 import {
   ARMOR_MATERIALS,
   ARMOR_SLOTS,
+  ACCESSORY_TYPES,
   CATEGORIES,
   ENCHANTS,
   MAX_DAILY_VOLUME,
@@ -279,7 +280,14 @@ function CategoryPicker({
               options={OFFHAND_TYPES}
               chosen={chosen}
               onSet={onSet}
-              className={styles.offhand}
+              className={styles.inline}
+            />
+            <CategoryGroup
+              label="Accessory"
+              options={ACCESSORY_TYPES}
+              chosen={chosen}
+              onSet={onSet}
+              className={styles.inline}
             />
           </div>
         </div>

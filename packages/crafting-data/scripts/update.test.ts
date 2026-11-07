@@ -92,7 +92,7 @@ describe("update", () => {
       "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 19 simple items, 7 names, 4 clusters, 5 crafting locations, 3 power levels",
       "Extracted 3 crafting locations: Thetford, Arthur's Rest, Island",
       "Extracted the hideout bonuses for 1 biomes (Swamp), 2 map qualities and 3 power levels",
-      "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands",
+      "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands, 0 bags, 0 capes",
       "Named 6 item IDs: 4 crafted, which the search covers, and 2 materials",
     ]);
     expect(existsSync(join(packageDir, "raw", "hideouts.json"))).toBe(true);

@@ -58,9 +58,9 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 
 ## Recipes
 
-`src/generated/recipes.json` has a recipe for every weapon, armor piece and offhand the app covers, at each enchantment level. The app imports it as `recipes` from `@aoc/crafting-data`. Its type, `GameRecipe` in `src/recipe.types.ts`, is core's `Recipe` plus the item's tier, enchantment, shop category and whether it's an artifact item.
+`src/generated/recipes.json` has a recipe for every weapon, armor piece, offhand, bag and cape the app covers, at each enchantment level. The app imports it as `recipes` from `@aoc/crafting-data`. Its type, `GameRecipe` in `src/recipe.types.ts`, is core's `Recipe` plus the item's tier, enchantment, shop category and whether it's an artifact item.
 
-- **Which items:** the shop categories `weapons`, `armors`, `head`, `shoes` and `offhands`, tiers 4 to 8. They come from three lists in `items.json`: `weapon`, `equipmentitem`, and `transformationweapon`, which holds the shapeshifter staffs. If any other list holds gear, `pnpm data:update` prints a warning that names it, because the shapeshifter staffs arrived that way.
+- **Which items:** the shop categories `weapons`, `armors`, `head`, `shoes`, `offhands`, `bags` and `capes`, tiers 4 to 8. `bags` holds bags and satchels of insight. Of the capes, only the regular ones are taken. Each faction's capes, and the artifact capes made from them, have a subcategory of their own, and `ONLY_SUBCATEGORIES` in `scripts/recipes.constants.ts` keeps just the regular capes' one. They come from three lists in `items.json`: `weapon`, `equipmentitem`, and `transformationweapon`, which holds the shapeshifter staffs. If any other list holds gear, `pnpm data:update` prints a warning that names it, because the shapeshifter staffs arrived that way.
 - **Left out:**
   - items the market doesn't show (`@showinmarketplace="false"`)
   - unreleased items, whose IDs end in `_PROTOTYPE`
@@ -73,7 +73,7 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 - **Item value:** `itemValue`, which the station fee is based on, is Σ(count × the material's `@itemvalue`) ÷ the amount crafted, from the default recipe. Refined materials are worth 16 at T4 and double with each tier and enchantment level, so Adept's Broadsword (`T4_MAIN_SWORD`) is 16 × 16 + 8 × 16 = 384.
   - A royal item's base piece has no `@itemvalue`, so it takes the item value of its own recipe.
   - An artifact counts too: the Master's Clarent Blade is 16 × 64 + 8 × 64 + 384 for its artifact = 1,920.
-  - If a material has no `@itemvalue`, `pnpm data:update` prints a warning and the recipe has no `itemValue`, rather than counting the material as 0. The shapeshifter staffs are like this, because their `ALCHEMY_RARE` materials have no value.
+  - If a material has no `@itemvalue`, `pnpm data:update` prints a warning and the recipe has no `itemValue`, rather than counting the material as 0. The shapeshifter staffs are like this, because their `ALCHEMY_RARE` materials have no value, and so are the satchels of insight, because the Tome of Insight they need has none.
 
 ## Names, icons and search
 

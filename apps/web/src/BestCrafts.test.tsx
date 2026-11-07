@@ -696,6 +696,22 @@ describe("BestCrafts with filters", () => {
     expect(chips()).toEqual(["Plate helmet", "Plate armor"]);
   });
 
+  it("picks bags and capes as accessories", async () => {
+    renderFiltered({});
+    await bestCrafts();
+
+    fireEvent.click(categoryButton());
+    const accessory = within(screen.getByRole("group", { name: "Accessory" }));
+    fireEvent.click(accessory.getByRole("checkbox", { name: "Bag" }));
+    fireEvent.click(accessory.getByRole("checkbox", { name: "Cape" }));
+
+    expect(
+      within(screen.getByRole("list", { name: "Active filters" }))
+        .getAllByRole("button")
+        .map((chip) => chip.textContent),
+    ).toEqual(["Bag", "Cape"]);
+  });
+
   it("picks categories from a list that closes on Escape or a click outside", async () => {
     renderFiltered({});
     await bestCrafts();

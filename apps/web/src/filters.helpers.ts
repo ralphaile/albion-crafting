@@ -1,5 +1,5 @@
 import { type CraftingPlace, hasSpecialty } from "@aoc/core";
-import { type GameRecipe, searchItems } from "@aoc/crafting-data";
+import { categoryOf, type GameRecipe, searchItems } from "@aoc/crafting-data";
 
 import { soldPerDay } from "./best-crafts.helpers";
 import type { Craft } from "./best-crafts.types";
@@ -36,7 +36,7 @@ export function recipeFilter(
   return (recipe) =>
     includesOrEmpty(filters.tiers, recipe.tier) &&
     includesOrEmpty(filters.enchants, recipe.enchant) &&
-    includesOrEmpty(filters.categories, recipe.shopSubcategory) &&
+    includesOrEmpty(filters.categories, categoryOf(recipe)) &&
     matchesArtifacts(recipe, filters.artifacts) &&
     (!filters.specialtyOnly || hasSpecialty(place, recipe.craftingCategory)) &&
     (found === undefined || found.has(recipe.itemId));

@@ -1,15 +1,28 @@
 import type { SpecializationOf } from "./crafting-tree.types.js";
 import type { GameRecipe } from "./recipe.types.js";
 
-// A tree is the item's shop subcategory, and a specialization is the item at
-// every tier: T5_MAIN_SWORD@1 is the Broadsword in the Sword tree.
-export function specializationOf({
+const WHOLE_SHOP_CATEGORIES = new Set(["bags", "capes"]);
+
+// What an item is filtered and specialized by: its shop subcategory, such as
+// "sword", except that bags and capes are one each. The game splits bags from
+// satchels of insight, though one crafting tree makes both.
+export function categoryOf({
+  shopCategory,
   shopSubcategory,
-  baseId,
-}: Pick<GameRecipe, "shopSubcategory" | "baseId">): SpecializationOf {
+}: Pick<GameRecipe, "shopCategory" | "shopSubcategory">): string {
+  return WHOLE_SHOP_CATEGORIES.has(shopCategory)
+    ? shopCategory
+    : shopSubcategory;
+}
+
+// A tree is the item's category, and a specialization is the item at every
+// tier: T5_MAIN_SWORD@1 is the Broadsword in the Sword tree.
+export function specializationOf(
+  recipe: Pick<GameRecipe, "shopCategory" | "shopSubcategory" | "baseId">,
+): SpecializationOf {
   return {
-    treeId: shopSubcategory,
-    specializationId: baseId.replace(/^T\d+_/, ""),
+    treeId: categoryOf(recipe),
+    specializationId: recipe.baseId.replace(/^T\d+_/, ""),
   };
 }
 

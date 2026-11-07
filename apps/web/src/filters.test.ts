@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import type { CraftingPlace } from "@aoc/core";
-import { type GameRecipe, recipes } from "@aoc/crafting-data";
+import {
+  categoryOf,
+  craftingLocations,
+  type GameRecipe,
+  recipes,
+} from "@aoc/crafting-data";
 
 import type { Craft, DailyVolume } from "./best-crafts.types";
 import { CATEGORIES, NO_FILTERS } from "./filters.constants";
@@ -146,6 +151,32 @@ describe("recipeFilter", () => {
     expect(passing(filters)).toEqual(expected.map(({ itemId }) => itemId));
   });
 
+  it("takes bags and satchels of insight as bags, and capes as capes", () => {
+    expect(
+      passing({ categories: ["bags"], tiers: [4], enchants: [0] }, recipes),
+    ).toEqual(["T4_BAG", "T4_BAG_INSIGHT"]);
+    expect(
+      passing({ categories: ["capes"], tiers: [4], enchants: [0] }, recipes),
+    ).toEqual(["T4_CAPE"]);
+  });
+
+  it("keeps bags and capes as Brecilien's specialties", () => {
+    const brecilien = craftingLocations.find(
+      ({ name }) => name === "Brecilien",
+    );
+    const specialties = recipes
+      .filter(({ tier, enchant }) => tier === 4 && enchant === 0)
+      .filter(
+        recipeFilter(
+          { ...NO_FILTERS, specialtyOnly: true },
+          { location: brecilien! },
+        ),
+      )
+      .map(({ itemId }) => itemId);
+
+    expect(specialties).toEqual(["T4_BAG", "T4_BAG_INSIGHT", "T4_CAPE"]);
+  });
+
   it("finds items by name, in any case and without apostrophes", () => {
     expect(passing({ search: "  adepts BROADSWORD 4.0 " }, recipes)).toEqual([
       "T4_MAIN_SWORD",
@@ -159,7 +190,7 @@ describe("recipeFilter", () => {
   });
 
   it("finds every recipe of each category in the game data", () => {
-    const categories = new Set(recipes.map((recipe) => recipe.shopSubcategory));
+    const categories = new Set(recipes.map(categoryOf));
 
     expect([...categories].sort()).toEqual(
       CATEGORIES.map(({ id }) => id).sort(),

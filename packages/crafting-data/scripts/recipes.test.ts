@@ -141,9 +141,36 @@ describe("extractRecipes", () => {
     ).toEqual(["T4_HEAD_CLOTH_SET2@1", "T4_HEAD_CLOTH_SET3@1"]);
   });
 
+  it.each<[string, string, string]>([
+    ["a bag", "bags", "bags"],
+    ["a satchel of insight", "bags", "satchels"],
+    ["a regular cape", "capes", "accessoires_capes_capes"],
+  ])("takes %s", async (_, category, subcategory) => {
+    const { equipmentitem } = (await validate(fixtures))["items.json"].items;
+    const helmet = equipmentitem[0]!;
+
+    expect(
+      extractRecipes(
+        only({
+          ...helmet,
+          "@shopcategory": category,
+          "@shopsubcategory1": subcategory,
+        }),
+      )[0],
+    ).toMatchObject({ shopCategory: category, shopSubcategory: subcategory });
+  });
+
   it.each<[string, (item: GearItem) => GearItem]>([
     ["a T3 item", (item) => ({ ...item, "@tier": 3 })],
-    ["a cape", (item) => ({ ...item, "@shopcategory": "capes" })],
+    ["a mount", (item) => ({ ...item, "@shopcategory": "mounts" })],
+    [
+      "a faction cape",
+      (item) => ({
+        ...item,
+        "@shopcategory": "capes",
+        "@shopsubcategory1": "accessoires_capes_martlock",
+      }),
+    ],
     [
       "an item the market doesn't show",
       (item) => ({ ...item, "@showinmarketplace": false }),

@@ -106,14 +106,21 @@ describe("fceParts", () => {
 
   it("counts the item's own specialization, the mastery and the tree's other specializations", () => {
     expect(
-      fceParts(profile, { shopSubcategory: "sword", baseId: "T5_MAIN_SWORD" }),
+      fceParts(profile, {
+        shopCategory: "weapons",
+        shopSubcategory: "sword",
+        baseId: "T5_MAIN_SWORD",
+      }),
     ).toEqual({ mastery: 3000, spec: 25_000, otherSpecs: 1200, total: 29_200 });
   });
 
   it("is 0 for a tree with no levels", () => {
     expect(
-      fceParts(profile, { shopSubcategory: "axe", baseId: "T5_MAIN_AXE" })
-        .total,
+      fceParts(profile, {
+        shopCategory: "weapons",
+        shopSubcategory: "axe",
+        baseId: "T5_MAIN_AXE",
+      }).total,
     ).toBe(0);
   });
 });

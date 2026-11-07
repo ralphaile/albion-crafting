@@ -43,4 +43,11 @@ export const DAILY_BONUS_GROUPS: readonly OptionGroup[] = [
     label: "Offhand",
     options: [{ id: "offhand", label: "Tome, shield or torch" }],
   },
+  {
+    label: "Accessory",
+    options: [
+      { id: "bag", label: "Bag" },
+      { id: "cape", label: "Cape" },
+    ],
+  },
 ];

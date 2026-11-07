@@ -156,9 +156,17 @@ exports[`the generated data > has the same number of items and recipes in each c
     "items": 40,
     "recipes": 200,
   },
+  "bag": {
+    "items": 10,
+    "recipes": 50,
+  },
   "bow": {
     "items": 40,
     "recipes": 200,
+  },
+  "cape": {
+    "items": 5,
+    "recipes": 25,
   },
   "cloth_armor": {
     "items": 40,
@@ -269,6 +277,14 @@ exports[`the generated data > has the same number of items and recipes in each s
     "items": 140,
     "recipes": 700,
   },
+  "bags": {
+    "items": 10,
+    "recipes": 50,
+  },
+  "capes": {
+    "items": 5,
+    "recipes": 25,
+  },
   "head": {
     "items": 140,
     "recipes": 700,
@@ -347,6 +363,36 @@ exports[`the generated data > has the same recipe for T4_ARMOR_LEATHER_ROYAL 1`]
   ],
   "shopCategory": "armors",
   "shopSubcategory": "leather_armor",
+  "silver": 0,
+  "tier": 4,
+}
+`;
+
+exports[`the generated data > has the same recipe for T4_BAG 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T4_BAG",
+  "craftingCategory": "bag",
+  "enchant": 0,
+  "focus": 858,
+  "isArtifact": false,
+  "itemId": "T4_BAG",
+  "itemValue": 256,
+  "materials": [
+    {
+      "count": 8,
+      "id": "T4_CLOTH",
+      "returnable": true,
+    },
+    {
+      "count": 8,
+      "id": "T4_LEATHER",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "bags",
+  "shopSubcategory": "bags",
   "silver": 0,
   "tier": 4,
 }
@@ -468,6 +514,70 @@ exports[`the generated data > has the same recipe for T5_ARMOR_PLATE_SET1 1`] = 
   "shopSubcategory": "plate_armor",
   "silver": 0,
   "tier": 5,
+}
+`;
+
+exports[`the generated data > has the same recipe for T5_CAPE@1 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T5_CAPE",
+  "craftingCategory": "cape",
+  "enchant": 1,
+  "focus": 1313,
+  "isArtifact": false,
+  "itemId": "T5_CAPE@1",
+  "itemValue": 512,
+  "materials": [
+    {
+      "count": 4,
+      "id": "T5_CLOTH_LEVEL1@1",
+      "returnable": true,
+    },
+    {
+      "count": 4,
+      "id": "T5_LEATHER_LEVEL1@1",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "capes",
+  "shopSubcategory": "accessoires_capes_capes",
+  "silver": 0,
+  "tier": 5,
+}
+`;
+
+exports[`the generated data > has the same recipe for T6_BAG_INSIGHT@2 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T6_BAG_INSIGHT",
+  "craftingCategory": "bag",
+  "enchant": 2,
+  "focus": 8042,
+  "isArtifact": false,
+  "itemId": "T6_BAG_INSIGHT@2",
+  "materials": [
+    {
+      "count": 8,
+      "id": "T6_CLOTH_LEVEL2@2",
+      "returnable": true,
+    },
+    {
+      "count": 8,
+      "id": "T6_LEATHER_LEVEL2@2",
+      "returnable": true,
+    },
+    {
+      "count": 1,
+      "id": "T4_SKILLBOOK_STANDARD",
+      "returnable": false,
+    },
+  ],
+  "shopCategory": "bags",
+  "shopSubcategory": "satchels",
+  "silver": 0,
+  "tier": 6,
 }
 `;
 
