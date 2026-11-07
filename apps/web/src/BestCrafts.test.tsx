@@ -443,6 +443,8 @@ function heldPrices() {
 
 describe("BestCrafts price status", () => {
   it("counts the batches, counts down a rate-limit wait, and cancels", async () => {
+    // A clock that doesn't move, so the countdown can't tick to 17 s.
+    vi.spyOn(Date, "now").mockReturnValue(1_000_000);
     const { calls, getPrices } = heldPrices();
     renderBestCrafts(getPrices);
     await waitFor(() => {
@@ -473,6 +475,7 @@ describe("BestCrafts price status", () => {
       await screen.findByRole("button", { name: "Refresh prices" }),
     ).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    vi.restoreAllMocks();
   });
 
   it("says when the oldest price was fetched, and fetches every price again on Refresh", async () => {

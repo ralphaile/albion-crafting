@@ -1,4 +1,5 @@
 import {
+  cleanup,
   fireEvent,
   render,
   screen,
@@ -119,7 +120,10 @@ function pressed(name: string) {
 }
 
 describe("App", () => {
+  // Unmounts first, so a test's last effects can't write the link after it's
+  // reset for the next test.
   afterEach(() => {
+    cleanup();
     window.history.replaceState(null, "", "/");
   });
 
@@ -564,7 +568,9 @@ describe("App", () => {
 
     await screen.findByRole("button", { name: "Try again" });
 
-    expect(window.location.search).not.toContain("item=");
+    await waitFor(() => {
+      expect(window.location.search).not.toContain("item=");
+    });
   });
 
   it("prices a changed route right away, puts it in the link and saves it", async () => {
