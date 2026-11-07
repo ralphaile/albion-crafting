@@ -41,6 +41,8 @@ pnpm dev   # http://localhost:5173/albion-crafting/
 | `pnpm data:diff`      | Compares the generated game data with the committed data and writes a report of the changes to `packages/crafting-data/data-diff.md`                                                 |
 | `pnpm data:update`    | Downloads and checks the game files at the pinned commit, then generates the crafting locations, hideout bonuses, recipes and item names. `--latest` moves the pin to the newest one |
 
+`pnpm --filter @aoc/web prices:snapshot` writes the [price snapshot](docs/market-prices.md#price-snapshot) into the built site. CI runs it on deploy, and the `Price snapshot` workflow every 6 hours.
+
 ## Project layout
 
 A pnpm + Turborepo monorepo. The web app uses Vite and React, styled with CSS Modules ([ADR-005](docs/adr/005-css-modules.md)). Dashed parts come in a later release. [ADR-001](docs/adr/001-monorepo-with-a-pure-core.md) explains the split, and [ADR-004](docs/adr/004-core-owns-the-shared-types.md) why the packages use core's types.

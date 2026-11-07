@@ -26,6 +26,13 @@ A result is only worth trusting if every price in it is real, and you can tell w
 - Requests are batched to fit the URL limit, a rate limiter keeps them under both request limits, and failed requests are retried.
 - Prices are cached as described in [ADR-002](002-local-first-storage.md) and reused for 15 minutes. **Refresh prices** fetches them again.
 
+**When AODP can't answer**
+
+- The site publishes a price snapshot with itself: every item the recipes make or use, in every market, on all 3 servers, at quality 1. A GitHub Actions run fetches it every 6 hours and on each deploy.
+- For an item AODP can't answer for, the browser downloads its route's markets from the snapshot, once per visit, and uses each side's newer price: the saved one or the snapshot's. Its age counts from when AODP saw it, so a 7-hour-old snapshot price is stale like any other.
+- A manual price beats a snapshot price, however old.
+- This is the fallback until there's a backend with a shared price cache.
+
 **Reading an API price**
 
 - A `0` price or the `0001-01-01` date means **missing**.
@@ -60,6 +67,7 @@ If any price is missing, the result is marked incomplete and lists what's missin
 ## Consequences
 
 - There's no backend and no API key. Each user's requests come from their own browser, so the rate limits apply per user.
+- When AODP is down or slow, a first visit still has prices up to about 6 hours old, from the snapshot.
 - You can always finish an incomplete result by hand, which matters most in the Black Zone.
 - Older API data never replaces a manual price, because the newer price wins. A newer API price does replace it, unless **Always prefer my manual prices** is on.
 - The badges show every price's source and age, so a stale or typed-in price is never mistaken for a fresh one.

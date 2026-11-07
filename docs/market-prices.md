@@ -16,8 +16,12 @@ Live prices come from the [Albion Online Data Project](https://www.albion-online
 ```ts
 import { openMarketData } from "@aoc/market-prices";
 
-const marketData = await openMarketData();
+const marketData = await openMarketData({
+  snapshotUrl: "/albion-crafting/prices/",
+});
 ```
+
+- **`snapshotUrl`:** where the site publishes its [price snapshot](#price-snapshot). Without it, there's no fallback.
 
 - **One at a time:** prices and history share one AODP client, so they share its request limits, on every server. Open market data once and pass it around. A second one, such as in another browser tab, has limits of its own.
 - **Saved in the browser:** prices and history go in IndexedDB, in a database of their own called `aoc-price-cache`, so clearing it can't touch anything else the app saves. [ADR-002](adr/002-local-first-storage.md) explains why.
@@ -108,6 +112,16 @@ Each batch gets up to 3 attempts:
 
 - **One row per server, item, market and quality,** in the `prices` and `history` tables, as AODP sent it, plus when it was fetched.
 - **Nothing back:** when AODP sends nothing for an item, market and quality it was asked about, an empty row is saved instead: a price with no data, or a series with no points. It's reused like any other row, so an item nobody buys isn't asked for on every call. A failed batch gets no empty row.
+
+## Price snapshot
+
+The site publishes every server's prices with itself, for when AODP can't answer ([ADR-003](adr/003-price-data-strategy.md)).
+
+- **Files:** one per server and market, at quality 1, such as `prices/west/black-market.json`. Each has `fetchedAt` and a row per item with orders: `[itemId, sellMin, sellMinDate, buyMax, buyMaxDate]`, with AODP's own dates. They come to about 3 MB, and a few KB each once compressed.
+- **Written by** `pnpm --filter @aoc/web prices:snapshot`, into `apps/web/dist/prices/`. It asks for every item the recipes make or use, about 7,000, in about 50 requests a server. An item AODP can't answer for keeps its row from the published snapshot.
+- **Published** by the `Price snapshot` workflow every 6 hours and on demand, and by CI on each deploy, since a deploy replaces the whole site. A run that fails deploys nothing, so the site keeps the last snapshot.
+- **Read** by `getPrices()` only for items whose batch failed. It downloads each of the route's markets once per visit. A missing file, or one Zod rejects, counts as no snapshot.
+- **Which price:** each side is the newer of the saved price and the snapshot's. A price from the snapshot has `fromSnapshot: true`, and a manual price always beats it.
 
 ## AODP quirks
 
