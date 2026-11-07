@@ -106,9 +106,10 @@ export function evaluatePlan(
   locations: readonly PlanLocation[],
   settings: PlanSettings,
 ): PlanResult {
-  const planned = locations.map(({ place, prices, entries }) => {
+  const planned = locations.map(({ place, prices, sellMode, entries }) => {
+    const here = sellMode === undefined ? settings : { ...settings, sellMode };
     const results = entries.map((entry) =>
-      planEntry(entry, place, prices, settings),
+      planEntry(entry, place, prices, here),
     );
     return { entries: results, totals: totalsOf(results) };
   });
