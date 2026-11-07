@@ -21,6 +21,12 @@ export {
   specializationFce,
 } from "./focus.helpers.js";
 export { type FceParts, type SpecializationLevels } from "./focus.types.js";
+export { fillFocusBudget } from "./focus-budget.helpers.js";
+export {
+  type FocusBudget,
+  type FocusCandidate,
+  type FocusPick,
+} from "./focus-budget.types.js";
 export { hideoutProductionBonus } from "./hideout-bonus.helpers.js";
 export {
   type Hideout,
