@@ -263,7 +263,10 @@ describe("App", () => {
         expect.anything(),
         ["Lymhurst"],
         [1],
-        { region: "europe", staleAfterMinutes: 24 * 60 },
+        expect.objectContaining({
+          region: "europe",
+          staleAfterMinutes: 24 * 60,
+        }),
       );
     });
   });

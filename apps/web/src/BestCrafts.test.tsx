@@ -125,13 +125,21 @@ describe("BestCrafts", () => {
       expect.arrayContaining(["T4_METALBAR", "T4_LEATHER"]),
       ["Martlock"],
       [1],
-      { region: "west", staleAfterMinutes: 12 * 60 },
+      expect.objectContaining({
+        region: "west",
+        staleAfterMinutes: 12 * 60,
+        force: false,
+      }),
     );
     expect(getPrices).toHaveBeenCalledWith(
       expect.arrayContaining(["T4_MAIN_SWORD"]),
       ["Caerleon"],
       [1],
-      { region: "west", staleAfterMinutes: 12 * 60 },
+      expect.objectContaining({
+        region: "west",
+        staleAfterMinutes: 12 * 60,
+        force: false,
+      }),
     );
   });
 
@@ -167,7 +175,11 @@ describe("BestCrafts", () => {
       expect.anything(),
       expect.anything(),
       [1],
-      { region: "europe", staleAfterMinutes: 12 * 60 },
+      expect.objectContaining({
+        region: "europe",
+        staleAfterMinutes: 12 * 60,
+        force: false,
+      }),
     );
 
     rerender(
@@ -185,7 +197,11 @@ describe("BestCrafts", () => {
       expect.anything(),
       expect.anything(),
       [1],
-      { region: "europe", staleAfterMinutes: 2 * 60 },
+      expect.objectContaining({
+        region: "europe",
+        staleAfterMinutes: 2 * 60,
+        force: false,
+      }),
     );
   });
 
