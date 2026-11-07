@@ -148,6 +148,45 @@ function AddItem({ onAdd }: { onAdd: (itemId: string) => void }) {
   );
 }
 
+// Keeps what's typed, even empty or out of range, and only changes the plan
+// with a whole number in range. Leaving the field puts back the plan's.
+function QuantityInput({
+  label,
+  quantity,
+  onChange,
+}: {
+  label: string;
+  quantity: number;
+  onChange: (quantity: number) => void;
+}) {
+  const [draft, setDraft] = useState<string>();
+  return (
+    <input
+      aria-label={label}
+      type="number"
+      min={1}
+      max={MAX_PLAN_QUANTITY}
+      value={draft ?? quantity}
+      onChange={(event) => {
+        const text = event.target.value;
+        setDraft(text);
+        const typed = Number(text);
+        if (
+          text.trim() !== "" &&
+          Number.isInteger(typed) &&
+          typed >= 1 &&
+          typed <= MAX_PLAN_QUANTITY
+        ) {
+          onChange(typed);
+        }
+      }}
+      onBlur={() => {
+        setDraft(undefined);
+      }}
+    />
+  );
+}
+
 function EntryRow({
   entry,
   planned,
@@ -206,21 +245,11 @@ function EntryRow({
         </select>
       </td>
       <td>
-        <input
-          aria-label={`Quantity of ${name}`}
-          type="number"
-          min={1}
-          max={MAX_PLAN_QUANTITY}
-          value={entry.quantity}
-          onChange={(event) => {
-            const quantity = Number(event.target.value);
-            if (
-              Number.isInteger(quantity) &&
-              quantity >= 1 &&
-              quantity <= MAX_PLAN_QUANTITY
-            ) {
-              onChange({ ...entry, quantity });
-            }
+        <QuantityInput
+          label={`Quantity of ${name}`}
+          quantity={entry.quantity}
+          onChange={(quantity) => {
+            onChange({ ...entry, quantity });
           }}
         />
       </td>

@@ -83,6 +83,33 @@ describe("focusCandidates", () => {
     ).toBe(7);
   });
 
+  it("counts what a craft makes with the recipe it ranks, such as 8 stone blocks", () => {
+    const recipe = RECIPES_BY_ID.get("T4_STONEBLOCK");
+    if (recipe === undefined) {
+      throw new Error("No stone block recipe");
+    }
+    const [craft] = evaluateCrafts([recipe], island, settings, {
+      materials: [
+        prices("T4_ROCK", 1000),
+        prices("T1_FACTION_HIGHLAND_TOKEN_1", 1000),
+        prices("T3_STONEBLOCK", 1000),
+        prices("T4_ROCK_LEVEL1@1", 1000),
+        prices("T4_ROCK_LEVEL2@2", 1000),
+        prices("T4_ROCK_LEVEL3@3", 10),
+      ],
+      products: [prices("T4_STONEBLOCK", 2000)],
+    });
+    if (craft?.status !== "complete") {
+      throw new Error("No priced stone block");
+    }
+
+    expect(craft.alternative).toBe(4);
+    expect(focusCandidates([craft], 100)[0]).toMatchObject({
+      amountCrafted: 8,
+      profitPerCraft: craft.profit * 8,
+    });
+  });
+
   it("leaves out crafts without focus or a price", () => {
     expect(focusCandidates(crafts(5000, false), 100)).toEqual([]);
     expect(
