@@ -102,7 +102,9 @@ function toRecipes(item: GearItem): GameRecipe[] {
   });
 }
 
-function toAlternative(requirements: CraftingRequirements): RecipeAlternative {
+export function toAlternative(
+  requirements: CraftingRequirements,
+): RecipeAlternative {
   return {
     focus: requirements["@craftingfocus"],
     silver: requirements["@silver"] ?? 0,

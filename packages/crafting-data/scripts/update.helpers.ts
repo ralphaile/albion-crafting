@@ -9,6 +9,8 @@ import { extractItems } from "./items.helpers.ts";
 import { extractLocations } from "./locations.helpers.ts";
 import { SHOP_CATEGORIES } from "./recipes.constants.ts";
 import { extractRecipes, findUnreadGear } from "./recipes.helpers.ts";
+import { REFINED_SUBCATEGORIES } from "./refining.constants.ts";
+import { extractRefiningRecipes } from "./refining.helpers.ts";
 import { fetchLatestCommit } from "./source.client.ts";
 import { readSource, writeSource } from "./source.schema.ts";
 
@@ -124,7 +126,32 @@ export async function update({
       .join(", ")}`,
   );
 
-  const named = extractItems(recipes, dumps["formatted/items.json"]);
+  const refining = extractRefiningRecipes(items);
+  await writeJson(
+    join(packageDir, "src", "generated", "refining.json"),
+    refining,
+  );
+  const refinedBySubcategory = new Map(
+    [...REFINED_SUBCATEGORIES].map((subcategory) => [subcategory, 0]),
+  );
+  for (const { shopSubcategory } of refining) {
+    refinedBySubcategory.set(
+      shopSubcategory,
+      (refinedBySubcategory.get(shopSubcategory) ?? 0) + 1,
+    );
+  }
+  log(
+    `Extracted ${count(refining.length, "refining recipes")}: ${[
+      ...refinedBySubcategory,
+    ]
+      .map(([subcategory, total]) => count(total, subcategory))
+      .join(", ")}`,
+  );
+
+  const named = extractItems(
+    [...recipes, ...refining],
+    dumps["formatted/items.json"],
+  );
   for (const warning of named.warnings) {
     warn(`Warning: ${warning}`);
   }

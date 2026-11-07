@@ -62,6 +62,14 @@ const simpleItem = z.object({
   "@tier": number,
   "@enchantmentlevel": number.optional(),
   "@itemvalue": number.optional(),
+  "@shopcategory": z.string().optional(),
+  "@shopsubcategory1": z.string().optional(),
+  "@shopsubcategory2": z.string().optional(),
+  "@craftingcategory": z.string().optional(),
+  // Some, such as journals, are made without focus.
+  craftingrequirements: oneOrMany(
+    craftingRequirements.extend({ "@craftingfocus": number.optional() }),
+  ).optional(),
 });
 
 const bonus = z.object({

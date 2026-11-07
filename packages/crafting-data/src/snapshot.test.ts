@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { craftingLocations, recipes } from "./index.js";
+import { craftingLocations, recipes, refiningRecipes } from "./index.js";
 
 function countBy(key: (recipe: (typeof recipes)[number]) => string) {
   const counts: Record<string, { items: number; recipes: number }> = {};
@@ -43,6 +43,25 @@ describe("the generated data", () => {
   ])("has the same recipe for %s", (itemId) => {
     expect(
       recipes.find((recipe) => recipe.itemId === itemId),
+    ).toMatchSnapshot();
+  });
+
+  it("has the same number of refining recipes in each subcategory", () => {
+    const counts: Record<string, number> = {};
+    for (const { shopSubcategory } of refiningRecipes) {
+      counts[shopSubcategory] = (counts[shopSubcategory] ?? 0) + 1;
+    }
+    expect(counts).toMatchSnapshot();
+  });
+
+  it.each([
+    "T2_METALBAR",
+    "T5_METALBAR",
+    "T6_PLANKS_LEVEL2@2",
+    "T4_STONEBLOCK",
+  ])("has the same refining recipe for %s", (itemId) => {
+    expect(
+      refiningRecipes.find((recipe) => recipe.itemId === itemId),
     ).toMatchSnapshot();
   });
 

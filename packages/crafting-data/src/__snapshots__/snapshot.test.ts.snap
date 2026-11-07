@@ -6,6 +6,10 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "0000",
     "name": "Thetford",
+    "refiningBonus": 0.18,
+    "refiningSpecialties": {
+      "ore": 0.4,
+    },
     "specialties": {
       "cloth_helmet": 0.15,
       "firestaff": 0.15,
@@ -19,6 +23,10 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "1000",
     "name": "Lymhurst",
+    "refiningBonus": 0.18,
+    "refiningSpecialties": {
+      "fiber": 0.4,
+    },
     "specialties": {
       "arcanestaff": 0.15,
       "bow": 0.15,
@@ -32,6 +40,10 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "2000",
     "name": "Bridgewatch",
+    "refiningBonus": 0.18,
+    "refiningSpecialties": {
+      "rock": 0.4,
+    },
     "specialties": {
       "cloth_shoes": 0.15,
       "crossbow": 0.15,
@@ -45,6 +57,10 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "3004",
     "name": "Martlock",
+    "refiningBonus": 0.18,
+    "refiningSpecialties": {
+      "hide": 0.4,
+    },
     "specialties": {
       "axe": 0.15,
       "froststaff": 0.15,
@@ -58,6 +74,10 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "4000",
     "name": "Fort Sterling",
+    "refiningBonus": 0.18,
+    "refiningSpecialties": {
+      "wood": 0.4,
+    },
     "specialties": {
       "cloth_armor": 0.15,
       "hammer": 0.15,
@@ -72,6 +92,8 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "3003",
     "name": "Caerleon",
+    "refiningBonus": 0.18,
+    "refiningSpecialties": {},
     "specialties": {
       "food": 0.15,
       "gatherergear": 0.15,
@@ -84,6 +106,8 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "5000",
     "name": "Brecilien",
+    "refiningBonus": 0.18,
+    "refiningSpecialties": {},
     "specialties": {
       "bag": 0.15,
       "cape": 0.15,
@@ -94,6 +118,8 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "4300",
     "name": "Arthur's Rest",
+    "refiningBonus": 0.15,
+    "refiningSpecialties": {},
     "specialties": {
       "axe": 0.15,
       "crossbow": 0.15,
@@ -110,6 +136,8 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "1012",
     "name": "Merlyn's Rest",
+    "refiningBonus": 0.15,
+    "refiningSpecialties": {},
     "specialties": {
       "bow": 0.15,
       "dagger": 0.15,
@@ -126,6 +154,8 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0.18,
     "id": "0008",
     "name": "Morgana's Rest",
+    "refiningBonus": 0.15,
+    "refiningSpecialties": {},
     "specialties": {
       "arcanestaff": 0.15,
       "cloth_armor": 0.15,
@@ -141,6 +171,8 @@ exports[`the generated data > has the same crafting locations 1`] = `
     "craftingBonus": 0,
     "id": "island",
     "name": "Island",
+    "refiningBonus": 0,
+    "refiningSpecialties": {},
     "specialties": {},
   },
 ]
@@ -301,6 +333,16 @@ exports[`the generated data > has the same number of items and recipes in each s
     "items": 680,
     "recipes": 3400,
   },
+}
+`;
+
+exports[`the generated data > has the same number of refining recipes in each subcategory 1`] = `
+{
+  "cloth": 27,
+  "leather": 27,
+  "metalbars": 27,
+  "planks": 27,
+  "stoneblock": 7,
 }
 `;
 
@@ -711,5 +753,244 @@ exports[`the generated data > has the same recipe for T8_2H_BOW@4 1`] = `
   "shopSubcategory": "bow",
   "silver": 0,
   "tier": 8,
+}
+`;
+
+exports[`the generated data > has the same refining recipe for T2_METALBAR 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T2_METALBAR",
+  "craftingCategory": "ore",
+  "enchant": 0,
+  "focus": 18,
+  "isArtifact": false,
+  "itemId": "T2_METALBAR",
+  "itemValue": 4,
+  "materials": [
+    {
+      "count": 1,
+      "id": "T2_ORE",
+      "returnable": true,
+    },
+  ],
+  "refining": true,
+  "shopCategory": "crafting",
+  "shopSubcategory": "metalbars",
+  "silver": 0,
+  "tier": 2,
+}
+`;
+
+exports[`the generated data > has the same refining recipe for T4_STONEBLOCK 1`] = `
+{
+  "alternatives": [
+    {
+      "amountCrafted": 1,
+      "focus": 54,
+      "materials": [
+        {
+          "count": 1,
+          "id": "T4_ROCK",
+          "returnable": true,
+        },
+        {
+          "count": 1,
+          "id": "T1_FACTION_HIGHLAND_TOKEN_1",
+          "returnable": true,
+        },
+        {
+          "count": 1,
+          "id": "T3_STONEBLOCK",
+          "returnable": true,
+        },
+      ],
+      "silver": 0,
+    },
+    {
+      "amountCrafted": 2,
+      "focus": 54,
+      "materials": [
+        {
+          "count": 2,
+          "id": "T4_ROCK_LEVEL1@1",
+          "returnable": true,
+        },
+        {
+          "count": 2,
+          "id": "T3_STONEBLOCK",
+          "returnable": true,
+        },
+      ],
+      "silver": 0,
+    },
+    {
+      "amountCrafted": 4,
+      "focus": 54,
+      "materials": [
+        {
+          "count": 2,
+          "id": "T4_ROCK_LEVEL2@2",
+          "returnable": true,
+        },
+        {
+          "count": 4,
+          "id": "T3_STONEBLOCK",
+          "returnable": true,
+        },
+      ],
+      "silver": 0,
+    },
+    {
+      "amountCrafted": 8,
+      "focus": 54,
+      "materials": [
+        {
+          "count": 2,
+          "id": "T4_ROCK_LEVEL3@3",
+          "returnable": true,
+        },
+        {
+          "count": 8,
+          "id": "T3_STONEBLOCK",
+          "returnable": true,
+        },
+      ],
+      "silver": 0,
+    },
+  ],
+  "amountCrafted": 1,
+  "baseId": "T4_STONEBLOCK",
+  "craftingCategory": "rock",
+  "enchant": 0,
+  "focus": 54,
+  "isArtifact": false,
+  "itemId": "T4_STONEBLOCK",
+  "itemValue": 16,
+  "materials": [
+    {
+      "count": 2,
+      "id": "T4_ROCK",
+      "returnable": true,
+    },
+    {
+      "count": 1,
+      "id": "T3_STONEBLOCK",
+      "returnable": true,
+    },
+  ],
+  "refining": true,
+  "shopCategory": "crafting",
+  "shopSubcategory": "stoneblock",
+  "silver": 0,
+  "tier": 4,
+}
+`;
+
+exports[`the generated data > has the same refining recipe for T5_METALBAR 1`] = `
+{
+  "alternatives": [
+    {
+      "amountCrafted": 1,
+      "focus": 94,
+      "materials": [
+        {
+          "count": 2,
+          "id": "T5_ORE",
+          "returnable": true,
+        },
+        {
+          "count": 1,
+          "id": "T1_FACTION_MOUNTAIN_TOKEN_1",
+          "returnable": true,
+        },
+        {
+          "count": 1,
+          "id": "T4_METALBAR",
+          "returnable": true,
+        },
+      ],
+      "silver": 0,
+    },
+  ],
+  "amountCrafted": 1,
+  "baseId": "T5_METALBAR",
+  "craftingCategory": "ore",
+  "enchant": 0,
+  "focus": 94,
+  "isArtifact": false,
+  "itemId": "T5_METALBAR",
+  "itemValue": 32,
+  "materials": [
+    {
+      "count": 3,
+      "id": "T5_ORE",
+      "returnable": true,
+    },
+    {
+      "count": 1,
+      "id": "T4_METALBAR",
+      "returnable": true,
+    },
+  ],
+  "refining": true,
+  "shopCategory": "crafting",
+  "shopSubcategory": "metalbars",
+  "silver": 0,
+  "tier": 5,
+}
+`;
+
+exports[`the generated data > has the same refining recipe for T6_PLANKS_LEVEL2@2 1`] = `
+{
+  "alternatives": [
+    {
+      "amountCrafted": 1,
+      "focus": 503,
+      "materials": [
+        {
+          "count": 3,
+          "id": "T6_WOOD_LEVEL2@2",
+          "returnable": true,
+        },
+        {
+          "count": 1,
+          "id": "T1_FACTION_FOREST_TOKEN_1",
+          "returnable": true,
+        },
+        {
+          "count": 1,
+          "id": "T5_PLANKS_LEVEL2@2",
+          "returnable": true,
+        },
+      ],
+      "silver": 0,
+    },
+  ],
+  "amountCrafted": 1,
+  "baseId": "T6_PLANKS",
+  "craftingCategory": "wood",
+  "enchant": 2,
+  "focus": 503,
+  "isArtifact": false,
+  "itemId": "T6_PLANKS_LEVEL2@2",
+  "itemValue": 256,
+  "materials": [
+    {
+      "count": 4,
+      "id": "T6_WOOD_LEVEL2@2",
+      "returnable": true,
+    },
+    {
+      "count": 1,
+      "id": "T5_PLANKS_LEVEL2@2",
+      "returnable": true,
+    },
+  ],
+  "refining": true,
+  "shopCategory": "crafting",
+  "shopSubcategory": "planks",
+  "silver": 0,
+  "tier": 6,
 }
 `;
