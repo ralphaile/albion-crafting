@@ -34,7 +34,7 @@ function only(...craftinglocation: Location[]): CraftingModifiers {
 }
 
 describe("extractLocations", () => {
-  it("gives each city and Rest its name, crafting bonus and specialties, without the refining ones", async () => {
+  it("gives each city and Rest its name, and its crafting and refining bonuses and specialties apart", async () => {
     const { locations, warnings } = await fixtureLocations();
 
     expect(locations.slice(0, 2)).toEqual([
@@ -50,6 +50,8 @@ describe("extractLocations", () => {
           leather_armor: 0.15,
           cloth_helmet: 0.15,
         },
+        refiningBonus: 0.18,
+        refiningSpecialties: { ore: 0.4 },
       },
       {
         id: "4300",
@@ -66,6 +68,8 @@ describe("extractLocations", () => {
           plate_armor: 0.15,
           plate_shoes: 0.15,
         },
+        refiningBonus: 0.15,
+        refiningSpecialties: {},
       },
     ]);
     expect(warnings).toEqual([]);
@@ -80,6 +84,8 @@ describe("extractLocations", () => {
       name: "Island",
       craftingBonus: 0,
       specialties: {},
+      refiningBonus: 0,
+      refiningSpecialties: {},
     });
   });
 

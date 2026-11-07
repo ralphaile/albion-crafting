@@ -72,6 +72,8 @@ const rrr25: CraftingPlace = {
     name: "25% return rate",
     craftingBonus: 1 / 3,
     specialties: {},
+    refiningBonus: 0.18,
+    refiningSpecialties: {},
   },
 };
 const rrr50WithFocus: CraftingPlace = {
@@ -80,6 +82,8 @@ const rrr50WithFocus: CraftingPlace = {
     name: "50% return rate with focus",
     craftingBonus: 0.41,
     specialties: {},
+    refiningBonus: 0.18,
+    refiningSpecialties: {},
   },
 };
 
@@ -182,6 +186,7 @@ describe("evaluate", () => {
         biome: { specialties: ["sword", "bow", "arcanestaff"] },
         mapQuality: { specialtyBonus: 0.26 },
         powerLevel: { generalBonus: 0.26, specialistBonus: 0.3 },
+        refiningBonus: 0.15,
       },
     };
 
@@ -349,5 +354,71 @@ describe("evaluate", () => {
       expect(result.focusCost).toBe(0);
       expect(result).not.toHaveProperty("silverPerFocus");
     });
+  });
+});
+
+describe("refining", () => {
+  // Thetford refines ore with a +0.40 specialty on top of its 0.18 base.
+  const thetford: CraftingPlace = {
+    location: {
+      id: "0000",
+      name: "Thetford",
+      craftingBonus: 0.18,
+      specialties: { mace: 0.15 },
+      refiningBonus: 0.18,
+      refiningSpecialties: { ore: 0.4 },
+    },
+  };
+  const t5MetalBar: Recipe = {
+    itemId: "T5_METALBAR",
+    refining: true,
+    craftingCategory: "ore",
+    focus: 94,
+    silver: 0,
+    amountCrafted: 1,
+    materials: [
+      { id: "T5_ORE", count: 3, returnable: true },
+      { id: "T4_METALBAR", count: 1, returnable: true },
+    ],
+    alternatives: [],
+    itemValue: 32,
+  };
+  const barPrices: EvaluatePrices = {
+    materials: new Map([
+      ["T5_ORE", instantOnly(200)],
+      ["T4_METALBAR", instantOnly(500)],
+    ]),
+    products: new Map([["T5_METALBAR", instantOnly(1200)]]),
+  };
+
+  it("refines a T5 metal bar in Thetford with its ore specialty, without focus", () => {
+    const result = complete(
+      evaluate(t5MetalBar, thetford, settings, barPrices),
+    );
+
+    expect(result.bonus).toMatchObject({ base: 0.18, specialty: 0.4 });
+    expect(result.rrr).toBeCloseTo(0.3671, 4);
+    expect(result.materialCost).toMatchObject({ status: "complete" });
+    expect(
+      result.materialCost.status === "complete" && result.materialCost.total,
+    ).toBeCloseTo(1100 * (1 - result.rrr), 6);
+  });
+
+  it("refines a T5 metal bar in Thetford with focus", () => {
+    const result = complete(
+      evaluate(t5MetalBar, thetford, { ...settings, focus: true }, barPrices),
+    );
+
+    expect(result.rrr).toBeCloseTo(0.5392, 4);
+    expect(result.focusCost).toBe(94);
+  });
+
+  it("gives the same bar crafting's bonus, without the specialty, when it is marked as crafting", () => {
+    const asCrafting = { ...t5MetalBar, refining: false };
+    const result = complete(
+      evaluate(asCrafting, thetford, settings, barPrices),
+    );
+
+    expect(result.bonus).toMatchObject({ base: 0.18, specialty: 0 });
   });
 });

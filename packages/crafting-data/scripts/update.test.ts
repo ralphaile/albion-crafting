@@ -93,6 +93,7 @@ describe("update", () => {
       "Extracted 3 crafting locations: Thetford, Arthur's Rest, Island",
       "Extracted the hideout bonuses for 1 biomes (Swamp), 2 map qualities and 3 power levels",
       "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands, 0 bags, 0 capes",
+      "Extracted 0 refining recipes: 0 metalbars, 0 planks, 0 cloth, 0 leather, 0 stoneblock",
       "Named 6 item IDs: 4 crafted, which the search covers, and 2 materials",
     ]);
     expect(existsSync(join(packageDir, "raw", "hideouts.json"))).toBe(true);
@@ -113,9 +114,9 @@ describe("update", () => {
     );
     expect(text.split("\n")).toEqual([
       "[",
-      '{"id":"0000","name":"Thetford","craftingBonus":0.18,"specialties":{"meat_pig":0.1,"mace":0.15,"naturestaff":0.15,"firestaff":0.15,"leather_armor":0.15,"cloth_helmet":0.15}},',
-      '{"id":"4300","name":"Arthur\'s Rest","craftingBonus":0.18,"specialties":{"axe":0.15,"crossbow":0.15,"hammer":0.15,"mace":0.15,"sword":0.15,"knuckles":0.15,"plate_helmet":0.15,"plate_armor":0.15,"plate_shoes":0.15}},',
-      '{"id":"island","name":"Island","craftingBonus":0,"specialties":{}}',
+      '{"id":"0000","name":"Thetford","craftingBonus":0.18,"specialties":{"meat_pig":0.1,"mace":0.15,"naturestaff":0.15,"firestaff":0.15,"leather_armor":0.15,"cloth_helmet":0.15},"refiningBonus":0.18,"refiningSpecialties":{"ore":0.4}},',
+      '{"id":"4300","name":"Arthur\'s Rest","craftingBonus":0.18,"specialties":{"axe":0.15,"crossbow":0.15,"hammer":0.15,"mace":0.15,"sword":0.15,"knuckles":0.15,"plate_helmet":0.15,"plate_armor":0.15,"plate_shoes":0.15},"refiningBonus":0.15,"refiningSpecialties":{}},',
+      '{"id":"island","name":"Island","craftingBonus":0,"specialties":{},"refiningBonus":0,"refiningSpecialties":{}}',
       "]",
       "",
     ]);

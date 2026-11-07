@@ -31,7 +31,14 @@ const broadsword = recipe("T4_MAIN_SWORD", ["T4_METALBAR", "T4_LEATHER"]);
 const axe = recipe("T4_MAIN_AXE", ["T4_METALBAR", "T4_PLANKS"]);
 
 const island: CraftingPlace = {
-  location: { id: "island", name: "Island", craftingBonus: 0, specialties: {} },
+  location: {
+    id: "island",
+    name: "Island",
+    craftingBonus: 0,
+    specialties: {},
+    refiningBonus: 0,
+    refiningSpecialties: {},
+  },
 };
 
 const instantBuyAndSell: EvaluateSettings = {

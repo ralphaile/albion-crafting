@@ -94,6 +94,7 @@ describe("validate", () => {
 
     expect(dumps["items.json"].items.simpleitem[0]).toEqual({
       "@uniquename": "T4_METALBAR",
+      "@shopcategory": "crafting",
       "@tier": 4,
       "@enchantmentlevel": 0,
       "@itemvalue": 16,

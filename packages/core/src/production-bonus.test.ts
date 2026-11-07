@@ -14,12 +14,16 @@ const lymhurst: CraftingLocation = {
   name: "Lymhurst",
   craftingBonus: 0.18,
   specialties: { sword: 0.15, bow: 0.15, meat_goose: 0.1 },
+  refiningBonus: 0.18,
+  refiningSpecialties: {},
 };
 const island: CraftingLocation = {
   id: "island",
   name: "Island",
   craftingBonus: 0,
   specialties: {},
+  refiningBonus: 0,
+  refiningSpecialties: {},
 };
 
 describe("productionBonus", () => {

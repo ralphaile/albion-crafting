@@ -2,12 +2,14 @@ export interface Hideout {
   biome: { specialties: readonly string[] };
   mapQuality: { specialtyBonus: number };
   powerLevel: { generalBonus: number; specialistBonus: number };
+  refiningBonus: number;
 }
 
 export interface HideoutProductionBonus {
   mapQuality: number;
   powerGeneral: number;
   powerSpecialist: number;
+  refining: number;
   daily: number;
   focus: number;
   override?: number;

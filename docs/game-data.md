@@ -85,6 +85,15 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 - **Icons** come from the game's render service: `iconUrl("T5_MAIN_SWORD@1")` is `https://render.albiononline.com/v1/item/T5_MAIN_SWORD@1.png?quality=1&size=64`. The app lazy-loads them. The service draws icons on demand and sometimes answers 502 while it's busy, so when one fails to load the app shows a grey placeholder, tries again after 1 second and after 3 more, then keeps the placeholder.
 - **Search:** each entry holds the item's name and ID in lowercase, without apostrophes, such as `experts broadsword 5.1 t5_main_sword@1`. A query matches when each of its words appears somewhere in the entry, in any order, so `broad 5.1` and `experts broadsword` both find the Expert's Broadsword.
 
+## Refining recipes
+
+`src/generated/refining.json` has a recipe for every metal bar, plank, cloth, leather and stone block, T2 to T8 at each enchantment level, from the `simpleitem` list in `items.json`. The app imports it as `refiningRecipes` from `@aoc/crafting-data`. Each has `refining: true`, so core gives it the place's [refining bonuses](#crafting-locations).
+
+- **Which items:** shop subcategory `refinedresources`, with `@shopsubcategory2` one of `metalbars`, `planks`, `cloth`, `leather` and `stoneblock`, in `scripts/refining.constants.ts`. That becomes the recipe's `shopSubcategory`.
+- **One item per enchantment level:** the game files list `T5_METALBAR_LEVEL1` as an item of its own. Its market ID is `T5_METALBAR_LEVEL1@1`, and its `baseId` is the plain `T5_METALBAR`.
+- **Recipe:** the raw resource plus one of the tier below, such as 3 T5 ore and a T4 bar. T2 takes the raw resource alone. The others are kept in `alternatives`: one with a faction token in place of a raw resource, and for stone blocks, enchanted stone that makes 2, 4 or 8 blocks at once. Stone blocks have no enchantment levels of their own.
+- **Item value:** the item's own `@itemvalue`, such as 32 for a T5 bar.
+
 ## Crafting locations
 
 `src/generated/locations.json` has the crafting bonuses of the 7 cities, the 3 Rests and the island. The app imports it as `craftingLocations` from `@aoc/crafting-data`, and its type is `CraftingLocation` from `@aoc/core`.
@@ -93,9 +102,11 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 - **Left out:** the 100 `TNL-…` clusters, Roads of Avalon zones such as Quatun-Nusas, which have no crafting bonus. The hideout entries, by biome and map quality, go into [Hideouts](#hideouts).
 - **`craftingBonus`** is the base bonus, 0.18 in every city and Rest.
 - **`specialties`** maps a crafting category to its bonus, such as `{ "sword": 0.15 }`, so a recipe's specialty bonus is `specialties[recipe.craftingCategory] ?? 0`.
-  - The refining bonuses, such as `ore` 0.40, are left out. The file lists their categories in `refiningcategory`.
+  - The refining bonuses, such as `ore` 0.40, go in `refiningSpecialties` instead. The file lists their categories in `refiningcategory`.
   - The royal cities' butcher bonuses, such as `meat_pig` 0.10, are kept for food crafting later.
-- **The island** has no specialties, and its bonus is the `@islandvalue` that every city and Rest gives, 0. If they ever disagree, `pnpm data:update` fails before writing anything.
+- **`refiningBonus`** is the base bonus for refining: 0.18 in the cities and 0.15 in the Rests.
+- **`refiningSpecialties`** maps a refining category to its bonus. Each of the 5 royal cities has one at 0.40, such as Thetford's `ore`. Caerleon, Brecilien and the Rests have none.
+- **The island** has no specialties, and its bonuses are the `@islandvalue`s that every city and Rest gives, 0 for crafting and refining. If they ever disagree, `pnpm data:update` fails before writing anything.
 - **A test** checks that every recipe's crafting category is some location's specialty, so a category the game renames on one side shows up.
 
 ## Hideouts
@@ -107,7 +118,7 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
   - A test checks that each biome's categories still match its city's.
 - **`mapQualities`:** what the map quality, Q1 to Q6, adds for the biome's 5 categories: 0.01 to 0.26.
 - **`powerLevels`:** levels 1 to 9, from `hideouts.json`. The general bonus counts for everything crafted there, and the specialist bonus only for the biome's 5 categories. The file leaves both out at level 1, which means 0.
-- **`refiningBonus`:** 0.15 in every hideout, kept for refining later.
+- **`refiningBonus`:** 0.15 in every hideout. Refining there gets this flat bonus in place of the power level and map quality.
 - **Why tables:** `craftingmodifiers.json` has 30 hideout entries, one per biome and map quality, with the same numbers in every biome. If one ever differs, such as a single biome getting another bonus at Q3, `pnpm data:update` fails before writing anything and names the difference.
 - **Left out:** Roads of Avalon hideouts, which come in a later release.
 

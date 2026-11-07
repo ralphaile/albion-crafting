@@ -149,7 +149,11 @@ describe("searchItems", () => {
   });
 
   it("leaves out the materials", () => {
-    expect(searchItems("titanium steel bar")).toEqual([]);
+    expect(searchItems("titanium ore")).toEqual([]);
+  });
+
+  it("finds refined materials, which are refined rather than crafted", () => {
+    expect(searchItems("titanium steel bar 5.0")).toEqual(["T5_METALBAR"]);
   });
 });
 
@@ -181,6 +185,26 @@ describe("craftingLocations", () => {
           leather_helmet: 0.15,
           leather_shoes: 0.15,
         },
+        refiningBonus: 0.18,
+        refiningSpecialties: { fiber: 0.4 },
+      },
+    ],
+    [
+      "Thetford",
+      {
+        id: "0000",
+        name: "Thetford",
+        craftingBonus: 0.18,
+        specialties: {
+          meat_pig: 0.1,
+          mace: 0.15,
+          naturestaff: 0.15,
+          firestaff: 0.15,
+          leather_armor: 0.15,
+          cloth_helmet: 0.15,
+        },
+        refiningBonus: 0.18,
+        refiningSpecialties: { ore: 0.4 },
       },
     ],
     [
@@ -200,11 +224,20 @@ describe("craftingLocations", () => {
           plate_armor: 0.15,
           plate_shoes: 0.15,
         },
+        refiningBonus: 0.15,
+        refiningSpecialties: {},
       },
     ],
     [
       "Island",
-      { id: "island", name: "Island", craftingBonus: 0, specialties: {} },
+      {
+        id: "island",
+        name: "Island",
+        craftingBonus: 0,
+        specialties: {},
+        refiningBonus: 0,
+        refiningSpecialties: {},
+      },
     ],
   ])("has the known bonuses for %s", (name, expected) => {
     expect(

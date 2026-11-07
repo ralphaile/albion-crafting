@@ -8,16 +8,26 @@ const lymhurst: CraftingPlace = {
     name: "Lymhurst",
     craftingBonus: 0.18,
     specialties: { sword: 0.15, bow: 0.15 },
+    refiningBonus: 0.18,
+    refiningSpecialties: {},
   },
 };
 const island: CraftingPlace = {
-  location: { id: "island", name: "Island", craftingBonus: 0, specialties: {} },
+  location: {
+    id: "island",
+    name: "Island",
+    craftingBonus: 0,
+    specialties: {},
+    refiningBonus: 0,
+    refiningSpecialties: {},
+  },
 };
 const forestHideout: CraftingPlace = {
   hideout: {
     biome: { specialties: ["sword"] },
     mapQuality: { specialtyBonus: 0.26 },
     powerLevel: { generalBonus: 0.26, specialistBonus: 0.3 },
+    refiningBonus: 0.15,
   },
 };
 const bareHideout: CraftingPlace = {
@@ -25,6 +35,7 @@ const bareHideout: CraftingPlace = {
     biome: { specialties: ["sword"] },
     mapQuality: { specialtyBonus: 0 },
     powerLevel: { generalBonus: 0, specialistBonus: 0 },
+    refiningBonus: 0.15,
   },
 };
 

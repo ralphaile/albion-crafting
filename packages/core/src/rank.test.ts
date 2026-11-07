@@ -17,6 +17,8 @@ const template = evaluate(
       name: "Island",
       craftingBonus: 0,
       specialties: {},
+      refiningBonus: 0,
+      refiningSpecialties: {},
     },
   },
   {

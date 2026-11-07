@@ -22,11 +22,13 @@ const best: Hideout = {
   biome: forest,
   mapQuality: { specialtyBonus: 0.26 },
   powerLevel: { generalBonus: 0.26, specialistBonus: 0.3 },
+  refiningBonus: 0.15,
 };
 const worst: Hideout = {
   biome: forest,
   mapQuality: { specialtyBonus: 0.01 },
   powerLevel: { generalBonus: 0, specialistBonus: 0 },
+  refiningBonus: 0.15,
 };
 
 describe("hideoutProductionBonus", () => {
@@ -104,6 +106,7 @@ describe("hideoutProductionBonus", () => {
       mapQuality: 0.26,
       powerGeneral: 0.26,
       powerSpecialist: 0.3,
+      refining: 0,
       daily: 0.1,
       focus: 0.59,
       total: bonus.total,
@@ -115,6 +118,7 @@ describe("hideoutProductionBonus", () => {
       mapQuality: 0,
       powerGeneral: 0.26,
       powerSpecialist: 0,
+      refining: 0,
       daily: 0,
       focus: 0,
       total: 0.26,
@@ -130,10 +134,29 @@ describe("hideoutProductionBonus", () => {
       mapQuality: 0.26,
       powerGeneral: 0.26,
       powerSpecialist: 0.3,
+      refining: 0,
       daily: 0,
       focus: 0,
       override: 0.9,
       total: 0.9,
+    });
+  });
+
+  it("gives refining the flat hideout refining bonus, without power level or map quality", () => {
+    expect(
+      hideoutProductionBonus(best, "ore", {
+        refining: true,
+        focus: true,
+        dailyBonuses: [{ category: "ore", bonus: 0.1 }],
+      }),
+    ).toEqual({
+      mapQuality: 0,
+      powerGeneral: 0,
+      powerSpecialist: 0,
+      refining: 0.15,
+      daily: 0.1,
+      focus: 0.59,
+      total: 0.15 + 0.1 + 0.59,
     });
   });
 
