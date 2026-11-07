@@ -166,6 +166,31 @@ describe("evaluatePlan", () => {
     );
   });
 
+  it("sells at a location's own sell mode, such as the Black Market's buy orders", () => {
+    const blackMarket: EvaluatePrices = {
+      ...pricesAt(100, 5000),
+      products: new Map([
+        ["T4_BAG", { sellMin: { status: "missing" }, buyMax: fresh(6000) }],
+      ]),
+    };
+    const result = evaluatePlan(
+      [
+        {
+          place: city,
+          prices: blackMarket,
+          sellMode: "blackMarket",
+          entries: [entry()],
+        },
+      ],
+      settings,
+    );
+
+    expect(result.locations[0]?.entries[0]?.evaluation.revenue).toMatchObject({
+      source: "buyMax",
+      price: 6000,
+    });
+  });
+
   it("gives each entry its own daily bonus", () => {
     const [plain, boosted] =
       evaluatePlan(
