@@ -14,6 +14,15 @@ A plan says what you'll craft where, and how many: "10 broadswords in Lymhurst, 
 
 `usePlan()` asks each market once for every item the plan needs there, so editing a quantity or focus needs no new request. Prices use the same settings as the best-crafts table: the server, when a price goes stale, and the typed prices.
 
+## Adding from the ranking
+
+Each row of the best-crafts table has a **+** button, and the craft panel an **Add to plan** button. Both ask how many, then add the craft to the plan:
+
+- **Where:** the location with the route chosen above the table, made if the plan doesn't have it yet.
+- **Which recipe:** the one the row ranks, or the one shown in the panel.
+- **Focus and daily bonus:** as in Settings, the daily bonus being the one for the item's own category.
+- **Already there:** the same item and recipe at that location gets the quantity added, up to 100,000.
+
 ## The model
 
 `apps/web/src/plan.types.ts`:
