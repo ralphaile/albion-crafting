@@ -478,6 +478,47 @@ describe("App", () => {
       });
   });
 
+  it("fills the plan from a focus budget with the crafts the table ranks", async () => {
+    window.history.replaceState(null, "", "/#plan");
+    const settingsStore = await renderApp({
+      savedFilters: { ...NO_FILTERS, search: "broadsword", tiers: [4] },
+      marketData: answering(broadswordPrices),
+    });
+    const fill = screen.getByRole("form", { name: "Fill from focus" });
+
+    fireEvent.change(within(fill).getByLabelText("Focus"), {
+      target: { value: "5000" },
+    });
+    await waitFor(() => {
+      fireEvent.click(
+        within(fill).getByRole("button", { name: "Fill from focus" }),
+      );
+      expect(within(fill).getByRole("status")).toHaveTextContent(
+        "Added 1 craft",
+      );
+    });
+
+    await expect
+      .poll(() => settingsStore.load(PLAN_SETTING))
+      .toMatchObject({
+        locations: [
+          { entries: [{ itemId: "T4_MAIN_SWORD", quantity: 3, focus: true }] },
+        ],
+      });
+  });
+
+  it("can't fill the plan from focus with Focus off in Settings", async () => {
+    window.history.replaceState(null, "", "/#plan");
+    await renderApp({ savedSettings: { ...DEFAULT_SETTINGS, focus: false } });
+
+    expect(
+      within(screen.getByRole("form", { name: "Fill from focus" })).getByRole(
+        "button",
+        { name: "Fill from focus" },
+      ),
+    ).toBeDisabled();
+  });
+
   it("keeps a craft open when a typed price drops it below the minimum profit", async () => {
     window.history.replaceState(
       null,

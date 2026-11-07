@@ -6,6 +6,7 @@ import type { MarketData } from "@aoc/market-prices";
 
 import type { UsedPrice, UsedPrices } from "./best-crafts.types";
 import { CraftingLocationBar } from "./CraftingLocationBar";
+import { type FillBudget, FillFromFocus } from "./FillFromFocus";
 import { formatCount, formatQuantity, formatSilver } from "./format.helpers";
 import type { ManualPrice } from "./manual-prices.types";
 import { MAX_PLAN_QUANTITY } from "./plan.constants";
@@ -440,6 +441,8 @@ export function PlanPage({
   settings,
   manualPrices,
   specializations,
+  onFill,
+  fillUnavailable,
 }: {
   marketData: MarketData;
   plan: CraftingPlan;
@@ -448,6 +451,8 @@ export function PlanPage({
   settings: CraftingSettings;
   manualPrices: readonly ManualPrice[];
   specializations: SpecializationProfile;
+  onFill?: (budget: FillBudget) => number;
+  fillUnavailable?: string;
 }) {
   const state = usePlan(
     marketData,
@@ -481,6 +486,9 @@ export function PlanPage({
           Add location
         </button>
       </div>
+      {onFill && (
+        <FillFromFocus onFill={onFill} unavailable={fillUnavailable} />
+      )}
       {state.status === "ready" && (
         <Totals
           totals={state.result.totals}

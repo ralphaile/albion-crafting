@@ -6,6 +6,7 @@ import styles from "./App.module.css";
 import { BestCrafts } from "./BestCrafts";
 import { searchWithShownItem, shownItemFromSearch } from "./craft-url.helpers";
 import { CraftingLocationBar } from "./CraftingLocationBar";
+import { fillPlan } from "./fill-plan.helpers";
 import { filtersFromSearch, searchWithFilters } from "./filters-url.helpers";
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
@@ -227,6 +228,20 @@ export function App({
             settings={settings}
             manualPrices={manualPrices}
             specializations={specializations}
+            onFill={(budget) => {
+              const filled = fillPlan(
+                plan,
+                routeChoice,
+                bestCrafts.status === "loading" ? [] : bestCrafts.crafts,
+                budget,
+                settings,
+              );
+              setPlan(filled.plan);
+              return filled.added;
+            }}
+            {...(!settings.focus && {
+              fillUnavailable: "Turn on Focus in Settings first",
+            })}
           />
         ) : (
           <>
