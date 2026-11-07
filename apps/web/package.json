@@ -8,6 +8,7 @@
     "build": "vite build",
     "dev": "vite",
     "e2e": "playwright test",
+    "icons": "node scripts/item-icons.ts",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
     "prices:snapshot": "node scripts/price-snapshot.ts",

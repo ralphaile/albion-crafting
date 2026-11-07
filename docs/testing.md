@@ -150,7 +150,7 @@ test("the app loads and shows its title", async ({ page }) => {
 
 The `test` from `./test` adds two things to every test:
 
-- **A fake network.** Requests to anywhere other than the app are answered from the recorded responses in `packages/market-prices/test/fixtures`: `prices.json`, `history.json` and `prices-no-data.json`. AODP price requests that match no recording get AODP's no-data answer, as for an item nobody has seen. Item icons from `https://render.albiononline.com` get a blank 64×64 SVG instead. Any other request with no recording is blocked and fails the test with `GET <url> has no recorded response`.
+- **A fake network.** Requests to anywhere other than the app are answered from the recorded responses in `packages/market-prices/test/fixtures`: `prices.json`, `history.json` and `prices-no-data.json`. AODP price requests that match no recording get AODP's no-data answer, as for an item nobody has seen. Item icons, from the site's `icons/` or from `https://render.albiononline.com`, get a blank 64×64 SVG instead, since the build has no icons. Service workers are blocked, so the icon cache never answers in their place. Any other request with no recording is blocked and fails the test with `GET <url> has no recorded response`.
 - **An error check.** The test fails if the browser console shows an error or the page throws one.
 
 Find elements by role, label or visible text, as in component tests.

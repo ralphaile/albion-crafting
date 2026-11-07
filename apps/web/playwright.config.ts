@@ -10,6 +10,8 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
+    // So every request reaches the page's routes, icons included.
+    serviceWorkers: "block",
   },
   projects: [
     {

@@ -82,8 +82,17 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
 - **Names** are the `EN-US` names from `formatted/items.json`, keyed by `UniqueName`, which includes the enchanted IDs such as `T5_MAIN_SWORD@1`. The other languages are left out, because some of them have encoding problems.
 - **Tier and enchantment** are added to the name: `T5_MAIN_SWORD@1` is "Expert's Broadsword 5.1", and `T5_MAIN_SWORD` is "Expert's Broadsword 5.0". An ID that doesn't start with a tier, such as `QUESTITEM_TOKEN_ROYAL_T4` ("Adept's Royal Sigil"), keeps its name as it is.
 - **A missing name:** `pnpm data:update` prints a warning, and the app shows the item's ID instead.
-- **Icons** come from the game's render service: `iconUrl("T5_MAIN_SWORD@1")` is `https://render.albiononline.com/v1/item/T5_MAIN_SWORD@1.png?quality=1&size=64`. The app lazy-loads them. The service draws icons on demand and sometimes answers 502 while it's busy, so when one fails to load the app shows a grey placeholder, tries again after 1 second and after 3 more, then keeps the placeholder.
+- **Icons** come from the game's render service: `iconUrl("T5_MAIN_SWORD@1")` is `https://render.albiononline.com/v1/item/T5_MAIN_SWORD@1.png?quality=1&size=64`. The site serves its own copies, see [Item icons](#item-icons).
 - **Search:** each entry holds the item's name and ID in lowercase, without apostrophes, such as `experts broadsword 5.1 t5_main_sword@1`. A query matches when each of its words appears somewhere in the entry, in any order, so `broad 5.1` and `experts broadsword` both find the Expert's Broadsword.
+
+## Item icons
+
+The render service draws each icon when it's asked for, so icons load slowly from it. The site serves its own copies instead.
+
+- **`pnpm --filter @aoc/web icons`** copies the 64 px icon of every item the recipes make or use, about 7,000 and 64 MB, into `apps/web/dist/icons/`. It keeps them in `apps/web/.icons/` and downloads only the ones missing there, 4 at a time, each tried again after 1, 3 and 9 seconds. It prints how many icons there are and their size.
+- **In CI**, `.github/actions/item-icons` runs it on every deploy, from both `CI` and `Price snapshot`, since a deploy replaces the whole site. `.icons/` is kept in the Actions cache, keyed by `source.json`. After a game-data refresh, the cache from before is restored, so only the new items are downloaded. A first run downloads everything in about 7 minutes.
+- **`ItemIcon`** lazy-loads the site's copy, `/albion-crafting/icons/T5_MAIN_SWORD@1.png`. Without one, as in `pnpm dev`, it loads the render service's at once. That service sometimes answers 502 while it's busy, so then the app shows a grey placeholder, tries again after 1 second and after 3 more, and then keeps the placeholder.
+- **Kept for later visits:** GitHub Pages lets a browser keep a file only 10 minutes. So `apps/web/public/icon-cache.js`, a service worker, keeps each icon the first time it loads, and later visits load none. A deploy doesn't empty that cache, so an icon that changes under the same ID keeps its old picture until the cache's name changes.
 
 ## Refining recipes
 

@@ -209,11 +209,12 @@ function HelpContent({ section }: { section: string | undefined }) {
           its current terms and notices.
         </li>
         <li>
-          Item icons are requested from Albion Online&apos;s official{" "}
+          Item icons come from Albion Online&apos;s official{" "}
           <a href={RENDER_URL} rel="noreferrer">
             render service
           </a>
-          , in line with that service&apos;s terms.
+          , in line with that service&apos;s terms. This site serves copies of
+          them, and asks the service for any icon it doesn&apos;t have.
         </li>
       </ul>
       <p>
@@ -232,13 +233,14 @@ function PrivacyContent() {
   return (
     <article className={styles.content}>
       <h1>Privacy policy</h1>
-      <p>Last updated: October 31, 2026</p>
+      <p>Last updated: November 7, 2026</p>
       <h2>What is stored locally</h2>
       <p>
         The site stores settings, filters, route choices, specializations,
-        manually entered prices, and cached market prices in this browser&apos;s
-        local storage or IndexedDB. This data is used only to make the tool work
-        on this device.
+        recipe choices, crafting plans, manually entered prices, and cached
+        market prices in this browser&apos;s local storage or IndexedDB, and
+        item icons in its cache storage. This data is used only to make the tool
+        work on this device.
       </p>
       <h2>Accounts and server storage</h2>
       <p>
@@ -251,9 +253,9 @@ function PrivacyContent() {
       <h2>How to delete your data</h2>
       <p>
         To delete local data, clear this site&apos;s browser data (including
-        IndexedDB and local storage) in your browser settings. Any server data
-        will be deletable from the account settings or by contacting the service
-        at the time accounts are introduced.
+        IndexedDB, local storage and cache storage) in your browser settings.
+        Any server data will be deletable from the account settings or by
+        contacting the service at the time accounts are introduced.
       </p>
       <p>
         The app may request prices and item images from the linked AODP and

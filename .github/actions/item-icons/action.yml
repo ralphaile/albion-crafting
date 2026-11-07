@@ -1,0 +1,12 @@
+name: Add the item icons
+description: Adds every item's icon to apps/web/dist/icons. Icons from earlier runs are kept in the Actions cache, so only the items a game-data refresh adds are downloaded.
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: apps/web/.icons
+        key: item-icons-${{ hashFiles('packages/crafting-data/source.json') }}
+        restore-keys: item-icons-
+    - run: pnpm --filter @aoc/web run icons
+      shell: bash
