@@ -57,6 +57,7 @@ export function createAodpClient(): AodpClient {
     qualities: readonly number[],
     region: Region,
     onEvent: (event: AodpEvent) => void,
+    signal: AbortSignal | undefined,
   ): Promise<{ rows: T[]; failures: BatchFailure[] }> {
     if (
       itemIds.length === 0 ||
@@ -80,7 +81,13 @@ export function createAodpClient(): AodpClient {
     onEvent({ type: "progress", done, total: batches.length });
     const results = await Promise.all(
       batches.map(async (batch) => {
-        const result = await fetchRows(batch.url, endpoint, limiter, onEvent);
+        const result = await fetchRows(
+          batch.url,
+          endpoint,
+          limiter,
+          onEvent,
+          signal,
+        );
         done += 1;
         if (result instanceof Error) {
           failures.push({ itemIds: batch.itemIds, error: result });
@@ -103,7 +110,7 @@ export function createAodpClient(): AodpClient {
       itemIds,
       marketIds,
       qualities,
-      { region = DEFAULT_REGION, onEvent = () => undefined } = {},
+      { region = DEFAULT_REGION, onEvent = () => undefined, signal } = {},
     ) {
       const { rows, failures } = await getRows(
         pricesEndpoint,
@@ -112,6 +119,7 @@ export function createAodpClient(): AodpClient {
         qualities,
         region,
         onEvent,
+        signal,
       );
       return { prices: rows, failures };
     },
@@ -119,7 +127,7 @@ export function createAodpClient(): AodpClient {
       itemIds,
       marketIds,
       qualities,
-      { region = DEFAULT_REGION, onEvent = () => undefined } = {},
+      { region = DEFAULT_REGION, onEvent = () => undefined, signal } = {},
     ) {
       const { rows, failures } = await getRows(
         historyEndpoint,
@@ -128,6 +136,7 @@ export function createAodpClient(): AodpClient {
         qualities,
         region,
         onEvent,
+        signal,
       );
       return { history: rows, failures };
     },
@@ -178,18 +187,27 @@ async function fetchRows<T>(
   endpoint: Endpoint<T>,
   limiter: Limiter,
   onEvent: (event: AodpEvent) => void,
+  signal: AbortSignal | undefined,
 ): Promise<T[] | Error> {
   const onWait = (ms: number) => {
     onEvent({ type: "waiting", seconds: Math.ceil(ms / 1000) });
   };
   for (let attempt = 1; ; attempt += 1) {
-    const response = await limiter.run(() => fetch(url).catch(toError), onWait);
+    const response = await limiter
+      .run(
+        () => fetch(url, { signal: signal ?? null }).catch(toError),
+        onWait,
+        signal,
+      )
+      .catch(toError);
+    if (signal?.aborted) {
+      return toError(signal.reason);
+    }
     if (!(response instanceof Error) && response.ok) {
-      return parseRows(
-        await response.json().catch(() => undefined),
-        url,
-        endpoint,
-      );
+      const body: unknown = await response.json().catch(() => undefined);
+      return signal?.aborted
+        ? toError(signal.reason)
+        : parseRows(body, url, endpoint);
     }
     const problem =
       response instanceof Error
@@ -210,7 +228,10 @@ async function fetchRows<T>(
     if (!(response instanceof Error) && response.status === 429) {
       limiter.pauseUntil(resetTime(response));
     }
-    await sleep(backoff(attempt));
+    await sleep(backoff(attempt), signal);
+    if (signal?.aborted) {
+      return toError(signal.reason);
+    }
   }
 }
 
@@ -252,8 +273,17 @@ function backoff(attempt: number): number {
   return ms / 2 + (Math.random() * ms) / 2;
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+// Ends early when cancelled.
+function sleep(ms: number, signal: AbortSignal | undefined): Promise<void> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(done, ms);
+    function done() {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", done);
+      resolve();
+    }
+    signal?.addEventListener("abort", done, { once: true });
+  });
 }
 
 function toError(reason: unknown): Error {

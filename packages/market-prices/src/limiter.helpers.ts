@@ -12,6 +12,11 @@ interface Queued {
   onWait: ((ms: number) => void) | undefined;
 }
 
+function errorOf(signal: AbortSignal | undefined): Error {
+  const reason: unknown = signal?.reason;
+  return reason instanceof Error ? reason : new Error(String(reason));
+}
+
 // Counts requests over the last minute and 5 minutes, not per clock minute like
 // AODP does, so no clock minute or 5 minutes can get more than AODP allows.
 export function createLimiter(): Limiter {
@@ -58,11 +63,24 @@ export function createLimiter(): Limiter {
   }
 
   return {
-    run(task, onWait) {
+    run(task, onWait, signal) {
       return new Promise((resolve, reject) => {
-        queue.push({
+        if (signal?.aborted) {
+          reject(errorOf(signal));
+          return;
+        }
+        // A task cancelled while queued leaves the queue without using a request.
+        const cancel = () => {
+          const index = queue.indexOf(queued);
+          if (index !== -1) {
+            queue.splice(index, 1);
+            reject(errorOf(signal));
+          }
+        };
+        const queued: Queued = {
           onWait,
           start: () => {
+            signal?.removeEventListener("abort", cancel);
             void task()
               .then(resolve, reject)
               .finally(() => {
@@ -70,7 +88,9 @@ export function createLimiter(): Limiter {
                 next();
               });
           },
-        });
+        };
+        signal?.addEventListener("abort", cancel, { once: true });
+        queue.push(queued);
         next();
       });
     },

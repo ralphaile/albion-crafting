@@ -15,6 +15,7 @@ export type AodpEvent =
 export interface FetchOptions {
   region?: Region;
   onEvent?: (event: AodpEvent) => void;
+  signal?: AbortSignal;
 }
 
 interface FetchedPrices {

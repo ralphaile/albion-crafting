@@ -422,6 +422,50 @@ describe("getPrices when AODP fails", () => {
     await expect(result).resolves.toEqual({ prices: [], failures: [] });
     expect(most).toBe(3);
   });
+  it("stops retrying when cancelled, and reports the batch as failed", async () => {
+    const times = serveInTurn(status(503), ok);
+    const controller = new AbortController();
+
+    const result = aodp.getPrices(["T4_BAG"], ["Caerleon"], [1], {
+      signal: controller.signal,
+    });
+    await vi.advanceTimersByTimeAsync(100);
+    controller.abort();
+    await vi.runAllTimersAsync();
+
+    const { prices, failures } = await result;
+    expect(prices).toEqual([]);
+    expect(
+      failures.map(({ itemIds, error }) => ({ itemIds, name: error.name })),
+    ).toEqual([{ itemIds: ["T4_BAG"], name: "AbortError" }]);
+    expect(times).toEqual([0]);
+  });
+
+  it("doesn't send the queued requests of a cancelled fetch", async () => {
+    let requests = 0;
+    server.use(
+      http.get(PRICES, async () => {
+        requests += 1;
+        await delay(1000);
+        return HttpResponse.json([]);
+      }),
+    );
+    const controller = new AbortController();
+
+    const result = aodp.getPrices(
+      ["A", "B", "C", "D", "E"].map(soloId),
+      ["Caerleon"],
+      [1],
+      { signal: controller.signal },
+    );
+    await vi.advanceTimersByTimeAsync(100);
+    controller.abort();
+    await vi.runAllTimersAsync();
+
+    const { failures } = await result;
+    expect(failures).toHaveLength(5);
+    expect(requests).toBe(3);
+  });
 });
 
 describe("getHistory", () => {
