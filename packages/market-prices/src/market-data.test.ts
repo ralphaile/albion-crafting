@@ -407,7 +407,7 @@ describe.each([
       minutesLater(1);
       const after = await marketData.getPrices(items, ["Caerleon"], [1], {
         force: true,
-        onPartial: (partial) => partials.push(partial),
+        onPartial: (read) => partials.push(read()),
       });
 
       const [atOnce, oneBatch, bothBatches] = partials.map((partial) =>
@@ -448,8 +448,8 @@ describe.each([
         [1],
         {
           signal: controller.signal,
-          onPartial: ({ prices }) => {
-            if (prices.length > 0) {
+          onPartial: (read) => {
+            if (read().prices.length > 0) {
               controller.abort();
             }
           },

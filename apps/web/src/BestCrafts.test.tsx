@@ -451,7 +451,9 @@ describe("BestCrafts price status", () => {
       calls[0]?.options.onEvent?.({ type: "progress", done: 1, total: 3 });
       calls[1]?.options.onEvent?.({ type: "progress", done: 2, total: 4 });
     });
-    expect(status).toHaveTextContent("Fetching prices: 3 / 7 batches");
+    await waitFor(() => {
+      expect(status).toHaveTextContent("Fetching prices: 3 / 7 batches");
+    });
 
     act(() => {
       calls[1]?.options.onEvent?.({ type: "waiting", seconds: 18 });

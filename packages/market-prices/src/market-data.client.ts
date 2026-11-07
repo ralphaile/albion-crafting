@@ -58,10 +58,13 @@ export async function openMarketData(): Promise<MarketData> {
         {
           ...fetchOptions,
           ...(onPartial && {
-            onPartial: (partial) => {
-              onPartial({
-                prices: normalizePrices(partial.rows, options),
-                fetchedAt: partial.fetchedAt,
+            onPartial: (read) => {
+              onPartial(() => {
+                const partial = read();
+                return {
+                  prices: normalizePrices(partial.rows, options),
+                  fetchedAt: partial.fetchedAt,
+                };
               });
             },
           }),

@@ -3,11 +3,12 @@ import type { CachedFetchOptions } from "./cached-rows.types.js";
 import type { HistorySummary, SummarizeOptions } from "./history.types.js";
 import type { ItemPrices } from "./prices.types.js";
 
-// `onPartial` gets the prices known so far: those already fetched, and the
-// older ones of what's still to come.
+// `onPartial` is called as prices arrive. `read` gets the prices known by
+// then: those already fetched, and the older ones of what's still to come.
+// It's work, so a caller that shows them can read only when it shows them.
 export interface PricesOptions extends CachedFetchOptions {
   staleAfterMinutes?: number;
-  onPartial?: (partial: PartialPrices) => void;
+  onPartial?: (read: () => PartialPrices) => void;
 }
 
 export type PartialPrices = Omit<PricesResult, "failures">;

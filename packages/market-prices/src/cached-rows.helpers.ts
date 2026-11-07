@@ -52,7 +52,7 @@ export function cachedRows<T extends { item_id: string; quality: number }>({
       onPartial,
       ...options
     }: CachedFetchOptions & {
-      onPartial?: (partial: CachedRows<T & Stamp>) => void;
+      onPartial?: (read: () => CachedRows<T & Stamp>) => void;
     } = {},
   ): Promise<CachedRows<T & Stamp> & { failures: BatchFailure[] }> => {
     const region = options.region ?? DEFAULT_REGION;
@@ -118,13 +118,13 @@ export function cachedRows<T extends { item_id: string; quality: number }>({
       }
       fetched.push(...stamped);
       saving.push(store.put(stamped));
-      onPartial?.(used());
+      onPartial?.(used);
     };
 
     if (toFetch.length === 0) {
       return { ...used(), failures: [] };
     }
-    onPartial?.(used());
+    onPartial?.(used);
     const { failures } = await fetch(toFetch, markets, levels, {
       ...options,
       onBatch,

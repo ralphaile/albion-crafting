@@ -62,7 +62,7 @@ function heldPrices() {
             resolve({ ...pricesAt(marketIds, 2000), failures: [] });
           },
         });
-        options.onPartial?.(pricesAt(marketIds, 1000));
+        options.onPartial?.(() => pricesAt(marketIds, 1000));
       }),
   );
   return { calls, getPrices };
@@ -124,10 +124,12 @@ describe("useBestCrafts", () => {
       calls[1]?.options.onEvent?.({ type: "waiting", seconds: 18 });
     });
 
-    expect(result.current.progress).toEqual({
-      done: 3,
-      total: 7,
-      waitingUntil: 28_000,
+    await waitFor(() => {
+      expect(result.current.progress).toEqual({
+        done: 3,
+        total: 7,
+        waitingUntil: 28_000,
+      });
     });
     vi.restoreAllMocks();
   });
@@ -163,7 +165,7 @@ describe("useBestCrafts", () => {
     const getPrices = vi.fn<MarketData["getPrices"]>(
       (itemIds, marketIds, _qualities, options = {}) =>
         new Promise((resolve) => {
-          options.onPartial?.(pricesAt(marketIds, 1000));
+          options.onPartial?.(() => pricesAt(marketIds, 1000));
           options.signal?.addEventListener("abort", () => {
             resolve({
               ...pricesAt(marketIds, 1000),

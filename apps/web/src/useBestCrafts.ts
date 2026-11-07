@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { type CraftingPlace, pricesNeeded, type PricesNeeded } from "@aoc/core";
 import { recipes } from "@aoc/crafting-data";
@@ -99,6 +99,8 @@ type Side = "materials" | "products";
 
 const QUALITIES = [QUALITY];
 
+const UPDATE_EVERY_MS = 1000;
+
 const NO_PRICES: CraftPrices = { materials: [], products: [] };
 
 function oldest(...times: (number | undefined)[]): number | undefined {
@@ -119,17 +121,24 @@ function readyPrices(
   };
 }
 
-// `onPartial` gets the prices known so far, once both sides have some.
+// Reads a side's prices once, until newer ones arrive.
+function readOnce(read: () => PartialPrices): () => PartialPrices {
+  let prices: PartialPrices | undefined;
+  return () => (prices ??= read());
+}
+
+// `onPartial` is called as prices arrive, once both sides have some, and
+// `read` gets the prices known so far.
 async function fetchPrices(
   marketData: MarketData,
   needed: PricesNeeded,
   buyMarketId: string,
   sellMarketId: string,
   options: PricesOptions,
-  onPartial: (prices: ReadyPrices) => void,
+  onPartial: (read: () => ReadyPrices) => void,
   onProgress: (done: number, total: number) => void,
 ): Promise<Fetched> {
-  const known: Partial<Record<Side, PartialPrices>> = {};
+  const known: Partial<Record<Side, () => PartialPrices>> = {};
   const counts: Record<Side, { done: number; total: number }> = {
     materials: { done: 0, total: 0 },
     products: { done: 0, total: 0 },
@@ -151,14 +160,15 @@ async function fetchPrices(
           );
         }
       },
-      onPartial: (partial) => {
-        known[side] = partial;
-        if (known.materials && known.products) {
-          onPartial(readyPrices(known.materials, known.products));
+      onPartial: (read) => {
+        known[side] = readOnce(read);
+        const { materials, products } = known;
+        if (materials && products) {
+          onPartial(() => readyPrices(materials(), products()));
         }
       },
     });
-    known[side] = result;
+    known[side] = () => result;
     return result;
   };
   try {
@@ -283,6 +293,38 @@ export function useBestCrafts(
         done,
       });
     };
+    // Re-ranking every craft after each batch is slow on a slow device, so the
+    // batches that arrive close together show together, after any input.
+    let prices: (() => ReadyPrices) | undefined;
+    let counts: FetchProgress = {
+      done: 0,
+      total: 0,
+      waitingUntil: undefined,
+    };
+    let shownAt = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const show = () => {
+      clearTimeout(timer);
+      timer = undefined;
+      if (!active) {
+        return;
+      }
+      shownAt = Date.now();
+      const shown = { prices: prices?.(), counts };
+      prices = undefined;
+      startTransition(() => {
+        if (shown.prices !== undefined) {
+          answerWith(shown.prices, false);
+        }
+        setProgress({ ...shown.counts, needed, attempt });
+      });
+    };
+    const showSoon = () => {
+      timer ??= setTimeout(
+        show,
+        Math.max(0, shownAt + UPDATE_EVERY_MS - Date.now()),
+      );
+    };
     void fetchPrices(
       marketData,
       needed,
@@ -294,29 +336,26 @@ export function useBestCrafts(
         force,
         signal: controller.signal,
         onEvent: (event) => {
-          if (active && event.type === "waiting") {
-            const waitingUntil = Date.now() + event.seconds * 1000;
-            setProgress((last) => last && { ...last, waitingUntil });
+          // A wait shows at once, so its countdown starts on time.
+          if (event.type === "waiting") {
+            counts = {
+              ...counts,
+              waitingUntil: Date.now() + event.seconds * 1000,
+            };
+            show();
           }
         },
       },
-      (prices) => {
-        if (active) {
-          answerWith(prices, false);
-        }
+      (partial) => {
+        prices = partial;
+        showSoon();
       },
       (done, total) => {
-        if (active) {
-          setProgress({
-            needed,
-            attempt,
-            done,
-            total,
-            waitingUntil: undefined,
-          });
-        }
+        counts = { ...counts, done, total };
+        showSoon();
       },
     ).then((fetched) => {
+      clearTimeout(timer);
       if (active) {
         // Stopping a fetch on purpose isn't a failure.
         answerWith(
@@ -329,6 +368,7 @@ export function useBestCrafts(
     });
     return () => {
       active = false;
+      clearTimeout(timer);
       controller.abort();
     };
   }, [
