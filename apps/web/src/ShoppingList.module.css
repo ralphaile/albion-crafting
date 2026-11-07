@@ -1,0 +1,53 @@
+.shoppingList {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.head h3 {
+  margin: 0;
+  font-family: var(--font-display);
+}
+
+.market {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.market caption {
+  padding-bottom: 4px;
+  font-family: var(--font-caps);
+  text-align: left;
+}
+
+.market th,
+.market td {
+  padding: 4px 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
+  text-align: left;
+}
+
+.market td {
+  text-align: right;
+}
+
+.market tfoot th,
+.market tfoot td {
+  border-bottom: none;
+  font-weight: 700;
+}
+
+.missing {
+  color: var(--price-missing);
+}

@@ -215,6 +215,37 @@ describe("PlanPage", () => {
     ]);
   });
 
+  it("lists what to buy in each market, and copies it as text", async () => {
+    const writeText = vi.fn<(text: string) => Promise<void>>(() =>
+      Promise.resolve(),
+    );
+    // jsdom has no clipboard.
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+    renderPlan();
+    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
+    addBroadsword(screen.getByRole("region", { name: "Location 1" }));
+
+    const list = await screen.findByRole("region", { name: "Shopping list" });
+    const lymhurst = within(list).getByRole("table", { name: "Lymhurst" });
+    expect(
+      within(lymhurst)
+        .getAllByRole("rowheader")
+        .map(({ textContent }) => textContent),
+    ).toEqual(["Steel Bar 4.0", "Worked Leather 4.0", "Total"]);
+
+    fireEvent.click(within(list).getByRole("button", { name: "Copy as text" }));
+
+    expect(
+      await within(list).findByRole("button", { name: "Copied" }),
+    ).toBeInTheDocument();
+    expect(writeText.mock.calls[0]?.[0]).toMatch(
+      /^Lymhurst\n {2}\d+ × Steel Bar 4\.0 at 100 = /,
+    );
+  });
+
   it("uses an item's 7-day average when its price is an outlier and Settings says to", async () => {
     const marketData = {
       ...answering(broadswordPrices),
@@ -315,5 +346,22 @@ describe("PlanPage", () => {
     fireEvent.blur(quantity);
 
     expect(quantity).toHaveValue(2);
+  });
+
+  it("says when the shopping list can't be copied", async () => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: undefined,
+      configurable: true,
+    });
+    renderPlan();
+    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
+    addBroadsword(screen.getByRole("region", { name: "Location 1" }));
+    const list = await screen.findByRole("region", { name: "Shopping list" });
+
+    fireEvent.click(within(list).getByRole("button", { name: "Copy as text" }));
+
+    expect(
+      await within(list).findByRole("button", { name: "Couldn’t copy" }),
+    ).toBeInTheDocument();
   });
 });

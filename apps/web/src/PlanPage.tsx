@@ -15,6 +15,8 @@ import { PriceBadge } from "./PriceBadge";
 import { RECIPES_BY_ID } from "./recipes.constants";
 import type { RouteChoice } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
+import { shoppingList } from "./shopping-list.helpers";
+import { ShoppingList } from "./ShoppingList";
 import type { SpecializationProfile } from "./specializations.types";
 import { type PlanState, usePlan } from "./usePlan";
 
@@ -510,6 +512,9 @@ export function PlanPage({
           }}
         />
       ))}
+      {state.status === "ready" && (
+        <ShoppingList markets={shoppingList(plan, state.result)} />
+      )}
     </section>
   );
 }

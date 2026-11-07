@@ -10,6 +10,7 @@ A plan says what you'll craft where, and how many: "10 broadswords in Lymhurst, 
 - **Add an item** searches items by name and adds one at quantity 1, with focus. Each entry's enchantment, recipe, quantity, focus and daily bonus can be changed in its row.
 - **Each row** shows the materials to buy after returns, the focus, the station fee and the profit. The materials and the profit carry the same price badges as the best-crafts table: fresh, stale, typed or missing. An entry without every price says which ones it's missing instead of a profit.
 - **Totals** for each location and for the plan: silver to invest, focus and profit, and the missing prices.
+- **Shopping list:** every material the plan needs, added up across entries and locations for each market it's bought in. Each line is the expected count after returns rounded up to whole items, its unit price and its cost, with a total per market. **Copy as text** copies it, for example to paste into Discord. `shoppingList()` in `apps/web/src/shopping-list.helpers.ts` builds it.
 
 `usePlan()` asks each market once for every item the plan needs there, so editing a quantity or focus needs no new request. Prices use the same settings as the best-crafts table: the server, when a price goes stale, and the typed prices.
 
