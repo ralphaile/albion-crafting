@@ -20,7 +20,7 @@ A plan says what you'll craft where, and how many: "10 broadswords in Lymhurst, 
 Each row of the best-crafts table has a **+** button, and the craft panel an **Add to plan** button. Both ask how many, then add the craft to the plan:
 
 - **Where:** the location with the route chosen above the table, made if the plan doesn't have it yet.
-- **Which recipe:** the one the row ranks, or the one shown in the panel.
+- **Which recipe:** the one the table uses, chosen in the panel or the most profitable.
 - **Focus and daily bonus:** as in Settings, the daily bonus being the one for the item's own category.
 - **Already there:** the same item and recipe at that location, with the same focus and daily bonus, gets the quantity added, up to 100,000. With other focus or daily bonus it's a row of its own.
 
