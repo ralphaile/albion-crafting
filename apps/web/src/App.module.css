@@ -39,6 +39,27 @@
   margin-left: auto;
 }
 
+.pages {
+  display: flex;
+  gap: 16px;
+}
+
+.pages a {
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  text-decoration: none;
+}
+
+.pages a:hover,
+.pages a[aria-current="page"] {
+  color: var(--text);
+}
+
+.pages a[aria-current="page"] {
+  text-decoration: underline 2px var(--brass);
+  text-underline-offset: 6px;
+}
+
 .main {
   display: grid;
   gap: 24px;

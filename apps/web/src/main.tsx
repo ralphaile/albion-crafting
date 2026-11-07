@@ -16,6 +16,7 @@ import { openManualPriceStore } from "./manual-prices.store";
 import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
+  PLAN_SETTING,
   ROUTE_SETTING,
   SPECIALIZATIONS_SETTING,
 } from "./saved-settings.constants";
@@ -38,12 +39,14 @@ const [
   savedRoute,
   savedSettings,
   savedSpecializations,
+  savedPlan,
   savedManualPrices,
 ] = await Promise.all([
   settingsStore.load(FILTERS_SETTING),
   settingsStore.load(ROUTE_SETTING),
   settingsStore.load(CRAFTING_SETTING),
   settingsStore.load(SPECIALIZATIONS_SETTING),
+  settingsStore.load(PLAN_SETTING),
   manualPriceStore.list(),
 ]);
 
@@ -57,6 +60,7 @@ createRoot(root).render(
       savedRoute={savedRoute}
       savedSettings={savedSettings}
       savedSpecializations={savedSpecializations}
+      savedPlan={savedPlan}
       savedManualPrices={savedManualPrices}
     />
   </StrictMode>,
