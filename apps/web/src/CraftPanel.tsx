@@ -43,8 +43,15 @@ function seen(price: UsedPrice) {
   if (price.status === "missing") {
     return "missing";
   }
+  if (price.outlier?.usingAverage === true) {
+    return "using 7-day average";
+  }
   const how = price.origin === "manual" ? "typed" : "seen";
-  return `${how} ${formatAgo(price.ageMinutes)}${price.status === "stale" ? ", stale" : ""}`;
+  const notes = [
+    ...(price.status === "stale" ? ["stale"] : []),
+    ...(price.outlier === undefined ? [] : ["outlier"]),
+  ];
+  return [`${how} ${formatAgo(price.ageMinutes)}`, ...notes].join(", ");
 }
 
 // How many the returns leave you buying, times what each costs.

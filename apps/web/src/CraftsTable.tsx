@@ -105,11 +105,18 @@ function PriceAge({ label, price }: { label: string; price: UsedPrice }) {
   );
 }
 
-// The oldest material price, or missing when any of them is.
+// Missing when any material price is, else an outlier among them, else the
+// oldest.
 function materialsPrice({ materialPrices, oldestMaterialPrice }: Craft) {
-  return [...materialPrices.values()].some(({ status }) => status === "missing")
-    ? MISSING
-    : (oldestMaterialPrice ?? MISSING);
+  const prices = [...materialPrices.values()];
+  if (prices.some(({ status }) => status === "missing")) {
+    return MISSING;
+  }
+  return (
+    prices.find(({ outlier }) => outlier !== undefined) ??
+    oldestMaterialPrice ??
+    MISSING
+  );
 }
 
 function Volume({

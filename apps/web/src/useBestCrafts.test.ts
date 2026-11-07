@@ -117,7 +117,7 @@ describe("useBestCrafts", () => {
     });
   });
 
-  it("gives each craft how many sell a day in the sell market, and doesn't force history on a refresh", async () => {
+  it("fetches the materials' history in the buy market and the products' in the sell market, gives each craft how many sell a day, and doesn't force history on a refresh", async () => {
     const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
       Promise.resolve({ ...pricesAt(marketIds, 0), failures: [] }),
     );
@@ -146,7 +146,7 @@ describe("useBestCrafts", () => {
       result.current.refresh();
     });
     await waitFor(() => {
-      expect(getHistory).toHaveBeenCalledTimes(2);
+      expect(getHistory).toHaveBeenCalledTimes(4);
     });
 
     const crafts =
@@ -157,14 +157,16 @@ describe("useBestCrafts", () => {
     expect(
       crafts.find(({ itemId }) => itemId === "T5_MAIN_SWORD")?.dailyVolume,
     ).toBe("unknown");
-    const [itemIds, marketIds] = getHistory.mock.calls[0] ?? [];
-    expect(itemIds).toContain("T4_MAIN_SWORD");
-    expect(itemIds).not.toContain("T4_METALBAR");
-    expect(marketIds).toEqual(["Caerleon"]);
-    expect(getHistory.mock.calls.map(([, , , options]) => options)).toEqual([
-      expect.not.objectContaining({ force: true }),
-      expect.not.objectContaining({ force: true }),
-    ]);
+    const [materialIds, buyMarket] = getHistory.mock.calls[0] ?? [];
+    const [productIds, sellMarket] = getHistory.mock.calls[1] ?? [];
+    expect(materialIds).toContain("T4_METALBAR");
+    expect(buyMarket).toEqual(["Martlock"]);
+    expect(productIds).toContain("T4_MAIN_SWORD");
+    expect(productIds).not.toContain("T4_METALBAR");
+    expect(sellMarket).toEqual(["Caerleon"]);
+    expect(
+      getHistory.mock.calls.every(([, , , options]) => !options?.force),
+    ).toBe(true);
   });
 
   it("adds up the batches of prices and history, and says until when it waits for the rate limit", async () => {
@@ -224,7 +226,7 @@ describe("useBestCrafts", () => {
     ).toEqual([false, false, true, true, false, false]);
   });
 
-  it("retries a failed history batch for its history only, not its prices", async () => {
+  it("retries a failed batch of the materials' history for it alone, not the products' history or any prices", async () => {
     const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
       Promise.resolve({ ...pricesAt(marketIds, 0), failures: [] }),
     );
@@ -248,12 +250,13 @@ describe("useBestCrafts", () => {
       result.current.retry();
     });
     await waitFor(() => {
-      expect(getHistory).toHaveBeenCalledTimes(2);
+      expect(getHistory).toHaveBeenCalledTimes(4);
     });
 
-    expect(getHistory.mock.calls[1]?.[3]?.refetch).toEqual(
+    expect(getHistory.mock.calls[2]?.[3]?.refetch).toEqual(
       getHistory.mock.calls[0]?.[0],
     );
+    expect(getHistory.mock.calls[3]?.[3]?.refetch).toEqual([]);
     expect(
       getPrices.mock.calls.slice(2).map(([, , , options]) => options?.refetch),
     ).toEqual([[], []]);

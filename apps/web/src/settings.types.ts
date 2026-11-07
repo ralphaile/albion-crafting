@@ -14,6 +14,8 @@ export interface CraftingSettings {
   preferManualPrices: boolean;
   server: Region;
   lowVolumePerDay: number;
+  outlierRatio: number;
+  useAverageForOutliers: boolean;
 }
 
 export interface ServerOption {

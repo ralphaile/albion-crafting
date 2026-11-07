@@ -13,7 +13,7 @@ import type {
 } from "@aoc/market-prices";
 
 import { evaluateCrafts, withDailyVolumes } from "./best-crafts.helpers";
-import type { Craft, CraftPrices } from "./best-crafts.types";
+import type { Craft, CraftHistory, CraftPrices } from "./best-crafts.types";
 import { NO_FILTERS } from "./filters.constants";
 import { craftFilter, recipeFilter } from "./filters.helpers";
 import type { Filters } from "./filters.types";
@@ -21,6 +21,7 @@ import { withManualPrices } from "./manual-prices.helpers";
 import type { ManualPrice } from "./manual-prices.types";
 import { missingPrices } from "./missing-prices.helpers";
 import type { MissingPrice } from "./missing-prices.types";
+import { withOutliers } from "./outliers.helpers";
 import { QUALITY } from "./prices.constants";
 import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
@@ -70,11 +71,10 @@ export type BestCraftsResult = PriceActions &
       }
   );
 
-// `history` is the products' history in the sell market.
 interface ReadyPrices {
   status: "ready";
   prices: CraftPrices;
-  history: readonly HistorySummary[];
+  history: CraftHistory;
   failures: BatchFailure[];
   failed: Refetch;
   batches: number;
@@ -100,14 +100,18 @@ interface Progress extends FetchProgress {
   attempt: number;
 }
 
-type Side = "materials" | "products" | "history";
+type Side = "materials" | "products" | "materialHistory" | "productHistory";
 
-// The items to fetch again even when they're recent, kept apart for prices
-// and history so a failed history batch doesn't refetch prices that came.
-interface Refetch {
-  prices: readonly string[];
-  history: readonly string[];
-}
+const SIDES: readonly Side[] = [
+  "materials",
+  "products",
+  "materialHistory",
+  "productHistory",
+];
+
+// The items to fetch again even when they're recent, kept apart for each
+// request so a batch that failed in one doesn't refetch what came in another.
+type Refetch = Record<Side, readonly string[]>;
 
 interface FetchOptions {
   region: Region;
@@ -126,9 +130,19 @@ const NO_PRICES: CraftPrices = { materials: [], products: [] };
 
 const NO_ITEMS: readonly string[] = [];
 
-const NO_HISTORY: readonly HistorySummary[] = [];
+const NO_SUMMARIES: readonly HistorySummary[] = [];
 
-const NO_REFETCH: Refetch = { prices: NO_ITEMS, history: NO_ITEMS };
+const NO_HISTORY: CraftHistory = {
+  materials: NO_SUMMARIES,
+  products: NO_SUMMARIES,
+};
+
+const NO_REFETCH: Refetch = {
+  materials: NO_ITEMS,
+  products: NO_ITEMS,
+  materialHistory: NO_ITEMS,
+  productHistory: NO_ITEMS,
+};
 
 function oldest(...times: (number | undefined)[]): number | undefined {
   const known = times.filter((time) => time !== undefined);
@@ -139,7 +153,7 @@ function oldest(...times: (number | undefined)[]): number | undefined {
 function readyPrices(
   materials: PartialPrices,
   products: PartialPrices,
-  history: PartialHistory | undefined,
+  history: CraftHistory,
   prices: CraftPrices = {
     materials: materials.prices,
     products: products.prices,
@@ -148,7 +162,7 @@ function readyPrices(
   return {
     status: "ready",
     prices,
-    history: history?.history ?? NO_HISTORY,
+    history,
     failures: [],
     failed: NO_REFETCH,
     batches: 0,
@@ -162,8 +176,8 @@ function readOnce<T>(read: () => T): () => T {
   return () => (rows ??= read());
 }
 
-// Fetches the materials' prices in the buy market, and the products' prices
-// and history in the sell market. `onPartial` is called as they arrive, once
+// Fetches the materials' prices and history in the buy market, and the
+// products' in the sell market. `onPartial` is called as they arrive, once
 // both sides of the prices have some, and `read` gets what's known so far.
 async function fetchPrices(
   marketData: MarketData,
@@ -177,15 +191,14 @@ async function fetchPrices(
   const known: {
     materials?: () => PartialPrices;
     products?: () => PartialPrices;
-    history?: () => PartialHistory;
+    materialHistory?: () => PartialHistory;
+    productHistory?: () => PartialHistory;
   } = {};
-  const counts: Record<Side, { done: number; total: number }> = {
-    materials: { done: 0, total: 0 },
-    products: { done: 0, total: 0 },
-    history: { done: 0, total: 0 },
-  };
+  const counts = Object.fromEntries(
+    SIDES.map((side) => [side, { done: 0, total: 0 }]),
+  ) as Record<Side, { done: number; total: number }>;
   const sum = (count: "done" | "total") =>
-    counts.materials[count] + counts.products[count] + counts.history[count];
+    SIDES.reduce((total, side) => total + counts[side][count], 0);
   const report = (side: Side) => (event: AodpEvent) => {
     onEvent(event);
     if (event.type === "progress") {
@@ -205,14 +218,17 @@ async function fetchPrices(
           products: products.prices,
         });
   const showKnown = () => {
-    const { materials, products, history } = known;
+    const { materials, products, materialHistory, productHistory } = known;
     if (materials && products) {
       onPartial(() => {
         const [materialPrices, productPrices] = [materials(), products()];
         return readyPrices(
           materialPrices,
           productPrices,
-          history?.(),
+          {
+            materials: materialHistory?.().history ?? NO_SUMMARIES,
+            products: productHistory?.().history ?? NO_SUMMARIES,
+          },
           pricesOf(materialPrices, productPrices),
         );
       });
@@ -227,7 +243,7 @@ async function fetchPrices(
       region,
       staleAfterMinutes,
       force,
-      refetch: refetch.prices,
+      refetch: refetch[side],
       signal,
       onEvent: report(side),
       onPartial: (read) => {
@@ -239,35 +255,37 @@ async function fetchPrices(
     return result;
   };
   // History is reused for hours, so Refresh prices doesn't force it.
-  const askHistory = async () => {
-    const result = await marketData.getHistory(
-      needed.products,
-      [sellMarketId],
-      QUALITIES,
-      {
-        region,
-        refetch: refetch.history,
-        signal,
-        onEvent: report("history"),
-        onPartial: (read) => {
-          known.history = readOnce(read);
-          showKnown();
-        },
+  const askHistory = async (
+    side: "materialHistory" | "productHistory",
+    itemIds: readonly string[],
+    marketId: string,
+  ) => {
+    const result = await marketData.getHistory(itemIds, [marketId], QUALITIES, {
+      region,
+      refetch: refetch[side],
+      signal,
+      onEvent: report(side),
+      onPartial: (read) => {
+        known[side] = readOnce(read);
+        showKnown();
       },
-    );
-    known.history = () => result;
+    });
+    known[side] = () => result;
     return result;
   };
   try {
-    const [materials, products, history] = await Promise.all([
-      ask("materials", needed.materials, buyMarketId),
-      ask("products", needed.products, sellMarketId),
-      askHistory(),
-    ]);
+    const [materials, products, materialHistory, productHistory] =
+      await Promise.all([
+        ask("materials", needed.materials, buyMarketId),
+        ask("products", needed.products, sellMarketId),
+        askHistory("materialHistory", needed.materials, buyMarketId),
+        askHistory("productHistory", needed.products, sellMarketId),
+      ]);
     const failures = [
       ...materials.failures,
       ...products.failures,
-      ...history.failures,
+      ...materialHistory.failures,
+      ...productHistory.failures,
     ];
     const [firstFailure] = failures;
     if (
@@ -279,11 +297,16 @@ async function fetchPrices(
     const itemsOf = (failed: readonly BatchFailure[]) =>
       failed.flatMap(({ itemIds }) => itemIds);
     return {
-      ...readyPrices(materials, products, history),
+      ...readyPrices(materials, products, {
+        materials: materialHistory.history,
+        products: productHistory.history,
+      }),
       failures,
       failed: {
-        prices: itemsOf([...materials.failures, ...products.failures]),
-        history: itemsOf(history.failures),
+        materials: itemsOf(materials.failures),
+        products: itemsOf(products.failures),
+        materialHistory: itemsOf(materialHistory.failures),
+        productHistory: itemsOf(productHistory.failures),
       },
       batches: sum("total"),
     };
@@ -328,8 +351,14 @@ export function useBestCrafts(
   specializations: SpecializationProfile = NO_SPECIALIZATIONS,
 ): BestCraftsResult {
   const { place, buyMarketId, sellMarketId } = route;
-  const { server, staleAfterHours, manualStaleAfterDays, preferManualPrices } =
-    settings;
+  const {
+    server,
+    staleAfterHours,
+    manualStaleAfterDays,
+    preferManualPrices,
+    outlierRatio,
+    useAverageForOutliers,
+  } = settings;
   const [{ attempt, force, refetch }, setRequest] = useState<{
     attempt: number;
     force: boolean;
@@ -511,7 +540,9 @@ export function useBestCrafts(
       : current?.fetched.status === "error"
         ? NO_PRICES
         : undefined;
-  const prices = useMemo(
+  const history =
+    current?.fetched.status === "ready" ? current.fetched.history : NO_HISTORY;
+  const chosenPrices = useMemo(
     () =>
       fetchedPrices &&
       withManualPrices(fetchedPrices, manualPrices, {
@@ -532,6 +563,15 @@ export function useBestCrafts(
       preferManualPrices,
     ],
   );
+  const prices = useMemo(
+    () =>
+      chosenPrices &&
+      withOutliers(chosenPrices, history, {
+        ratio: outlierRatio,
+        useAverage: useAverageForOutliers,
+      }),
+    [chosenPrices, history, outlierRatio, useAverageForOutliers],
+  );
   const routeSettings = useMemo(
     () => ({
       ...settingsForRoute(settings, route),
@@ -546,10 +586,8 @@ export function useBestCrafts(
         : evaluateCrafts(priced, place, routeSettings, prices),
     [priced, place, routeSettings, prices],
   );
-  const history =
-    current?.fetched.status === "ready" ? current.fetched.history : NO_HISTORY;
   const withVolumes = useMemo(
-    () => withDailyVolumes(evaluated, history),
+    () => withDailyVolumes(evaluated, history.products),
     [evaluated, history],
   );
   const crafts = useMemo(

@@ -110,6 +110,10 @@ describe("SettingsPanel", () => {
     );
     fireEvent.change(select("Server"), { target: { value: "europe" } });
     fireEvent.change(number("Low volume under"), { target: { value: "10" } });
+    fireEvent.change(number("Outlier beyond"), { target: { value: "3" } });
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Use 7-day average for outliers" }),
+    );
 
     expect(lastChange()).toEqual({
       ...DEFAULT_SETTINGS,
@@ -123,6 +127,8 @@ describe("SettingsPanel", () => {
       preferManualPrices: true,
       server: "europe",
       lowVolumePerDay: 10,
+      outlierRatio: 3,
+      useAverageForOutliers: true,
     });
   });
 
@@ -133,6 +139,9 @@ describe("SettingsPanel", () => {
       fireEvent.change(number("Station fee"), { target: { value } });
     }
     fireEvent.change(number("Stale after"), { target: { value: "0" } });
+    for (const value of ["1", "101"]) {
+      fireEvent.change(number("Outlier beyond"), { target: { value } });
+    }
 
     expect(lastChange()).toBeUndefined();
     fireEvent.blur(number("Station fee"));
@@ -187,6 +196,22 @@ describe("SettingsPanel", () => {
     expect(
       screen.getByRole("checkbox", { name: "Always prefer my manual prices" }),
     ).toHaveAccessibleDescription(/even when AODP has a newer one/);
+    expect(number("Outlier beyond")).toHaveAccessibleDescription(
+      /above or below the item's average sale price/,
+    );
+    expect(
+      screen.getByRole("checkbox", { name: "Use 7-day average for outliers" }),
+    ).toHaveAccessibleDescription(/a product price above its average/);
+  });
+
+  it("links the outlier settings to the outliers in the help", () => {
+    openPanel();
+
+    for (const about of ["Outlier beyond", "Use 7-day average for outliers"]) {
+      expect(
+        screen.getByRole("link", { name: `Read more about ${about}` }),
+      ).toHaveAttribute("href", "#help/outliers");
+    }
   });
 
   it("resets to the defaults", () => {

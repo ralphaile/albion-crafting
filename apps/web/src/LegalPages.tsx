@@ -86,6 +86,11 @@ const GLOSSARY = [
     "How many of an item sold a day in the sell market, on average over the newest 7 days AODP has. Low marks items that sell fewer than your setting, which can take a while to sell. No history means AODP has no sales there, as is common in the Black Zone.",
   ],
   [
+    "outliers",
+    "Outliers",
+    "An AODP price more than twice or under half the item's average sale price over the newest 7 days, or the ratio set in Settings. One odd listing can make a craft look far better than it is. The badge warns of it, and the Use 7-day average setting works out crafts with the average instead, where the outlier makes a craft look better: a product price above its average, or a material price below it. Prices you typed are never judged.",
+  ],
+  [
     "map-quality",
     "Map quality",
     "A hideout map quality from Q1 to Q6 that adds a production bonus for the biome’s specialties.",

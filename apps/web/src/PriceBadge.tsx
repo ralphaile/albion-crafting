@@ -6,14 +6,17 @@ import type { SeenPrice, UsedPrice } from "./best-crafts.types";
 import { formatAgo, formatSilver } from "./format.helpers";
 import styles from "./PriceBadge.module.css";
 
-type Kind = "fresh" | "stale" | "manual" | "missing";
+type Kind = "fresh" | "stale" | "manual" | "missing" | "outlier";
 
 const NAMES: Record<Kind, string> = {
   fresh: "API fresh",
   stale: "API stale",
   manual: "Manual",
   missing: "Missing",
+  outlier: "Outlier",
 };
+
+const USING_AVERAGE = "Using 7-day average";
 
 const TIP_WIDTH = 280;
 
@@ -27,22 +30,49 @@ const ICONS: Record<Kind, ReactNode> = {
   ),
   manual: <path d="M10.5 2.5l3 3L6 13H3v-3z" />,
   missing: <path d="M4 4l8 8M12 4l-8 8" />,
+  outlier: (
+    <>
+      <path d="M8 2.5L14.5 13.5h-13z" />
+      <path d="M8 6.5v3M8 11.5v0.01" />
+    </>
+  ),
 };
 
 function kindOf(price: UsedPrice): Kind {
   if (price.status === "missing") {
     return "missing";
   }
+  if (price.outlier !== undefined) {
+    return "outlier";
+  }
   return price.origin === "manual" ? "manual" : price.status;
 }
 
-function described(price: SeenPrice, origin: PriceOrigin) {
+function nameOf(price: UsedPrice) {
+  return price.outlier?.usingAverage === true
+    ? USING_AVERAGE
+    : NAMES[kindOf(price)];
+}
+
+function described(
+  price: SeenPrice & Pick<UsedPrice, "outlier">,
+  origin: PriceOrigin,
+) {
+  const ago = formatAgo(price.ageMinutes);
+  const { outlier } = price;
+  if (outlier !== undefined) {
+    const seen = `${formatSilver(outlier.seen)}, seen ${ago}`;
+    const average = formatSilver(outlier.average);
+    return outlier.usingAverage
+      ? `${USING_AVERAGE} ${average} in place of outlier ${seen}`
+      : `Outlier ${seen}. 7-day average ${average}`;
+  }
   const name =
     origin === "manual"
       ? `Manual${price.status === "stale" ? ", stale" : ""}`
       : NAMES[price.status];
   const how = origin === "manual" ? "typed" : "seen";
-  return `${name} ${formatSilver(price.value)}, ${how} ${formatAgo(price.ageMinutes)}`;
+  return `${name} ${formatSilver(price.value)}, ${how} ${ago}`;
 }
 
 function Icon({ kind }: { kind: Kind }) {
@@ -76,7 +106,7 @@ export function PriceBadge({
     <>
       <Icon kind={kind} />
       {children}
-      {announceName && <span className={styles.srOnly}>, {NAMES[kind]}</span>}
+      {announceName && <span className={styles.srOnly}>, {nameOf(price)}</span>}
     </>
   );
 

@@ -8,6 +8,7 @@ import {
   MAX_DAILY_BONUSES,
   MAX_LOW_VOLUME_PER_DAY,
   MAX_MANUAL_STALE_DAYS,
+  MAX_OUTLIER_RATIO,
   MAX_STALE_HOURS,
   MAX_STATION_FEE,
   SERVERS,
@@ -78,6 +79,8 @@ function helpSection(about: string) {
   if (about.includes("price")) return "price-badges";
   if (about === "Daily bonuses") return "production-bonus";
   if (about === "Low volume under") return "daily-volume";
+  if (about === "Outlier beyond" || about === "Use 7-day average for outliers")
+    return "outliers";
   return "data";
 }
 
@@ -484,6 +487,25 @@ export function SettingsPanel({
               set("preferManualPrices", preferManualPrices);
             }}
             help="Uses a price you typed whenever there is one, even when AODP has a newer one."
+          />
+          <WholeNumber
+            label="Outlier beyond"
+            unit="× the 7-day average"
+            value={settings.outlierRatio}
+            min={2}
+            max={MAX_OUTLIER_RATIO}
+            onChange={(outlierRatio) => {
+              set("outlierRatio", outlierRatio);
+            }}
+            help="An AODP price more than this many times above or below the item's average sale price over the last 7 days is marked as an outlier, such as one odd listing."
+          />
+          <Check
+            label="Use 7-day average for outliers"
+            checked={settings.useAverageForOutliers}
+            onChange={(useAverageForOutliers) => {
+              set("useAverageForOutliers", useAverageForOutliers);
+            }}
+            help="Works out crafts with the 7-day average in place of an outlier price. Only an outlier that makes a craft look better is replaced: a product price above its average, or a material price below it."
           />
           <WholeNumber
             label="Low volume under"
