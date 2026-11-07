@@ -24,3 +24,10 @@ interface PlanLocation {
 export interface CraftingPlan {
   locations: readonly PlanLocation[];
 }
+
+// Adds a craft from the ranking to the plan, at the route it was ranked for.
+export type AddToPlanHandler = (
+  itemId: string,
+  alternative: number,
+  quantity: number,
+) => void;

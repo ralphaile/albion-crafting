@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { type EvaluatePrices, type OrderPrices, evaluatePlan } from "@aoc/core";
 
 import { NO_PLAN } from "./plan.constants";
-import { planLocations } from "./plan.helpers";
+import { addToPlan, newEntry, planLocations } from "./plan.helpers";
 import { parsePlan } from "./plan.schema";
 import type { CraftingPlan, PlanEntry } from "./plan.types";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
@@ -156,5 +156,61 @@ describe("planLocations", () => {
       6,
     );
     expect(result.totals.focus).toBe(10 * 1286);
+  });
+});
+
+describe("addToPlan", () => {
+  const sword = newEntry("T4_MAIN_SWORD", 0, 10, {
+    focus: true,
+    dailyBonuses: [{ category: "sword", bonus: 0.2 }],
+  });
+
+  it("takes focus and the item's own daily bonus from Settings", () => {
+    expect(sword).toEqual({
+      itemId: "T4_MAIN_SWORD",
+      alternative: 0,
+      quantity: 10,
+      focus: true,
+      dailyBonus: 0.2,
+    });
+    expect(
+      newEntry("T4_BAG", 0, 1, {
+        focus: false,
+        dailyBonuses: [{ category: "sword", bonus: 0.2 }],
+      }),
+    ).toMatchObject({ focus: false, dailyBonus: 0 });
+  });
+
+  it("makes a location for a route the plan doesn't have yet", () => {
+    const added = addToPlan(NO_PLAN, forestHideout, sword);
+
+    expect(added.locations).toEqual([
+      {
+        id: expect.any(String) as string,
+        route: forestHideout,
+        entries: [{ id: expect.any(String) as string, ...sword }],
+      },
+    ]);
+  });
+
+  it("adds to the location with the same route, and to the same item's quantity there", () => {
+    const added = addToPlan(
+      addToPlan(plan, { ...lymhurst, place: { ...lymhurst.place } }, sword),
+      lymhurst,
+      { ...sword, itemId: "T4_BAG" },
+    );
+
+    expect(added.locations).toHaveLength(2);
+    expect(added.locations[0]?.entries).toEqual([
+      broadswords({ quantity: 20 }),
+      { id: expect.any(String) as string, ...sword, itemId: "T4_BAG" },
+    ]);
+    expect(added.locations[1]).toBe(plan.locations[1]);
+  });
+
+  it("keeps another recipe of the same item apart", () => {
+    const added = addToPlan(plan, lymhurst, { ...sword, alternative: 1 });
+
+    expect(added.locations[0]?.entries).toHaveLength(2);
   });
 });

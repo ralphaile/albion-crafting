@@ -14,6 +14,7 @@ import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
 import type { MissingPrice } from "./missing-prices.types";
 import { MissingPricesPanel } from "./MissingPricesPanel";
 import { NO_PLAN } from "./plan.constants";
+import { addToPlan, newEntry } from "./plan.helpers";
 import type { CraftingPlan } from "./plan.types";
 import { PlanPage } from "./PlanPage";
 import { routeFromSearch, searchWithRoute } from "./route-url.helpers";
@@ -248,6 +249,15 @@ export function App({
               onRemoveManualPrice={removeManualPrice}
               specializations={specializations}
               onEditSpecializations={showSpecializations}
+              onAddToPlan={(itemId, alternative, quantity) => {
+                setPlan((current) =>
+                  addToPlan(
+                    current,
+                    routeChoice,
+                    newEntry(itemId, alternative, quantity, settings),
+                  ),
+                );
+              }}
             />
           </>
         )}
