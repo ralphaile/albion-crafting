@@ -7,7 +7,7 @@ The **Settings** button at the top right, just its icon on phones, opens a panel
 | Use focus                      | Prices each craft with [focus](glossary.md#focus), and shows silver per focus                                                                  | On          |
 | Premium                        | The market [tax](glossary.md#tax-and-premium): 4% with premium, 8% without                                                                     | On          |
 | Station fee                    | Silver per 100 [nutrition](glossary.md#nutrition-and-station-fee), 0 to 100,000                                                                | 500         |
-| Daily bonuses                  | Up to two [daily bonuses](glossary.md#daily-bonus), each a crafting category and +10% or +20%                                                  | None        |
+| Daily bonuses                  | Up to two [daily bonuses](glossary.md#daily-bonus), each a crafting or refining category and +10% or +20%                                      | None        |
 | Buy materials by               | Instant buy or buy order, for the [material cost](glossary.md#material-cost)                                                                   | Instant buy |
 | Sell by                        | Sell order or instant sell, for the [revenue](glossary.md#revenue). Selling in the [Black Market](glossary.md#black-market) is always instant. | Sell order  |
 | Stale after                    | Hours until an AODP price counts as [stale](glossary.md#fresh-stale-and-missing-prices), 1 to 168                                              | 12          |
