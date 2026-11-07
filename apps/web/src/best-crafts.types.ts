@@ -60,8 +60,10 @@ export type CraftAlternative = Evaluation & {
 
 // The result of the recipe the table uses, and of every recipe for the item,
 // the default one first.
+// `recipeChosen` is set when the craft uses a recipe you chose.
 export type Craft = CraftAlternative & {
   recipe: GameRecipe;
+  recipeChosen?: true;
   specialty: boolean;
   dailyVolume: DailyVolume;
   alternatives: readonly [CraftAlternative, ...CraftAlternative[]];

@@ -1,4 +1,9 @@
-export { bestEvaluation, evaluate, evaluateEach } from "./evaluate.helpers.js";
+export {
+  bestEvaluation,
+  chosenEvaluation,
+  evaluate,
+  evaluateEach,
+} from "./evaluate.helpers.js";
 export {
   type CraftingPlace,
   type EvaluatePrices,

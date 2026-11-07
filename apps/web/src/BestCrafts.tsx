@@ -10,6 +10,7 @@ import type { Filters } from "./filters.types";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 import type { AddToPlanHandler } from "./plan.types";
 import { PriceStatus } from "./PriceStatus";
+import type { ChooseRecipeHandler } from "./recipe-choices.types";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 import { NO_SPECIALIZATIONS } from "./specializations.constants";
@@ -26,6 +27,8 @@ const IGNORE_MANUAL_PRICE = () => undefined;
 
 const IGNORE_EDIT_SPECIALIZATIONS = () => undefined;
 
+const IGNORE_RECIPE_CHOICE = () => undefined;
+
 export function BestCrafts({
   bestCrafts,
   shownItemId,
@@ -41,6 +44,7 @@ export function BestCrafts({
   onRemoveManualPrice = IGNORE_MANUAL_PRICE,
   specializations = NO_SPECIALIZATIONS,
   onEditSpecializations = IGNORE_EDIT_SPECIALIZATIONS,
+  onChooseRecipe = IGNORE_RECIPE_CHOICE,
   onAddToPlan,
 }: {
   bestCrafts: BestCraftsResult;
@@ -57,6 +61,7 @@ export function BestCrafts({
   onRemoveManualPrice?: (key: ManualPriceKey) => void;
   specializations?: SpecializationProfile;
   onEditSpecializations?: (treeId: string) => void;
+  onChooseRecipe?: ChooseRecipeHandler;
   onAddToPlan?: AddToPlanHandler;
 }) {
   const filtered = activeFilters(filters).length > 0;
@@ -149,6 +154,7 @@ export function BestCrafts({
         onRemove={onRemoveManualPrice}
         specializations={specializations}
         onEditSpecializations={onEditSpecializations}
+        onChooseRecipe={onChooseRecipe}
         {...(onAddToPlan && { onAddToPlan })}
         onClose={() => {
           onShowItem(undefined);

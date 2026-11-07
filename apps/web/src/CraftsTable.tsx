@@ -218,15 +218,27 @@ function CraftRow({
                 <span className={styles.specialty}>Specialty</span>
               )}
             </span>
-            {complete === undefined && (
-              <button
-                type="button"
-                className={styles.missing}
-                aria-haspopup="dialog"
-                onClick={showCraft}
-              >
-                {plural(missing, "price", "prices")} missing
-              </button>
+            {(complete === undefined || craft.recipeChosen) && (
+              <span className={styles.notes}>
+                {complete === undefined && (
+                  <button
+                    type="button"
+                    className={styles.missing}
+                    aria-haspopup="dialog"
+                    onClick={showCraft}
+                  >
+                    {plural(missing, "price", "prices")} missing
+                  </button>
+                )}
+                {craft.recipeChosen && (
+                  <span
+                    className={styles.chosenRecipe}
+                    title="Uses the recipe you chose in its prices panel"
+                  >
+                    Your recipe
+                  </span>
+                )}
+              </span>
             )}
           </span>
         </span>

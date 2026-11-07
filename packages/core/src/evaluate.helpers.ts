@@ -128,11 +128,27 @@ export function bestEvaluation<Result extends Evaluation>(
   );
 }
 
+// The recipe you chose, missing prices or not, or the best one when you chose
+// none or one the item doesn't have.
+export function chosenEvaluation<Result extends Evaluation>(
+  evaluations: readonly [Result, ...Result[]],
+  alternative: number | undefined,
+): Result {
+  return (
+    (alternative === undefined ? undefined : evaluations[alternative]) ??
+    bestEvaluation(evaluations)
+  );
+}
+
 export function evaluate(
   recipe: Recipe,
   place: CraftingPlace,
   settings: EvaluateSettings,
   prices: EvaluatePrices,
+  alternative?: number,
 ): Evaluation {
-  return bestEvaluation(evaluateEach(recipe, place, settings, prices));
+  return chosenEvaluation(
+    evaluateEach(recipe, place, settings, prices),
+    alternative,
+  );
 }

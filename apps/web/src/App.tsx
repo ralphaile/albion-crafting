@@ -18,6 +18,9 @@ import { NO_PLAN } from "./plan.constants";
 import { addToPlan, newEntry } from "./plan.helpers";
 import type { CraftingPlan } from "./plan.types";
 import { PlanPage } from "./PlanPage";
+import { NO_RECIPE_CHOICES } from "./recipe-choices.constants";
+import { chooseRecipe } from "./recipe-choices.helpers";
+import type { RecipeChoices } from "./recipe-choices.types";
 import { routeFromSearch, searchWithRoute } from "./route-url.helpers";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import { routeFromChoice } from "./route.helpers";
@@ -26,6 +29,7 @@ import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
   PLAN_SETTING,
+  RECIPE_CHOICES_SETTING,
   ROUTE_SETTING,
   SPECIALIZATIONS_SETTING,
 } from "./saved-settings.constants";
@@ -53,6 +57,7 @@ export function App({
   savedSettings,
   savedSpecializations,
   savedPlan,
+  savedRecipeChoices,
   savedManualPrices,
 }: {
   marketData: MarketData;
@@ -63,6 +68,7 @@ export function App({
   savedSettings: CraftingSettings | undefined;
   savedSpecializations: SpecializationProfile | undefined;
   savedPlan: CraftingPlan | undefined;
+  savedRecipeChoices: RecipeChoices | undefined;
   savedManualPrices: readonly ManualPrice[];
 }) {
   const [page, setPage] = useState<{
@@ -108,6 +114,11 @@ export function App({
     PLAN_SETTING,
     () => savedPlan ?? NO_PLAN,
   );
+  const [recipeChoices, setRecipeChoices] = useSavedSetting(
+    settingsStore,
+    RECIPE_CHOICES_SETTING,
+    () => savedRecipeChoices ?? NO_RECIPE_CHOICES,
+  );
   const [specializationsShown, setSpecializationsShown] = useState({
     open: false,
     treeId: FIRST_TREE_ID,
@@ -128,6 +139,7 @@ export function App({
     filters,
     manualPrices,
     specializations,
+    recipeChoices,
   );
 
   const [shownItemId, setShownItemId] = useState(() =>
@@ -268,6 +280,11 @@ export function App({
               onRemoveManualPrice={removeManualPrice}
               specializations={specializations}
               onEditSpecializations={showSpecializations}
+              onChooseRecipe={(itemId, alternative) => {
+                setRecipeChoices((current) =>
+                  chooseRecipe(current, itemId, alternative),
+                );
+              }}
               onAddToPlan={(itemId, alternative, quantity) => {
                 setPlan((current) =>
                   addToPlan(

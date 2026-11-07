@@ -145,7 +145,7 @@ Every recipe crafts one item, so the amount crafted is always 1 for now. The [re
 
 The engine's version is `evaluate()` in `packages/core/src/evaluate.helpers.ts`. It works out a recipe for where you craft, your settings, and the prices at your buy and sell markets:
 
-- An item with alternative recipes, such as a token instead of its [artifact](#artifact) or another base piece for a royal item, is evaluated with each, and the most profitable one with all its prices is kept.
+- An item with alternative recipes, such as a token instead of its [artifact](#artifact) or another base piece for a royal item, is evaluated with each, and the most profitable one with all its prices is kept, unless you chose one in the [craft panel](craft-panel.md).
 - A missing price, or a missing [item value](#item-value) at a paid station, makes the result incomplete. It lists the missing prices and has no profit.
 - With focus on, it also gives the focus cost and [silver per focus](#focus).
 

@@ -23,6 +23,8 @@ import { missingPrices } from "./missing-prices.helpers";
 import type { MissingPrice } from "./missing-prices.types";
 import { withOutliers } from "./outliers.helpers";
 import { QUALITY } from "./prices.constants";
+import { NO_RECIPE_CHOICES } from "./recipe-choices.constants";
+import type { RecipeChoices } from "./recipe-choices.types";
 import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
@@ -360,6 +362,7 @@ export function useBestCrafts(
   filters: Filters,
   manualPrices: readonly ManualPrice[],
   specializations: SpecializationProfile = NO_SPECIALIZATIONS,
+  recipeChoices: RecipeChoices = NO_RECIPE_CHOICES,
 ): BestCraftsResult {
   const { place, buyMarketId, sellMarketId } = route;
   const {
@@ -603,8 +606,8 @@ export function useBestCrafts(
     () =>
       prices === undefined
         ? []
-        : evaluateCrafts(priced, place, routeSettings, prices),
-    [priced, place, routeSettings, prices],
+        : evaluateCrafts(priced, place, routeSettings, prices, recipeChoices),
+    [priced, place, routeSettings, prices, recipeChoices],
   );
   const withVolumes = useMemo(
     () => withDailyVolumes(evaluated, history.products),

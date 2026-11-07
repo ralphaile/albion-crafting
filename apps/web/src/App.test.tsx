@@ -17,6 +17,7 @@ import type { Filters } from "./filters.types";
 import { formatCount } from "./format.helpers";
 import { memoryManualPriceStore } from "./manual-prices.store";
 import type { ManualPrice } from "./manual-prices.types";
+import type { RecipeChoices } from "./recipe-choices.types";
 import type { RouteChoice } from "./route.types";
 import {
   CRAFTING_SETTING,
@@ -44,6 +45,7 @@ async function renderApp({
   savedRoute,
   savedSettings,
   savedSpecializations,
+  savedRecipeChoices,
   savedManualPrices = [],
   marketData = fakeMarketData(),
 }: {
@@ -51,6 +53,7 @@ async function renderApp({
   savedRoute?: RouteChoice;
   savedSettings?: CraftingSettings;
   savedSpecializations?: SpecializationProfile;
+  savedRecipeChoices?: RecipeChoices;
   savedManualPrices?: readonly ManualPrice[];
   marketData?: MarketData;
 } = {}) {
@@ -74,6 +77,7 @@ async function renderApp({
       savedSettings={savedSettings}
       savedSpecializations={savedSpecializations}
       savedPlan={undefined}
+      savedRecipeChoices={savedRecipeChoices}
       savedManualPrices={savedManualPrices}
     />,
   );

@@ -4,7 +4,10 @@ A click anywhere on a row opens that craft in a panel over the right of the page
 
 ## What it shows
 
-- **Recipe:** only for an item with more than one, such as an artifact or the token used instead. Each recipe shows its profit, or how many prices it's missing, and ✓ marks the one the table uses: the most profitable with all its prices, or the first in the game files while none has them all. Picking another shows its numbers and its prices to type, without changing the table.
+- **Recipe:** only for an item with more than one, such as an artifact or the token used instead. Each recipe shows the icon and name of what tells it apart, its profit or how many prices it's missing, and ✓ on the one the table uses.
+  - **Most profitable**, until you choose: the most profitable recipe with all its prices, or the first in the game files while none has them all.
+  - **Choosing a recipe** makes the table use it for that item, even when another earns more or it's missing a price. The row says **Your recipe**. **Most profitable** goes back.
+  - **Saved in the browser** for that exact item, tier and enchantment, as the `recipeChoices` setting.
 - **Materials:** each material with how many a craft takes, its price and where it came from. Under it, how many you buy once the returns are counted, times the unit price, gives the line's cost: `8.33 × 100 = 833`. A material that never comes back, such as an artifact, says **Not returned**. Buying with a buy order adds the 2.5% setup fee to the unit price.
 - **Return rate:** what each part adds to the production bonus, and the return rate it gives ([glossary](glossary.md#return-rate-rrr)). A city has its base bonus and specialty, and a hideout has its map quality, power level and power specialist. Both can have the daily bonus and focus.
 - **Costs:** materials, station fee and silver for one craft. A recipe that makes several items also shows the cost of each.
