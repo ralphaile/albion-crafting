@@ -54,7 +54,7 @@ With premium you get 10,000 focus a day, and can store up to 30,000. The engine 
 
 ## Fresh, stale and missing prices
 
-How far an API price can be trusted. **Fresh** means AODP saw it in the last 12 hours, **stale** means it's older, and **missing** means AODP has none, because no player running its client has looked at that item in that market. The 12 hours are a [setting](settings.md). A [manual price](manual-prices.md) is fresh for 3 days after you type it, also a setting.
+How far an API price can be trusted. **Fresh** means AODP saw it in the last 12 hours, **stale** means it's older, and **missing** means AODP has none, because no player running its client has looked at that item in that market. The 12 hours are a [setting](settings.md). A [manual price](manual-prices.md) is fresh for 3 days after you type it, also a setting. While the page stays open, ages and badges keep up with the clock: they're worked out again each minute and when you come back to the tab, and a price that goes stale can change which one is used.
 
 In the table's Prices column and the prices panel, a badge next to each price shows where it came from, in color and with an icon:
 

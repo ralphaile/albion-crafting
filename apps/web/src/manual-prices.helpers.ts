@@ -1,5 +1,10 @@
 import { choosePrice } from "@aoc/core";
-import type { ItemPrices, ObservedPrice, Region } from "@aoc/market-prices";
+import {
+  agePrices,
+  type ItemPrices,
+  type ObservedPrice,
+  type Region,
+} from "@aoc/market-prices";
 
 import type {
   CraftPrices,
@@ -21,6 +26,7 @@ interface PricesAt {
 }
 
 interface ChoiceOptions {
+  staleAfterMinutes: number;
   manualStaleAfterMinutes: number;
   preferManual: boolean;
   now: number;
@@ -95,7 +101,11 @@ function chooseAt(
       buyMax: MISSING,
     }));
 
-  return [...rows, ...typedOnly].map((row) => {
+  const aged = agePrices(rows, {
+    now: options.now,
+    staleAfterMinutes: options.staleAfterMinutes,
+  });
+  return [...aged, ...typedOnly].map((row) => {
     const manual = (source: ManualPrice["source"]) => {
       const price = typed
         .get(row.itemId)
@@ -111,7 +121,8 @@ function chooseAt(
 }
 
 // Picks the price each craft uses: the API's or the one typed for the same
-// server, market, quality and order.
+// server, market, quality and order. Both are aged at `now`, so a price that
+// went stale since it was fetched counts as stale.
 export function withManualPrices(
   prices: CraftPrices,
   manualPrices: readonly ManualPrice[],
@@ -120,6 +131,7 @@ export function withManualPrices(
     buyMarketId,
     sellMarketId,
     quality,
+    staleAfterMinutes,
     manualStaleAfterMinutes,
     preferManual,
   }: {
@@ -127,12 +139,18 @@ export function withManualPrices(
     buyMarketId: string;
     sellMarketId: string;
     quality: number;
+    staleAfterMinutes: number;
     manualStaleAfterMinutes: number;
     preferManual: boolean;
   },
   now = Date.now(),
 ): UsedPrices {
-  const options = { manualStaleAfterMinutes, preferManual, now };
+  const options = {
+    staleAfterMinutes,
+    manualStaleAfterMinutes,
+    preferManual,
+    now,
+  };
   return {
     materials: chooseAt(
       prices.materials,

@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type {
   ItemPrices,
@@ -89,6 +89,78 @@ function renderBestCrafts(
 }
 
 describe("useBestCrafts", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("ages the prices as the clock moves, so a price going stale gives way to a fresh typed one without fetching again", async () => {
+    const MINUTE_MS = 60_000;
+    const now = Date.UTC(2026, 10, 7, 12);
+    vi.useFakeTimers({ now, shouldAdvanceTime: true });
+    const seenAt = (value: number, observedAt: number) => ({
+      status: "fresh" as const,
+      value,
+      observedAt,
+      ageMinutes: Math.floor((now - observedAt) / MINUTE_MS),
+    });
+    const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
+      Promise.resolve({
+        prices: (marketIds[0] === "Martlock"
+          ? ["T4_METALBAR", "T4_LEATHER"]
+          : ["T4_MAIN_SWORD"]
+        ).map((itemId) => ({
+          itemId,
+          marketId: marketIds[0] ?? "",
+          quality: 1,
+          sellMin: seenAt(
+            itemId === "T4_MAIN_SWORD" ? 5000 : 100,
+            now - (12 * 60 - 1) * MINUTE_MS,
+          ),
+          buyMax: seenAt(100, now),
+        })),
+        fetchedAt: now,
+        failures: [],
+      }),
+    );
+    const typedSword: ManualPrice = {
+      region: DEFAULT_SETTINGS.server,
+      itemId: "T4_MAIN_SWORD",
+      marketId: "Caerleon",
+      quality: 1,
+      source: "sellMin",
+      value: 6000,
+      enteredAt: now - 13 * 60 * MINUTE_MS,
+    };
+    const { result } = renderHook(() =>
+      useBestCrafts(
+        fakeMarketData({ getPrices }),
+        route,
+        DEFAULT_SETTINGS,
+        swords,
+        [typedSword],
+      ),
+    );
+    const swordRevenue = () =>
+      result.current.status === "ready"
+        ? result.current.crafts.find(({ itemId }) => itemId === "T4_MAIN_SWORD")
+            ?.revenue
+        : undefined;
+
+    await waitFor(() => {
+      expect(swordRevenue()).toMatchObject({ status: "fresh", price: 5000 });
+    });
+    const calls = getPrices.mock.calls.length;
+
+    act(() => {
+      vi.advanceTimersByTime(2 * MINUTE_MS);
+    });
+
+    await waitFor(() => {
+      expect(swordRevenue()).toMatchObject({ status: "fresh", price: 6000 });
+    });
+    expect(getPrices).toHaveBeenCalledTimes(calls);
+  });
+
   it("ranks the prices known so far while the rest arrive", async () => {
     const { calls, getPrices } = heldPrices();
     const { result } = renderBestCrafts(getPrices);
