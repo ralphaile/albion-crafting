@@ -9,13 +9,15 @@ import {
 import { rank, type SortDirection, type SortKey } from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
 
-import type { Craft, UsedPrice } from "./best-crafts.types";
+import { soldPerDay } from "./best-crafts.helpers";
+import type { Craft, DailyVolume, UsedPrice } from "./best-crafts.types";
 import { Chevron } from "./Chevron";
 import styles from "./CraftsTable.module.css";
 import {
   formatAge,
   formatCount,
   formatPercent,
+  formatPerDay,
   formatSilver,
   formatSilverPerFocus,
 } from "./format.helpers";
@@ -23,9 +25,12 @@ import { ItemIcon } from "./ItemIcon";
 import { Pager } from "./Pager";
 import { PAGE_SIZE } from "./pager.constants";
 import { PriceBadge } from "./PriceBadge";
+import { DEFAULT_SETTINGS } from "./settings.constants";
+
+type CraftSortKey = SortKey | "dailyVolume";
 
 interface Sort {
-  key: SortKey;
+  key: CraftSortKey;
   direction: SortDirection;
 }
 
@@ -56,10 +61,10 @@ function SortHeader({
   active,
   onSort,
 }: {
-  sortKey: SortKey;
+  sortKey: CraftSortKey;
   label: string;
   active: Sort;
-  onSort: (sortKey: SortKey) => void;
+  onSort: (sortKey: CraftSortKey) => void;
 }) {
   const sorted = sortKey === active.key;
   return (
@@ -107,19 +112,49 @@ function materialsPrice({ materialPrices, oldestMaterialPrice }: Craft) {
     : (oldestMaterialPrice ?? MISSING);
 }
 
+function Volume({
+  volume,
+  lowUnder,
+}: {
+  volume: DailyVolume;
+  lowUnder: number;
+}) {
+  if (volume === "unknown") {
+    return "—";
+  }
+  if (volume === "none") {
+    return <span className={styles.noHistory}>no history</span>;
+  }
+  return (
+    <>
+      {volume < lowUnder && (
+        <span
+          className={styles.low}
+          title={`Sells fewer than ${formatCount(lowUnder)} a day`}
+        >
+          Low
+        </span>
+      )}
+      {formatPerDay(volume)}
+    </>
+  );
+}
+
 function CraftRow({
   craft,
   rowIndex,
   sortKey,
   focus,
   wide,
+  lowVolumePerDay,
   onShowCraft,
 }: {
   craft: Craft;
   rowIndex: number;
-  sortKey: SortKey;
+  sortKey: CraftSortKey;
   focus: boolean;
   wide: boolean;
+  lowVolumePerDay: number;
   onShowCraft: (itemId: string) => void;
 }) {
   const showCraft = () => {
@@ -129,7 +164,7 @@ function CraftRow({
   const complete = craft.status === "complete" ? craft : undefined;
   const missing = craft.missingPrices.length;
   const value = (
-    key: SortKey,
+    key: CraftSortKey,
     amount: number | undefined,
     format: (amount: number) => string,
   ) => (
@@ -189,6 +224,14 @@ function CraftRow({
       {value("margin", complete?.margin, formatPercent)}
       {focus &&
         value("silverPerFocus", complete?.silverPerFocus, formatSilverPerFocus)}
+      <td
+        className={cx(
+          styles.number,
+          sortKey === "dailyVolume" && styles.sorted,
+        )}
+      >
+        <Volume volume={craft.dailyVolume} lowUnder={lowVolumePerDay} />
+      </td>
       {wide && (
         <>
           <td className={styles.number}>
@@ -246,12 +289,14 @@ function inHeldOrder(crafts: readonly Craft[], shown: readonly Craft[]) {
 export function CraftsTable({
   crafts,
   focus,
+  lowVolumePerDay = DEFAULT_SETTINGS.lowVolumePerDay,
   onShowCraft = IGNORE_SHOW_CRAFT,
   listId = crafts,
   holdOrder = false,
 }: {
   crafts: readonly Craft[];
   focus: boolean;
+  lowVolumePerDay?: number;
   onShowCraft?: (itemId: string) => void;
   listId?: unknown;
   holdOrder?: boolean;
@@ -273,7 +318,8 @@ export function CraftsTable({
   const wide = useMediaQuery("(min-width: 1100px)");
   const ledgerRef = useRef<HTMLElement>(null);
   const live = useMemo(
-    () => rank(crafts, sortKey, direction),
+    () =>
+      rank(crafts, sortKey === "dailyVolume" ? soldPerDay : sortKey, direction),
     [crafts, sortKey, direction],
   );
   // The last order shown while not holding it, for this sort. A table that
@@ -315,7 +361,7 @@ export function CraftsTable({
       ? Math.min(chosenPage.page, pageCount - 1)
       : 0;
   const start = page * PAGE_SIZE;
-  const columns = 5 + (focus ? 1 : 0) + (wide ? 2 : 0);
+  const columns = 6 + (focus ? 1 : 0) + (wide ? 2 : 0);
   const rowIndexOf = (index: number) =>
     index + 2 + (firstIncomplete !== -1 && index >= firstIncomplete ? 1 : 0);
 
@@ -325,7 +371,7 @@ export function CraftsTable({
     ledgerRef.current?.focus({ preventScroll: true });
   }
 
-  function sortBy(key: SortKey) {
+  function sortBy(key: CraftSortKey) {
     setChosenSort(
       key === sortKey
         ? {
@@ -353,6 +399,7 @@ export function CraftsTable({
             <col className={styles.silverColumn} />
             <col className={styles.percentColumn} />
             {focus && <col className={styles.silverPerFocusColumn} />}
+            <col className={styles.volumeColumn} />
             {wide && (
               <>
                 <col className={styles.silverColumn} />
@@ -385,6 +432,12 @@ export function CraftsTable({
                   onSort={sortBy}
                 />
               )}
+              <SortHeader
+                sortKey="dailyVolume"
+                label="Daily volume"
+                active={sort}
+                onSort={sortBy}
+              />
               {wide && (
                 <>
                   <th scope="col" className={styles.number}>
@@ -417,6 +470,7 @@ export function CraftsTable({
                     sortKey={sortKey}
                     focus={focus}
                     wide={wide}
+                    lowVolumePerDay={lowVolumePerDay}
                     onShowCraft={onShowCraft}
                   />
                 </Fragment>

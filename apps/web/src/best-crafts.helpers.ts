@@ -7,6 +7,7 @@ import {
   hasSpecialty,
 } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
+import type { HistorySummary } from "@aoc/market-prices";
 
 import type {
   Craft,
@@ -56,9 +57,32 @@ export function evaluateCrafts(
       ...bestEvaluation(alternatives),
       recipe,
       specialty: hasSpecialty(place, recipe.craftingCategory),
+      dailyVolume: "unknown" as const,
       alternatives,
     };
   });
+}
+
+// `history` is the products' history in the sell market.
+export function withDailyVolumes(
+  crafts: readonly Craft[],
+  history: readonly HistorySummary[],
+): Craft[] {
+  const volumes = new Map(
+    history.map(({ itemId, averageDailyVolume, newestDay }) => [
+      itemId,
+      newestDay === undefined ? ("none" as const) : averageDailyVolume,
+    ]),
+  );
+  return crafts.map((craft) => ({
+    ...craft,
+    dailyVolume: volumes.get(craft.itemId) ?? "unknown",
+  }));
+}
+
+// The daily volume to rank or filter by, when there's a number for it.
+export function soldPerDay({ dailyVolume }: Craft): number | undefined {
+  return typeof dailyVolume === "number" ? dailyVolume : undefined;
 }
 
 function byItem(prices: readonly UsedItemPrices[]) {

@@ -6,6 +6,7 @@ import {
   DAILY_BONUS_GROUPS,
   DEFAULT_SETTINGS,
   MAX_DAILY_BONUSES,
+  MAX_LOW_VOLUME_PER_DAY,
   MAX_MANUAL_STALE_DAYS,
   MAX_STALE_HOURS,
   MAX_STATION_FEE,
@@ -76,6 +77,7 @@ function helpSection(about: string) {
   if (about === "Buy materials by" || about === "Sell by") return "sell-orders";
   if (about.includes("price")) return "price-badges";
   if (about === "Daily bonuses") return "production-bonus";
+  if (about === "Low volume under") return "daily-volume";
   return "data";
 }
 
@@ -482,6 +484,17 @@ export function SettingsPanel({
               set("preferManualPrices", preferManualPrices);
             }}
             help="Uses a price you typed whenever there is one, even when AODP has a newer one."
+          />
+          <WholeNumber
+            label="Low volume under"
+            unit="a day"
+            value={settings.lowVolumePerDay}
+            min={0}
+            max={MAX_LOW_VOLUME_PER_DAY}
+            onChange={(lowVolumePerDay) => {
+              set("lowVolumePerDay", lowVolumePerDay);
+            }}
+            help="Crafts that sell fewer than this a day in the sell market are marked Low, as they may take a while to sell."
           />
           <div className={styles.setting}>
             <div className={styles.title}>

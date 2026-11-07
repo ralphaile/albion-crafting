@@ -13,7 +13,12 @@ export interface PricesOptions extends CachedFetchOptions {
 
 export type PartialPrices = Omit<PricesResult, "failures">;
 
-export type HistoryOptions = CachedFetchOptions & SummarizeOptions;
+export type HistoryOptions = CachedFetchOptions &
+  SummarizeOptions & {
+    onPartial?: (read: () => PartialHistory) => void;
+  };
+
+export type PartialHistory = Omit<HistoryResult, "failures">;
 
 export interface PricesResult {
   prices: ItemPrices[];

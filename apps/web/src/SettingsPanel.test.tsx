@@ -109,6 +109,7 @@ describe("SettingsPanel", () => {
       screen.getByRole("checkbox", { name: "Always prefer my manual prices" }),
     );
     fireEvent.change(select("Server"), { target: { value: "europe" } });
+    fireEvent.change(number("Low volume under"), { target: { value: "10" } });
 
     expect(lastChange()).toEqual({
       ...DEFAULT_SETTINGS,
@@ -121,6 +122,7 @@ describe("SettingsPanel", () => {
       manualStaleAfterDays: 7,
       preferManualPrices: true,
       server: "europe",
+      lowVolumePerDay: 10,
     });
   });
 

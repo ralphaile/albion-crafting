@@ -12,6 +12,7 @@ Different filters combine with AND: a craft has to pass every one of them. Insid
 - **Specialty only**: items that get the crafting location's [specialty bonus](glossary.md#specialty-bonus), or in a hideout, its biome's categories.
 - **Filter by name**: the item's name or ID, in any case. It applies once you stop typing for a moment.
 - **Min profit** and **Min margin %**: whole numbers. They only judge crafts with every price. Crafts with missing prices stay, so you can [finish them by hand](manual-prices.md), unless **Hide crafts with missing prices** is on. The [list of missing prices](manual-prices.md#filling-every-missing-price) keeps their prices either way.
+- **Min daily volume**: a whole number of sales a day in the sell market, the [daily volume](glossary.md#daily-volume). It judges every craft, since sales don't depend on prices, and hides crafts with no history or whose history hasn't arrived.
 
 ## Fewer price requests
 
@@ -29,6 +30,7 @@ The filters are in the page's link, so you can bookmark or share it. Only filter
 | `artifacts` | `exclude` or `only`                                                                                                                                     | `artifacts=exclude`                    |
 | `profit`    | Minimum profit in silver                                                                                                                                | `profit=10000`                         |
 | `margin`    | Minimum margin in percent                                                                                                                               | `margin=15`                            |
+| `volume`    | Minimum daily volume                                                                                                                                    | `volume=5`                             |
 | `complete`  | Hide crafts with missing prices                                                                                                                         | `complete=1`                           |
 | `specialty` | Specialty only                                                                                                                                          | `specialty=1`                          |
 | `q`         | Name                                                                                                                                                    | `q=broadsword`                         |

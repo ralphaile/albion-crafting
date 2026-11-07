@@ -22,6 +22,10 @@ Where you craft: one of the 7 cities, a [Rest](#rest) or an island. It gives a b
 
 Extra [production bonus](#production-bonus) the game gives a few crafting categories each day: +0.10 or +0.20. You set up to two in the [settings](settings.md), and the app adds them up if both are for the same category.
 
+## Daily volume
+
+How many of an item sold a day in the sell [market](#market), on average over the newest 7 days of AODP's history. Its history can lag by days, which is why the window ends at its newest day, not today. The table marks an item **Low** when it sells fewer than the **Low volume under** setting, 5 a day by default. **No history** means AODP has no sales of it there, which is common in Black Zone markets; it isn't counted as 0. [Market prices](market-prices.md#price-history) explains how it's worked out.
+
 ## Enchantment
 
 Levels .1 to .4 of an item, written after its tier: 5.1 is a tier 5 item at enchantment 1. Each level is made from materials of the same level and costs more [focus](#focus). Market IDs add the level after an `@`: `T5_MAIN_SWORD@1` is made from `T5_METALBAR_LEVEL1@1`. Level .0 has no suffix.
@@ -138,7 +142,7 @@ The engine's version is `evaluate()` in `packages/core/src/evaluate.helpers.ts`.
 - A missing price, or a missing [item value](#item-value) at a paid station, makes the result incomplete. It lists the missing prices and has no profit.
 - With focus on, it also gives the focus cost and [silver per focus](#focus).
 
-`rank()` in `packages/core/src/rank.helpers.ts` sorts the results by profit, margin or silver per focus, highest first, with incomplete ones last.
+`rank()` in `packages/core/src/rank.helpers.ts` sorts the results by profit, margin or silver per focus, or by a value it's given such as the [daily volume](#daily-volume), highest first, with incomplete ones last.
 
 ## Quality
 

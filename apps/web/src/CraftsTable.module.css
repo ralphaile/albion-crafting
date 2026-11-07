@@ -28,6 +28,10 @@
   width: 124px;
 }
 
+.volumeColumn {
+  width: 124px;
+}
+
 .pricesColumn {
   width: 192px;
 }
@@ -200,6 +204,20 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
+}
+
+.low {
+  margin-right: 6px;
+  color: var(--price-stale);
+  font-family: var(--font-caps);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.noHistory {
+  color: var(--text-faint);
+  font-size: 14px;
 }
 
 .missing {

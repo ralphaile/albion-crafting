@@ -69,8 +69,14 @@ function heldPrices() {
   return { calls, getPrices };
 }
 
-function renderBestCrafts(getPrices: MarketData["getPrices"]) {
-  const marketData = fakeMarketData({ getPrices });
+function renderBestCrafts(
+  getPrices: MarketData["getPrices"],
+  getHistory?: MarketData["getHistory"],
+) {
+  const marketData = fakeMarketData({
+    getPrices,
+    ...(getHistory && { getHistory }),
+  });
   return renderHook(() =>
     useBestCrafts(
       marketData,
@@ -111,24 +117,80 @@ describe("useBestCrafts", () => {
     });
   });
 
-  it("adds up both requests' batches, and says until when it waits for the rate limit", async () => {
+  it("gives each craft how many sell a day in the sell market, and doesn't force history on a refresh", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
+      Promise.resolve({ ...pricesAt(marketIds, 0), failures: [] }),
+    );
+    const getHistory = vi.fn<MarketData["getHistory"]>(() =>
+      Promise.resolve({
+        history: [
+          {
+            itemId: "T4_MAIN_SWORD",
+            marketId: "Caerleon",
+            quality: 1,
+            averagePrice: 5000,
+            averageDailyVolume: 12,
+            newestDay: 0,
+          },
+        ],
+        failures: [],
+        fetchedAt: 0,
+      }),
+    );
+    const { result } = renderBestCrafts(getPrices, getHistory);
+
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ updating: false });
+    });
+    act(() => {
+      result.current.refresh();
+    });
+    await waitFor(() => {
+      expect(getHistory).toHaveBeenCalledTimes(2);
+    });
+
+    const crafts =
+      result.current.status === "ready" ? result.current.allCrafts : [];
+    expect(
+      crafts.find(({ itemId }) => itemId === "T4_MAIN_SWORD")?.dailyVolume,
+    ).toBe(12);
+    expect(
+      crafts.find(({ itemId }) => itemId === "T5_MAIN_SWORD")?.dailyVolume,
+    ).toBe("unknown");
+    const [itemIds, marketIds] = getHistory.mock.calls[0] ?? [];
+    expect(itemIds).toContain("T4_MAIN_SWORD");
+    expect(itemIds).not.toContain("T4_METALBAR");
+    expect(marketIds).toEqual(["Caerleon"]);
+    expect(getHistory.mock.calls.map(([, , , options]) => options)).toEqual([
+      expect.not.objectContaining({ force: true }),
+      expect.not.objectContaining({ force: true }),
+    ]);
+  });
+
+  it("adds up the batches of prices and history, and says until when it waits for the rate limit", async () => {
     vi.spyOn(Date, "now").mockReturnValue(10_000);
     const { calls, getPrices } = heldPrices();
-    const { result } = renderBestCrafts(getPrices);
+    const getHistory = vi.fn<MarketData["getHistory"]>(
+      () => new Promise(() => undefined),
+    );
+    const { result } = renderBestCrafts(getPrices, getHistory);
     await waitFor(() => {
       expect(calls).toHaveLength(2);
     });
 
+    const historyOptions = getHistory.mock.calls[0]?.[3];
+
     act(() => {
       calls[0]?.options.onEvent?.({ type: "progress", done: 1, total: 3 });
       calls[1]?.options.onEvent?.({ type: "progress", done: 2, total: 4 });
+      historyOptions?.onEvent?.({ type: "progress", done: 1, total: 2 });
       calls[1]?.options.onEvent?.({ type: "waiting", seconds: 18 });
     });
 
     await waitFor(() => {
       expect(result.current.progress).toEqual({
-        done: 3,
-        total: 7,
+        done: 4,
+        total: 9,
         waitingUntil: 28_000,
       });
     });
@@ -160,6 +222,41 @@ describe("useBestCrafts", () => {
     expect(
       getPrices.mock.calls.map(([, , , options]) => options?.force),
     ).toEqual([false, false, true, true, false, false]);
+  });
+
+  it("retries a failed history batch for its history only, not its prices", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
+      Promise.resolve({ ...pricesAt(marketIds, 0), failures: [] }),
+    );
+    const getHistory = vi
+      .fn<MarketData["getHistory"]>(() =>
+        Promise.resolve({ history: [], failures: [], fetchedAt: 0 }),
+      )
+      .mockImplementationOnce((itemIds) =>
+        Promise.resolve({
+          history: [],
+          failures: [{ itemIds: [...itemIds], error: new Error("AODP: 503") }],
+          fetchedAt: undefined,
+        }),
+      );
+    const { result } = renderBestCrafts(getPrices, getHistory);
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ updating: false });
+    });
+
+    act(() => {
+      result.current.retry();
+    });
+    await waitFor(() => {
+      expect(getHistory).toHaveBeenCalledTimes(2);
+    });
+
+    expect(getHistory.mock.calls[1]?.[3]?.refetch).toEqual(
+      getHistory.mock.calls[0]?.[0],
+    );
+    expect(
+      getPrices.mock.calls.slice(2).map(([, , , options]) => options?.refetch),
+    ).toEqual([[], []]);
   });
 
   it("forces only the refresh's own fetch, not the next one for wider filters", async () => {

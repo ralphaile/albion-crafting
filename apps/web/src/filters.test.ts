@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { CraftingPlace } from "@aoc/core";
 import { type GameRecipe, recipes } from "@aoc/crafting-data";
 
-import type { Craft } from "./best-crafts.types";
+import type { Craft, DailyVolume } from "./best-crafts.types";
 import { CATEGORIES, NO_FILTERS } from "./filters.constants";
 import { activeFilters, craftFilter, recipeFilter } from "./filters.helpers";
 import type { Filters } from "./filters.types";
@@ -207,10 +207,14 @@ describe("recipeFilter", () => {
   });
 });
 
-function complete(profit: number, margin: number | undefined): Craft {
-  return { status: "complete", profit, margin } as Craft;
+function complete(
+  profit: number,
+  margin: number | undefined,
+  dailyVolume: DailyVolume = "unknown",
+): Craft {
+  return { status: "complete", profit, margin, dailyVolume } as Craft;
 }
-const incomplete = { status: "incomplete" } as Craft;
+const incomplete = { status: "incomplete", dailyVolume: 2 } as Craft;
 
 describe("craftFilter", () => {
   it.each<[string, Partial<Filters>, Craft, boolean]>([
@@ -264,6 +268,36 @@ describe("craftFilter", () => {
       true,
     ],
     [
+      "keeps a craft at the minimum daily volume",
+      { minDailyVolume: 5 },
+      complete(10, 0.1, 5),
+      true,
+    ],
+    [
+      "drops a craft below the minimum daily volume",
+      { minDailyVolume: 5 },
+      complete(5000, 0.5, 4.9),
+      false,
+    ],
+    [
+      "drops a craft with no history when there's a minimum daily volume",
+      { minDailyVolume: 0 },
+      complete(5000, 0.5, "none"),
+      false,
+    ],
+    [
+      "drops a craft whose history hasn't come when there's a minimum daily volume",
+      { minDailyVolume: 1 },
+      complete(5000, 0.5),
+      false,
+    ],
+    [
+      "drops a craft with missing prices below the minimum daily volume",
+      { minDailyVolume: 5 },
+      incomplete,
+      false,
+    ],
+    [
       "needs both minimums",
       { minProfit: 1000, minMarginPercent: 15 },
       complete(2000, 0.1),
@@ -283,6 +317,7 @@ describe("activeFilters", () => {
     artifacts: "exclude",
     minProfit: 10000,
     minMarginPercent: 15,
+    minDailyVolume: 5,
     hideIncomplete: true,
     specialtyOnly: true,
     search: " broadsword ",
@@ -300,6 +335,7 @@ describe("activeFilters", () => {
       "No artifacts",
       "Profit ≥ 10,000",
       "Margin ≥ 15%",
+      "Volume ≥ 5/day",
       "No missing prices",
       "Specialty only",
       "Name: broadsword",

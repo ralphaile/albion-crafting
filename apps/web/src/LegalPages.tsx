@@ -81,6 +81,11 @@ const GLOSSARY = [
     "Caerleon’s NPC market that buys gear to stock game loot. It uses its highest buy order.",
   ],
   [
+    "daily-volume",
+    "Daily volume",
+    "How many of an item sold a day in the sell market, on average over the newest 7 days AODP has. Low marks items that sell fewer than your setting, which can take a while to sell. No history means AODP has no sales there, as is common in the Black Zone.",
+  ],
+  [
     "map-quality",
     "Map quality",
     "A hideout map quality from Q1 to Q6 that adds a production bonus for the biome’s specialties.",

@@ -1,4 +1,4 @@
-import { answerPrices, expect, test } from "./test";
+import { answerHistory, answerPrices, expect, test } from "./test";
 
 test("ranks the one craft with every price first, with its numbers worked out", async ({
   page,
@@ -7,6 +7,9 @@ test("ranks the one craft with every price first, with its numbers worked out", 
     { itemId: "T4_METALBAR", marketId: "Lymhurst", sellMin: 100 },
     { itemId: "T4_LEATHER", marketId: "Lymhurst", sellMin: 50 },
     { itemId: "T4_MAIN_SWORD", marketId: "Lymhurst", sellMin: 5000 },
+  ]);
+  await answerHistory(page, [
+    { itemId: "T4_MAIN_SWORD", marketId: "Lymhurst", perDay: 3 },
   ]);
   await page.goto("./");
 
@@ -18,6 +21,7 @@ test("ranks the one craft with every price first, with its numbers worked out", 
   //   profit        4,675 − 1,041.67 − 216 = 3,417.33, a 271.7% margin
   //   without focus materials are 2,000 × (1 − 0.33/1.33) = 1,503.76,
   //   so focus saves 462.09 silver for 1,286 focus: 0.36 silver per focus
+  //   3 sold a day, under the 5 that counts as low
   const rows = page
     .getByRole("region", { name: "Best crafts" })
     .getByRole("row");
@@ -29,6 +33,7 @@ test("ranks the one craft with every price first, with its numbers worked out", 
     "3,417",
     "271.7%",
     "0.4",
+    "Low3",
     "1,042",
     "4,675",
     "47.9%",

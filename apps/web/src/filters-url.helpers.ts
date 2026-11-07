@@ -14,6 +14,7 @@ const PARAMS = [
   "artifacts",
   "profit",
   "margin",
+  "volume",
   "complete",
   "specialty",
   "q",
@@ -41,6 +42,7 @@ export function filtersFromSearch(search: string): Filters | undefined {
     artifacts: params.get("artifacts") ?? NO_FILTERS.artifacts,
     minProfit: wholeNumber(params, "profit"),
     minMarginPercent: wholeNumber(params, "margin"),
+    minDailyVolume: wholeNumber(params, "volume"),
     hideIncomplete: params.get("complete") === "1",
     specialtyOnly: params.get("specialty") === "1",
     search: params.get("q") ?? "",
@@ -67,6 +69,9 @@ export function searchWithFilters(search: string, filters: Filters): string {
   }
   if (filters.minMarginPercent !== undefined) {
     params.set("margin", String(filters.minMarginPercent));
+  }
+  if (filters.minDailyVolume !== undefined) {
+    params.set("volume", String(filters.minDailyVolume));
   }
   if (filters.hideIncomplete) {
     params.set("complete", "1");

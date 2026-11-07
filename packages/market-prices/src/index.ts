@@ -9,6 +9,7 @@ export {
   type HistoryOptions,
   type HistoryResult,
   type MarketData,
+  type PartialHistory,
   type PartialPrices,
   type PricesOptions,
   type PricesResult,

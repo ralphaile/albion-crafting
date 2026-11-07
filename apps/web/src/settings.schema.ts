@@ -6,6 +6,7 @@ import {
   DAILY_BONUS_GROUPS,
   DEFAULT_SETTINGS,
   MAX_DAILY_BONUSES,
+  MAX_LOW_VOLUME_PER_DAY,
   MAX_MANUAL_STALE_DAYS,
   MAX_STALE_HOURS,
   MAX_STATION_FEE,
@@ -61,6 +62,11 @@ const settingsSchema = z.object({
     .catch(DEFAULT_SETTINGS.manualStaleAfterDays),
   preferManualPrices: z.boolean().catch(DEFAULT_SETTINGS.preferManualPrices),
   server: serverSchema.catch(DEFAULT_SETTINGS.server),
+  lowVolumePerDay: z
+    .int()
+    .min(0)
+    .max(MAX_LOW_VOLUME_PER_DAY)
+    .catch(DEFAULT_SETTINGS.lowVolumePerDay),
 });
 
 // Each setting that doesn't fit falls back to its default, so a bad save never

@@ -1,6 +1,7 @@
 import { type CraftingPlace, hasSpecialty } from "@aoc/core";
 import { type GameRecipe, searchItems } from "@aoc/crafting-data";
 
+import { soldPerDay } from "./best-crafts.helpers";
 import type { Craft } from "./best-crafts.types";
 import { CATEGORIES } from "./filters.constants";
 import type { ActiveFilter, ArtifactFilter, Filters } from "./filters.types";
@@ -41,11 +42,20 @@ export function recipeFilter(
     (found === undefined || found.has(recipe.itemId));
 }
 
-// The minimums only judge crafts with every price. Whether the others show is
-// up to hideIncomplete, so they can still be finished by hand.
+// The profit and margin minimums only judge crafts with every price. Whether
+// the others show is up to hideIncomplete, so they can still be finished by
+// hand. The volume minimum judges every craft, since its history doesn't
+// depend on prices, and drops those without a volume to judge.
 export function craftFilter(filters: Filters): (craft: Craft) => boolean {
-  const { minProfit, minMarginPercent, hideIncomplete } = filters;
+  const { minProfit, minMarginPercent, minDailyVolume, hideIncomplete } =
+    filters;
   return (craft) => {
+    if (
+      minDailyVolume !== undefined &&
+      !((soldPerDay(craft) ?? -1) >= minDailyVolume)
+    ) {
+      return false;
+    }
     if (craft.status === "incomplete") {
       return !hideIncomplete;
     }
@@ -113,6 +123,13 @@ export function activeFilters(filters: Filters): ActiveFilter[] {
       id: "min-margin",
       label: `Margin ≥ ${formatCount(filters.minMarginPercent)}%`,
       remove: (current) => ({ ...current, minMarginPercent: undefined }),
+    });
+  }
+  if (filters.minDailyVolume !== undefined) {
+    active.push({
+      id: "min-daily-volume",
+      label: `Volume ≥ ${formatCount(filters.minDailyVolume)}/day`,
+      remove: (current) => ({ ...current, minDailyVolume: undefined }),
     });
   }
   if (filters.hideIncomplete) {

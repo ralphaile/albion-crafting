@@ -47,6 +47,7 @@ test("typing a missing artifact price completes its craft, and it's still there 
     "14,738",
     "110.7%",
     "0.4",
+    "no history",
     "13,042",
     "28,050",
     "47.9%",

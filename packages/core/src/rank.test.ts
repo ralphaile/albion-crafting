@@ -91,6 +91,24 @@ describe("rank", () => {
     },
   );
 
+  it("sorts by what a function reads from each result, still with incomplete ones last", () => {
+    const sold = new Map([
+      ["A", 50],
+      ["B", 2],
+      ["C", 30],
+      ["F", 7],
+    ]);
+
+    expect(ids(rank(results, ({ itemId }) => sold.get(itemId)))).toEqual([
+      "C",
+      "F",
+      "B",
+      "E",
+      "A",
+      "D",
+    ]);
+  });
+
   it("keeps the order of results that tie", () => {
     expect(
       ids(rank([complete("X", 100), complete("Y", 100)], "profit")),
