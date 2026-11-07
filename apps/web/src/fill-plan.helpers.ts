@@ -62,28 +62,30 @@ export function fillPlan(
   budget: FocusBudget & { maxQuantity: number },
   settings: Pick<CraftingSettings, "dailyBonuses">,
 ): { plan: CraftingPlan; added: number } {
+  const filled = (itemId: string, alternative: number, quantity: number) =>
+    newEntry(itemId, alternative, quantity, {
+      focus: true,
+      dailyBonuses: settings.dailyBonuses,
+    });
   const candidates = focusCandidates(crafts, budget.maxQuantity).map(
     (candidate) => ({
       ...candidate,
       maxQuantity: Math.min(
         candidate.maxQuantity,
         MAX_PLAN_QUANTITY -
-          plannedQuantity(plan, route, candidate.itemId, candidate.alternative),
+          plannedQuantity(
+            plan,
+            route,
+            filled(candidate.itemId, candidate.alternative, 0),
+          ),
       ),
     }),
   );
   const picks = fillFocusBudget(candidates, budget);
   return {
     plan: picks.reduce(
-      (filled, { itemId, alternative, quantity }) =>
-        addToPlan(
-          filled,
-          route,
-          newEntry(itemId, alternative, quantity, {
-            focus: true,
-            dailyBonuses: settings.dailyBonuses,
-          }),
-        ),
+      (next, { itemId, alternative, quantity }) =>
+        addToPlan(next, route, filled(itemId, alternative, quantity)),
       plan,
     ),
     added: picks.length,
