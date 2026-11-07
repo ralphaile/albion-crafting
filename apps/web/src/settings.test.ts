@@ -21,6 +21,7 @@ describe("parseSettings", () => {
       manualStaleAfterDays: 7,
       preferManualPrices: true,
       server: "europe",
+      lowVolumePerDay: 12,
     };
 
     expect(parseSettings(settings)).toEqual(settings);

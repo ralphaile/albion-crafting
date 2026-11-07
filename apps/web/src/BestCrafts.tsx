@@ -126,6 +126,7 @@ export function BestCrafts({
           <CraftsTable
             crafts={crafts}
             focus={settings.focus}
+            lowVolumePerDay={settings.lowVolumePerDay}
             onShowCraft={onShowItem}
             listId={listId}
             holdOrder={updating}

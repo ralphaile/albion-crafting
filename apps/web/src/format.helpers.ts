@@ -31,6 +31,12 @@ export const formatSilverPerFocus = formatter({
   maximumFractionDigits: 1,
 });
 
+const formatFewPerDay = formatter({ maximumFractionDigits: 1 });
+
+export function formatPerDay(perDay: number): string {
+  return perDay < 10 ? formatFewPerDay(perDay) : formatCount(perDay);
+}
+
 export function formatAge(minutes: number): string {
   if (minutes < 60) {
     return `${String(minutes)} min`;

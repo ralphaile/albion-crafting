@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { EvaluateSettings } from "@aoc/core";
 import { type GameRecipe, recipes } from "@aoc/crafting-data";
 
-import { evaluateCrafts } from "./best-crafts.helpers";
+import { evaluateCrafts, withDailyVolumes } from "./best-crafts.helpers";
 import type {
   Craft,
   UsedItemPrices,
@@ -90,6 +90,23 @@ const unpriced = evaluateCrafts(
     products: [],
   },
 );
+
+function sells(itemId: string, perDay: number | undefined) {
+  return {
+    itemId,
+    marketId: "Lymhurst",
+    quality: 1,
+    averagePrice: undefined,
+    averageDailyVolume: perDay ?? 0,
+    newestDay: perDay === undefined ? undefined : 0,
+  };
+}
+
+const withVolumes = withDailyVolumes(crafts, [
+  sells("T4_MAIN_SWORD", 3),
+  sells("T4_MAIN_AXE", 40),
+  sells("T4_2H_BOW", undefined),
+]);
 
 function rangeShown() {
   return screen.getByText(/^Crafts /).textContent;
@@ -259,6 +276,50 @@ describe("CraftsTable", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Profit" }),
+    ).toHaveAttribute("aria-sort", "descending");
+  });
+
+  it('shows how many sell a day, and "no history" when AODP has none', () => {
+    renderTable(withVolumes);
+
+    expect(rowOf("Adept's Battleaxe 4.0").getByText("40")).toBeInTheDocument();
+    expect(
+      rowOf("Adept's Bow 4.0").getByText("no history"),
+    ).toBeInTheDocument();
+  });
+
+  it('shows neither a volume nor "no history" until the history comes', () => {
+    renderTable();
+
+    expect(rowOf("Adept's Battleaxe 4.0").queryByText("40")).toBeNull();
+    expect(screen.queryByText("no history")).toBeNull();
+  });
+
+  it("marks a craft Low when it sells fewer than the setting a day", () => {
+    render(<CraftsTable crafts={withVolumes} focus lowVolumePerDay={5} />);
+
+    expect(rowOf("Adept's Broadsword 4.0").getByText("Low")).toHaveAttribute(
+      "title",
+      "Sells fewer than 5 a day",
+    );
+    expect(
+      rowOf("Adept's Battleaxe 4.0").queryByText("Low"),
+    ).not.toBeInTheDocument();
+    expect(rowOf("Adept's Bow 4.0").queryByText("Low")).not.toBeInTheDocument();
+  });
+
+  it("ranks by daily volume, with crafts without history after the rest", () => {
+    renderTable(withVolumes);
+
+    fireEvent.click(screen.getByRole("button", { name: "Daily volume" }));
+
+    expect(itemsInOrder()).toEqual([
+      "Adept's Battleaxe 4.0",
+      "Adept's Broadsword 4.0",
+      "Adept's Bow 4.0",
+    ]);
+    expect(
+      screen.getByRole("columnheader", { name: "Daily volume" }),
     ).toHaveAttribute("aria-sort", "descending");
   });
 

@@ -8,6 +8,7 @@ import {
   formatQuantity,
   formatReturnRate,
   formatSilver,
+  formatPerDay,
   formatSilverPerFocus,
 } from "./format.helpers";
 
@@ -52,6 +53,18 @@ describe("formatReturnRate", () => {
     [0, "0.00%"],
   ])("shows %d as %s", (value, expected) => {
     expect(formatReturnRate(value)).toBe(expected);
+  });
+});
+
+describe("formatPerDay", () => {
+  it.each([
+    [0, "0"],
+    [3 / 7, "0.4"],
+    [9.96, "10"],
+    [12.5, "13"],
+    [1234.4, "1,234"],
+  ])("shows %d a day as %s", (value, expected) => {
+    expect(formatPerDay(value)).toBe(expected);
   });
 });
 

@@ -13,6 +13,7 @@ export interface CraftingSettings {
   manualStaleAfterDays: number;
   preferManualPrices: boolean;
   server: Region;
+  lowVolumePerDay: number;
 }
 
 export interface ServerOption {
