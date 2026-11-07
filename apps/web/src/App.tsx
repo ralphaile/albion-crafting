@@ -156,6 +156,13 @@ export function App({
     }
   }, [filters, routeChoice, shownItemId]);
 
+  // Filling from focus ranks the crafts by their focus, once they're priced.
+  const fillUnavailable = !settings.focus
+    ? "Turn on Focus in Settings first"
+    : bestCrafts.status === "loading"
+      ? "Prices are still loading"
+      : undefined;
+
   if (page.kind === "help" || page.kind === "privacy") {
     return (
       <div className={styles.app}>
@@ -229,19 +236,16 @@ export function App({
             manualPrices={manualPrices}
             specializations={specializations}
             onFill={(budget) => {
-              const filled = fillPlan(
-                plan,
-                routeChoice,
-                bestCrafts.status === "loading" ? [] : bestCrafts.crafts,
-                budget,
-                settings,
+              const crafts =
+                bestCrafts.status === "loading" ? [] : bestCrafts.crafts;
+              setPlan(
+                (current) =>
+                  fillPlan(current, routeChoice, crafts, budget, settings).plan,
               );
-              setPlan(filled.plan);
-              return filled.added;
+              return fillPlan(plan, routeChoice, crafts, budget, settings)
+                .added;
             }}
-            {...(!settings.focus && {
-              fillUnavailable: "Turn on Focus in Settings first",
-            })}
+            {...(fillUnavailable !== undefined && { fillUnavailable })}
           />
         ) : (
           <>

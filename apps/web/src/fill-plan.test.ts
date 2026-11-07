@@ -5,7 +5,8 @@ import type { CraftingPlace, EvaluateSettings } from "@aoc/core";
 import { evaluateCrafts } from "./best-crafts.helpers";
 import type { UsedItemPrices, UsedPrice } from "./best-crafts.types";
 import { fillPlan, focusCandidates } from "./fill-plan.helpers";
-import { NO_PLAN } from "./plan.constants";
+import { MAX_PLAN_QUANTITY, NO_PLAN } from "./plan.constants";
+import { addToPlan, newEntry } from "./plan.helpers";
 import { RECIPES_BY_ID } from "./recipes.constants";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 
@@ -122,6 +123,27 @@ describe("fillPlan", () => {
         ],
       }),
     ]);
+  });
+
+  it("fills only the room left under the plan's cap for an item it already has", () => {
+    const full = addToPlan(
+      NO_PLAN,
+      DEFAULT_ROUTE_CHOICE,
+      newEntry("T4_MAIN_SWORD", 0, MAX_PLAN_QUANTITY - 2, {
+        focus: true,
+        dailyBonuses: [],
+      }),
+    );
+
+    const { plan } = fillPlan(
+      full,
+      DEFAULT_ROUTE_CHOICE,
+      crafts(5000),
+      { focus: 30_000, maxQuantity: 100 },
+      { dailyBonuses: [] },
+    );
+
+    expect(plan.locations[0]?.entries[0]?.quantity).toBe(MAX_PLAN_QUANTITY);
   });
 
   it("adds nothing when nothing fits the budget", () => {

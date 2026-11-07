@@ -5,7 +5,8 @@ import {
 } from "@aoc/core";
 
 import type { Craft } from "./best-crafts.types";
-import { addToPlan, newEntry } from "./plan.helpers";
+import { MAX_PLAN_QUANTITY } from "./plan.constants";
+import { addToPlan, newEntry, plannedQuantity } from "./plan.helpers";
 import type { CraftingPlan } from "./plan.types";
 import type { RouteChoice } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
@@ -20,6 +21,7 @@ export function focusCandidates(
     if (
       craft.status !== "complete" ||
       craft.focusCost === undefined ||
+      craft.silverPerFocus === undefined ||
       craft.materialCost.status !== "complete"
     ) {
       return [];
@@ -34,6 +36,7 @@ export function focusCandidates(
         costPerCraft:
           craft.materialCost.total + (craft.stationFee ?? 0) + craft.silverCost,
         profitPerCraft: craft.profit,
+        silverPerFocus: craft.silverPerFocus,
         maxQuantity:
           typeof dailyVolume === "number"
             ? Math.min(maxQuantity, Math.floor(dailyVolume))
@@ -43,7 +46,8 @@ export function focusCandidates(
   });
 }
 
-// Fills the budget from the ranked crafts, at the route's location.
+// Fills the budget from the ranked crafts, at the route's location. An item
+// the plan already has there only fills the room left under the plan's cap.
 export function fillPlan(
   plan: CraftingPlan,
   route: RouteChoice,
@@ -51,10 +55,17 @@ export function fillPlan(
   budget: FocusBudget & { maxQuantity: number },
   settings: Pick<CraftingSettings, "dailyBonuses">,
 ): { plan: CraftingPlan; added: number } {
-  const picks = fillFocusBudget(
-    focusCandidates(crafts, budget.maxQuantity),
-    budget,
+  const candidates = focusCandidates(crafts, budget.maxQuantity).map(
+    (candidate) => ({
+      ...candidate,
+      maxQuantity: Math.min(
+        candidate.maxQuantity,
+        MAX_PLAN_QUANTITY -
+          plannedQuantity(plan, route, candidate.itemId, candidate.alternative),
+      ),
+    }),
   );
+  const picks = fillFocusBudget(candidates, budget);
   return {
     plan: picks.reduce(
       (filled, { itemId, alternative, quantity }) =>
