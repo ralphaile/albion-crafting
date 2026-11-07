@@ -49,11 +49,21 @@ const { prices, failures, fetchedAt } = await marketData.getPrices(
   - **`ageMinutes` and `status`** are worked out on every call, reused prices included. A price is `stale` once it's older than `staleAfterMinutes`, 12 hours by default, and `fresh` before that.
 - **Reuse:** an item's prices are reused when every market and quality asked for was fetched less than 15 minutes ago, even after a reload. The other items are fetched. `force: true` fetches everything, for **Refresh prices**.
 - **`failures`:** each batch of items that failed for good, with its `itemIds` and `error`. The error message has the URL. Those items keep their older saved prices, however old, and the other batches' prices aren't lost.
-- **`fetchedAt`** is when the oldest of the prices was fetched, for **Last refreshed**, or `undefined` when there are none.
+- **`fetchedAt`** is when the oldest of the prices was fetched, for **Prices fetched … ago**, or `undefined` when there are none.
+- **`signal`**, an `AbortSignal`, cancels the fetch. Queued requests are dropped without using up the request limit, nothing is retried, and the cancelled batches come back in `failures`. Each batch is saved as it arrives, so what came before the cancel is kept.
+- **`onPartial`** is called with a `read` function at the start and after each batch. `read()` gives the prices known by then: the new ones, and the older saved ones of the items still to come. Reading costs time on thousands of items, so the page reads only when it updates the table.
 - **`onEvent`** gets three kinds of event, for the UI to show:
   - `progress`: `done` and `total` batches, at the start and after each batch.
   - `waiting`: the `seconds` until the request limits let the next request start.
   - `error`: a batch that failed for good, as in `failures`.
+
+## On the page
+
+- **The status line** above the table says when the oldest price on screen was fetched. While prices are fetched, it counts the batches, or counts down a wait for AODP's request limit.
+- **Refresh prices** fetches every price again. **Cancel** stops a fetch and keeps what arrived.
+- **While prices arrive,** the table updates at most once a second, and the rows already shown keep their places and page. It re-ranks once the fetch ends. On a first load, a craft shows once its own price has come.
+- **Failed batches** get a banner. **Retry failed** fetches just those. When every batch fails, it says whether AODP was unreachable or the browser is offline, and how old the prices kept are.
+- **Without IndexedDB,** as in some private windows, a note says prices are only kept until the page closes.
 
 ## Price history
 
