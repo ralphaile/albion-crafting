@@ -117,7 +117,9 @@ function samePlace(a: PlaceChoice, b: PlaceChoice): boolean {
   );
 }
 
-function sameEntry(a: NewEntry, b: NewEntry): boolean {
+type EntryKind = Omit<NewEntry, "quantity">;
+
+function sameEntry(a: EntryKind, b: EntryKind): boolean {
   return (
     a.itemId === b.itemId &&
     a.alternative === b.alternative &&
@@ -134,19 +136,16 @@ function sameRoute(a: RouteChoice, b: RouteChoice): boolean {
   );
 }
 
-// How many of the item and recipe the plan already has at the route.
+// How many the row `addToPlan()` would add `entry` to already has.
 export function plannedQuantity(
   plan: CraftingPlan,
   route: RouteChoice,
-  itemId: string,
-  alternative: number,
+  entry: EntryKind,
 ): number {
   return (
     plan.locations
       .find((location) => sameRoute(location.route, route))
-      ?.entries.find(
-        (entry) => entry.itemId === itemId && entry.alternative === alternative,
-      )?.quantity ?? 0
+      ?.entries.find((other) => sameEntry(other, entry))?.quantity ?? 0
   );
 }
 

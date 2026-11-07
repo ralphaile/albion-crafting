@@ -173,6 +173,30 @@ describe("fillPlan", () => {
     expect(plan.locations[0]?.entries[0]?.quantity).toBe(MAX_PLAN_QUANTITY);
   });
 
+  it("adds a row of its own next to the same item without focus", () => {
+    const withoutFocus = addToPlan(
+      NO_PLAN,
+      DEFAULT_ROUTE_CHOICE,
+      newEntry("T4_MAIN_SWORD", 0, MAX_PLAN_QUANTITY, {
+        focus: false,
+        dailyBonuses: [],
+      }),
+    );
+
+    const { plan } = fillPlan(
+      withoutFocus,
+      DEFAULT_ROUTE_CHOICE,
+      crafts(5000),
+      { focus: 10_000, maxQuantity: 100 },
+      { dailyBonuses: [] },
+    );
+
+    expect(plan.locations[0]?.entries).toEqual([
+      expect.objectContaining({ quantity: MAX_PLAN_QUANTITY, focus: false }),
+      expect.objectContaining({ itemId: "T4_MAIN_SWORD", focus: true }),
+    ]);
+  });
+
   it("adds nothing when nothing fits the budget", () => {
     const { plan, added } = fillPlan(
       NO_PLAN,
