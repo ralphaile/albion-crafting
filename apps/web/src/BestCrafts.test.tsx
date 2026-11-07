@@ -299,15 +299,15 @@ describe("BestCrafts", () => {
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
     expect(getPrices).toHaveBeenCalledTimes(4);
-    expect(getPrices).toHaveBeenLastCalledWith(
-      expect.anything(),
-      expect.anything(),
-      [1],
+    expect(
+      getPrices.mock.calls.slice(2).map(([, , , options]) => options),
+    ).toEqual([
       expect.objectContaining({
         force: false,
         refetch: getPrices.mock.calls[0]?.[0],
       }),
-    );
+      expect.objectContaining({ force: false, refetch: [] }),
+    ]);
   });
 
   it("says what went wrong when no prices could be fetched, and tries again when asked", async () => {
