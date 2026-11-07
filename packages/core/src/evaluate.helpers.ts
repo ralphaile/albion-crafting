@@ -88,12 +88,14 @@ export function evaluateEach(
       (materials + fee + alternative.silver) / alternative.amountCrafted;
     const spent = spentPerItem(cost.total);
     const profit = sale.net - spent;
+    // The focus pays for the whole craft, which can make several items.
     const perFocus =
       focusSpent === undefined
         ? undefined
         : silverPerFocus(
-            profit,
-            sale.net - spentPerItem(costWithoutFocus.total),
+            profit * alternative.amountCrafted,
+            (sale.net - spentPerItem(costWithoutFocus.total)) *
+              alternative.amountCrafted,
             focusSpent,
           );
     return {
