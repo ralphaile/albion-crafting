@@ -10,7 +10,8 @@
     "e2e": "playwright test",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "prices:snapshot": "node scripts/price-snapshot.ts",
+    "typecheck": "tsc --noEmit && tsc -p scripts"
   },
   "dependencies": {
     "@aoc/core": "workspace:*",
@@ -31,6 +32,7 @@
     "@testing-library/dom": "10.4.2",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
+    "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
