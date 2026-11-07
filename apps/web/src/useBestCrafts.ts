@@ -130,10 +130,14 @@ function readyPrices(
   materials: PartialPrices,
   products: PartialPrices,
   history: PartialHistory | undefined,
+  prices: CraftPrices = {
+    materials: materials.prices,
+    products: products.prices,
+  },
 ): ReadyPrices {
   return {
     status: "ready",
-    prices: { materials: materials.prices, products: products.prices },
+    prices,
     history: history?.history ?? NO_HISTORY,
     failures: [],
     batches: 0,
@@ -178,10 +182,29 @@ async function fetchPrices(
       onProgress(sum("done"), sum("total"));
     }
   };
+  // While only the history changes, the prices stay the same object, so the
+  // crafts aren't worked out again.
+  let shownPrices: CraftPrices | undefined;
+  const pricesOf = (materials: PartialPrices, products: PartialPrices) =>
+    shownPrices?.materials === materials.prices &&
+    shownPrices.products === products.prices
+      ? shownPrices
+      : (shownPrices = {
+          materials: materials.prices,
+          products: products.prices,
+        });
   const showKnown = () => {
     const { materials, products, history } = known;
     if (materials && products) {
-      onPartial(() => readyPrices(materials(), products(), history?.()));
+      onPartial(() => {
+        const [materialPrices, productPrices] = [materials(), products()];
+        return readyPrices(
+          materialPrices,
+          productPrices,
+          history?.(),
+          pricesOf(materialPrices, productPrices),
+        );
+      });
     }
   };
   const ask = async (
