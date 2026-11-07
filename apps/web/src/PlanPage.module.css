@@ -1,0 +1,108 @@
+.plan {
+  display: grid;
+  gap: 14px;
+}
+
+.planHead,
+.locationHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.planHead h2,
+.locationHead h3 {
+  margin: 0;
+  font-family: var(--font-display);
+}
+
+.location {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.entries {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.entries th,
+.entries td {
+  padding: 6px 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.entries input[type="number"] {
+  width: 7ch;
+}
+
+.materials {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+}
+
+.totals dt {
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+.totals dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.loss {
+  color: var(--loss);
+}
+
+.missing {
+  color: var(--price-missing);
+  white-space: normal;
+}
+
+.addItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.matches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

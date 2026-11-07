@@ -71,6 +71,7 @@ async function renderApp({
       savedRoute={savedRoute}
       savedSettings={savedSettings}
       savedSpecializations={savedSpecializations}
+      savedPlan={undefined}
       savedManualPrices={savedManualPrices}
     />,
   );

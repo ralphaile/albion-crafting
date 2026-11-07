@@ -13,6 +13,9 @@ import { Footer, LegalPage } from "./LegalPages";
 import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
 import type { MissingPrice } from "./missing-prices.types";
 import { MissingPricesPanel } from "./MissingPricesPanel";
+import { NO_PLAN } from "./plan.constants";
+import type { CraftingPlan } from "./plan.types";
+import { PlanPage } from "./PlanPage";
 import { routeFromSearch, searchWithRoute } from "./route-url.helpers";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import { routeFromChoice } from "./route.helpers";
@@ -20,6 +23,7 @@ import type { RouteChoice } from "./route.types";
 import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
+  PLAN_SETTING,
   ROUTE_SETTING,
   SPECIALIZATIONS_SETTING,
 } from "./saved-settings.constants";
@@ -36,6 +40,8 @@ import { useSavedSetting } from "./useSavedSetting";
 
 const NO_MISSING_PRICES: readonly MissingPrice[] = [];
 
+type PageKind = "home" | "plan" | "help" | "privacy";
+
 export function App({
   marketData,
   settingsStore,
@@ -44,6 +50,7 @@ export function App({
   savedRoute,
   savedSettings,
   savedSpecializations,
+  savedPlan,
   savedManualPrices,
 }: {
   marketData: MarketData;
@@ -53,10 +60,11 @@ export function App({
   savedRoute: RouteChoice | undefined;
   savedSettings: CraftingSettings | undefined;
   savedSpecializations: SpecializationProfile | undefined;
+  savedPlan: CraftingPlan | undefined;
   savedManualPrices: readonly ManualPrice[];
 }) {
   const [page, setPage] = useState<{
-    kind: "home" | "help" | "privacy";
+    kind: PageKind;
     section?: string;
   }>(() => pageFromHash(window.location.hash));
   useEffect(() => {
@@ -92,6 +100,11 @@ export function App({
     settingsStore,
     SPECIALIZATIONS_SETTING,
     () => savedSpecializations ?? NO_SPECIALIZATIONS,
+  );
+  const [plan, setPlan] = useSavedSetting(
+    settingsStore,
+    PLAN_SETTING,
+    () => savedPlan ?? NO_PLAN,
   );
   const [specializationsShown, setSpecializationsShown] = useState({
     open: false,
@@ -141,7 +154,7 @@ export function App({
     }
   }, [filters, routeChoice, shownItemId]);
 
-  if (page.kind !== "home") {
+  if (page.kind === "help" || page.kind === "privacy") {
     return (
       <div className={styles.app}>
         <LegalPage
@@ -159,6 +172,20 @@ export function App({
     <div className={styles.app}>
       <header className={styles.masthead}>
         <h1 className={styles.title}>Albion Crafting</h1>
+        <nav className={styles.pages} aria-label="Pages">
+          <a
+            href="#home"
+            aria-current={page.kind === "home" ? "page" : undefined}
+          >
+            Best crafts
+          </a>
+          <a
+            href="#plan"
+            aria-current={page.kind === "plan" ? "page" : undefined}
+          >
+            Plan
+          </a>
+        </nav>
         <div className={styles.actions}>
           <MissingPricesPanel
             missingPrices={
@@ -190,23 +217,40 @@ export function App({
         </div>
       </header>
       <main className={styles.main}>
-        <CraftingLocationBar route={routeChoice} onChange={setRouteChoice} />
-        <BestCrafts
-          bestCrafts={bestCrafts}
-          shownItemId={shownItemId}
-          onShowItem={setShownItemId}
-          route={route}
-          settings={settings}
-          filters={filters}
-          onFiltersChange={setFilters}
-          persistent={settingsStore.persistent}
-          pricesPersistent={marketData.persistent}
-          manualPrices={manualPrices}
-          onSaveManualPrice={saveManualPrice}
-          onRemoveManualPrice={removeManualPrice}
-          specializations={specializations}
-          onEditSpecializations={showSpecializations}
-        />
+        {page.kind === "plan" ? (
+          <PlanPage
+            marketData={marketData}
+            plan={plan}
+            onChange={setPlan}
+            route={routeChoice}
+            settings={settings}
+            manualPrices={manualPrices}
+            specializations={specializations}
+          />
+        ) : (
+          <>
+            <CraftingLocationBar
+              route={routeChoice}
+              onChange={setRouteChoice}
+            />
+            <BestCrafts
+              bestCrafts={bestCrafts}
+              shownItemId={shownItemId}
+              onShowItem={setShownItemId}
+              route={route}
+              settings={settings}
+              filters={filters}
+              onFiltersChange={setFilters}
+              persistent={settingsStore.persistent}
+              pricesPersistent={marketData.persistent}
+              manualPrices={manualPrices}
+              onSaveManualPrice={saveManualPrice}
+              onRemoveManualPrice={removeManualPrice}
+              specializations={specializations}
+              onEditSpecializations={showSpecializations}
+            />
+          </>
+        )}
       </main>
       <Footer
         onHelp={() => {
@@ -219,9 +263,12 @@ export function App({
 }
 
 function pageFromHash(hash: string): {
-  kind: "home" | "help" | "privacy";
+  kind: PageKind;
   section?: string;
 } {
+  if (hash === "#plan") {
+    return { kind: "plan" };
+  }
   if (hash.startsWith("#help")) {
     const section = hash.slice("#help/".length);
     return { kind: "help", ...(section ? { section } : {}) };
