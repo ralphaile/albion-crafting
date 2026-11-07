@@ -41,7 +41,7 @@ pnpm dev   # http://localhost:5173/albion-crafting/
 | `pnpm data:diff`      | Compares the generated game data with the committed data and writes a report of the changes to `packages/crafting-data/data-diff.md`                                                 |
 | `pnpm data:update`    | Downloads and checks the game files at the pinned commit, then generates the crafting locations, hideout bonuses, recipes and item names. `--latest` moves the pin to the newest one |
 
-`pnpm --filter @aoc/web prices:snapshot` writes the [price snapshot](docs/market-prices.md#price-snapshot) into the built site. CI runs it on deploy, and the `Price snapshot` workflow every 6 hours.
+`pnpm --filter @aoc/web prices:snapshot` writes the [price snapshot](docs/market-prices.md#price-snapshot) into the built site, and `pnpm --filter @aoc/web icons` the [item icons](docs/game-data.md#item-icons). CI runs both on deploy, and the `Price snapshot` workflow every 6 hours.
 
 ## Project layout
 
