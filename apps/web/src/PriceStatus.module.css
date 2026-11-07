@@ -1,0 +1,110 @@
+.priceStatus {
+  display: grid;
+  gap: 8px;
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+}
+
+.text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Wide enough for either label, so swapping them moves nothing. */
+.button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 10.5em;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  white-space: nowrap;
+  transition: border-color 120ms ease-out;
+}
+
+.button:hover {
+  border-color: var(--text-faint);
+}
+
+.button svg,
+.dismiss svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.failure {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--loss);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.failure .text {
+  flex: 1;
+  color: var(--text);
+}
+
+.retry {
+  flex: none;
+  padding: 4px 12px;
+  border: 1px solid var(--brass);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--brass);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.retry:hover {
+  background: var(--brass);
+  color: var(--bg);
+}
+
+.dismiss {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.dismiss:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}

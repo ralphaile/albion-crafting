@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import styles from "./BestCrafts.module.css";
 import { CraftFilters, type UpdateFilters } from "./CraftFilters";
 import { CraftPanel } from "./CraftPanel";
@@ -6,6 +8,7 @@ import { NO_FILTERS } from "./filters.constants";
 import { activeFilters } from "./filters.helpers";
 import type { Filters } from "./filters.types";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
+import { PriceStatus } from "./PriceStatus";
 import type { Route } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 import { NO_SPECIALIZATIONS } from "./specializations.constants";
@@ -31,6 +34,7 @@ export function BestCrafts({
   filters = NO_FILTERS,
   onFiltersChange = IGNORE_FILTERS,
   persistent = true,
+  pricesPersistent = true,
   manualPrices = NO_MANUAL_PRICES,
   onSaveManualPrice = IGNORE_MANUAL_PRICE,
   onRemoveManualPrice = IGNORE_MANUAL_PRICE,
@@ -45,6 +49,7 @@ export function BestCrafts({
   filters?: Filters;
   onFiltersChange?: UpdateFilters;
   persistent?: boolean;
+  pricesPersistent?: boolean;
   manualPrices?: readonly ManualPrice[];
   onSaveManualPrice?: (price: ManualPrice) => void;
   onRemoveManualPrice?: (key: ManualPriceKey) => void;
@@ -55,6 +60,12 @@ export function BestCrafts({
   const crafts =
     bestCrafts.status === "loading" ? undefined : bestCrafts.crafts;
   const updating = bestCrafts.status === "ready" && bestCrafts.updating;
+  // A new route, filter or setting starts the table at its first page again;
+  // new prices don't.
+  const listId = useMemo(
+    () => ({ route, filters, settings }),
+    [route, filters, settings],
+  );
   const shownCraft =
     bestCrafts.status === "loading"
       ? undefined
@@ -67,20 +78,12 @@ export function BestCrafts({
         onChange={onFiltersChange}
         persistent={persistent}
       />
+      <PriceStatus bestCrafts={bestCrafts} persistent={pricesPersistent} />
       {bestCrafts.status === "loading" && (
-        <div className={styles.loading} role="status">
-          <p className={styles.loadingText}>
-            Fetching market prices…{" "}
-            <span className={styles.hint}>
-              The first time takes a few seconds. Prices are then kept for 15
-              minutes.
-            </span>
-          </p>
-          <div className={styles.skeleton} aria-hidden="true">
-            {Array.from({ length: SKELETON_ROWS }, (_, row) => (
-              <div key={row} className={styles.skeletonRow} />
-            ))}
-          </div>
+        <div className={styles.skeleton} aria-hidden="true">
+          {Array.from({ length: SKELETON_ROWS }, (_, row) => (
+            <div key={row} className={styles.skeletonRow} />
+          ))}
         </div>
       )}
       {bestCrafts.status === "error" && (
@@ -104,11 +107,6 @@ export function BestCrafts({
           </button>
         </div>
       )}
-      {updating && (
-        <p className={styles.updating} role="status">
-          Updating prices…
-        </p>
-      )}
       {crafts !== undefined &&
         (filtered && crafts.length === 0 && !updating ? (
           <div className={styles.empty}>
@@ -129,6 +127,8 @@ export function BestCrafts({
             crafts={crafts}
             focus={settings.focus}
             onShowCraft={onShowItem}
+            listId={listId}
+            holdOrder={updating}
           />
         ))}
       <CraftPanel

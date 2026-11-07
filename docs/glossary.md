@@ -138,7 +138,7 @@ The engine's version is `evaluate()` in `packages/core/src/evaluate.helpers.ts`.
 - A missing price, or a missing [item value](#item-value) at a paid station, makes the result incomplete. It lists the missing prices and has no profit.
 - With focus on, it also gives the focus cost and [silver per focus](#focus).
 
-`rank()` in `packages/core/src/rank.helpers.ts` sorts the results by profit, margin or silver per focus, highest first, with incomplete ones last. By default it sorts by silver per focus when focus is on, and by profit otherwise.
+`rank()` in `packages/core/src/rank.helpers.ts` sorts the results by profit, margin or silver per focus, highest first, with incomplete ones last.
 
 ## Quality
 

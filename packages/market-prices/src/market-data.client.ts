@@ -1,5 +1,6 @@
 import { createAodpClient } from "./aodp.client.js";
 import { NO_DATA_DATE } from "./aodp.constants.js";
+import type { AodpHistory, AodpPrice } from "./aodp.schema.js";
 import { openCacheStore } from "./cache.store.js";
 import { cachedRows } from "./cached-rows.helpers.js";
 import { summarizeHistory } from "./history.helpers.js";
@@ -11,18 +12,11 @@ export async function openMarketData(): Promise<MarketData> {
   // One client, so that prices and history share its rate limiter.
   const client = createAodpClient();
 
-  const cachedPrices = cachedRows({
+  const cachedPrices = cachedRows<AodpPrice>({
     rows: store.prices,
     ttlMinutes: 15,
-    fetch: async (itemIds, marketIds, qualities, options) => {
-      const { prices, failures } = await client.getPrices(
-        itemIds,
-        marketIds,
-        qualities,
-        options,
-      );
-      return { rows: prices, failures };
-    },
+    fetch: (itemIds, marketIds, qualities, options) =>
+      client.getPrices(itemIds, marketIds, qualities, options),
     marketIdOf: (row) => row.city,
     empty: (itemId, marketId, quality) => ({
       item_id: itemId,
@@ -39,18 +33,11 @@ export async function openMarketData(): Promise<MarketData> {
     }),
   });
 
-  const cachedHistory = cachedRows({
+  const cachedHistory = cachedRows<AodpHistory>({
     rows: store.history,
     ttlMinutes: 6 * 60,
-    fetch: async (itemIds, marketIds, qualities, options) => {
-      const { history, failures } = await client.getHistory(
-        itemIds,
-        marketIds,
-        qualities,
-        options,
-      );
-      return { rows: history, failures };
-    },
+    fetch: (itemIds, marketIds, qualities, options) =>
+      client.getHistory(itemIds, marketIds, qualities, options),
     marketIdOf: (row) => row.location,
     empty: (itemId, marketId, quality) => ({
       location: marketId,
@@ -62,12 +49,26 @@ export async function openMarketData(): Promise<MarketData> {
 
   return {
     persistent: store.persistent,
-    async getPrices(itemIds, marketIds, qualities, options) {
+    async getPrices(itemIds, marketIds, qualities, options = {}) {
+      const { onPartial, ...fetchOptions } = options;
       const { rows, failures, fetchedAt } = await cachedPrices(
         itemIds,
         marketIds,
         qualities,
-        options,
+        {
+          ...fetchOptions,
+          ...(onPartial && {
+            onPartial: (read) => {
+              onPartial(() => {
+                const partial = read();
+                return {
+                  prices: normalizePrices(partial.rows, options),
+                  fetchedAt: partial.fetchedAt,
+                };
+              });
+            },
+          }),
+        },
       );
       return { prices: normalizePrices(rows, options), failures, fetchedAt };
     },

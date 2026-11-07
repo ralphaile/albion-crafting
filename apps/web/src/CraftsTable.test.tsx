@@ -114,24 +114,8 @@ function rowOf(name: string) {
 }
 
 describe("CraftsTable", () => {
-  it("ranks the crafts with every price by silver per focus when focus is on, and the rest after them", () => {
+  it("ranks the crafts with every price by profit, even with focus, and the rest after them", () => {
     renderTable();
-
-    expect(itemsInOrder()).toEqual([
-      "Adept's Battleaxe 4.0",
-      "Adept's Broadsword 4.0",
-      "Adept's Bow 4.0",
-    ]);
-    expect(
-      screen.getByRole("columnheader", { name: "Silver/focus" }),
-    ).toHaveAttribute("aria-sort", "descending");
-    expect(screen.getByText("Missing prices · 1 craft")).toBeInTheDocument();
-  });
-
-  it("ranks by the column clicked", () => {
-    renderTable();
-
-    fireEvent.click(screen.getByRole("button", { name: "Profit" }));
 
     expect(itemsInOrder()).toEqual([
       "Adept's Broadsword 4.0",
@@ -141,29 +125,44 @@ describe("CraftsTable", () => {
     expect(
       screen.getByRole("columnheader", { name: "Profit" }),
     ).toHaveAttribute("aria-sort", "descending");
+    expect(screen.getByText("Missing prices · 1 craft")).toBeInTheDocument();
+  });
+
+  it("ranks by the column clicked", () => {
+    renderTable();
+
+    fireEvent.click(screen.getByRole("button", { name: "Silver/focus" }));
+
+    expect(itemsInOrder()).toEqual([
+      "Adept's Battleaxe 4.0",
+      "Adept's Broadsword 4.0",
+      "Adept's Bow 4.0",
+    ]);
     expect(
       screen.getByRole("columnheader", { name: "Silver/focus" }),
+    ).toHaveAttribute("aria-sort", "descending");
+    expect(
+      screen.getByRole("columnheader", { name: "Profit" }),
     ).not.toHaveAttribute("aria-sort");
   });
 
   it("ranks lowest first when the sorted column is clicked again, and back", () => {
     renderTable();
-    const silverPerFocus = () =>
-      screen.getByRole("columnheader", { name: "Silver/focus" });
+    const profit = () => screen.getByRole("columnheader", { name: "Profit" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Silver/focus" }));
+    fireEvent.click(screen.getByRole("button", { name: "Profit" }));
 
     expect(itemsInOrder()).toEqual([
-      "Adept's Broadsword 4.0",
       "Adept's Battleaxe 4.0",
+      "Adept's Broadsword 4.0",
       "Adept's Bow 4.0",
     ]);
-    expect(silverPerFocus()).toHaveAttribute("aria-sort", "ascending");
+    expect(profit()).toHaveAttribute("aria-sort", "ascending");
 
-    fireEvent.click(screen.getByRole("button", { name: "Silver/focus" }));
+    fireEvent.click(screen.getByRole("button", { name: "Profit" }));
 
-    expect(silverPerFocus()).toHaveAttribute("aria-sort", "descending");
-    expect(itemsInOrder()[0]).toBe("Adept's Battleaxe 4.0");
+    expect(profit()).toHaveAttribute("aria-sort", "descending");
+    expect(itemsInOrder()[0]).toBe("Adept's Broadsword 4.0");
   });
 
   it("shows a craft's profit, margin, silver per focus, costs and return rate", () => {
@@ -304,6 +303,46 @@ describe("CraftsTable", () => {
     fireEvent.click(screen.getByRole("button", { name: "Margin" }));
 
     expect(rangeShown()).toMatch(/^Crafts 1–50 of/);
+  });
+
+  it("keeps its order and page while prices update, and re-ranks once they're in", () => {
+    const listId = {};
+    const table = (given: readonly Craft[], holdOrder: boolean) => (
+      <CraftsTable crafts={given} focus listId={listId} holdOrder={holdOrder} />
+    );
+    const { rerender } = render(table(crafts, false));
+    const swapped = crafts.map((each) =>
+      each.itemId === "T4_MAIN_AXE" ? { ...each, profit: 1_000_000 } : each,
+    );
+
+    rerender(table(swapped, true));
+
+    expect(itemsInOrder()).toEqual([
+      "Adept's Broadsword 4.0",
+      "Adept's Battleaxe 4.0",
+      "Adept's Bow 4.0",
+    ]);
+    expect(rowOf("Adept's Battleaxe 4.0").getByText("1,000,000")).toBeVisible();
+
+    rerender(table(swapped, false));
+
+    expect(itemsInOrder()).toEqual([
+      "Adept's Battleaxe 4.0",
+      "Adept's Broadsword 4.0",
+      "Adept's Bow 4.0",
+    ]);
+  });
+
+  it("stays on its page when the same list gets new prices", () => {
+    const listId = {};
+    const { rerender } = render(
+      <CraftsTable crafts={unpriced} focus listId={listId} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Page 2" }));
+
+    rerender(<CraftsTable crafts={[...unpriced]} focus listId={listId} />);
+
+    expect(rangeShown()).toMatch(/^Crafts 51–100 of/);
   });
 
   it("has no pages when every craft fits on one", () => {

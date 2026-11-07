@@ -1,7 +1,7 @@
 import { DEFAULT_REGION } from "./aodp.constants.js";
-import type { BatchFailure, FetchOptions, Region } from "./aodp.types.js";
+import type { BatchFailure, BatchOptions, Region } from "./aodp.types.js";
 import type { RowKey, RowStore } from "./cache.types.js";
-import type { CachedFetchOptions } from "./cached-rows.types.js";
+import type { CachedFetchOptions, CachedRows } from "./cached-rows.types.js";
 
 const MINUTE_MS = 60_000;
 
@@ -17,8 +17,8 @@ interface CachedRowsOptions<T> {
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    options: FetchOptions,
-  ) => Promise<{ rows: T[]; failures: BatchFailure[] }>;
+    options: BatchOptions<T>,
+  ) => Promise<{ failures: BatchFailure[] }>;
   marketIdOf: (row: T) => string;
   empty: (itemId: string, marketId: string, quality: number) => T;
 }
@@ -26,6 +26,14 @@ interface CachedRowsOptions<T> {
 // AODP matches market names in any case, so the cache does too.
 function comboId(itemId: string, marketId: string, quality: number): string {
   return JSON.stringify([itemId, marketId.toLowerCase(), quality]);
+}
+
+function oldest(rows: readonly Stamp[]): number | undefined {
+  return rows.reduce<number | undefined>(
+    (first, { fetchedAt }) =>
+      first === undefined ? fetchedAt : Math.min(first, fetchedAt),
+    undefined,
+  );
 }
 
 export function cachedRows<T extends { item_id: string; quality: number }>({
@@ -39,8 +47,15 @@ export function cachedRows<T extends { item_id: string; quality: number }>({
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    { force = false, ...options }: CachedFetchOptions = {},
-  ) => {
+    {
+      force = false,
+      refetch = [],
+      onPartial,
+      ...options
+    }: CachedFetchOptions & {
+      onPartial?: (read: () => CachedRows<T & Stamp>) => void;
+    } = {},
+  ): Promise<CachedRows<T & Stamp> & { failures: BatchFailure[] }> => {
     const region = options.region ?? DEFAULT_REGION;
     const now = Date.now();
     const items = [...new Set(itemIds)];
@@ -61,24 +76,34 @@ export function cachedRows<T extends { item_id: string; quality: number }>({
       }
     }
     // An item is reused only if every market and quality asked for is recent.
+    const refetching = new Set(refetch);
     const reusable = (itemId: string) =>
-      !force && recentRows.get(itemId) === markets.length * levels.length;
+      !force &&
+      !refetching.has(itemId) &&
+      recentRows.get(itemId) === markets.length * levels.length;
 
     const toFetch = items.filter((itemId) => !reusable(itemId));
-    const { rows, failures } =
-      toFetch.length === 0
-        ? { rows: [], failures: [] }
-        : await fetch(toFetch, markets, levels, options);
-    const failed = new Set(failures.flatMap((failure) => failure.itemIds));
+    const fetchedItems = new Set<string>();
+    const fetched: (T & Stamp)[] = [];
+    const saving: Promise<void>[] = [];
+    // Older rows of an item not fetched yet, or that failed to fetch, beat no
+    // rows at all.
+    const used = (): CachedRows<T & Stamp> => {
+      const rows = [
+        ...cached.filter(({ item_id }) => !fetchedItems.has(item_id)),
+        ...fetched,
+      ];
+      return { rows, fetchedAt: oldest(rows) };
+    };
 
-    // AODP sends nothing for some of what it's asked, such as the history of an
-    // item nobody bought. An empty row says so, until it's as old as any other.
-    const answered = new Set(
-      rows.map((row) => comboId(row.item_id, marketIdOf(row), row.quality)),
-    );
-    const empties = toFetch
-      .filter((itemId) => !failed.has(itemId))
-      .flatMap((itemId) =>
+    // Saved batch by batch, so a fetch that's cancelled keeps what arrived.
+    const onBatch = (batchItemIds: string[], rows: T[]) => {
+      // AODP sends nothing for some of what it's asked, such as the history of
+      // an item nobody bought. An empty row says so, until it's as old as any other.
+      const answered = new Set(
+        rows.map((row) => comboId(row.item_id, marketIdOf(row), row.quality)),
+      );
+      const empties = batchItemIds.flatMap((itemId) =>
         markets.flatMap((marketId) =>
           levels
             .filter(
@@ -87,28 +112,28 @@ export function cachedRows<T extends { item_id: string; quality: number }>({
             .map((quality) => empty(itemId, marketId, quality)),
         ),
       );
-    const fetched = [...rows, ...empties].map((row): T & Stamp => ({
-      ...row,
-      region,
-      fetchedAt: now,
-    }));
-    await store.put(fetched);
-
-    // Older rows of an item that failed to fetch beat no rows at all.
-    const used = [
-      ...cached.filter(
-        (row) => reusable(row.item_id) || failed.has(row.item_id),
-      ),
-      ...fetched,
-    ];
-    return {
-      rows: used,
-      failures,
-      fetchedAt: used.reduce<number | undefined>(
-        (oldest, { fetchedAt }) =>
-          oldest === undefined ? fetchedAt : Math.min(oldest, fetchedAt),
-        undefined,
-      ),
+      const stamped = [...rows, ...empties].map((row): T & Stamp => ({
+        ...row,
+        region,
+        fetchedAt: now,
+      }));
+      for (const itemId of batchItemIds) {
+        fetchedItems.add(itemId);
+      }
+      fetched.push(...stamped);
+      saving.push(store.put(stamped));
+      onPartial?.(used);
     };
+
+    onPartial?.(used);
+    if (toFetch.length === 0) {
+      return { ...used(), failures: [] };
+    }
+    const { failures } = await fetch(toFetch, markets, levels, {
+      ...options,
+      onBatch,
+    });
+    await Promise.all(saving);
+    return { ...used(), failures };
   };
 }

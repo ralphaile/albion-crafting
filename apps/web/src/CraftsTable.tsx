@@ -6,12 +6,7 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import {
-  defaultSortKey,
-  rank,
-  type SortDirection,
-  type SortKey,
-} from "@aoc/core";
+import { rank, type SortDirection, type SortKey } from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
 
 import type { Craft, UsedPrice } from "./best-crafts.types";
@@ -236,33 +231,66 @@ function CraftRow({
 
 const IGNORE_SHOW_CRAFT = () => undefined;
 
+// Keeps the crafts that were shown where they were, with new ones after them.
+// Crafts that are missing a price still come last, after the separator.
+function inHeldOrder(crafts: readonly Craft[], shown: readonly Craft[]) {
+  const position = new Map(shown.map(({ itemId }, index) => [itemId, index]));
+  const place = ({ itemId }: Craft) => position.get(itemId) ?? shown.length;
+  const incomplete = ({ status }: Craft) => (status === "incomplete" ? 1 : 0);
+  return [...crafts].sort(
+    (first, second) =>
+      incomplete(first) - incomplete(second) || place(first) - place(second),
+  );
+}
+
 export function CraftsTable({
   crafts,
   focus,
   onShowCraft = IGNORE_SHOW_CRAFT,
+  listId = crafts,
+  holdOrder = false,
 }: {
   crafts: readonly Craft[];
   focus: boolean;
   onShowCraft?: (itemId: string) => void;
+  listId?: unknown;
+  holdOrder?: boolean;
 }) {
   const [chosenSort, setChosenSort] = useState<Sort>();
   const sort: Sort =
     chosenSort === undefined || (chosenSort.key === "silverPerFocus" && !focus)
-      ? { key: defaultSortKey(focus), direction: "descending" }
+      ? { key: "profit", direction: "descending" }
       : chosenSort;
   const { key: sortKey, direction } = sort;
-  // Remembers what the page was chosen for, so new crafts or a new sort start again at the first page.
+  // Remembers what the page was chosen for, so another list (`listId`) or a
+  // new sort starts again at the first page.
   const [chosenPage, setChosenPage] = useState({
-    crafts,
+    listId,
     sortKey,
     direction,
     page: 0,
   });
   const wide = useMediaQuery("(min-width: 1100px)");
   const ledgerRef = useRef<HTMLElement>(null);
-  const ranked = useMemo(
+  const live = useMemo(
     () => rank(crafts, sortKey, direction),
     [crafts, sortKey, direction],
+  );
+  // The last order shown while not holding it, for this sort. A table that
+  // starts out holding has none yet, so it ranks as the prices come.
+  const [held, setHeld] = useState(() =>
+    holdOrder ? undefined : { live, sortKey, direction },
+  );
+  if (!holdOrder && held?.live !== live) {
+    setHeld({ live, sortKey, direction });
+  }
+  const heldOrder =
+    holdOrder && held?.sortKey === sortKey && held.direction === direction
+      ? held.live
+      : undefined;
+  const ranked = useMemo(
+    () => (heldOrder === undefined ? live : inHeldOrder(live, heldOrder)),
+    [heldOrder, live],
   );
 
   if (crafts.length === 0) {
@@ -281,7 +309,7 @@ export function CraftsTable({
   const missing = plural(ranked.length - complete, "craft", "crafts");
   const pageCount = Math.ceil(ranked.length / PAGE_SIZE);
   const page =
-    chosenPage.crafts === crafts &&
+    chosenPage.listId === listId &&
     chosenPage.sortKey === sortKey &&
     chosenPage.direction === direction
       ? Math.min(chosenPage.page, pageCount - 1)
@@ -292,7 +320,7 @@ export function CraftsTable({
     index + 2 + (firstIncomplete !== -1 && index >= firstIncomplete ? 1 : 0);
 
   function showPage(next: number) {
-    setChosenPage({ crafts, sortKey, direction, page: next });
+    setChosenPage({ listId, sortKey, direction, page: next });
     ledgerRef.current?.scrollIntoView({ block: "start" });
     ledgerRef.current?.focus({ preventScroll: true });
   }

@@ -52,7 +52,7 @@ export {
 } from "./price-choice.types.js";
 export { pricesNeeded } from "./prices-needed.helpers.js";
 export { type PricesNeeded } from "./prices-needed.types.js";
-export { defaultSortKey, rank } from "./rank.helpers.js";
+export { rank } from "./rank.helpers.js";
 export { type SortDirection, type SortKey } from "./rank.types.js";
 export { bonusForReturnRate, returnRate } from "./return-rate.helpers.js";
 export { revenue } from "./revenue.helpers.js";

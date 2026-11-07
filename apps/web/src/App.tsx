@@ -200,6 +200,7 @@ export function App({
           filters={filters}
           onFiltersChange={setFilters}
           persistent={settingsStore.persistent}
+          pricesPersistent={marketData.persistent}
           manualPrices={manualPrices}
           onSaveManualPrice={saveManualPrice}
           onRemoveManualPrice={removeManualPrice}

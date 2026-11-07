@@ -88,6 +88,39 @@ describe("createLimiter", () => {
     );
   });
 
+  it("drops a task cancelled while queued, without using a request", async () => {
+    const limiter = createLimiter();
+    const finish: (() => void)[] = [];
+    const running = Array.from({ length: 3 }, () =>
+      limiter.run(() => new Promise<void>((resolve) => finish.push(resolve))),
+    );
+    const controller = new AbortController();
+    const cancelledTask = vi.fn(() => Promise.resolve("cancelled"));
+    const cancelled = limiter.run(cancelledTask, undefined, controller.signal);
+    const next = limiter.run(() => Promise.resolve("next"));
+
+    controller.abort();
+    for (const resolve of finish) {
+      resolve();
+    }
+
+    await expect(cancelled).rejects.toThrow(
+      expect.objectContaining({ name: "AbortError" }),
+    );
+    await expect(next).resolves.toBe("next");
+    await Promise.all(running);
+    expect(cancelledTask).not.toHaveBeenCalled();
+  });
+
+  it("doesn't queue a task that's already cancelled", async () => {
+    const task = vi.fn(() => Promise.resolve());
+
+    await expect(
+      createLimiter().run(task, undefined, AbortSignal.abort()),
+    ).rejects.toThrow(expect.objectContaining({ name: "AbortError" }));
+    expect(task).not.toHaveBeenCalled();
+  });
+
   it("waits until the latest pause ends, even one set while waiting", async () => {
     const limiter = createLimiter();
     const onWait = vi.fn();

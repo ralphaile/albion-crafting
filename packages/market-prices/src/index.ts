@@ -9,6 +9,7 @@ export {
   type HistoryOptions,
   type HistoryResult,
   type MarketData,
+  type PartialPrices,
   type PricesOptions,
   type PricesResult,
 } from "./market-data.types.js";

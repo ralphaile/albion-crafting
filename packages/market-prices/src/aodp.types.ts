@@ -15,6 +15,12 @@ export type AodpEvent =
 export interface FetchOptions {
   region?: Region;
   onEvent?: (event: AodpEvent) => void;
+  signal?: AbortSignal;
+}
+
+// `onBatch` gets each batch's rows as soon as it arrives.
+export interface BatchOptions<T> extends FetchOptions {
+  onBatch?: (itemIds: string[], rows: T[]) => void;
 }
 
 interface FetchedPrices {
@@ -32,12 +38,12 @@ export interface AodpClient {
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    options?: FetchOptions,
+    options?: BatchOptions<AodpPrice>,
   ): Promise<FetchedPrices>;
   getHistory(
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    options?: FetchOptions,
+    options?: BatchOptions<AodpHistory>,
   ): Promise<FetchedHistory>;
 }

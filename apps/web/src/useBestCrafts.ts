@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { type CraftingPlace, pricesNeeded, type PricesNeeded } from "@aoc/core";
 import { recipes } from "@aoc/crafting-data";
 import type {
   BatchFailure,
   MarketData,
+  PartialPrices,
   PricesOptions,
   Region,
 } from "@aoc/market-prices";
@@ -26,30 +27,58 @@ import { NO_SPECIALIZATIONS } from "./specializations.constants";
 import { fceFor } from "./specializations.helpers";
 import type { SpecializationProfile } from "./specializations.types";
 
-// `allCrafts` keeps the crafts the price filters hide.
-export type BestCraftsResult =
-  | { status: "loading" }
-  | {
-      status: "error";
-      error: Error;
-      crafts: Craft[];
-      allCrafts: Craft[];
-      missingPrices: MissingPrice[];
-      retry: () => void;
-    }
-  | {
-      status: "ready";
-      crafts: Craft[];
-      allCrafts: Craft[];
-      missingPrices: MissingPrice[];
-      failures: BatchFailure[];
-      updating: boolean;
-    };
+// How far a fetch has got, in batches, and until when it waits for the rate
+// limit, if it does.
+interface FetchProgress {
+  done: number;
+  total: number;
+  waitingUntil: number | undefined;
+}
 
-type Fetched =
-  | { status: "error"; error: Error }
-  | { status: "ready"; prices: CraftPrices; failures: BatchFailure[] };
+// `refresh` fetches every price again. `retry` fetches only what has no recent
+// price, such as the batches that failed.
+interface PriceActions {
+  progress: FetchProgress | undefined;
+  refresh: () => void;
+  retry: () => void;
+  cancel: () => void;
+}
 
+// `allCrafts` keeps the crafts the price filters hide. `fetchedAt` is when the
+// oldest price was fetched, and `batches` how many the last fetch asked for.
+export type BestCraftsResult = PriceActions &
+  (
+    | { status: "loading" }
+    | {
+        status: "error";
+        error: Error;
+        crafts: Craft[];
+        allCrafts: Craft[];
+        missingPrices: MissingPrice[];
+      }
+    | {
+        status: "ready";
+        crafts: Craft[];
+        allCrafts: Craft[];
+        missingPrices: MissingPrice[];
+        failures: BatchFailure[];
+        batches: number;
+        fetchedAt: number | undefined;
+        updating: boolean;
+      }
+  );
+
+interface ReadyPrices {
+  status: "ready";
+  prices: CraftPrices;
+  failures: BatchFailure[];
+  batches: number;
+  fetchedAt: number | undefined;
+}
+
+type Fetched = { status: "error"; error: Error } | ReadyPrices;
+
+// `done` is false while batches are still arriving.
 interface Answer {
   buyMarketId: string;
   sellMarketId: string;
@@ -58,23 +87,96 @@ interface Answer {
   attempt: number;
   products: ReadonlySet<string>;
   fetched: Fetched;
+  done: boolean;
 }
+
+interface Progress extends FetchProgress {
+  needed: PricesNeeded;
+  attempt: number;
+}
+
+type Side = "materials" | "products";
 
 const QUALITIES = [QUALITY];
 
+const UPDATE_EVERY_MS = 1000;
+
 const NO_PRICES: CraftPrices = { materials: [], products: [] };
 
+const NO_ITEMS: readonly string[] = [];
+
+function oldest(...times: (number | undefined)[]): number | undefined {
+  const known = times.filter((time) => time !== undefined);
+  return known.length === 0 ? undefined : Math.min(...known);
+}
+
+function readyPrices(
+  materials: PartialPrices,
+  products: PartialPrices,
+): ReadyPrices {
+  return {
+    status: "ready",
+    prices: { materials: materials.prices, products: products.prices },
+    failures: [],
+    batches: 0,
+    fetchedAt: oldest(materials.fetchedAt, products.fetchedAt),
+  };
+}
+
+// Reads a side's prices once, until newer ones arrive.
+function readOnce(read: () => PartialPrices): () => PartialPrices {
+  let prices: PartialPrices | undefined;
+  return () => (prices ??= read());
+}
+
+// `onPartial` is called as prices arrive, once both sides have some, and
+// `read` gets the prices known so far.
 async function fetchPrices(
   marketData: MarketData,
   needed: PricesNeeded,
   buyMarketId: string,
   sellMarketId: string,
   options: PricesOptions,
+  onPartial: (read: () => ReadyPrices) => void,
+  onProgress: (done: number, total: number) => void,
 ): Promise<Fetched> {
+  const known: Partial<Record<Side, () => PartialPrices>> = {};
+  const counts: Record<Side, { done: number; total: number }> = {
+    materials: { done: 0, total: 0 },
+    products: { done: 0, total: 0 },
+  };
+  const ask = async (
+    side: Side,
+    itemIds: readonly string[],
+    marketId: string,
+  ) => {
+    const result = await marketData.getPrices(itemIds, [marketId], QUALITIES, {
+      ...options,
+      onEvent: (event) => {
+        options.onEvent?.(event);
+        if (event.type === "progress") {
+          counts[side] = { done: event.done, total: event.total };
+          onProgress(
+            counts.materials.done + counts.products.done,
+            counts.materials.total + counts.products.total,
+          );
+        }
+      },
+      onPartial: (read) => {
+        known[side] = readOnce(read);
+        const { materials, products } = known;
+        if (materials && products) {
+          onPartial(() => readyPrices(materials(), products()));
+        }
+      },
+    });
+    known[side] = () => result;
+    return result;
+  };
   try {
     const [materials, products] = await Promise.all([
-      marketData.getPrices(needed.materials, [buyMarketId], QUALITIES, options),
-      marketData.getPrices(needed.products, [sellMarketId], QUALITIES, options),
+      ask("materials", needed.materials, buyMarketId),
+      ask("products", needed.products, sellMarketId),
     ]);
     const failures = [...materials.failures, ...products.failures];
     const [firstFailure] = failures;
@@ -85,9 +187,9 @@ async function fetchPrices(
       return { status: "error", error: firstFailure.error };
     }
     return {
-      status: "ready",
-      prices: { materials: materials.prices, products: products.prices },
+      ...readyPrices(materials, products),
       failures,
+      batches: counts.materials.total + counts.products.total,
     };
   } catch (error) {
     return {
@@ -132,17 +234,23 @@ export function useBestCrafts(
   const { place, buyMarketId, sellMarketId } = route;
   const { server, staleAfterHours, manualStaleAfterDays, preferManualPrices } =
     settings;
-  const [attempt, setAttempt] = useState(0);
+  const [{ attempt, force, refetch }, setRequest] = useState<{
+    attempt: number;
+    force: boolean;
+    refetch: readonly string[];
+  }>({ attempt: 0, force: false, refetch: NO_ITEMS });
   const [answer, setAnswer] = useState<Answer>();
+  const [progress, setProgress] = useState<Progress>();
+  const cancelRef = useRef<() => void>(undefined);
   const selected = useSelectedRecipes(filters, place);
   const needed = useMemo(() => pricesNeeded(selected), [selected]);
 
+  // An earlier attempt's answer stays on screen while the next one comes in.
   const current =
     answer?.buyMarketId === buyMarketId &&
     answer.sellMarketId === sellMarketId &&
     answer.server === server &&
-    answer.staleAfterHours === staleAfterHours &&
-    answer.attempt === attempt
+    answer.staleAfterHours === staleAfterHours
       ? answer
       : undefined;
   // The selected recipes the last answer has prices for. When that's all of
@@ -154,7 +262,10 @@ export function useBestCrafts(
         : selected.filter(({ itemId }) => current.products.has(itemId)),
     [current, selected],
   );
-  const covered = current !== undefined && priced.length === selected.length;
+  const covered =
+    current?.attempt === attempt &&
+    current.done &&
+    priced.length === selected.length;
   const needsFetch = selected.length > 0 && !covered;
 
   useEffect(() => {
@@ -162,24 +273,124 @@ export function useBestCrafts(
       return;
     }
     let active = true;
-    void fetchPrices(marketData, needed, buyMarketId, sellMarketId, {
-      region: server,
-      staleAfterMinutes: staleAfterHours * 60,
-    }).then((fetched) => {
+    let cancelled = false;
+    const controller = new AbortController();
+    cancelRef.current = () => {
+      cancelled = true;
+      controller.abort();
+    };
+    // Until it's done, a craft shows only once its own price has arrived.
+    const answerWith = (fetched: Fetched, done: boolean) => {
+      setAnswer({
+        buyMarketId,
+        sellMarketId,
+        server,
+        staleAfterHours,
+        attempt,
+        products: new Set(
+          done || fetched.status === "error"
+            ? needed.products
+            : fetched.prices.products.map(({ itemId }) => itemId),
+        ),
+        fetched,
+        done,
+      });
+    };
+    // Re-ranking every craft after each batch is slow on a slow device, so the
+    // batches that arrive close together show together, after any input.
+    let prices: (() => ReadyPrices) | undefined;
+    let counts: FetchProgress = {
+      done: 0,
+      total: 0,
+      waitingUntil: undefined,
+    };
+    let shownAt = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const show = () => {
+      clearTimeout(timer);
+      timer = undefined;
+      if (!active) {
+        return;
+      }
+      shownAt = Date.now();
+      const shown = { prices: prices?.(), counts };
+      prices = undefined;
+      startTransition(() => {
+        if (shown.prices !== undefined) {
+          answerWith(shown.prices, false);
+        }
+        setProgress({ ...shown.counts, needed, attempt });
+      });
+    };
+    const showSoon = () => {
+      timer ??= setTimeout(
+        show,
+        Math.max(0, shownAt + UPDATE_EVERY_MS - Date.now()),
+      );
+    };
+    void fetchPrices(
+      marketData,
+      needed,
+      buyMarketId,
+      sellMarketId,
+      {
+        region: server,
+        staleAfterMinutes: staleAfterHours * 60,
+        force,
+        refetch,
+        signal: controller.signal,
+        onEvent: (event) => {
+          // A wait shows at once, so its countdown starts on time.
+          if (event.type === "waiting") {
+            counts = {
+              ...counts,
+              waitingUntil: Date.now() + event.seconds * 1000,
+            };
+            show();
+          }
+        },
+      },
+      (partial) => {
+        prices = partial;
+        showSoon();
+      },
+      (done, total) => {
+        counts = { ...counts, done, total };
+        showSoon();
+      },
+    ).then((fetched) => {
+      clearTimeout(timer);
       if (active) {
-        setAnswer({
-          buyMarketId,
-          sellMarketId,
-          server,
-          staleAfterHours,
-          attempt,
-          products: new Set(needed.products),
-          fetched,
-        });
+        // Stopping a fetch on purpose isn't a failure, even before any price came.
+        answerWith(
+          !cancelled
+            ? fetched
+            : fetched.status === "ready"
+              ? { ...fetched, failures: [] }
+              : {
+                  status: "ready",
+                  prices: NO_PRICES,
+                  failures: [],
+                  batches: 0,
+                  fetchedAt: undefined,
+                },
+          true,
+        );
+        // A refresh or retry forces only its own fetch, not the next filter
+        // or route's.
+        if (force || refetch.length > 0) {
+          setRequest((last) =>
+            last.attempt === attempt
+              ? { attempt, force: false, refetch: NO_ITEMS }
+              : last,
+          );
+        }
       }
     });
     return () => {
       active = false;
+      clearTimeout(timer);
+      controller.abort();
     };
   }, [
     needsFetch,
@@ -190,6 +401,8 @@ export function useBestCrafts(
     server,
     staleAfterHours,
     attempt,
+    force,
+    refetch,
   ]);
 
   // When AODP gives nothing at all, the manual prices still price what they
@@ -250,37 +463,76 @@ export function useBestCrafts(
     [evaluated, server, buyMarketId, sellMarketId],
   );
 
+  const failedItems =
+    current?.fetched.status === "ready"
+      ? current.fetched.failures.flatMap(({ itemIds }) => itemIds)
+      : NO_ITEMS;
+  const actions: PriceActions = {
+    progress: !needsFetch
+      ? undefined
+      : progress?.needed === needed && progress.attempt === attempt
+        ? {
+            done: progress.done,
+            total: progress.total,
+            waitingUntil: progress.waitingUntil,
+          }
+        : { done: 0, total: 0, waitingUntil: undefined },
+    refresh: () => {
+      setRequest(({ attempt: last }) => ({
+        attempt: last + 1,
+        force: true,
+        refetch: NO_ITEMS,
+      }));
+    },
+    // The failed items may still have recent prices from before a refresh, so
+    // they're named to be fetched again.
+    retry: () => {
+      setRequest(({ attempt: last }) => ({
+        attempt: last + 1,
+        force: false,
+        refetch: failedItems,
+      }));
+    },
+    cancel: () => {
+      cancelRef.current?.();
+    },
+  };
+
   if (selected.length === 0) {
     return {
+      ...actions,
       status: "ready",
       crafts: [],
       allCrafts: [],
       missingPrices: [],
       failures: [],
+      batches: 0,
+      fetchedAt: undefined,
       updating: false,
     };
   }
   if (current?.fetched.status === "error" && covered) {
     return {
+      ...actions,
       status: "error",
       error: current.fetched.error,
       crafts,
       allCrafts: evaluated,
       missingPrices: missing,
-      retry: () => {
-        setAttempt((count) => count + 1);
-      },
     };
   }
   if (current?.fetched.status === "ready" && priced.length > 0) {
     return {
+      ...actions,
       status: "ready",
       crafts,
       allCrafts: evaluated,
       missingPrices: missing,
       failures: current.fetched.failures,
+      batches: current.fetched.batches,
+      fetchedAt: current.fetched.fetchedAt,
       updating: !covered,
     };
   }
-  return { status: "loading" };
+  return { ...actions, status: "loading" };
 }
