@@ -9,6 +9,7 @@ import {
 import { rank, type SortDirection, type SortKey } from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
 
+import { AddToPlan } from "./AddToPlan";
 import { soldPerDay } from "./best-crafts.helpers";
 import type { Craft, DailyVolume, UsedPrice } from "./best-crafts.types";
 import { Chevron } from "./Chevron";
@@ -24,6 +25,7 @@ import {
 import { ItemIcon } from "./ItemIcon";
 import { Pager } from "./Pager";
 import { PAGE_SIZE } from "./pager.constants";
+import type { AddToPlanHandler } from "./plan.types";
 import { PriceBadge } from "./PriceBadge";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 
@@ -155,6 +157,7 @@ function CraftRow({
   wide,
   lowVolumePerDay,
   onShowCraft,
+  onAddToPlan,
 }: {
   craft: Craft;
   rowIndex: number;
@@ -163,6 +166,7 @@ function CraftRow({
   wide: boolean;
   lowVolumePerDay: number;
   onShowCraft: (itemId: string) => void;
+  onAddToPlan: AddToPlanHandler | undefined;
 }) {
   const showCraft = () => {
     onShowCraft(craft.itemId);
@@ -193,7 +197,7 @@ function CraftRow({
       onClick={(event) => {
         if (
           event.target instanceof Element &&
-          event.target.closest("button") === null
+          event.target.closest("button, form, a") === null
         ) {
           showCraft();
         }
@@ -273,6 +277,15 @@ function CraftRow({
               <path d="M9 4l3 3" />
             </svg>
           </button>
+          {onAddToPlan && (
+            <AddToPlan
+              name={itemName(craft.itemId)}
+              compact
+              onAdd={(quantity) => {
+                onAddToPlan(craft.itemId, craft.alternative, quantity);
+              }}
+            />
+          )}
         </span>
       </td>
     </tr>
@@ -298,6 +311,7 @@ export function CraftsTable({
   focus,
   lowVolumePerDay = DEFAULT_SETTINGS.lowVolumePerDay,
   onShowCraft = IGNORE_SHOW_CRAFT,
+  onAddToPlan,
   listId = crafts,
   holdOrder = false,
 }: {
@@ -305,6 +319,7 @@ export function CraftsTable({
   focus: boolean;
   lowVolumePerDay?: number;
   onShowCraft?: (itemId: string) => void;
+  onAddToPlan?: AddToPlanHandler;
   listId?: unknown;
   holdOrder?: boolean;
 }) {
@@ -479,6 +494,7 @@ export function CraftsTable({
                     wide={wide}
                     lowVolumePerDay={lowVolumePerDay}
                     onShowCraft={onShowCraft}
+                    onAddToPlan={onAddToPlan}
                   />
                 </Fragment>
               );

@@ -21,6 +21,7 @@ import type { RouteChoice } from "./route.types";
 import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
+  PLAN_SETTING,
   ROUTE_SETTING,
   SPECIALIZATIONS_SETTING,
 } from "./saved-settings.constants";
@@ -421,6 +422,60 @@ describe("App", () => {
     );
 
     expect(window.location.search).toContain("item=T4_MAIN_SWORD");
+  });
+
+  it("adds a craft from its row to the plan at the route, and adds to its quantity the next time", async () => {
+    const settingsStore = await renderApp({
+      savedFilters: { ...NO_FILTERS, search: "broadsword", tiers: [4] },
+      marketData: answering(broadswordPrices),
+    });
+    const addFromRow = async (quantity: string) => {
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: "Add Adept's Broadsword 4.0 to plan",
+        }),
+      );
+      const form = screen.getByRole("form", {
+        name: "Add Adept's Broadsword 4.0 to plan",
+      });
+      fireEvent.change(within(form).getByLabelText("How many"), {
+        target: { value: quantity },
+      });
+      fireEvent.click(within(form).getByRole("button", { name: "Add" }));
+    };
+
+    await addFromRow("3");
+
+    expect(screen.getByText("Added to the plan.")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: "Adept's Broadsword 4.0" }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.pointerDown(document.body);
+    await addFromRow("2");
+
+    await expect
+      .poll(() => settingsStore.load(PLAN_SETTING))
+      .toMatchObject({
+        locations: [
+          {
+            route: {
+              place: { kind: "location", locationId: "1000" },
+              buyMarketId: "Lymhurst",
+              sellMarketId: "Lymhurst",
+            },
+            entries: [
+              {
+                itemId: "T4_MAIN_SWORD",
+                alternative: 0,
+                quantity: 5,
+                focus: DEFAULT_SETTINGS.focus,
+                dailyBonus: 0,
+              },
+            ],
+          },
+        ],
+      });
   });
 
   it("keeps a craft open when a typed price drops it below the minimum profit", async () => {
