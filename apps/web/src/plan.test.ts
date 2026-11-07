@@ -124,7 +124,7 @@ describe("planLocations", () => {
     products: new Map([["T4_MAIN_SWORD", fresh(5000)]]),
   };
 
-  it("gives core the same item at a city and a hideout, each at its own place, prices and daily bonus", () => {
+  it("gives core the same item at a city and a hideout, each at its own place, prices, sell mode and daily bonus", () => {
     const asked: string[] = [];
     const locations = planLocations(plan, (route) => {
       asked.push(`${route.buyMarketId} → ${route.sellMarketId}`);
@@ -150,7 +150,11 @@ describe("planLocations", () => {
       "complete",
       "complete",
     ]);
-    expect(result.totals.revenue).toBeCloseTo(15 * 5000 * 0.935, 6);
+    expect(locations[1]?.sellMode).toBe("blackMarket");
+    expect(result.totals.revenue).toBeCloseTo(
+      10 * 5000 * 0.935 + 5 * 5000 * 0.96,
+      6,
+    );
     expect(result.totals.focus).toBe(10 * 1286);
   });
 });
