@@ -245,6 +245,18 @@ describe("agePrices", () => {
     expect(later?.buyMax).toEqual({ status: "missing" });
   });
 
+  it("keeps the age a price came with when `now` is earlier, but uses the stale time given", () => {
+    const [earlier] = agePrices([fetched], {
+      now: NOW - 5 * 60_000,
+      staleAfterMinutes: 60,
+    });
+
+    expect(earlier?.sellMin).toMatchObject({
+      status: "stale",
+      ageMinutes: 120,
+    });
+  });
+
   it("uses the stale time it's given", () => {
     const [later] = agePrices([fetched], {
       now: NOW + 11 * HOUR_MS,
