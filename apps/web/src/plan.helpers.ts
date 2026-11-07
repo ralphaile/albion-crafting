@@ -117,6 +117,15 @@ function samePlace(a: PlaceChoice, b: PlaceChoice): boolean {
   );
 }
 
+function sameEntry(a: NewEntry, b: NewEntry): boolean {
+  return (
+    a.itemId === b.itemId &&
+    a.alternative === b.alternative &&
+    a.focus === b.focus &&
+    a.dailyBonus === b.dailyBonus
+  );
+}
+
 function sameRoute(a: RouteChoice, b: RouteChoice): boolean {
   return (
     samePlace(a.place, b.place) &&
@@ -126,7 +135,8 @@ function sameRoute(a: RouteChoice, b: RouteChoice): boolean {
 }
 
 // Adds to the location with the same route, made if there's none yet. The same
-// item and recipe already there gets the quantity added.
+// item and recipe there, with the same focus and daily bonus, gets the
+// quantity added; otherwise it's a row of its own, so it's priced as added.
 export function addToPlan(
   plan: CraftingPlan,
   route: RouteChoice,
@@ -140,10 +150,7 @@ export function addToPlan(
     route,
     entries: [],
   };
-  const same = location.entries.find(
-    ({ itemId, alternative }) =>
-      itemId === entry.itemId && alternative === entry.alternative,
-  );
+  const same = location.entries.find((other) => sameEntry(other, entry));
   const entries =
     same === undefined
       ? [...location.entries, { id: crypto.randomUUID(), ...entry }]

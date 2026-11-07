@@ -21,7 +21,7 @@ Each row of the best-crafts table has a **+** button, and the craft panel an **A
 - **Where:** the location with the route chosen above the table, made if the plan doesn't have it yet.
 - **Which recipe:** the one the row ranks, or the one shown in the panel.
 - **Focus and daily bonus:** as in Settings, the daily bonus being the one for the item's own category.
-- **Already there:** the same item and recipe at that location gets the quantity added, up to 100,000.
+- **Already there:** the same item and recipe at that location, with the same focus and daily bonus, gets the quantity added, up to 100,000. With other focus or daily bonus it's a row of its own.
 
 ## The model
 
