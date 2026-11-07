@@ -47,7 +47,12 @@ function priced(itemId: string, marketId: string, value: number): ItemPrices {
     itemId,
     marketId,
     quality: 1,
-    sellMin: { status: "fresh", value, observedAt: 0, ageMinutes: 30 },
+    sellMin: {
+      status: "fresh",
+      value,
+      observedAt: Date.now() - 30 * 60_000,
+      ageMinutes: 30,
+    },
     buyMax: { status: "missing" },
   };
 }

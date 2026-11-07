@@ -17,6 +17,7 @@ import { QUALITY } from "./prices.constants";
 import type { CraftingSettings } from "./settings.types";
 import { fceFor } from "./specializations.helpers";
 import type { SpecializationProfile } from "./specializations.types";
+import { useMinute } from "./useMinute";
 
 // `prices` has each location's prices, in the plan's order, with the typed
 // ones chosen where they win. While `updating`, a price the plan has only just
@@ -133,6 +134,7 @@ export function usePlan(
   specializations: SpecializationProfile,
 ): PlanState {
   const answer = usePlanPrices(marketData, plan, settings);
+  const now = useMinute();
   return useMemo((): PlanState => {
     if (answer === undefined) {
       return { status: "loading" };
@@ -152,9 +154,11 @@ export function usePlan(
           buyMarketId: route.buyMarketId,
           sellMarketId: route.sellMarketId,
           quality: QUALITY,
+          staleAfterMinutes: settings.staleAfterHours * 60,
           manualStaleAfterMinutes: settings.manualStaleAfterDays * 24 * 60,
           preferManual: settings.preferManualPrices,
         },
+        now,
       );
       return withOutliers(
         chosen,
@@ -179,5 +183,5 @@ export function usePlan(
       updating: !current,
       failed: fetched.failed,
     };
-  }, [answer, plan, settings, manualPrices, specializations]);
+  }, [answer, plan, settings, manualPrices, specializations, now]);
 }

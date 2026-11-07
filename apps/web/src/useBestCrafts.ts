@@ -29,6 +29,7 @@ import type { CraftingSettings } from "./settings.types";
 import { NO_SPECIALIZATIONS } from "./specializations.constants";
 import { fceFor } from "./specializations.helpers";
 import type { SpecializationProfile } from "./specializations.types";
+import { useMinute } from "./useMinute";
 
 // How far a fetch has got, in batches, and until when it waits for the rate
 // limit, if it does.
@@ -552,25 +553,34 @@ export function useBestCrafts(
         : undefined;
   const history =
     current?.fetched.status === "ready" ? current.fetched.history : NO_HISTORY;
+  const now = useMinute();
   const chosenPrices = useMemo(
     () =>
       fetchedPrices &&
-      withManualPrices(fetchedPrices, manualPrices, {
-        region: server,
-        buyMarketId,
-        sellMarketId,
-        quality: QUALITY,
-        manualStaleAfterMinutes: manualStaleAfterDays * 24 * 60,
-        preferManual: preferManualPrices,
-      }),
+      withManualPrices(
+        fetchedPrices,
+        manualPrices,
+        {
+          region: server,
+          buyMarketId,
+          sellMarketId,
+          quality: QUALITY,
+          staleAfterMinutes: staleAfterHours * 60,
+          manualStaleAfterMinutes: manualStaleAfterDays * 24 * 60,
+          preferManual: preferManualPrices,
+        },
+        now,
+      ),
     [
       fetchedPrices,
       manualPrices,
       server,
       buyMarketId,
       sellMarketId,
+      staleAfterHours,
       manualStaleAfterDays,
       preferManualPrices,
+      now,
     ],
   );
   const prices = useMemo(

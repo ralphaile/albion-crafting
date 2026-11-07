@@ -131,6 +131,7 @@ describe("withManualPrices", () => {
     buyMarketId: "Lymhurst",
     sellMarketId: "Caerleon",
     quality: 1,
+    staleAfterMinutes: 12 * 60,
     manualStaleAfterMinutes: 3 * 24 * 60,
     preferManual: false,
   };
@@ -214,6 +215,16 @@ describe("withManualPrices", () => {
       ...seen(120, fourDays),
       origin: "manual",
       passedOver: staleApi,
+    });
+  });
+
+  it("ages the API's price at the time given, so one that went stale since it was fetched loses to a fresh typed price", () => {
+    const fetchedFresh = seen(100, 13 * 60);
+
+    expect(barsUsed(fetchedFresh, 14 * 60)?.sellMin).toEqual({
+      ...seen(120, 14 * 60),
+      origin: "manual",
+      passedOver: seen(100, 13 * 60, "stale"),
     });
   });
 
