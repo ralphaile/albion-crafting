@@ -266,6 +266,7 @@ export function useBestCrafts(
       cancelled = true;
       controller.abort();
     };
+    // Until it's done, a craft shows only once its own price has arrived.
     const answerWith = (fetched: Fetched, done: boolean) => {
       setAnswer({
         buyMarketId,
@@ -273,7 +274,11 @@ export function useBestCrafts(
         server,
         staleAfterHours,
         attempt,
-        products: new Set(needed.products),
+        products: new Set(
+          done || fetched.status === "error"
+            ? needed.products
+            : fetched.prices.products.map(({ itemId }) => itemId),
+        ),
         fetched,
         done,
       });

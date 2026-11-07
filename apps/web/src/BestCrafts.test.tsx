@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -13,6 +14,7 @@ import type {
   ItemPrices,
   MarketData,
   ObservedPrice,
+  PricesOptions,
   PricesResult,
 } from "@aoc/market-prices";
 
@@ -252,16 +254,14 @@ describe("BestCrafts", () => {
         }),
     );
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Fetching market prices…",
-    );
+    expect(screen.getByRole("status")).toHaveTextContent("Fetching prices…");
 
     for (const answer of answers) {
       answer(noPrices);
     }
 
     await bestCrafts();
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
   it("counts the crafts that have every price", async () => {
@@ -270,14 +270,41 @@ describe("BestCrafts", () => {
     expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
   });
 
-  it("uses the prices it has when only some batches fail", async () => {
-    renderBestCrafts(async (itemIds, marketIds) => ({
-      ...(await broadswordPrices(marketIds)),
-      failures: [{ itemIds: [...itemIds], error: new Error("AODP is down") }],
-    }));
+  it("uses the prices it has when only some batches fail, and retries just those", async () => {
+    const getPrices = vi
+      .fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
+        broadswordPrices(marketIds),
+      )
+      .mockImplementationOnce(
+        async (itemIds, marketIds, _qualities, options) => {
+          options?.onEvent?.({ type: "progress", done: 3, total: 3 });
+          return {
+            ...(await broadswordPrices(marketIds)),
+            failures: [
+              { itemIds: [...itemIds], error: new Error("AODP: 503") },
+            ],
+          };
+        },
+      );
+    renderBestCrafts(getPrices);
 
     expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "1 batch failed",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry failed" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+    expect(getPrices).toHaveBeenCalledTimes(4);
+    expect(getPrices).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.anything(),
+      [1],
+      expect.objectContaining({ force: false }),
+    );
   });
 
   it("says what went wrong when no prices could be fetched, and tries again when asked", async () => {
@@ -388,6 +415,136 @@ function askedFor(getPrices: ReturnType<typeof renderFiltered>, call = 1) {
 function categoryButton() {
   return screen.getByRole("button", { name: /^Category/ });
 }
+
+// Each call stays open, and hands its options to the test.
+function heldPrices() {
+  const calls: {
+    options: PricesOptions;
+    finish: (result: Partial<PricesResult>) => void;
+  }[] = [];
+  const getPrices = vi.fn<MarketData["getPrices"]>(
+    (_itemIds, marketIds, _qualities, options = {}) =>
+      new Promise<PricesResult>((resolve) => {
+        calls.push({
+          options,
+          finish: (result) => {
+            void broadswordPrices(marketIds).then((prices) => {
+              resolve({ ...prices, ...result });
+            });
+          },
+        });
+      }),
+  );
+  return { calls, getPrices };
+}
+
+describe("BestCrafts price status", () => {
+  it("counts the batches, counts down a rate-limit wait, and cancels", async () => {
+    const { calls, getPrices } = heldPrices();
+    renderBestCrafts(getPrices);
+    await waitFor(() => {
+      expect(calls).toHaveLength(2);
+    });
+    const status = screen.getByRole("status");
+
+    act(() => {
+      calls[0]?.options.onEvent?.({ type: "progress", done: 1, total: 3 });
+      calls[1]?.options.onEvent?.({ type: "progress", done: 2, total: 4 });
+    });
+    expect(status).toHaveTextContent("Fetching prices: 3 / 7 batches");
+
+    act(() => {
+      calls[1]?.options.onEvent?.({ type: "waiting", seconds: 18 });
+    });
+    expect(status).toHaveTextContent("Waiting for API limit, resuming in 18 s");
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(calls[0]?.options.signal?.aborted).toBe(true);
+    for (const { finish } of calls) {
+      finish({});
+    }
+    expect(
+      await screen.findByRole("button", { name: "Refresh prices" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("says when the oldest price was fetched, and fetches every price again on Refresh", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(3 * 60 * 60_000);
+    const getPrices = vi.fn<MarketData["getPrices"]>(
+      async (_itemIds, marketIds) => ({
+        ...(await broadswordPrices(marketIds)),
+        fetchedAt: marketIds[0] === "Martlock" ? 60 * 60_000 : 2 * 60 * 60_000,
+      }),
+    );
+    renderBestCrafts(getPrices);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Prices fetched 2 h ago",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
+
+    await waitFor(() => {
+      expect(getPrices).toHaveBeenCalledTimes(4);
+    });
+    expect(getPrices).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.anything(),
+      [1],
+      expect.objectContaining({ force: true }),
+    );
+    vi.restoreAllMocks();
+  });
+
+  it("keeps the older prices when every batch fails offline, and says so until dismissed", async () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    const { calls, getPrices } = heldPrices();
+    renderBestCrafts(getPrices);
+    await waitFor(() => {
+      expect(calls).toHaveLength(2);
+    });
+
+    act(() => {
+      for (const { options, finish } of calls) {
+        options.onEvent?.({ type: "progress", done: 1, total: 1 });
+        finish({
+          fetchedAt: Date.now() - 5 * 60_000,
+          failures: [{ itemIds: [], error: new Error("Failed to fetch") }],
+        });
+      }
+    });
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "You’re offline. Showing prices from 5 min ago.",
+    );
+    expect(await missingPrices(recipes.length - 1)).toBeInTheDocument();
+
+    fireEvent.click(within(alert).getByRole("button", { name: "Dismiss" }));
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    vi.restoreAllMocks();
+  });
+
+  it("says when this browser can't keep prices", async () => {
+    render(
+      <PricedBestCrafts
+        marketData={fakeMarketData()}
+        route={route}
+        settings={DEFAULT_SETTINGS}
+        pricesPersistent={false}
+      />,
+    );
+
+    expect(
+      await screen.findByText(
+        "This browser can’t save prices, so they’re only kept until the page closes.",
+      ),
+    ).toBeInTheDocument();
+  });
+});
 
 describe("BestCrafts with filters", () => {
   it("asks only for the items that pass the filters", async () => {
