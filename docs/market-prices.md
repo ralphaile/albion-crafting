@@ -47,7 +47,7 @@ const { prices, failures, fetchedAt } = await marketData.getPrices(
   - **Missing:** when AODP has no price, it's `{ status: "missing" }`, with no value to use by mistake.
   - **`observedAt`** is when AODP saw the price, in milliseconds since 1970, like `Date.now()`.
   - **`ageMinutes` and `status`** are worked out on every call, reused prices included. A price is `stale` once it's older than `staleAfterMinutes`, 12 hours by default, and `fresh` before that.
-- **Reuse:** an item's prices are reused when every market and quality asked for was fetched less than 15 minutes ago, even after a reload. The other items are fetched. `force: true` fetches everything, for **Refresh prices**.
+- **Reuse:** an item's prices are reused when every market and quality asked for was fetched less than 15 minutes ago, even after a reload. The other items are fetched. `force: true` fetches everything, for **Refresh prices**. `refetch` lists items to fetch even when they're recent, for **Retry failed** after a refresh.
 - **`failures`:** each batch of items that failed for good, with its `itemIds` and `error`. The error message has the URL. Those items keep their older saved prices, however old, and the other batches' prices aren't lost.
 - **`fetchedAt`** is when the oldest of the prices was fetched, for **Prices fetched … ago**, or `undefined` when there are none.
 - **`signal`**, an `AbortSignal`, cancels the fetch. Queued requests are dropped without using up the request limit, nothing is retried, and the cancelled batches come back in `failures`. Each batch is saved as it arrives, so what came before the cancel is kept.

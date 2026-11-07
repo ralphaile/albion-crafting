@@ -103,6 +103,8 @@ const UPDATE_EVERY_MS = 1000;
 
 const NO_PRICES: CraftPrices = { materials: [], products: [] };
 
+const NO_ITEMS: readonly string[] = [];
+
 function oldest(...times: (number | undefined)[]): number | undefined {
   const known = times.filter((time) => time !== undefined);
   return known.length === 0 ? undefined : Math.min(...known);
@@ -232,10 +234,11 @@ export function useBestCrafts(
   const { place, buyMarketId, sellMarketId } = route;
   const { server, staleAfterHours, manualStaleAfterDays, preferManualPrices } =
     settings;
-  const [{ attempt, force }, setRequest] = useState({
-    attempt: 0,
-    force: false,
-  });
+  const [{ attempt, force, refetch }, setRequest] = useState<{
+    attempt: number;
+    force: boolean;
+    refetch: readonly string[];
+  }>({ attempt: 0, force: false, refetch: NO_ITEMS });
   const [answer, setAnswer] = useState<Answer>();
   const [progress, setProgress] = useState<Progress>();
   const cancelRef = useRef<() => void>(undefined);
@@ -334,6 +337,7 @@ export function useBestCrafts(
         region: server,
         staleAfterMinutes: staleAfterHours * 60,
         force,
+        refetch,
         signal: controller.signal,
         onEvent: (event) => {
           // A wait shows at once, so its countdown starts on time.
@@ -372,10 +376,13 @@ export function useBestCrafts(
                 },
           true,
         );
-        // A refresh forces only its own fetch, not the next filter or route's.
-        if (force) {
+        // A refresh or retry forces only its own fetch, not the next filter
+        // or route's.
+        if (force || refetch.length > 0) {
           setRequest((last) =>
-            last.attempt === attempt ? { attempt, force: false } : last,
+            last.attempt === attempt
+              ? { attempt, force: false, refetch: NO_ITEMS }
+              : last,
           );
         }
       }
@@ -395,6 +402,7 @@ export function useBestCrafts(
     staleAfterHours,
     attempt,
     force,
+    refetch,
   ]);
 
   // When AODP gives nothing at all, the manual prices still price what they
@@ -455,6 +463,10 @@ export function useBestCrafts(
     [evaluated, server, buyMarketId, sellMarketId],
   );
 
+  const failedItems =
+    current?.fetched.status === "ready"
+      ? current.fetched.failures.flatMap(({ itemIds }) => itemIds)
+      : NO_ITEMS;
   const actions: PriceActions = {
     progress: !needsFetch
       ? undefined
@@ -466,10 +478,20 @@ export function useBestCrafts(
           }
         : { done: 0, total: 0, waitingUntil: undefined },
     refresh: () => {
-      setRequest(({ attempt: last }) => ({ attempt: last + 1, force: true }));
+      setRequest(({ attempt: last }) => ({
+        attempt: last + 1,
+        force: true,
+        refetch: NO_ITEMS,
+      }));
     },
+    // The failed items may still have recent prices from before a refresh, so
+    // they're named to be fetched again.
     retry: () => {
-      setRequest(({ attempt: last }) => ({ attempt: last + 1, force: false }));
+      setRequest(({ attempt: last }) => ({
+        attempt: last + 1,
+        force: false,
+        refetch: failedItems,
+      }));
     },
     cancel: () => {
       cancelRef.current?.();

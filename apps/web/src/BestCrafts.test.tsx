@@ -303,7 +303,10 @@ describe("BestCrafts", () => {
       expect.anything(),
       expect.anything(),
       [1],
-      expect.objectContaining({ force: false }),
+      expect.objectContaining({
+        force: false,
+        refetch: getPrices.mock.calls[0]?.[0],
+      }),
     );
   });
 

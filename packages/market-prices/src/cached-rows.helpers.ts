@@ -49,6 +49,7 @@ export function cachedRows<T extends { item_id: string; quality: number }>({
     qualities: readonly number[],
     {
       force = false,
+      refetch = [],
       onPartial,
       ...options
     }: CachedFetchOptions & {
@@ -75,8 +76,11 @@ export function cachedRows<T extends { item_id: string; quality: number }>({
       }
     }
     // An item is reused only if every market and quality asked for is recent.
+    const refetching = new Set(refetch);
     const reusable = (itemId: string) =>
-      !force && recentRows.get(itemId) === markets.length * levels.length;
+      !force &&
+      !refetching.has(itemId) &&
+      recentRows.get(itemId) === markets.length * levels.length;
 
     const toFetch = items.filter((itemId) => !reusable(itemId));
     const fetchedItems = new Set<string>();
@@ -121,10 +125,10 @@ export function cachedRows<T extends { item_id: string; quality: number }>({
       onPartial?.(used);
     };
 
+    onPartial?.(used);
     if (toFetch.length === 0) {
       return { ...used(), failures: [] };
     }
-    onPartial?.(used);
     const { failures } = await fetch(toFetch, markets, levels, {
       ...options,
       onBatch,

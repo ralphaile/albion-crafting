@@ -356,6 +356,44 @@ describe.each([
       expect(summary(result)).toEqual(["T4_BAG Caerleon q1: 1000"]);
     });
 
+    it("fetches the items it's told to refetch even when they're recent, as Retry failed does", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      await marketData.getPrices(["T4_BAG", "T5_BAG"], ["Caerleon"], [1]);
+
+      minutesLater(1);
+      const result = await marketData.getPrices(
+        ["T4_BAG", "T5_BAG"],
+        ["Caerleon"],
+        [1],
+        { refetch: ["T5_BAG"] },
+      );
+
+      expect(requests).toEqual([
+        "west prices T4_BAG,T5_BAG",
+        "west prices T5_BAG",
+      ]);
+      expect(summary(result)).toEqual([
+        "T4_BAG Caerleon q1: 1000",
+        "T5_BAG Caerleon q1: 2000",
+      ]);
+    });
+
+    it("reports the prices it has even when it needs to fetch none", async () => {
+      fakeAodp();
+      const marketData = await openMarketData();
+      const first = await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1]);
+      const partials: PartialPrices[] = [];
+
+      await marketData.getPrices(["T4_BAG"], ["Caerleon"], [1], {
+        onPartial: (read) => partials.push(read()),
+      });
+
+      expect(partials).toEqual([
+        { prices: first.prices, fetchedAt: first.fetchedAt },
+      ]);
+    });
+
     it("fetches everything again when forced to, as Refresh prices does", async () => {
       const { requests } = fakeAodp();
       const marketData = await openMarketData();
