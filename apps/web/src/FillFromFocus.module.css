@@ -1,0 +1,20 @@
+.fill {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.fill label {
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+.fill input {
+  width: 11ch;
+}
+
+.status {
+  min-width: 14ch;
+  color: var(--text-muted);
+}

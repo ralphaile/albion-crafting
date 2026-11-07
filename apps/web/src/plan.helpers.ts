@@ -14,7 +14,7 @@ import type { PlaceChoice, Route, RouteChoice } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 
 // The recipe an entry uses: its usual one, or one of its alternatives.
-function chosenRecipe(
+export function chosenRecipe(
   recipe: GameRecipe,
   alternative: number,
 ): RecipeAlternative {
@@ -117,6 +117,17 @@ function samePlace(a: PlaceChoice, b: PlaceChoice): boolean {
   );
 }
 
+type EntryKind = Omit<NewEntry, "quantity">;
+
+function sameEntry(a: EntryKind, b: EntryKind): boolean {
+  return (
+    a.itemId === b.itemId &&
+    a.alternative === b.alternative &&
+    a.focus === b.focus &&
+    a.dailyBonus === b.dailyBonus
+  );
+}
+
 function sameRoute(a: RouteChoice, b: RouteChoice): boolean {
   return (
     samePlace(a.place, b.place) &&
@@ -125,8 +136,22 @@ function sameRoute(a: RouteChoice, b: RouteChoice): boolean {
   );
 }
 
+// How many the row `addToPlan()` would add `entry` to already has.
+export function plannedQuantity(
+  plan: CraftingPlan,
+  route: RouteChoice,
+  entry: EntryKind,
+): number {
+  return (
+    plan.locations
+      .find((location) => sameRoute(location.route, route))
+      ?.entries.find((other) => sameEntry(other, entry))?.quantity ?? 0
+  );
+}
+
 // Adds to the location with the same route, made if there's none yet. The same
-// item and recipe already there gets the quantity added.
+// item and recipe there, with the same focus and daily bonus, gets the
+// quantity added; otherwise it's a row of its own, so it's priced as added.
 export function addToPlan(
   plan: CraftingPlan,
   route: RouteChoice,
@@ -140,10 +165,7 @@ export function addToPlan(
     route,
     entries: [],
   };
-  const same = location.entries.find(
-    ({ itemId, alternative }) =>
-      itemId === entry.itemId && alternative === entry.alternative,
-  );
+  const same = location.entries.find((other) => sameEntry(other, entry));
   const entries =
     same === undefined
       ? [...location.entries, { id: crypto.randomUUID(), ...entry }]

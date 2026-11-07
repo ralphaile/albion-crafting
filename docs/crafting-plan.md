@@ -21,7 +21,16 @@ Each row of the best-crafts table has a **+** button, and the craft panel an **A
 - **Where:** the location with the route chosen above the table, made if the plan doesn't have it yet.
 - **Which recipe:** the one the row ranks, or the one shown in the panel.
 - **Focus and daily bonus:** as in Settings, the daily bonus being the one for the item's own category.
-- **Already there:** the same item and recipe at that location gets the quantity added, up to 100,000.
+- **Already there:** the same item and recipe at that location, with the same focus and daily bonus, gets the quantity added, up to 100,000. With other focus or daily bonus it's a row of its own.
+
+## Filling it from a focus budget
+
+**Fill from focus** on the plan page fills the plan with the best crafts for the focus you have. It asks for the focus (10,000 to start), the most of each item (100 to start) and, optionally, the silver to spend.
+
+- **Which crafts:** the ones the best-crafts table ranks for its route and filters, with every price. It needs **Focus** on in Settings, as only then do crafts have a focus cost.
+- **Greedy by silver per focus:** `fillFocusBudget()` in `packages/core/src/focus-budget.helpers.ts` takes the craft with the most silver per focus first, as many crafts as the focus, the silver and the item's cap allow, then the next. Crafts that lose silver are left out.
+- **Cap per item:** the most of each item, or what sells in a day in the sell market when that's known and lower, in whole crafts.
+- **Where:** like **Add to plan**, at the location with the table's route, with focus on and the item's daily bonus from Settings. Filling again adds to the quantities.
 
 ## The model
 
