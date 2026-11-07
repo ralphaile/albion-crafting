@@ -110,6 +110,10 @@ describe("SettingsPanel", () => {
     );
     fireEvent.change(select("Server"), { target: { value: "europe" } });
     fireEvent.change(number("Low volume under"), { target: { value: "10" } });
+    fireEvent.change(number("Outlier beyond"), { target: { value: "3" } });
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Use 7-day average for outliers" }),
+    );
 
     expect(lastChange()).toEqual({
       ...DEFAULT_SETTINGS,
@@ -123,6 +127,8 @@ describe("SettingsPanel", () => {
       preferManualPrices: true,
       server: "europe",
       lowVolumePerDay: 10,
+      outlierRatio: 3,
+      useAverageForOutliers: true,
     });
   });
 

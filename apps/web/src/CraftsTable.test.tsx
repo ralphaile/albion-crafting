@@ -239,6 +239,33 @@ describe("CraftsTable", () => {
     );
   });
 
+  it("shows an outlier among the materials before the oldest of their prices", () => {
+    const outlier: UsedPrice = {
+      ...seen(100, 20),
+      outlier: { seen: 100, average: 30, usingAverage: false },
+    };
+    renderTable(
+      evaluateCrafts(
+        [recipe("T4_MAIN_SWORD")],
+        DEFAULT_ROUTE.place,
+        DEFAULT_SETTINGS,
+        {
+          ...lymhurstPrices,
+          materials: [
+            sellsAt("T4_METALBAR", outlier),
+            ...lymhurstPrices.materials.slice(1),
+          ],
+        },
+      ),
+    );
+
+    expect(
+      rowOf("Adept's Broadsword 4.0").getByTitle(
+        "Outlier 100, seen 20 min ago. 7-day average 30",
+      ),
+    ).toHaveTextContent("materials 20 min, Outlier");
+  });
+
   it("shows a missing price as missing", () => {
     renderTable();
 
