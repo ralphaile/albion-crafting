@@ -2,7 +2,7 @@
 
 The **Specializations** button at the top right, just its icon on phones, opens a panel over the right of the page. It closes on Escape, a click outside it, or ×. In the code, the profile is `SpecializationProfile` in `apps/web/src/specializations.types.ts`, and the panel is `apps/web/src/SpecializationsPanel.tsx`.
 
-A crafting tree is one destiny-board node, such as Swords or Plate Armor: a mastery, then one specialization per item line. The trees are grouped by the building that crafts them: Warrior's Forge, Hunter's Lodge and Mage's Tower. Offhands sit with that building, so shields are under the forge, torches under the lodge and tomes under the tower. Royal items cost no focus, so they have no specialization here.
+A crafting tree is one destiny-board node, such as Swords or Plate Armor: a mastery, then one specialization per item line. The trees are grouped by the building that crafts them: Warrior's Forge, Hunter's Lodge, Mage's Tower and Toolmaker, which makes bags and capes. Bags and satchels of insight share one tree. Offhands sit with that building, so shields are under the forge, torches under the lodge and tomes under the tower. Royal items cost no focus, so they have no specialization here.
 
 Each mastery and specialization is a whole number from 0 to 100. **Export** downloads the profile as `specializations.json`. **Import** replaces it from a file like that. A file that isn't JSON, or that has no level this app knows, is left unused, so it can't wipe what you already entered.
 
