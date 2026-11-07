@@ -1,7 +1,7 @@
 import type { Material, RecipeAlternative } from "@aoc/core";
 
 import type { Dumps } from "./dumps.schema.ts";
-import { SHOP_CATEGORIES } from "./recipes.constants.ts";
+import { ONLY_SUBCATEGORIES, SHOP_CATEGORIES } from "./recipes.constants.ts";
 import type { GameRecipe } from "../src/recipe.types.ts";
 
 type Items = Dumps["items.json"]["items"];
@@ -61,6 +61,10 @@ function gearId(entry: unknown): string[] {
 function isIncluded(item: GearItem): boolean {
   return (
     SHOP_CATEGORIES.has(item["@shopcategory"]) &&
+    (ONLY_SUBCATEGORIES.get(item["@shopcategory"])?.has(
+      item["@shopsubcategory1"],
+    ) ??
+      true) &&
     item["@tier"] >= MIN_TIER &&
     item["@tier"] <= MAX_TIER &&
     item["@showinmarketplace"] !== false &&
