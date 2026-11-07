@@ -1,5 +1,7 @@
 import { parseFilters } from "./filters.schema";
 import type { Filters } from "./filters.types";
+import { parsePlan } from "./plan.schema";
+import type { CraftingPlan } from "./plan.types";
 import { parseRoute } from "./route.schema";
 import type { RouteChoice } from "./route.types";
 import type { SavedSetting } from "./saved-settings.types";
@@ -30,4 +32,10 @@ export const SPECIALIZATIONS_SETTING: SavedSetting<SpecializationProfile> = {
   id: "specializations",
   version: 1,
   parse: parseSpecializations,
+};
+
+export const PLAN_SETTING: SavedSetting<CraftingPlan> = {
+  id: "plan",
+  version: 1,
+  parse: parsePlan,
 };
