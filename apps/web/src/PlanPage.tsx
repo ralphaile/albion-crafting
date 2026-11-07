@@ -457,7 +457,8 @@ export function PlanPage({
           updating={state.updating}
         />
       )}
-      {state.status === "error" && (
+      {(state.status === "error" ||
+        (state.status === "ready" && state.failed)) && (
         <p role="alert">
           Couldn’t fetch prices from the Albion Online Data Project.
         </p>
