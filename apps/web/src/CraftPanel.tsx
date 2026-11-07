@@ -181,13 +181,17 @@ function recipeResult(alternative: CraftAlternative) {
 // What each part adds to the production bonus, which sets the return rate.
 function bonusParts(
   bonus: ProductionBonus | HideoutProductionBonus,
+  refining: boolean,
 ): [string, number][] {
   const common: [string, number][] = [
     ["Daily bonus", bonus.daily],
     ["Focus", bonus.focus],
   ];
-  return "base" in bonus
-    ? [["Base", bonus.base], ["Specialty", bonus.specialty], ...common]
+  if ("base" in bonus) {
+    return [["Base", bonus.base], ["Specialty", bonus.specialty], ...common];
+  }
+  return refining
+    ? [["Refining", bonus.refining], ...common]
     : [
         ["Map quality", bonus.mapQuality],
         ["Power level", bonus.powerGeneral],
@@ -336,14 +340,16 @@ export function CraftPanel({
         </Section>
         <Section title="Return rate" help="production-bonus">
           <dl className={styles.figures}>
-            {bonusParts(shown.bonus).map(([label, value]) => (
-              <Figure
-                key={label}
-                label={label}
-                value={value}
-                format={formatPercent}
-              />
-            ))}
+            {bonusParts(shown.bonus, craft?.recipe.refining ?? false).map(
+              ([label, value]) => (
+                <Figure
+                  key={label}
+                  label={label}
+                  value={value}
+                  format={formatPercent}
+                />
+              ),
+            )}
             <Figure
               label="Production bonus"
               value={shown.bonus.total}

@@ -50,4 +50,14 @@ export const DAILY_BONUS_GROUPS: readonly OptionGroup[] = [
       { id: "cape", label: "Cape" },
     ],
   },
+  {
+    label: "Refining",
+    options: [
+      { id: "ore", label: "Ore" },
+      { id: "wood", label: "Wood" },
+      { id: "fiber", label: "Fiber" },
+      { id: "hide", label: "Hide" },
+      { id: "rock", label: "Stone" },
+    ],
+  },
 ];
