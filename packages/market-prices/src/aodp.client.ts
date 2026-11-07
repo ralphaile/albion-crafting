@@ -11,7 +11,7 @@ import type {
   AodpClient,
   AodpEvent,
   BatchFailure,
-  Region,
+  BatchOptions,
 } from "./aodp.types.js";
 import { createLimiter } from "./limiter.helpers.js";
 import type { Limiter } from "./limiter.types.js";
@@ -55,9 +55,12 @@ export function createAodpClient(): AodpClient {
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    region: Region,
-    onEvent: (event: AodpEvent) => void,
-    signal: AbortSignal | undefined,
+    {
+      region = DEFAULT_REGION,
+      onEvent = () => undefined,
+      onBatch,
+      signal,
+    }: BatchOptions<T>,
   ): Promise<{ rows: T[]; failures: BatchFailure[] }> {
     if (
       itemIds.length === 0 ||
@@ -92,51 +95,38 @@ export function createAodpClient(): AodpClient {
         if (result instanceof Error) {
           failures.push({ itemIds: batch.itemIds, error: result });
           onEvent({ type: "error", itemIds: batch.itemIds, error: result });
+          onEvent({ type: "progress", done, total: batches.length });
+          return [];
         }
+        const rows = result.filter((row) =>
+          asked.has(endpoint.marketIdOf(row).toLowerCase()),
+        );
+        onBatch?.(batch.itemIds, rows);
         onEvent({ type: "progress", done, total: batches.length });
-        return result instanceof Error ? [] : result;
+        return rows;
       }),
     );
-    return {
-      rows: results
-        .flat()
-        .filter((row) => asked.has(endpoint.marketIdOf(row).toLowerCase())),
-      failures,
-    };
+    return { rows: results.flat(), failures };
   }
 
   return {
-    async getPrices(
-      itemIds,
-      marketIds,
-      qualities,
-      { region = DEFAULT_REGION, onEvent = () => undefined, signal } = {},
-    ) {
+    async getPrices(itemIds, marketIds, qualities, options = {}) {
       const { rows, failures } = await getRows(
         pricesEndpoint,
         itemIds,
         marketIds,
         qualities,
-        region,
-        onEvent,
-        signal,
+        options,
       );
       return { prices: rows, failures };
     },
-    async getHistory(
-      itemIds,
-      marketIds,
-      qualities,
-      { region = DEFAULT_REGION, onEvent = () => undefined, signal } = {},
-    ) {
+    async getHistory(itemIds, marketIds, qualities, options = {}) {
       const { rows, failures } = await getRows(
         historyEndpoint,
         itemIds,
         marketIds,
         qualities,
-        region,
-        onEvent,
-        signal,
+        options,
       );
       return { history: rows, failures };
     },

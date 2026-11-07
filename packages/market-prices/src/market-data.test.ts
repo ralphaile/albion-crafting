@@ -3,7 +3,11 @@ import { Dexie } from "dexie";
 import { delay, http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type PricesResult, openMarketData } from "./index.js";
+import {
+  type PartialPrices,
+  type PricesResult,
+  openMarketData,
+} from "./index.js";
 import { server } from "../test/setup.js";
 
 const PRICES = "https://*.albion-online-data.com/api/v2/stats/prices/*";
@@ -112,11 +116,16 @@ function historySeries(
   };
 }
 
+// So long that each one needs its own request
+function longId(name: string): string {
+  return `${name}_${"X".repeat(3000)}`;
+}
+
 function summary({ prices }: PricesResult): string[] {
   return prices
     .map(
       ({ itemId, marketId, quality, sellMin }) =>
-        `${itemId} ${marketId} q${String(quality)}: ${sellMin.status === "missing" ? "missing" : String(sellMin.value)}`,
+        `${itemId.replace(/_X+$/, "")} ${marketId} q${String(quality)}: ${sellMin.status === "missing" ? "missing" : String(sellMin.value)}`,
     )
     .sort();
 }
@@ -386,6 +395,80 @@ describe.each([
         },
       ]);
       expect(result.fetchedAt).toBe(START);
+    });
+
+    it("reports the older prices at once, then each batch as it arrives", async () => {
+      fakeAodp();
+      const marketData = await openMarketData();
+      const items = [longId("T4_FIRST"), longId("T4_SECOND")];
+      const before = await marketData.getPrices(items, ["Caerleon"], [1]);
+      const partials: PartialPrices[] = [];
+
+      minutesLater(1);
+      const after = await marketData.getPrices(items, ["Caerleon"], [1], {
+        force: true,
+        onPartial: (partial) => partials.push(partial),
+      });
+
+      const [atOnce, oneBatch, bothBatches] = partials.map((partial) =>
+        summary({ ...partial, failures: [] }),
+      );
+      expect(partials).toHaveLength(3);
+      expect(atOnce).toEqual(summary(before));
+      expect(oneBatch).not.toEqual(summary(before));
+      expect(oneBatch).not.toEqual(summary(after));
+      expect(bothBatches).toEqual(summary(after));
+      expect(partials.map(({ fetchedAt }) => fetchedAt)).toEqual([
+        START,
+        START,
+        START + MINUTE_MS,
+      ]);
+    });
+
+    it("keeps the batches that arrived before it was cancelled", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+      const [first, second] = [longId("T4_FIRST"), longId("T4_SECOND")];
+      server.use(
+        http.get(
+          PRICES,
+          async ({ request }) => {
+            if (request.url.includes(second)) {
+              await delay("infinite");
+            }
+          },
+          { once: true },
+        ),
+      );
+      const controller = new AbortController();
+
+      const result = await marketData.getPrices(
+        [first, second],
+        ["Caerleon"],
+        [1],
+        {
+          signal: controller.signal,
+          onPartial: ({ prices }) => {
+            if (prices.length > 0) {
+              controller.abort();
+            }
+          },
+        },
+      );
+      requests.length = 0;
+      const again = await marketData.getPrices(
+        [first, second],
+        ["Caerleon"],
+        [1],
+      );
+
+      expect(summary(result)).toEqual(["T4_FIRST Caerleon q1: 1000"]);
+      expect(result.failures).toMatchObject([{ itemIds: [second] }]);
+      expect(requests).toEqual([`west prices ${second}`]);
+      expect(summary(again)).toEqual([
+        "T4_FIRST Caerleon q1: 1000",
+        "T4_SECOND Caerleon q1: 1000",
+      ]);
     });
 
     it("has no fetch time when it has no prices", async () => {
