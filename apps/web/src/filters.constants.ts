@@ -2,6 +2,7 @@ import { armorPiece } from "./armor.helpers";
 import type { Filters, Option } from "./filters.types";
 
 export const NO_FILTERS: Filters = {
+  mode: "crafting",
   tiers: [],
   enchants: [],
   categories: [],
@@ -15,6 +16,7 @@ export const NO_FILTERS: Filters = {
 };
 
 export const TIERS: readonly number[] = [4, 5, 6, 7, 8];
+export const REFINING_TIERS: readonly number[] = [2, 3, 4, 5, 6, 7, 8];
 export const ENCHANTS: readonly number[] = [0, 1, 2, 3, 4];
 
 export const WEAPON_TYPES: readonly Option[] = [
@@ -69,6 +71,19 @@ export const CATEGORIES: readonly Option[] = [
   ...ARMOR_PIECES,
   ...OFFHAND_TYPES,
   ...ACCESSORY_TYPES,
+];
+
+export const REFINED_TYPES: readonly Option[] = [
+  { id: "metalbars", label: "Metal bar" },
+  { id: "planks", label: "Plank" },
+  { id: "cloth", label: "Cloth" },
+  { id: "leather", label: "Leather" },
+  { id: "stoneblock", label: "Stone block" },
+];
+
+export const ALL_CATEGORIES: readonly Option[] = [
+  ...CATEGORIES,
+  ...REFINED_TYPES,
 ];
 
 export const MAX_SEARCH_LENGTH = 100;

@@ -413,6 +413,35 @@ describe("refining", () => {
     expect(result.focusCost).toBe(94);
   });
 
+  it("earns silver per focus on every item a batch makes, such as 4 stone blocks", () => {
+    const blocks: Recipe = {
+      itemId: "T4_STONEBLOCK",
+      refining: true,
+      craftingCategory: "rock",
+      focus: 48,
+      silver: 0,
+      amountCrafted: 4,
+      materials: [{ id: "T4_ROCK_LEVEL2@2", count: 1, returnable: true }],
+      alternatives: [],
+      itemValue: 16,
+    };
+    const blockPrices: EvaluatePrices = {
+      materials: new Map([["T4_ROCK_LEVEL2@2", instantOnly(400)]]),
+      products: new Map([["T4_STONEBLOCK", instantOnly(200)]]),
+    };
+    const withFocus = complete(
+      evaluate(blocks, thetford, { ...settings, focus: true }, blockPrices),
+    );
+    const withoutFocus = complete(
+      evaluate(blocks, thetford, settings, blockPrices),
+    );
+
+    expect(withFocus.silverPerFocus).toBeCloseTo(
+      ((withFocus.profit - withoutFocus.profit) * 4) / 48,
+      6,
+    );
+  });
+
   it("gives the same bar crafting's bonus, without the specialty, when it is marked as crafting", () => {
     const asCrafting = { ...t5MetalBar, refining: false };
     const result = complete(

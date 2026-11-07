@@ -10,6 +10,7 @@ const LIST_PARAMS = {
 } as const;
 
 const PARAMS = [
+  "mode",
   ...Object.values(LIST_PARAMS),
   "artifacts",
   "profit",
@@ -36,6 +37,7 @@ export function filtersFromSearch(search: string): Filters | undefined {
     return undefined;
   }
   return parseFilters({
+    mode: params.get("mode") ?? NO_FILTERS.mode,
     tiers: numbers(params, LIST_PARAMS.tiers),
     enchants: numbers(params, LIST_PARAMS.enchants),
     categories: list(params, LIST_PARAMS.categories),
@@ -54,6 +56,9 @@ export function searchWithFilters(search: string, filters: Filters): string {
   const params = new URLSearchParams(search);
   for (const name of PARAMS) {
     params.delete(name);
+  }
+  if (filters.mode !== NO_FILTERS.mode) {
+    params.set("mode", filters.mode);
   }
   for (const [key, name] of Object.entries(LIST_PARAMS)) {
     const values = filters[key as keyof typeof LIST_PARAMS];

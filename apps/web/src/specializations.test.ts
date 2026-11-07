@@ -128,6 +128,7 @@ describe("fceParts", () => {
 describe("fceFor", () => {
   const fce = fceFor({
     sword: { mastery: 100, specializations: { MAIN_SWORD: 100 } },
+    metalbars: { mastery: 100, specializations: { T5_METALBAR: 100 } },
   });
 
   it("gives an item's FCE at every tier and enchantment", () => {
@@ -135,7 +136,12 @@ describe("fceFor", () => {
     expect(fce("T8_MAIN_SWORD@4")).toBe(28_000);
   });
 
+  it("gives a refined item its own tier's FCE, at every enchantment", () => {
+    expect(fce("T5_METALBAR_LEVEL2@2")).toBe(28_000);
+    expect(fce("T6_METALBAR")).toBe(3_000 + 100 * 30);
+  });
+
   it("is 0 for an item it has no recipe for", () => {
-    expect(fce("T4_METALBAR")).toBe(0);
+    expect(fce("T4_ORE")).toBe(0);
   });
 });

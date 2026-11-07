@@ -21,11 +21,19 @@ import {
   MAX_SEARCH_LENGTH,
   NO_FILTERS,
   OFFHAND_TYPES,
+  REFINED_TYPES,
+  REFINING_TIERS,
   TIERS,
   WEAPON_TYPES,
 } from "./filters.constants";
 import { activeFilters, categoryLabel } from "./filters.helpers";
-import type { ArtifactFilter, Filters, Option } from "./filters.types";
+import { inMode } from "./filters.schema";
+import type {
+  ArtifactFilter,
+  CraftMode,
+  Filters,
+  Option,
+} from "./filters.types";
 
 export type UpdateFilters = (update: (filters: Filters) => Filters) => void;
 
@@ -40,7 +48,12 @@ const ARTIFACT_CHOICES: readonly { id: ArtifactFilter; label: string }[] = [
 
 type SetCategories = (ids: readonly string[], on: boolean) => void;
 
-const CATEGORY_ORDER = CATEGORIES.map(({ id }) => id);
+const CATEGORY_ORDER = [...CATEGORIES, ...REFINED_TYPES].map(({ id }) => id);
+
+const MODES: readonly { id: CraftMode; label: string }[] = [
+  { id: "crafting", label: "Crafting" },
+  { id: "refining", label: "Refining" },
+];
 
 function toggled<T>(values: readonly T[], value: T, order: readonly T[]) {
   return values.includes(value)
@@ -185,9 +198,11 @@ function categorySummary(chosen: readonly string[]) {
 
 function CategoryPicker({
   chosen,
+  refining,
   onSet,
 }: {
   chosen: readonly string[];
+  refining: boolean;
   onSet: SetCategories;
 }) {
   const labelId = useId();
@@ -266,30 +281,42 @@ function CategoryPicker({
           role="group"
           aria-labelledby={labelId}
         >
-          <CategoryGroup
-            label="Weapon"
-            options={WEAPON_TYPES}
-            chosen={chosen}
-            onSet={onSet}
-            className={styles.weapons}
-          />
-          <div className={styles.gear}>
-            <ArmorGrid chosen={chosen} onSet={onSet} />
+          {refining ? (
             <CategoryGroup
-              label="Offhand"
-              options={OFFHAND_TYPES}
+              label="Refined"
+              options={REFINED_TYPES}
               chosen={chosen}
               onSet={onSet}
               className={styles.inline}
             />
-            <CategoryGroup
-              label="Accessory"
-              options={ACCESSORY_TYPES}
-              chosen={chosen}
-              onSet={onSet}
-              className={styles.inline}
-            />
-          </div>
+          ) : (
+            <>
+              <CategoryGroup
+                label="Weapon"
+                options={WEAPON_TYPES}
+                chosen={chosen}
+                onSet={onSet}
+                className={styles.weapons}
+              />
+              <div className={styles.gear}>
+                <ArmorGrid chosen={chosen} onSet={onSet} />
+                <CategoryGroup
+                  label="Offhand"
+                  options={OFFHAND_TYPES}
+                  chosen={chosen}
+                  onSet={onSet}
+                  className={styles.inline}
+                />
+                <CategoryGroup
+                  label="Accessory"
+                  options={ACCESSORY_TYPES}
+                  chosen={chosen}
+                  onSet={onSet}
+                  className={styles.inline}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -456,7 +483,13 @@ export function CraftFilters({
   persistent: boolean;
 }) {
   const artifactsName = useId();
+  const modeName = useId();
+  const refining = filters.mode === "refining";
+  const tiers = refining ? REFINING_TIERS : TIERS;
   const chips = activeFilters(filters);
+  const setMode = (mode: CraftMode) => {
+    onChange((current) => inMode({ ...current, mode }));
+  };
   const setCategories: SetCategories = (ids, on) => {
     onChange((current) => ({
       ...current,
@@ -481,17 +514,42 @@ export function CraftFilters({
   return (
     <section className={styles.filters} aria-label="Filters">
       <div className={styles.row}>
+        <div className={styles.field}>
+          <span id={modeName} className={styles.legend}>
+            Mode
+          </span>
+          <div
+            className={styles.toggles}
+            role="radiogroup"
+            aria-labelledby={modeName}
+          >
+            {MODES.map((choice) => (
+              <label key={choice.id} className={styles.radio}>
+                <input
+                  type="radio"
+                  name={modeName}
+                  value={choice.id}
+                  checked={filters.mode === choice.id}
+                  onChange={() => {
+                    setMode(choice.id);
+                  }}
+                />
+                <span>{choice.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
         <Toggles
           label="Tier"
           values={filters.tiers}
-          options={TIERS.map((tier) => ({
+          options={tiers.map((tier) => ({
             value: tier,
             label: `T${String(tier)}`,
           }))}
           onToggle={(tier) => {
             onChange((current) => ({
               ...current,
-              tiers: toggled(current.tiers, tier, TIERS),
+              tiers: toggled(current.tiers, tier, tiers),
             }));
           }}
         />
@@ -524,6 +582,7 @@ export function CraftFilters({
                   type="radio"
                   name={artifactsName}
                   value={choice.id}
+                  disabled={refining}
                   checked={filters.artifacts === choice.id}
                   onChange={() => {
                     set("artifacts")(choice.id);
@@ -534,7 +593,11 @@ export function CraftFilters({
             ))}
           </div>
         </div>
-        <CategoryPicker chosen={filters.categories} onSet={setCategories} />
+        <CategoryPicker
+          chosen={filters.categories}
+          refining={refining}
+          onSet={setCategories}
+        />
       </div>
       <div className={styles.row}>
         <SearchField value={filters.search} onChange={setSearch} />
@@ -601,7 +664,7 @@ export function CraftFilters({
             type="button"
             className={styles.clear}
             onClick={() => {
-              onChange(() => NO_FILTERS);
+              onChange((current) => ({ ...NO_FILTERS, mode: current.mode }));
             }}
           >
             Clear all

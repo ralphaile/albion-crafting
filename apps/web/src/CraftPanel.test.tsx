@@ -291,6 +291,45 @@ describe("CraftPanel", () => {
     expect(detailOf(leather)).toBe("3.32 × 50 = 166");
   });
 
+  it("gives a refine in a hideout the flat refining bonus, and FCE from the tier's specialization", async () => {
+    renderCrafts({
+      filters: {
+        ...NO_FILTERS,
+        mode: "refining",
+        tiers: [5],
+        enchants: [0],
+        categories: ["metalbars"],
+      },
+      materials: [],
+      products: [],
+      route: forestHideout,
+      specializations: {
+        metalbars: {
+          mastery: 100,
+          specializations: { T5_METALBAR: 100, T4_METALBAR: 40 },
+        },
+      },
+    });
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Titanium Steel Bar 5.0",
+      }),
+    );
+    const name = "Titanium Steel Bar 5.0";
+
+    expect(figures("Return rate", name)).toEqual({
+      Refining: "15.0%",
+      "Daily bonus": "0.0%",
+      Focus: "59.0%",
+      "Production bonus": "74.0%",
+      "Return rate": "42.53%",
+    });
+    expect(figures("Focus", name)).toMatchObject({
+      "Mastery 100 × 30": "3,000",
+      FCE: "29,200",
+    });
+  });
+
   // 29,200 FCE makes the 1,286 base focus 1,286 × 0.5 ^ 2.92 = 169.92.
   it("shows how the craft's FCE is worked out from the specializations", async () => {
     renderBroadsword([typedLeather], lymhurst, {

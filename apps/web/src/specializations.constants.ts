@@ -1,4 +1,4 @@
-import { CATEGORIES } from "./filters.constants";
+import { ALL_CATEGORIES } from "./filters.constants";
 import type { OptionGroup } from "./route.types";
 import type { SpecializationProfile } from "./specializations.types";
 
@@ -10,7 +10,7 @@ function trees(label: string, ids: readonly string[]): OptionGroup {
   return {
     label,
     options: ids.flatMap((id) =>
-      CATEGORIES.filter((category) => category.id === id),
+      ALL_CATEGORIES.filter((category) => category.id === id),
     ),
   };
 }
@@ -53,6 +53,7 @@ export const TREE_GROUPS: readonly OptionGroup[] = [
     "booktype",
   ]),
   trees("Toolmaker", ["bags", "capes"]),
+  trees("Refining", ["metalbars", "planks", "cloth", "leather", "stoneblock"]),
 ];
 
 export const FIRST_TREE_ID: string = TREE_GROUPS[0]?.options[0]?.id ?? "";

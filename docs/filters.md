@@ -2,6 +2,12 @@
 
 The filters above the best-crafts table narrow it to what you can and want to craft. Every active filter shows as a chip below them: click a chip to remove that filter, or **Clear all** to remove them all.
 
+## Crafting or refining
+
+**Mode** picks what the table ranks: **Crafting** ranks gear, and **Refining** ranks metal bars, planks, cloth, leather and stone blocks, with each place's [refining bonus](glossary.md#production-bonus). It isn't a filter, so it has no chip and **Clear all** keeps it.
+
+The two modes offer different tiers and categories: refining has T2 and T3, its categories are the 5 refined resources, and it has no artifacts. Switching keeps the tiers both modes have and drops the categories the new mode doesn't have.
+
 ## How they combine
 
 Different filters combine with AND: a craft has to pass every one of them. Inside one filter, the choices add up:
@@ -24,6 +30,7 @@ The filters are in the page's link, so you can bookmark or share it. Only filter
 
 | Parameter   | Filter                                                                                                                                                  | Example                                |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `mode`      | `refining`; crafting is left out                                                                                                                        | `mode=refining`                        |
 | `tier`      | Tiers                                                                                                                                                   | `tier=6,7`                             |
 | `enchant`   | Enchantment levels                                                                                                                                      | `enchant=0,1`                          |
 | `cat`       | Categories, as the game files name them: weapon types such as `sword`, armor pieces such as `plate_helmet`, and `booktype`, `shieldtype` or `torchtype` | `cat=sword,plate_helmet,leather_shoes` |
@@ -37,4 +44,4 @@ The filters are in the page's link, so you can bookmark or share it. Only filter
 
 The browser also saves them in IndexedDB ([ADR-002](adr/002-local-first-storage.md)), and the app opens with them next time. A link with filters wins over the saved ones, but doesn't replace them: the saved filters change only when you change one. Where IndexedDB isn't available, the filters last for the visit, and the panel says so.
 
-A link or a saved value the app doesn't know is ignored, one filter at a time: `tier=4,9` keeps tier 4, and `profit=lots` leaves no minimum profit. A name longer than 100 characters is cut short. The saved filters carry a version number, and a version the app doesn't know is ignored.
+A link or a saved value the app doesn't know is ignored, one filter at a time: `tier=4,9` keeps tier 4, and `profit=lots` leaves no minimum profit. So is one the mode doesn't have: `tier=2` without `mode=refining` keeps no tier. A name longer than 100 characters is cut short. The saved filters carry a version number, and a version the app doesn't know is ignored.

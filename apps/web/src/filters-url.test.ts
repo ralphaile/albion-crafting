@@ -5,6 +5,7 @@ import { MAX_SEARCH_LENGTH, NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 
 const everyFilter: Filters = {
+  mode: "crafting",
   tiers: [6, 7],
   enchants: [0, 1],
   categories: ["bow", "sword", "leather_shoes", "plate_helmet", "shieldtype"],
@@ -40,6 +41,32 @@ describe("filtersFromSearch", () => {
     expect(filtersFromSearch(searchWithFilters("", everyFilter))).toEqual(
       everyFilter,
     );
+  });
+
+  it("reads back refining, with its tiers and categories", () => {
+    const refining: Filters = {
+      ...NO_FILTERS,
+      mode: "refining",
+      tiers: [2, 5],
+      categories: ["metalbars", "stoneblock"],
+    };
+
+    expect(searchWithFilters("", refining)).toBe(
+      "?mode=refining&tier=2,5&cat=metalbars,stoneblock",
+    );
+    expect(filtersFromSearch(searchWithFilters("", refining))).toEqual(
+      refining,
+    );
+  });
+
+  it("drops the tiers, categories and artifacts a mode doesn't have", () => {
+    expect(filtersFromSearch("?tier=2,4&cat=sword,metalbars")).toMatchObject({
+      tiers: [4],
+      categories: ["sword"],
+    });
+    expect(
+      filtersFromSearch("?mode=refining&cat=sword,metalbars&artifacts=only"),
+    ).toMatchObject({ categories: ["metalbars"], artifacts: "include" });
   });
 
   it("is undefined when the link has no filters", () => {

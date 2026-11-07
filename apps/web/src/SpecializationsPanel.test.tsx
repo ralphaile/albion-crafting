@@ -129,6 +129,7 @@ describe("SpecializationsPanel", () => {
       "Hunter's Lodge",
       "Mage's Tower",
       "Toolmaker",
+      "Refining",
     ]);
   });
 

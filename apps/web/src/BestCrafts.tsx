@@ -116,7 +116,10 @@ export function BestCrafts({
               type="button"
               className={styles.button}
               onClick={() => {
-                onFiltersChange(() => NO_FILTERS);
+                onFiltersChange((current) => ({
+                  ...NO_FILTERS,
+                  mode: current.mode,
+                }));
               }}
             >
               Clear all filters
