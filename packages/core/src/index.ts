@@ -50,6 +50,17 @@ export {
   type PriceChoiceOptions,
   type PriceOrigin,
 } from "./price-choice.types.js";
+export { evaluatePlan } from "./plan.helpers.js";
+export {
+  type PlanEntry,
+  type PlanLocation,
+  type PlanResult,
+  type PlanSettings,
+  type PlanTotals,
+  type PlannedEntry,
+  type PlannedLocation,
+  type PlannedMaterial,
+} from "./plan.types.js";
 export { pricesNeeded } from "./prices-needed.helpers.js";
 export { type PricesNeeded } from "./prices-needed.types.js";
 export { rank } from "./rank.helpers.js";
