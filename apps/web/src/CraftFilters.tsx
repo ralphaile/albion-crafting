@@ -14,6 +14,7 @@ import {
   ARMOR_SLOTS,
   CATEGORIES,
   ENCHANTS,
+  MAX_DAILY_VOLUME,
   MAX_MARGIN_PERCENT,
   MAX_PROFIT,
   MAX_SEARCH_LENGTH,
@@ -542,6 +543,13 @@ export function CraftFilters({
           min={-100}
           max={MAX_MARGIN_PERCENT}
           onChange={set("minMarginPercent")}
+        />
+        <NumberField
+          label="Min daily volume"
+          value={filters.minDailyVolume}
+          min={0}
+          max={MAX_DAILY_VOLUME}
+          onChange={set("minDailyVolume")}
         />
         <div className={styles.checks}>
           <Checkbox

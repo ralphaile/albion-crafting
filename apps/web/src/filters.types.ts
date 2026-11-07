@@ -7,6 +7,7 @@ export interface Filters {
   artifacts: ArtifactFilter;
   minProfit: number | undefined;
   minMarginPercent: number | undefined;
+  minDailyVolume: number | undefined;
   hideIncomplete: boolean;
   specialtyOnly: boolean;
   search: string;

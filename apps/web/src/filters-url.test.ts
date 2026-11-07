@@ -11,6 +11,7 @@ const everyFilter: Filters = {
   artifacts: "exclude",
   minProfit: -500,
   minMarginPercent: 15,
+  minDailyVolume: 5,
   hideIncomplete: true,
   specialtyOnly: true,
   search: "clarent, blade",

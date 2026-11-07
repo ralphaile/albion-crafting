@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   CATEGORIES,
   ENCHANTS,
+  MAX_DAILY_VOLUME,
   MAX_MARGIN_PERCENT,
   MAX_PROFIT,
   MAX_SEARCH_LENGTH,
@@ -37,6 +38,12 @@ const filtersSchema = z.object({
     .max(MAX_MARGIN_PERCENT)
     .optional()
     .catch(undefined),
+  minDailyVolume: z
+    .int()
+    .min(0)
+    .max(MAX_DAILY_VOLUME)
+    .optional()
+    .catch(undefined),
   hideIncomplete: z.boolean().catch(false),
   specialtyOnly: z.boolean().catch(false),
   search: z
@@ -52,6 +59,6 @@ export function parseFilters(raw: unknown): Filters {
   if (!parsed.success) {
     return NO_FILTERS;
   }
-  const { minProfit, minMarginPercent, ...rest } = parsed.data;
-  return { ...rest, minProfit, minMarginPercent };
+  const { minProfit, minMarginPercent, minDailyVolume, ...rest } = parsed.data;
+  return { ...rest, minProfit, minMarginPercent, minDailyVolume };
 }

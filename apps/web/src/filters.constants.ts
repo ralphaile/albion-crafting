@@ -8,6 +8,7 @@ export const NO_FILTERS: Filters = {
   artifacts: "include",
   minProfit: undefined,
   minMarginPercent: undefined,
+  minDailyVolume: undefined,
   hideIncomplete: false,
   specialtyOnly: false,
   search: "",
@@ -68,3 +69,4 @@ export const MAX_SEARCH_LENGTH = 100;
 
 export const MAX_PROFIT = 1_000_000_000;
 export const MAX_MARGIN_PERCENT = 100_000;
+export const MAX_DAILY_VOLUME = 1_000_000;
