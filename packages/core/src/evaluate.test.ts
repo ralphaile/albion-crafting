@@ -331,6 +331,25 @@ describe("evaluate", () => {
       });
     });
 
+    it("uses the recipe you chose, even when another is more profitable or it's missing a price", () => {
+      const chosen = complete(evaluate(royalRobe, rrr25, settings, prices, 0));
+
+      expect(chosen.alternative).toBe(0);
+      expect(chosen.profit).toBeLessThan(
+        complete(evaluate(royalRobe, rrr25, settings, prices)).profit,
+      );
+      expect(evaluate(royalRobe, rrr25, settings, prices, 2)).toMatchObject({
+        status: "incomplete",
+        alternative: 2,
+      });
+    });
+
+    it("uses the best recipe when the one chosen doesn't exist", () => {
+      expect(evaluate(royalRobe, rrr25, settings, prices, 3).alternative).toBe(
+        1,
+      );
+    });
+
     it("gives each recipe's result, the default one first", () => {
       const results = evaluateEach(royalRobe, rrr25, settings, prices);
 
