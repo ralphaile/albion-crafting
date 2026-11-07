@@ -195,7 +195,11 @@ describe("addToPlan", () => {
 
   it("adds to the location with the same route, and to the same item's quantity there", () => {
     const added = addToPlan(
-      addToPlan(plan, { ...lymhurst, place: { ...lymhurst.place } }, sword),
+      addToPlan(
+        plan,
+        { ...lymhurst, place: { ...lymhurst.place } },
+        { ...sword, dailyBonus: 0 as const },
+      ),
       lymhurst,
       { ...sword, itemId: "T4_BAG" },
     );
@@ -212,5 +216,17 @@ describe("addToPlan", () => {
     const added = addToPlan(plan, lymhurst, { ...sword, alternative: 1 });
 
     expect(added.locations[0]?.entries).toHaveLength(2);
+  });
+
+  it("keeps the same item with other focus or daily bonus apart", () => {
+    const same = { ...sword, dailyBonus: 0 as const };
+    const withoutFocus = addToPlan(plan, lymhurst, { ...same, focus: false });
+    const otherBonus = addToPlan(plan, lymhurst, sword);
+
+    expect(withoutFocus.locations[0]?.entries).toEqual([
+      broadswords(),
+      { id: expect.any(String) as string, ...same, focus: false },
+    ]);
+    expect(otherBonus.locations[0]?.entries).toHaveLength(2);
   });
 });
