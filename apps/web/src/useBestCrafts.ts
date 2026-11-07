@@ -21,6 +21,7 @@ import { withManualPrices } from "./manual-prices.helpers";
 import type { ManualPrice } from "./manual-prices.types";
 import { missingPrices } from "./missing-prices.helpers";
 import type { MissingPrice } from "./missing-prices.types";
+import { withOutliers } from "./outliers.helpers";
 import { QUALITY } from "./prices.constants";
 import { settingsForRoute } from "./route.helpers";
 import type { Route } from "./route.types";
@@ -349,8 +350,14 @@ export function useBestCrafts(
   specializations: SpecializationProfile = NO_SPECIALIZATIONS,
 ): BestCraftsResult {
   const { place, buyMarketId, sellMarketId } = route;
-  const { server, staleAfterHours, manualStaleAfterDays, preferManualPrices } =
-    settings;
+  const {
+    server,
+    staleAfterHours,
+    manualStaleAfterDays,
+    preferManualPrices,
+    outlierRatio,
+    useAverageForOutliers,
+  } = settings;
   const [{ attempt, force, refetch }, setRequest] = useState<{
     attempt: number;
     force: boolean;
@@ -532,7 +539,9 @@ export function useBestCrafts(
       : current?.fetched.status === "error"
         ? NO_PRICES
         : undefined;
-  const prices = useMemo(
+  const history =
+    current?.fetched.status === "ready" ? current.fetched.history : NO_HISTORY;
+  const chosenPrices = useMemo(
     () =>
       fetchedPrices &&
       withManualPrices(fetchedPrices, manualPrices, {
@@ -553,6 +562,15 @@ export function useBestCrafts(
       preferManualPrices,
     ],
   );
+  const prices = useMemo(
+    () =>
+      chosenPrices &&
+      withOutliers(chosenPrices, history, {
+        ratio: outlierRatio,
+        useAverage: useAverageForOutliers,
+      }),
+    [chosenPrices, history, outlierRatio, useAverageForOutliers],
+  );
   const routeSettings = useMemo(
     () => ({
       ...settingsForRoute(settings, route),
@@ -567,8 +585,6 @@ export function useBestCrafts(
         : evaluateCrafts(priced, place, routeSettings, prices),
     [priced, place, routeSettings, prices],
   );
-  const history =
-    current?.fetched.status === "ready" ? current.fetched.history : NO_HISTORY;
   const withVolumes = useMemo(
     () => withDailyVolumes(evaluated, history.products),
     [evaluated, history],

@@ -22,6 +22,8 @@ describe("parseSettings", () => {
       preferManualPrices: true,
       server: "europe",
       lowVolumePerDay: 12,
+      outlierRatio: 3,
+      useAverageForOutliers: true,
     };
 
     expect(parseSettings(settings)).toEqual(settings);

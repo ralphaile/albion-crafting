@@ -8,6 +8,7 @@ import {
   MAX_DAILY_BONUSES,
   MAX_LOW_VOLUME_PER_DAY,
   MAX_MANUAL_STALE_DAYS,
+  MAX_OUTLIER_RATIO,
   MAX_STALE_HOURS,
   MAX_STATION_FEE,
   SERVERS,
@@ -67,6 +68,14 @@ const settingsSchema = z.object({
     .min(0)
     .max(MAX_LOW_VOLUME_PER_DAY)
     .catch(DEFAULT_SETTINGS.lowVolumePerDay),
+  outlierRatio: z
+    .int()
+    .min(2)
+    .max(MAX_OUTLIER_RATIO)
+    .catch(DEFAULT_SETTINGS.outlierRatio),
+  useAverageForOutliers: z
+    .boolean()
+    .catch(DEFAULT_SETTINGS.useAverageForOutliers),
 });
 
 // Each setting that doesn't fit falls back to its default, so a bad save never

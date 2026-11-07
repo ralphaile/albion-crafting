@@ -25,11 +25,20 @@ export type DailyVolume = number | "none" | "unknown";
 
 export type SeenPrice = Exclude<ObservedPrice, { status: "missing" }>;
 
+// An API price far from its 7-day average. With `usingAverage`, the price's
+// value is the average, and `seen` is the price AODP had.
+interface Outlier {
+  seen: number;
+  average: number;
+  usingAverage: boolean;
+}
+
 // When there's both an API price and a typed one, `passedOver` is the one not
 // used.
 export type UsedPrice = ObservedPrice & {
   origin: PriceOrigin;
   passedOver?: SeenPrice;
+  outlier?: Outlier;
 };
 
 export interface UsedItemPrices extends Omit<ItemPrices, "sellMin" | "buyMax"> {
