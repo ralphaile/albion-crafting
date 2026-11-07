@@ -46,14 +46,19 @@ export function ShoppingList({
           type="button"
           aria-live="polite"
           onClick={() => {
-            navigator.clipboard.writeText(shoppingListText(markets)).then(
-              () => {
-                setCopy("copied");
-              },
-              () => {
-                setCopy("failed");
-              },
-            );
+            // A page served over plain http has no clipboard at all.
+            Promise.resolve()
+              .then(() =>
+                navigator.clipboard.writeText(shoppingListText(markets)),
+              )
+              .then(
+                () => {
+                  setCopy("copied");
+                },
+                () => {
+                  setCopy("failed");
+                },
+              );
           }}
         >
           {COPY_LABELS[copy]}
