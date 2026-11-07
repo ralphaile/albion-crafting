@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { AodpPrice } from "./aodp.schema.js";
-import { normalizePrices } from "./prices.helpers.js";
+import { agePrices, normalizePrices } from "./prices.helpers.js";
 import type { NormalizeOptions } from "./prices.types.js";
 import pricesNoData from "../test/fixtures/prices-no-data.json" with { type: "json" };
 import prices from "../test/fixtures/prices.json" with { type: "json" };
@@ -214,5 +214,43 @@ describe("normalizePrices", () => {
         buyMax: { status: "missing" },
       },
     ]);
+  });
+});
+
+describe("agePrices", () => {
+  const HOUR_MS = 60 * 60_000;
+  const [fetched] = normalizePrices(
+    [
+      {
+        ...rowSelling(4500, "2026-10-25T10:00:00"),
+        sellFromSnapshot: true,
+      },
+    ],
+    { now: NOW },
+  );
+  if (fetched === undefined) {
+    throw new Error("No prices");
+  }
+
+  it("works out the age and fresh or stale again, from when AODP saw the price", () => {
+    const [later] = agePrices([fetched], { now: NOW + 11 * HOUR_MS });
+
+    expect(later?.sellMin).toEqual({
+      status: "stale",
+      value: 4500,
+      observedAt: Date.UTC(2026, 9, 25, 10, 0),
+      ageMinutes: 13 * 60,
+      fromSnapshot: true,
+    });
+    expect(later?.buyMax).toEqual({ status: "missing" });
+  });
+
+  it("uses the stale time it's given", () => {
+    const [later] = agePrices([fetched], {
+      now: NOW + 11 * HOUR_MS,
+      staleAfterMinutes: 24 * 60,
+    });
+
+    expect(later?.sellMin).toMatchObject({ status: "fresh" });
   });
 });

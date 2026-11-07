@@ -16,6 +16,7 @@ export {
 } from "./market-data.types.js";
 export { markets } from "./markets.constants.js";
 export { type Market } from "./markets.types.js";
+export { agePrices } from "./prices.helpers.js";
 export { type ItemPrices, type ObservedPrice } from "./prices.types.js";
 export { snapshotReader } from "./snapshot.client.js";
 export { fetchPriceSnapshots } from "./snapshot-fetch.helpers.js";
