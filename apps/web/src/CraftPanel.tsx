@@ -17,6 +17,7 @@ import {
 } from "@aoc/crafting-data";
 import type { Region } from "@aoc/market-prices";
 
+import { AddToPlan } from "./AddToPlan";
 import type { Craft, CraftAlternative, UsedPrice } from "./best-crafts.types";
 import styles from "./CraftPanel.module.css";
 import {
@@ -30,6 +31,7 @@ import {
 } from "./format.helpers";
 import { sameManualPrice } from "./manual-prices.helpers";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
+import type { AddToPlanHandler } from "./plan.types";
 import { PriceBadge } from "./PriceBadge";
 import { PriceRow } from "./PriceRow";
 import { QUALITY } from "./prices.constants";
@@ -210,6 +212,7 @@ export function CraftPanel({
   onRemove,
   specializations,
   onEditSpecializations,
+  onAddToPlan,
   onClose,
 }: {
   craft: Craft | undefined;
@@ -221,6 +224,7 @@ export function CraftPanel({
   onRemove: (key: ManualPriceKey) => void;
   specializations: SpecializationProfile;
   onEditSpecializations: (treeId: string) => void;
+  onAddToPlan?: AddToPlanHandler;
   onClose: () => void;
 }) {
   // Which recipe the panel shows, until it closes or shows another item.
@@ -465,6 +469,14 @@ export function CraftPanel({
         : craft;
     return (
       <>
+        {onAddToPlan && (
+          <AddToPlan
+            name={itemName(craft.itemId)}
+            onAdd={(quantity) => {
+              onAddToPlan(craft.itemId, shown.alternative, quantity);
+            }}
+          />
+        )}
         {craft.alternatives.length > 1 && recipes(craft, shown)}
         {breakdown(shown, craft.recipe)}
       </>
