@@ -294,4 +294,26 @@ describe("PlanPage", () => {
       "Fine Cloth 4.0, Adept's Bag 4.0",
     );
   });
+
+  it("lets a quantity be cleared and typed again, and keeps the last good one until then", async () => {
+    renderPlan();
+    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
+    addBroadsword(screen.getByRole("region", { name: "Location 1" }));
+    await screen.findByRole("list", { name: `Materials for ${BROADSWORD}` });
+    const quantity = screen.getByLabelText(`Quantity of ${BROADSWORD}`);
+
+    fireEvent.change(quantity, { target: { value: "" } });
+
+    expect(quantity).toHaveValue(null);
+    expect(total("Plan totals", "Focus")).toBe("1,286");
+
+    fireEvent.change(quantity, { target: { value: "2" } });
+
+    expect(total("Plan totals", "Focus")).toBe("2,572");
+
+    fireEvent.change(quantity, { target: { value: "" } });
+    fireEvent.blur(quantity);
+
+    expect(quantity).toHaveValue(2);
+  });
 });
