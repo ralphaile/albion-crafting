@@ -1,9 +1,10 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ItemIcon } from "./ItemIcon";
+import { ItemIcon, siteIconUrl } from "./ItemIcon";
 
-const SWORD_ICON =
+const SITE_ICON = siteIconUrl("T5_MAIN_SWORD@1");
+const RENDER_ICON =
   "https://render.albiononline.com/v1/item/T5_MAIN_SWORD@1.png?quality=1&size=64";
 
 function icon() {
@@ -29,39 +30,50 @@ afterEach(() => {
 });
 
 describe("ItemIcon", () => {
-  it("lazy-loads the item's icon from the Albion render service", () => {
+  it("lazy-loads the item's icon from the site", () => {
     render(<ItemIcon id="T5_MAIN_SWORD@1" />);
 
-    expect(icon()).toHaveAttribute("src", SWORD_ICON);
+    expect(icon()).toHaveAttribute("src", SITE_ICON);
     expect(icon()).toHaveAttribute("loading", "lazy");
   });
 
-  it("shows a placeholder while it waits to try again", () => {
+  it("loads the render service's icon straight away when the site has none", () => {
     render(<ItemIcon id="T5_MAIN_SWORD@1" />);
 
+    failToLoad();
+
+    expect(icon()).toHaveAttribute("src", RENDER_ICON);
+  });
+
+  it("shows a placeholder while it waits to try the render service again", () => {
+    render(<ItemIcon id="T5_MAIN_SWORD@1" />);
+
+    failToLoad();
     failToLoad();
 
     expect(icon().getAttribute("src")).toMatch(/^data:image\/svg\+xml,/);
   });
 
-  it("tries again after 1 second, then after 3 more", () => {
+  it("tries the render service again after 1 second, then after 3 more", () => {
     render(<ItemIcon id="T5_MAIN_SWORD@1" />);
+    failToLoad();
 
     failToLoad();
     wait(999);
-    expect(icon()).not.toHaveAttribute("src", SWORD_ICON);
+    expect(icon()).not.toHaveAttribute("src", RENDER_ICON);
     wait(1);
-    expect(icon()).toHaveAttribute("src", SWORD_ICON);
+    expect(icon()).toHaveAttribute("src", RENDER_ICON);
 
     failToLoad();
     wait(2999);
-    expect(icon()).not.toHaveAttribute("src", SWORD_ICON);
+    expect(icon()).not.toHaveAttribute("src", RENDER_ICON);
     wait(1);
-    expect(icon()).toHaveAttribute("src", SWORD_ICON);
+    expect(icon()).toHaveAttribute("src", RENDER_ICON);
   });
 
-  it("keeps the placeholder after the third failure", () => {
+  it("keeps the placeholder after the render service fails a third time", () => {
     render(<ItemIcon id="T5_MAIN_SWORD@1" />);
+    failToLoad();
 
     failToLoad();
     wait(1000);
@@ -73,15 +85,12 @@ describe("ItemIcon", () => {
     expect(icon().getAttribute("src")).toMatch(/^data:image\/svg\+xml,/);
   });
 
-  it("starts over when it shows a different item", () => {
+  it("starts over with the site's icon when it shows a different item", () => {
     const { rerender } = render(<ItemIcon id="T5_MAIN_SWORD@1" />);
     failToLoad();
 
     rerender(<ItemIcon id="T5_MAIN_SWORD@2" />);
 
-    expect(icon()).toHaveAttribute(
-      "src",
-      "https://render.albiononline.com/v1/item/T5_MAIN_SWORD@2.png?quality=1&size=64",
-    );
+    expect(icon()).toHaveAttribute("src", siteIconUrl("T5_MAIN_SWORD@2"));
   });
 });

@@ -16,6 +16,9 @@ interface RecordedResponse {
 
 export const ICON_ORIGIN = "https://render.albiononline.com";
 
+// The build has no icons: `pnpm icons` adds them only for a deploy.
+const SITE_ICONS = /\/icons\/[^/]+\.png$/;
+
 const STAND_IN_ICON =
   '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"></svg>';
 
@@ -204,7 +207,9 @@ export const test = base.extend<{ problems: string[] }>({
       },
     );
     await page.route(
-      (url) => url.origin === ICON_ORIGIN,
+      (url) =>
+        url.origin === ICON_ORIGIN ||
+        (url.origin === appOrigin && SITE_ICONS.test(url.pathname)),
       (route) =>
         route.fulfill({ contentType: "image/svg+xml", body: STAND_IN_ICON }),
     );
