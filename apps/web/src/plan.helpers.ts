@@ -14,7 +14,7 @@ import type { PlaceChoice, Route, RouteChoice } from "./route.types";
 import type { CraftingSettings } from "./settings.types";
 
 // The recipe an entry uses: its usual one, or one of its alternatives.
-function chosenRecipe(
+export function chosenRecipe(
   recipe: GameRecipe,
   alternative: number,
 ): RecipeAlternative {
