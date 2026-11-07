@@ -11,18 +11,19 @@ function candidate(changes: Partial<FocusCandidate>): FocusCandidate {
     focusPerCraft: 1000,
     costPerCraft: 2000,
     profitPerCraft: 3000,
+    silverPerFocus: 1,
     maxQuantity: 100,
     ...changes,
   };
 }
 
 describe("fillFocusBudget", () => {
-  it("spends the focus on the most silver per focus first", () => {
+  it("spends the focus where it adds the most silver first, not on the most profit", () => {
     const picks = fillFocusBudget(
       [
-        candidate({ itemId: "LOW", profitPerCraft: 1000 }),
-        candidate({ itemId: "HIGH", profitPerCraft: 5000, maxQuantity: 6 }),
-        candidate({ itemId: "MID", profitPerCraft: 3000 }),
+        candidate({ itemId: "LOW", profitPerCraft: 9000, silverPerFocus: 1 }),
+        candidate({ itemId: "HIGH", silverPerFocus: 3, maxQuantity: 6 }),
+        candidate({ itemId: "MID", silverPerFocus: 2 }),
       ],
       { focus: 10_000 },
     );
@@ -37,8 +38,8 @@ describe("fillFocusBudget", () => {
   it("stops at the silver budget, and goes on with crafts that still fit it", () => {
     const picks = fillFocusBudget(
       [
-        candidate({ itemId: "DEAR", profitPerCraft: 5000, costPerCraft: 4000 }),
-        candidate({ itemId: "CHEAP", profitPerCraft: 2000, costPerCraft: 500 }),
+        candidate({ itemId: "DEAR", silverPerFocus: 5, costPerCraft: 4000 }),
+        candidate({ itemId: "CHEAP", silverPerFocus: 2, costPerCraft: 500 }),
       ],
       { focus: 10_000, silver: 9000 },
     );
@@ -63,12 +64,13 @@ describe("fillFocusBudget", () => {
     ]);
   });
 
-  it("leaves out crafts that lose silver or need no focus", () => {
+  it("leaves out crafts that lose silver, need no focus, or that focus doesn't help", () => {
     expect(
       fillFocusBudget(
         [
           candidate({ itemId: "LOSS", profitPerCraft: -100 }),
           candidate({ itemId: "FREE", focusPerCraft: 0 }),
+          candidate({ itemId: "NO_GAIN", silverPerFocus: 0 }),
         ],
         { focus: 10_000 },
       ),

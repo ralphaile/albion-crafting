@@ -4,13 +4,9 @@ import type {
   FocusPick,
 } from "./focus-budget.types.js";
 
-function silverPerFocus({ profitPerCraft, focusPerCraft }: FocusCandidate) {
-  return profitPerCraft / focusPerCraft;
-}
-
 // Greedy: the most silver per focus first, as many crafts as the focus, the
-// silver and the item's cap allow, then the next. Crafts that lose silver or
-// need no focus are left out.
+// silver and the item's cap allow, then the next. Crafts that lose silver, or
+// that focus doesn't help, are left out.
 export function fillFocusBudget(
   candidates: readonly FocusCandidate[],
   { focus, silver = Infinity }: FocusBudget,
@@ -20,10 +16,10 @@ export function fillFocusBudget(
   const picks: FocusPick[] = [];
   const ranked = candidates
     .filter(
-      ({ profitPerCraft, focusPerCraft }) =>
-        profitPerCraft > 0 && focusPerCraft > 0,
+      ({ profitPerCraft, focusPerCraft, silverPerFocus }) =>
+        profitPerCraft > 0 && focusPerCraft > 0 && silverPerFocus > 0,
     )
-    .toSorted((a, b) => silverPerFocus(b) - silverPerFocus(a));
+    .toSorted((a, b) => b.silverPerFocus - a.silverPerFocus);
   for (const candidate of ranked) {
     const { amountCrafted, focusPerCraft, costPerCraft, profitPerCraft } =
       candidate;
