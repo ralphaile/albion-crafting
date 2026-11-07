@@ -347,4 +347,21 @@ describe("PlanPage", () => {
 
     expect(quantity).toHaveValue(2);
   });
+
+  it("says when the shopping list can't be copied", async () => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: undefined,
+      configurable: true,
+    });
+    renderPlan();
+    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
+    addBroadsword(screen.getByRole("region", { name: "Location 1" }));
+    const list = await screen.findByRole("region", { name: "Shopping list" });
+
+    fireEvent.click(within(list).getByRole("button", { name: "Copy as text" }));
+
+    expect(
+      await within(list).findByRole("button", { name: "Couldn’t copy" }),
+    ).toBeInTheDocument();
+  });
 });
