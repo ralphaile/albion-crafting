@@ -2,6 +2,8 @@
 
 A click anywhere on a row opens that craft in a panel over the right of the page, and so do the row's pencil and its **N prices missing**. The panel shows how the table got its numbers, and every price in it can be typed over ([manual prices](manual-prices.md)). The table and the panel change as soon as a price is saved. In the code, it's `apps/web/src/CraftPanel.tsx`.
 
+It has two tabs: **Breakdown**, which it opens on, and **Compare markets**. The arrow keys move between them.
+
 ## What it shows
 
 - **Recipe:** only for an item with more than one, such as an artifact or the token used instead. Each recipe shows the icon and name of what tells it apart, its profit or how many prices it's missing, and ✓ on the one the table uses.
@@ -16,6 +18,16 @@ A click anywhere on a row opens that craft in a panel over the right of the page
 - **Result:** profit and margin, and silver per focus when the recipe costs focus.
 
 A figure a missing price keeps from being worked out shows **—**.
+
+## Compare markets
+
+The item's price, net revenue and profit in every market you can sell in: the cities, the [Black Market](glossary.md#black-market) and the Black Zone's Rests. The materials and costs are the route's, so only the revenue changes from one market to the next.
+
+- **Order:** the highest net first, then the markets without a price.
+- **Best:** the first market is highlighted, with how much more an item nets there than in the current sell market, such as `+1,122 vs Lymhurst`.
+- **Prices** are picked as the table picks them: a [price you typed](manual-prices.md) for that market, the [badge](glossary.md#fresh-stale-and-missing-prices) for its freshness, and [outliers](glossary.md#outliers) judged against that market's own 7-day average. The Black Market is sold to its buy orders, whatever the sell mode.
+- **Sell here** makes that market the route's sell market. The table works the crafts out again, and the panel stays open.
+- **Fetched** when the tab opens, in one request for every market, then kept with the other prices.
 
 ## In the link
 

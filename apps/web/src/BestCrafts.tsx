@@ -1,6 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+
+import type { MarketData } from "@aoc/market-prices";
 
 import styles from "./BestCrafts.module.css";
+import { CompareMarkets } from "./CompareMarkets";
 import { CraftFilters, type UpdateFilters } from "./CraftFilters";
 import { CraftPanel } from "./CraftPanel";
 import { CraftsTable } from "./CraftsTable";
@@ -50,6 +53,7 @@ export function BestCrafts({
   pins = NO_PINS,
   onPinMaterial,
   onAddToPlan,
+  sellMarkets,
 }: {
   bestCrafts: BestCraftsResult;
   shownItemId: string | undefined;
@@ -69,6 +73,11 @@ export function BestCrafts({
   pins?: MaterialPins;
   onPinMaterial?: PinMaterialHandler;
   onAddToPlan?: AddToPlanHandler;
+  // Without it, the craft panel doesn't compare sell markets.
+  sellMarkets?: {
+    marketData: MarketData;
+    onSellIn: (marketId: string) => void;
+  };
 }) {
   const filtered = activeFilters(filters).length > 0;
   const crafts =
@@ -80,10 +89,21 @@ export function BestCrafts({
     () => ({ route, filters, settings }),
     [route, filters, settings],
   );
-  const shownCraft =
+  const foundCraft =
     bestCrafts.status === "loading"
       ? undefined
       : bestCrafts.allCrafts.find(({ itemId }) => itemId === shownItemId);
+  // Selling in another market from the panel reloads the table. The panel
+  // keeps its craft meanwhile, rather than closing.
+  const [lastCraft, setLastCraft] = useState(foundCraft);
+  if (foundCraft !== undefined && foundCraft !== lastCraft) {
+    setLastCraft(foundCraft);
+  }
+  const shownCraft =
+    foundCraft ??
+    (bestCrafts.status === "loading" && lastCraft?.itemId === shownItemId
+      ? lastCraft
+      : undefined);
 
   return (
     <div className={styles.bestCrafts}>
@@ -163,6 +183,18 @@ export function BestCrafts({
         onEditSpecializations={onEditSpecializations}
         onChooseRecipe={onChooseRecipe}
         {...(onAddToPlan && { onAddToPlan })}
+        {...(sellMarkets && {
+          compareMarkets: (craft) => (
+            <CompareMarkets
+              craft={craft}
+              marketData={sellMarkets.marketData}
+              settings={settings}
+              manualPrices={manualPrices}
+              sellMarketId={route.sellMarketId}
+              onSellIn={sellMarkets.onSellIn}
+            />
+          ),
+        })}
         onClose={() => {
           onShowItem(undefined);
         }}

@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -97,9 +103,10 @@ function Crafts({
   const [shownItemId, setShownItemId] = useState<string>();
   const [recipeChoices, setRecipeChoices] = useState(NO_RECIPE_CHOICES);
   const [pins, setPins] = useState(NO_PINS);
+  const [shownRoute, setShownRoute] = useState(route);
   const bestCrafts = useBestCrafts(
     marketData,
-    route,
+    shownRoute,
     DEFAULT_SETTINGS,
     filters,
     manualPrices,
@@ -112,7 +119,7 @@ function Crafts({
       bestCrafts={bestCrafts}
       shownItemId={shownItemId}
       onShowItem={setShownItemId}
-      route={route}
+      route={shownRoute}
       settings={DEFAULT_SETTINGS}
       filters={filters}
       manualPrices={manualPrices}
@@ -128,6 +135,12 @@ function Crafts({
         setRecipeChoices((current) =>
           chooseRecipe(current, itemId, alternative),
         );
+      }}
+      sellMarkets={{
+        marketData,
+        onSellIn: (sellMarketId) => {
+          setShownRoute((current) => ({ ...current, sellMarketId }));
+        },
       }}
     />
   );
@@ -564,6 +577,59 @@ describe("CraftPanel", () => {
       screen.getByRole("button", { name: "1 price missing" }),
     ).toBeInTheDocument();
     await expect(store.list()).resolves.toEqual([]);
+  });
+
+  it("compares the item's net and profit in every sell market, and sells in the one picked", async () => {
+    renderCrafts({
+      filters: broadswordOnly,
+      materials: [
+        priced("T4_METALBAR", "Martlock", 100),
+        priced("T4_LEATHER", "Martlock", 50),
+      ],
+      products: [
+        priced("T4_MAIN_SWORD", "Caerleon", 5000),
+        priced("T4_MAIN_SWORD", "Lymhurst", 6000),
+      ],
+    });
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Broadsword 4.0",
+      }),
+    );
+    const tab = (name: string) => within(panel()).getByRole("tab", { name });
+    const sellIn = (market: string) =>
+      within(panel()).getByRole("button", { name: `Sell in ${market}` });
+    expect(tab("Breakdown")).toHaveAttribute("aria-selected", "true");
+
+    fireEvent.click(tab("Compare markets"));
+
+    await within(panel()).findByRole("button", { name: "Sell in Lymhurst" });
+    const markets = within(panel()).getAllByRole("row");
+    const rowOf = (market: string) =>
+      markets.find((row) => row.textContent.startsWith(market));
+    expect(rowOf("Lymhurst")).toHaveTextContent(
+      // Net 6,000 less 4% premium tax and 2.5% setup fee, 935 more than
+      // Caerleon's 4,675.
+      /^Lymhurst\s*Best.*6,000.*5,610.*\+935 vs Caerleon/,
+    );
+    expect(rowOf("Caerleon")).toHaveTextContent(/^Caerleon.*5,000.*4,675/);
+    expect(sellIn("Caerleon")).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(sellIn("Lymhurst"));
+
+    await waitFor(() => {
+      expect(sellIn("Lymhurst")).toHaveAttribute("aria-pressed", "true");
+    });
+    expect(within(panel()).queryByText(/vs Caerleon/)).not.toBeInTheDocument();
+
+    fireEvent.keyDown(tab("Compare markets"), { key: "ArrowLeft" });
+
+    expect(tab("Breakdown")).toHaveFocus();
+    expect(
+      await within(panel()).findByRole("textbox", {
+        name: "Adept's Broadsword 4.0, sell order in Lymhurst",
+      }),
+    ).toHaveAttribute("placeholder", "6,000");
   });
 
   it("closes with its close button", async () => {

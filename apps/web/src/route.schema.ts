@@ -36,7 +36,7 @@ function ids(groups: readonly OptionGroup[]) {
 }
 
 export const BUY_MARKET_IDS = ids(BUY_MARKET_GROUPS);
-const sellMarketIds = ids(SELL_MARKET_GROUPS);
+export const SELL_MARKET_IDS = ids(SELL_MARKET_GROUPS);
 
 const buyMarket = (fallback: string) =>
   z.string().refine(oneOf(BUY_MARKET_IDS)).catch(fallback);
@@ -63,7 +63,7 @@ const routeSchema = z.object({
   ),
   sellMarketId: z
     .string()
-    .refine(oneOf(sellMarketIds))
+    .refine(oneOf(SELL_MARKET_IDS))
     .catch(DEFAULT_ROUTE_CHOICE.sellMarketId),
 });
 

@@ -148,3 +148,31 @@
   background: var(--brass);
   color: var(--bg);
 }
+
+.tabs {
+  display: flex;
+  gap: 16px;
+}
+
+.tab {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  text-underline-offset: 6px;
+}
+
+.tab:hover,
+.tab[aria-selected="true"] {
+  color: var(--text);
+}
+
+.tab[aria-selected="true"] {
+  text-decoration: underline 2px var(--brass);
+}
+
+.tabPanel {
+  display: grid;
+  gap: inherit;
+}
