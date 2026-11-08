@@ -9,6 +9,9 @@ import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 import { memoryManualPriceStore } from "./manual-prices.store";
 import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
+import { everyMaterialIn } from "./material-markets.helpers";
+import { NO_PINS } from "./material-pins.constants";
+import { pinMaterial } from "./material-pins.helpers";
 import { NO_RECIPE_CHOICES } from "./recipe-choices.constants";
 import { chooseRecipe } from "./recipe-choices.helpers";
 import { DEFAULT_ROUTE } from "./route.constants";
@@ -24,6 +27,7 @@ import { fakeMarketData } from "../test/fake-market-data";
 const lymhurst: Route = {
   place: DEFAULT_ROUTE.place,
   buyMarketId: "Martlock",
+  materialMarkets: everyMaterialIn("Martlock"),
   sellMarketId: "Caerleon",
 };
 
@@ -92,6 +96,7 @@ function Crafts({
   );
   const [shownItemId, setShownItemId] = useState<string>();
   const [recipeChoices, setRecipeChoices] = useState(NO_RECIPE_CHOICES);
+  const [pins, setPins] = useState(NO_PINS);
   const bestCrafts = useBestCrafts(
     marketData,
     route,
@@ -100,6 +105,7 @@ function Crafts({
     manualPrices,
     specializations,
     recipeChoices,
+    pins,
   );
   return (
     <BestCrafts
@@ -114,6 +120,10 @@ function Crafts({
       onRemoveManualPrice={removeManualPrice}
       specializations={specializations}
       onEditSpecializations={onEditSpecializations}
+      pins={pins}
+      onPinMaterial={(itemId, marketId) => {
+        setPins((current) => pinMaterial(current, itemId, marketId));
+      }}
       onChooseRecipe={(itemId, alternative) => {
         setRecipeChoices((current) =>
           chooseRecipe(current, itemId, alternative),
@@ -140,7 +150,9 @@ function renderCrafts({
 }) {
   const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
     Promise.resolve({
-      prices: marketIds[0] === "Martlock" ? materials : products,
+      prices: [...materials, ...products].filter(({ marketId }) =>
+        marketIds.includes(marketId),
+      ),
       failures: [],
       fetchedAt: 0,
     }),
@@ -235,6 +247,48 @@ describe("CraftPanel", () => {
     expect(field(leather)).toHaveAccessibleDescription(
       "Sell order · Martlock · missing",
     );
+  });
+
+  it("buys a material in the market it's pinned to, and back in the route's once unpinned", async () => {
+    renderCrafts({
+      filters: broadswordOnly,
+      materials: [
+        priced("T4_METALBAR", "Martlock", 100),
+        priced("T4_LEATHER", "Martlock", 50),
+        priced("T4_LEATHER", "Caerleon", 30),
+      ],
+      products: [priced("T4_MAIN_SWORD", "Caerleon", 5000)],
+    });
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Broadsword 4.0",
+      }),
+    );
+    const market = (name: string) =>
+      within(panel()).getByRole("button", {
+        name: `Market for Worked Leather 4.0: ${name}`,
+      });
+
+    fireEvent.click(market("Martlock"));
+    fireEvent.click(within(panel()).getByRole("button", { name: "Caerleon" }));
+
+    expect(
+      await within(panel()).findByRole("textbox", {
+        name: "Worked Leather 4.0, sell order in Caerleon",
+      }),
+    ).toHaveAttribute("placeholder", "30");
+    expect(market("Caerleon, pinned")).toHaveFocus();
+
+    fireEvent.click(market("Caerleon, pinned"));
+    fireEvent.click(
+      within(panel()).getByRole("button", {
+        name: "Back to the route’s market",
+      }),
+    );
+
+    expect(
+      await within(panel()).findByRole("textbox", { name: leather }),
+    ).toHaveAttribute("placeholder", "50");
   });
 
   // Lymhurst's 18% and its 15% sword specialty, with focus, return 47.92% of

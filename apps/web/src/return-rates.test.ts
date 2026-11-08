@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { formatReturnRate } from "./format.helpers";
+import { everyMaterialIn } from "./material-markets.helpers";
 import { placeReturnRates } from "./return-rates.helpers";
 import type { ReturnRates } from "./return-rates.types";
 import { routeFromChoice } from "./route.helpers";
@@ -11,6 +12,7 @@ function ratesAt(place: PlaceChoice) {
     routeFromChoice({
       place,
       buyMarketId: "Lymhurst",
+      materialMarkets: everyMaterialIn("Lymhurst"),
       sellMarketId: "Lymhurst",
     }).place,
   );

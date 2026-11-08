@@ -23,6 +23,7 @@ import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 import { formatCount } from "./format.helpers";
 import type { ManualPrice } from "./manual-prices.types";
+import { everyMaterialIn } from "./material-markets.helpers";
 import { DEFAULT_ROUTE } from "./route.constants";
 import type { Route } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
@@ -33,6 +34,7 @@ import { fakeMarketData, noPrices } from "../test/fake-market-data";
 const route: Route = {
   place: DEFAULT_ROUTE.place,
   buyMarketId: "Martlock",
+  materialMarkets: everyMaterialIn("Martlock"),
   sellMarketId: "Caerleon",
 };
 

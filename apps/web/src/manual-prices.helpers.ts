@@ -14,14 +14,17 @@ import type {
   UsedPrices,
 } from "./best-crafts.types";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
+import { materialMarketId } from "./material-markets.helpers";
+import type { MarketChoice } from "./route.types";
 
 const MINUTE_MS = 60_000;
 
 const MISSING: ObservedPrice = { status: "missing" };
 
+// `marketOf` is the market each item is priced in.
 interface PricesAt {
   region: Region;
-  marketId: string;
+  marketOf: (itemId: string) => string;
   quality: number;
 }
 
@@ -77,14 +80,14 @@ function usedPrice(
 function chooseAt(
   rows: readonly ItemPrices[],
   manualPrices: readonly ManualPrice[],
-  { region, marketId, quality }: PricesAt,
+  { region, marketOf, quality }: PricesAt,
   options: ChoiceOptions,
 ): UsedItemPrices[] {
   const typed = new Map<string, ManualPrice[]>();
   for (const price of manualPrices) {
     if (
       price.region === region &&
-      price.marketId === marketId &&
+      price.marketId === marketOf(price.itemId) &&
       price.quality === quality
     ) {
       typed.set(price.itemId, [...(typed.get(price.itemId) ?? []), price]);
@@ -95,7 +98,7 @@ function chooseAt(
     .filter((itemId) => !fetched.has(itemId))
     .map((itemId): ItemPrices => ({
       itemId,
-      marketId,
+      marketId: marketOf(itemId),
       quality,
       sellMin: MISSING,
       buyMax: MISSING,
@@ -129,14 +132,15 @@ export function withManualPrices(
   {
     region,
     buyMarketId,
+    materialMarkets,
+    pins,
     sellMarketId,
     quality,
     staleAfterMinutes,
     manualStaleAfterMinutes,
     preferManual,
-  }: {
+  }: MarketChoice & {
     region: Region;
-    buyMarketId: string;
     sellMarketId: string;
     quality: number;
     staleAfterMinutes: number;
@@ -155,13 +159,18 @@ export function withManualPrices(
     materials: chooseAt(
       prices.materials,
       manualPrices,
-      { region, marketId: buyMarketId, quality },
+      {
+        region,
+        marketOf: (itemId) =>
+          materialMarketId({ buyMarketId, materialMarkets, pins }, itemId),
+        quality,
+      },
       options,
     ),
     products: chooseAt(
       prices.products,
       manualPrices,
-      { region, marketId: sellMarketId, quality },
+      { region, marketOf: () => sellMarketId, quality },
       options,
     ),
   };

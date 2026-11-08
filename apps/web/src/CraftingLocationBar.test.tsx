@@ -46,6 +46,14 @@ function choose(name: string, value: string) {
   fireEvent.change(select(name), { target: { value } });
 }
 
+function buyMarkets() {
+  return screen.getByRole("button", { name: "Buy materials in" });
+}
+
+function openBuyMarkets() {
+  fireEvent.click(buyMarkets());
+}
+
 function options(element: HTMLElement) {
   return within(element)
     .getAllByRole("option")
@@ -208,11 +216,11 @@ describe("CraftingLocationBar", () => {
 
   it("buys only in the cities, and sells in the Black Market and Black Zone too", () => {
     renderBar();
+    openBuyMarkets();
 
-    expect(groups("Buy materials in")).toEqual([
-      ROYAL_CITIES,
-      CAERLEON_AND_BRECILIEN,
-    ]);
+    for (const name of ["Everything else", "Metal bars", "Leather"]) {
+      expect(groups(name)).toEqual([ROYAL_CITIES, CAERLEON_AND_BRECILIEN]);
+    }
     expect(groups("Sell in")).toEqual([
       ROYAL_CITIES,
       CAERLEON_AND_BRECILIEN,
@@ -227,12 +235,49 @@ describe("CraftingLocationBar", () => {
   it("changes where you buy and where you sell", () => {
     const latest = renderBar();
 
-    choose("Buy materials in", "Martlock");
+    openBuyMarkets();
+    choose("Everything else", "Martlock");
+    choose("Metal bars", "Caerleon");
     choose("Sell in", "Arthurs Rest Smugglers Network");
 
     expect(latest()).toMatchObject({
       buyMarketId: "Martlock",
+      materialMarkets: { metalbars: "Caerleon" },
       sellMarketId: "Arthurs Rest Smugglers Network",
     });
+  });
+
+  it("buys each refined material in the city that refines it with a bonus, until you change it", () => {
+    const latest = renderBar();
+
+    expect(buyMarkets()).toHaveTextContent("Lymhurst +3");
+    openBuyMarkets();
+    expect(
+      ["Metal bars", "Planks", "Cloth", "Leather"].map(
+        (name) => (select(name) as HTMLSelectElement).value,
+      ),
+    ).toEqual(["Thetford", "Fort Sterling", "Lymhurst", "Martlock"]);
+    const reset = screen.getByRole("button", { name: "Refining cities" });
+    expect(reset).toBeDisabled();
+
+    choose("Planks", "Lymhurst");
+    expect(buyMarkets()).toHaveTextContent("Lymhurst +2");
+    fireEvent.click(reset);
+
+    expect(latest()?.materialMarkets).toEqual(
+      DEFAULT_ROUTE_CHOICE.materialMarkets,
+    );
+  });
+
+  it("closes the buy markets on Escape, back on their button", () => {
+    renderBar();
+    openBuyMarkets();
+
+    fireEvent.keyDown(select("Everything else"), { key: "Escape" });
+
+    expect(
+      screen.queryByRole("combobox", { name: "Everything else" }),
+    ).not.toBeInTheDocument();
+    expect(buyMarkets()).toHaveFocus();
   });
 });

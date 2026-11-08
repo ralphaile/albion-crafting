@@ -1,5 +1,7 @@
 import { parseFilters } from "./filters.schema";
 import type { Filters } from "./filters.types";
+import { parsePins } from "./material-pins.schema";
+import type { MaterialPins } from "./material-pins.types";
 import { parsePlan } from "./plan.schema";
 import type { CraftingPlan } from "./plan.types";
 import { parseRecipeChoices } from "./recipe-choices.schema";
@@ -40,6 +42,12 @@ export const PLAN_SETTING: SavedSetting<CraftingPlan> = {
   id: "plan",
   version: 1,
   parse: parsePlan,
+};
+
+export const PINS_SETTING: SavedSetting<MaterialPins> = {
+  id: "materialPins",
+  version: 1,
+  parse: parsePins,
 };
 
 export const RECIPE_CHOICES_SETTING: SavedSetting<RecipeChoices> = {

@@ -6,6 +6,8 @@ import type { GameRecipe } from "@aoc/crafting-data";
 import { evaluateCrafts } from "./best-crafts.helpers";
 import type { UsedItemPrices, UsedPrices } from "./best-crafts.types";
 import type { ManualPriceKey } from "./manual-prices.types";
+import { everyMaterialIn } from "./material-markets.helpers";
+import { NO_PINS } from "./material-pins.constants";
 import { missingPrices } from "./missing-prices.helpers";
 
 function recipe(itemId: string, materials: string[]): GameRecipe {
@@ -52,6 +54,8 @@ const instantBuyAndSell: EvaluateSettings = {
 const at = {
   region: "west",
   buyMarketId: "Martlock",
+  materialMarkets: everyMaterialIn("Martlock"),
+  pins: NO_PINS,
   sellMarketId: "Arthurs Rest Smugglers Network",
   quality: 1,
 } as const;

@@ -5,6 +5,8 @@ import { itemName } from "@aoc/crafting-data";
 import controls from "./controls.module.css";
 import { formatCount, formatSilver } from "./format.helpers";
 import { ItemIcon } from "./ItemIcon";
+import type { MaterialPins, PinMaterialHandler } from "./material-pins.types";
+import { MaterialMarket } from "./MaterialMarket";
 import { PriceField, type PriceTyping } from "./PriceField";
 import { QUALITY } from "./prices.constants";
 import { shoppingListText } from "./shopping-list.helpers";
@@ -21,13 +23,16 @@ const COPY_LABELS: Record<CopyState, string> = {
   failed: "Couldn’t copy",
 };
 
-// With `typing`, each unit price can be typed over.
+// With `typing`, each unit price can be typed over, and with `pinning`, each
+// item pinned to a market.
 export function ShoppingList({
   markets,
   typing,
+  pinning,
 }: {
   markets: readonly ShoppingMarket[];
   typing?: PriceTyping;
+  pinning?: { pins: MaterialPins; onPin: PinMaterialHandler };
 }) {
   const [copy, setCopy] = useState<CopyState>("idle");
   useEffect(() => {
@@ -97,6 +102,14 @@ export function ShoppingList({
                   <span className={styles.item}>
                     <ItemIcon id={itemId} />
                     {itemName(itemId)}
+                    {pinning !== undefined && (
+                      <MaterialMarket
+                        itemId={itemId}
+                        marketId={marketId}
+                        pinned={pinning.pins[itemId] !== undefined}
+                        onPin={pinning.onPin}
+                      />
+                    )}
                   </span>
                 </th>
                 <td>{formatCount(toBuy)}</td>

@@ -3,33 +3,40 @@ import type { Region } from "@aoc/market-prices";
 
 import type { Craft } from "./best-crafts.types";
 import type { ManualPriceKey } from "./manual-prices.types";
+import { materialMarketId } from "./material-markets.helpers";
+import type { MaterialPins } from "./material-pins.types";
 import type { MissingPrice } from "./missing-prices.types";
 import type { CraftingPlan } from "./plan.types";
+import type { MarketChoice } from "./route.types";
 
-interface PricesAt {
+interface PricesAt extends MarketChoice {
   region: Region;
-  buyMarketId: string;
   sellMarketId: string;
   quality: number;
 }
 
 type Priced = Pick<Craft, "itemId" | "materialCost" | "revenue">;
 
-function missingKeys(
-  craft: Priced,
-  { region, buyMarketId, sellMarketId, quality }: PricesAt,
-): ManualPriceKey[] {
+function missingKeys(craft: Priced, at: PricesAt): ManualPriceKey[] {
   const key = (
     itemId: string,
     marketId: string,
     source: ManualPriceKey["source"],
-  ): ManualPriceKey => ({ region, itemId, marketId, quality, source });
+  ): ManualPriceKey => ({
+    region: at.region,
+    itemId,
+    marketId,
+    quality: at.quality,
+    source,
+  });
   return [
     ...craft.materialCost.lines
       .filter(({ status }) => status === "missing")
-      .map(({ itemId, source }) => key(itemId, buyMarketId, source)),
+      .map(({ itemId, source }) =>
+        key(itemId, materialMarketId(at, itemId), source),
+      ),
     ...(craft.revenue.status === "missing"
-      ? [key(craft.itemId, sellMarketId, craft.revenue.source)]
+      ? [key(craft.itemId, at.sellMarketId, craft.revenue.source)]
       : []),
   ];
 }
@@ -47,7 +54,7 @@ export function missingPrices(
 export function planMissingPrices(
   plan: CraftingPlan,
   result: PlanResult,
-  at: Pick<PricesAt, "region" | "quality">,
+  at: Pick<PricesAt, "region" | "quality"> & { pins: MaterialPins },
 ): MissingPrice[] {
   return counted(
     plan.locations.flatMap(({ route, entries }, index) =>

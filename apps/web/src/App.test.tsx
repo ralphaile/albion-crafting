@@ -17,7 +17,9 @@ import type { Filters } from "./filters.types";
 import { formatCount } from "./format.helpers";
 import { memoryManualPriceStore } from "./manual-prices.store";
 import type { ManualPrice } from "./manual-prices.types";
+import { everyMaterialIn } from "./material-markets.helpers";
 import type { RecipeChoices } from "./recipe-choices.types";
+import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import type { RouteChoice } from "./route.types";
 import {
   CRAFTING_SETTING,
@@ -32,11 +34,19 @@ import type { CraftingSettings } from "./settings.types";
 import type { SpecializationProfile } from "./specializations.types";
 import { fakeMarketData, noPrices } from "../test/fake-market-data";
 
-const DEFAULT_ROUTE_SEARCH = "place=1000&buy=Lymhurst&sell=Lymhurst";
+const DEFAULT_ROUTE_SEARCH =
+  "place=1000&buy=Lymhurst&bars=Thetford&planks=Fort+Sterling&cloth=Lymhurst&leather=Martlock&sell=Lymhurst";
+
+// Every material in Lymhurst, where the tests' prices are.
+const LYMHURST_ROUTE: RouteChoice = {
+  ...DEFAULT_ROUTE_CHOICE,
+  materialMarkets: everyMaterialIn("Lymhurst"),
+};
 
 const hideout: RouteChoice = {
   place: { kind: "hideout", biomeId: "FOREST", quality: 6, level: 9 },
   buyMarketId: "Martlock",
+  materialMarkets: everyMaterialIn("Martlock"),
   sellMarketId: "Caerleon",
 };
 
@@ -113,6 +123,10 @@ const broadswordPrices = [
 
 function broadswordPanel() {
   return screen.queryByRole("dialog", { name: "Adept's Broadsword 4.0" });
+}
+
+function buyMarkets() {
+  return screen.getByRole("button", { name: "Buy materials in" });
 }
 
 function selected(name: string) {
@@ -238,10 +252,10 @@ describe("App", () => {
 
     expect(selected("Crafting location")).toHaveValue("hideout");
     expect(selected("Biome")).toHaveValue("FOREST");
-    expect(selected("Buy materials in")).toHaveValue("Martlock");
+    expect(buyMarkets()).toHaveTextContent(/^Martlock$/);
     expect(selected("Sell in")).toHaveValue("Caerleon");
     expect(window.location.search).toBe(
-      "?place=hideout&biome=FOREST&quality=6&level=9&buy=Martlock&sell=Caerleon",
+      "?place=hideout&biome=FOREST&quality=6&level=9&buy=Martlock&bars=Martlock&planks=Martlock&cloth=Martlock&leather=Martlock&sell=Caerleon",
     );
   });
 
@@ -250,7 +264,7 @@ describe("App", () => {
     const settingsStore = await renderApp({ savedRoute: hideout });
 
     expect(selected("Crafting location")).toHaveValue("0000");
-    expect(selected("Buy materials in")).toHaveValue("Thetford");
+    expect(buyMarkets()).toHaveTextContent("Thetford +3");
     expect(selected("Sell in")).toHaveValue("Lymhurst");
     await expect(settingsStore.load(ROUTE_SETTING)).resolves.toEqual(hideout);
   });
@@ -283,6 +297,7 @@ describe("App", () => {
 
   it("prices with the manual prices this browser saved", async () => {
     await renderApp({
+      savedRoute: LYMHURST_ROUTE,
       savedManualPrices: ["T4_METALBAR", "T4_LEATHER", "T4_MAIN_SWORD"].map(
         (itemId) => ({
           region: "west",
@@ -309,6 +324,7 @@ describe("App", () => {
       lymhurst("T4_MAIN_SWORD", 5000),
     ];
     await renderApp({
+      savedRoute: LYMHURST_ROUTE,
       savedFilters: {
         ...NO_FILTERS,
         tiers: [4],
@@ -466,6 +482,7 @@ describe("App", () => {
             route: {
               place: { kind: "location", locationId: "1000" },
               buyMarketId: "Lymhurst",
+              materialMarkets: DEFAULT_ROUTE_CHOICE.materialMarkets,
               sellMarketId: "Lymhurst",
             },
             entries: [
@@ -485,6 +502,7 @@ describe("App", () => {
   it("fills the plan from a focus budget with the crafts the table ranks", async () => {
     window.history.replaceState(null, "", "/#plan");
     const settingsStore = await renderApp({
+      savedRoute: LYMHURST_ROUTE,
       savedFilters: { ...NO_FILTERS, search: "broadsword", tiers: [4] },
       marketData: answering(broadswordPrices),
     });
@@ -529,7 +547,10 @@ describe("App", () => {
       "",
       "/?tier=4&enchant=0&q=broadsword&profit=1000&item=T4_MAIN_SWORD",
     );
-    await renderApp({ marketData: answering(broadswordPrices) });
+    await renderApp({
+      savedRoute: LYMHURST_ROUTE,
+      marketData: answering(broadswordPrices),
+    });
     const sword = within(
       await screen.findByRole("dialog", { name: "Adept's Broadsword 4.0" }),
     ).getByRole("textbox", {
@@ -589,7 +610,9 @@ describe("App", () => {
 
     await expect
       .poll(() => window.location.search)
-      .toBe("?place=1000&buy=Lymhurst&sell=Caerleon");
+      .toBe(
+        "?place=1000&buy=Lymhurst&bars=Thetford&planks=Fort+Sterling&cloth=Lymhurst&leather=Martlock&sell=Caerleon",
+      );
     await expect(settingsStore.load(ROUTE_SETTING)).resolves.toMatchObject({
       sellMarketId: "Caerleon",
     });

@@ -1,6 +1,7 @@
 import { craftingLocations } from "@aoc/crafting-data";
 import { markets } from "@aoc/market-prices";
 
+import { REFINING_CITY_MARKETS } from "./material-markets.constants";
 import { optionGroups, routeFromChoice } from "./route.helpers";
 import type { OptionGroup, Route, RouteChoice } from "./route.types";
 
@@ -9,6 +10,7 @@ const LYMHURST_ID = "1000";
 export const DEFAULT_ROUTE_CHOICE: RouteChoice = {
   place: { kind: "location", locationId: LYMHURST_ID },
   buyMarketId: "Lymhurst",
+  materialMarkets: REFINING_CITY_MARKETS,
   sellMarketId: "Lymhurst",
 };
 

@@ -6,6 +6,8 @@ import type {
 } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
 
+import { materialMarketId, sameBuyMarkets } from "./material-markets.helpers";
+import type { MaterialPins } from "./material-pins.types";
 import { MAX_PLAN_QUANTITY } from "./plan.constants";
 import type { CraftingPlan, PlanEntry } from "./plan.types";
 import { RECIPES_BY_ID } from "./recipes.constants";
@@ -25,7 +27,10 @@ export function chosenRecipe(
 
 // The items each market needs prices for: the entries' materials where they're
 // bought, and the items where they're sold. Each list is sorted, once each.
-export function planMarkets(plan: CraftingPlan): Map<string, string[]> {
+export function planMarkets(
+  plan: CraftingPlan,
+  pins: MaterialPins,
+): Map<string, string[]> {
   const needed = new Map<string, Set<string>>();
   const add = (marketId: string, itemId: string) => {
     const items = needed.get(marketId) ?? new Set<string>();
@@ -39,7 +44,7 @@ export function planMarkets(plan: CraftingPlan): Map<string, string[]> {
         continue;
       }
       for (const { id } of chosenRecipe(recipe, entry.alternative).materials) {
-        add(route.buyMarketId, id);
+        add(materialMarketId({ ...route, pins }, id), id);
       }
       add(route.sellMarketId, entry.itemId);
     }
@@ -131,7 +136,7 @@ function sameEntry(a: EntryKind, b: EntryKind): boolean {
 function sameRoute(a: RouteChoice, b: RouteChoice): boolean {
   return (
     samePlace(a.place, b.place) &&
-    a.buyMarketId === b.buyMarketId &&
+    sameBuyMarkets(a, b) &&
     a.sellMarketId === b.sellMarketId
   );
 }

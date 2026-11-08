@@ -5,12 +5,17 @@ import { describe, expect, it, vi } from "vitest";
 import type { ItemPrices, MarketData } from "@aoc/market-prices";
 
 import type { ManualPrice } from "./manual-prices.types";
+import { everyMaterialIn } from "./material-markets.helpers";
+import { NO_PINS } from "./material-pins.constants";
+import { pinMaterial } from "./material-pins.helpers";
+import type { MaterialPins } from "./material-pins.types";
 import type { MissingPrice } from "./missing-prices.types";
 import { MissingPricesPanel } from "./MissingPricesPanel";
 import { NO_PLAN } from "./plan.constants";
 import type { CraftingPlan } from "./plan.types";
 import { PlanPage } from "./PlanPage";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
+import type { RouteChoice } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
 import type { CraftingSettings } from "./settings.types";
 import { NO_SPECIALIZATIONS } from "./specializations.constants";
@@ -18,10 +23,20 @@ import { fakeMarketData } from "../test/fake-market-data";
 
 const BROADSWORD = "Adept's Broadsword 4.0";
 
-function lymhurst(itemId: string, value: number): ItemPrices {
+// Every material in Lymhurst, so the plan asks one market.
+const ROUTE: RouteChoice = {
+  ...DEFAULT_ROUTE_CHOICE,
+  materialMarkets: everyMaterialIn("Lymhurst"),
+};
+
+function lymhurst(
+  itemId: string,
+  value: number,
+  marketId = "Lymhurst",
+): ItemPrices {
   return {
     itemId,
-    marketId: "Lymhurst",
+    marketId,
     quality: 1,
     sellMin: { status: "fresh", value, observedAt: 0, ageMinutes: 30 },
     buyMax: { status: "missing" },
@@ -29,9 +44,12 @@ function lymhurst(itemId: string, value: number): ItemPrices {
 }
 
 function answering(prices: readonly ItemPrices[]) {
-  const getPrices = vi.fn<MarketData["getPrices"]>((itemIds) =>
+  const getPrices = vi.fn<MarketData["getPrices"]>((itemIds, marketIds) =>
     Promise.resolve({
-      prices: prices.filter(({ itemId }) => itemIds.includes(itemId)),
+      prices: prices.filter(
+        ({ itemId, marketId }) =>
+          itemIds.includes(itemId) && marketIds.includes(marketId),
+      ),
       failures: [],
       fetchedAt: 0,
     }),
@@ -57,6 +75,7 @@ function Harness({
   const [plan, setPlan] = useState(initial);
   const [manualPrices, setManualPrices] = useState<ManualPrice[]>([]);
   const [missing, setMissing] = useState<readonly MissingPrice[]>([]);
+  const [pins, setPins] = useState<MaterialPins>(NO_PINS);
   return (
     <>
       <MissingPricesPanel
@@ -70,7 +89,7 @@ function Harness({
         marketData={marketData}
         plan={plan}
         onChange={setPlan}
-        route={DEFAULT_ROUTE_CHOICE}
+        route={ROUTE}
         settings={settings}
         manualPrices={manualPrices}
         onSaveManualPrice={(price) => {
@@ -86,6 +105,10 @@ function Harness({
         onRemoveManualPrice={() => undefined}
         onMissingPrices={setMissing}
         specializations={NO_SPECIALIZATIONS}
+        pins={pins}
+        onPinMaterial={(itemId, marketId) => {
+          setPins((current) => pinMaterial(current, itemId, marketId));
+        }}
       />
     </>
   );
@@ -253,7 +276,7 @@ describe("PlanPage", () => {
       locations: [
         {
           id: "city",
-          route: DEFAULT_ROUTE_CHOICE,
+          route: ROUTE,
           entries: [
             {
               id: "a",
@@ -270,6 +293,7 @@ describe("PlanPage", () => {
           route: {
             place: { kind: "hideout", biomeId: "FOREST", quality: 6, level: 9 },
             buyMarketId: "Lymhurst",
+            materialMarkets: everyMaterialIn("Lymhurst"),
             sellMarketId: "Lymhurst",
           },
           entries: [
@@ -325,6 +349,43 @@ describe("PlanPage", () => {
     );
   });
 
+  it("buys a material pinned to another market there, and lists it under that market", async () => {
+    const marketData = answering([
+      ...broadswordPrices,
+      lymhurst("T4_METALBAR", 80, "Caerleon"),
+    ]);
+    renderPlan(marketData);
+    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
+    addBroadsword(screen.getByRole("region", { name: "Location 1" }));
+    const list = await screen.findByRole("region", { name: "Shopping list" });
+
+    fireEvent.click(
+      within(list).getByRole("button", {
+        name: "Market for Steel Bar 4.0: Lymhurst",
+      }),
+    );
+    fireEvent.click(within(list).getByRole("button", { name: "Caerleon" }));
+
+    const caerleon = await within(list).findByRole("table", {
+      name: "Caerleon",
+    });
+    expect(
+      within(caerleon)
+        .getAllByRole("rowheader")
+        .map(({ textContent }) => textContent),
+    ).toEqual(["Steel Bar 4.0", "Total"]);
+    expect(
+      within(caerleon).getByRole("textbox", {
+        name: "Unit price of Steel Bar 4.0 in Caerleon",
+      }),
+    ).toHaveAttribute("placeholder", "80");
+    expect(
+      within(list).getByRole("button", {
+        name: "Market for Steel Bar 4.0: Caerleon, pinned",
+      }),
+    ).toBeInTheDocument();
+  });
+
   it("uses an item's 7-day average when its price is an outlier and Settings says to", async () => {
     const marketData = {
       ...answering(broadswordPrices),
@@ -349,7 +410,7 @@ describe("PlanPage", () => {
       locations: [
         {
           id: "city",
-          route: DEFAULT_ROUTE_CHOICE,
+          route: ROUTE,
           entries: [
             {
               id: "a",

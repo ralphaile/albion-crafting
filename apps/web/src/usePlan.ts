@@ -10,6 +10,8 @@ import type {
 import type { UsedItemPrices, UsedPrices } from "./best-crafts.types";
 import { withManualPrices } from "./manual-prices.helpers";
 import type { ManualPrice } from "./manual-prices.types";
+import { materialMarketId } from "./material-markets.helpers";
+import type { MaterialPins } from "./material-pins.types";
 import { withOutliers } from "./outliers.helpers";
 import { planLocations, planMarkets } from "./plan.helpers";
 import type { CraftingPlan } from "./plan.types";
@@ -59,11 +61,12 @@ function byItem(prices: readonly UsedItemPrices[]) {
 function usePlanPrices(
   marketData: MarketData,
   plan: CraftingPlan,
+  pins: MaterialPins,
   { server, staleAfterHours }: CraftingSettings,
 ): { fetched: Fetched; current: boolean } | undefined {
   const neededKey = useMemo(
-    () => JSON.stringify([...planMarkets(plan)]),
-    [plan],
+    () => JSON.stringify([...planMarkets(plan, pins)]),
+    [plan, pins],
   );
   const [fetched, setFetched] = useState<{ key: string; fetched: Fetched }>();
   const key = `${server} ${String(staleAfterHours)} ${neededKey}`;
@@ -132,8 +135,9 @@ export function usePlan(
   settings: CraftingSettings,
   manualPrices: readonly ManualPrice[],
   specializations: SpecializationProfile,
+  pins: MaterialPins,
 ): PlanState {
-  const answer = usePlanPrices(marketData, plan, settings);
+  const answer = usePlanPrices(marketData, plan, pins, settings);
   const now = useMinute();
   return useMemo((): PlanState => {
     if (answer === undefined) {
@@ -144,14 +148,26 @@ export function usePlan(
       return fetched;
     }
     const prices = plan.locations.map(({ route }) => {
-      const buy = fetched.byMarket.get(route.buyMarketId) ?? NO_ANSWER;
+      // Each market's answer has every item the plan buys there, so only the
+      // ones this location buys there are kept.
+      const bought = <Row extends { itemId: string }>(
+        rows: (answer: MarketAnswer) => readonly Row[],
+      ) =>
+        [...fetched.byMarket].flatMap(([marketId, answer]) =>
+          rows(answer).filter(
+            ({ itemId }) =>
+              materialMarketId({ ...route, pins }, itemId) === marketId,
+          ),
+        );
       const sell = fetched.byMarket.get(route.sellMarketId) ?? NO_ANSWER;
       const chosen = withManualPrices(
-        { materials: buy.prices, products: sell.prices },
+        { materials: bought(({ prices }) => prices), products: sell.prices },
         manualPrices,
         {
           region: settings.server,
           buyMarketId: route.buyMarketId,
+          materialMarkets: route.materialMarkets,
+          pins,
           sellMarketId: route.sellMarketId,
           quality: QUALITY,
           staleAfterMinutes: settings.staleAfterHours * 60,
@@ -162,7 +178,7 @@ export function usePlan(
       );
       return withOutliers(
         chosen,
-        { materials: buy.history, products: sell.history },
+        { materials: bought(({ history }) => history), products: sell.history },
         {
           ratio: settings.outlierRatio,
           useAverage: settings.useAverageForOutliers,
@@ -183,5 +199,5 @@ export function usePlan(
       updating: !current,
       failed: fetched.failed,
     };
-  }, [answer, plan, settings, manualPrices, specializations, now]);
+  }, [answer, plan, settings, manualPrices, specializations, pins, now]);
 }

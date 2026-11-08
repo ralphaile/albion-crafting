@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { everyMaterialIn } from "./material-markets.helpers";
 import { routeFromSearch, searchWithRoute } from "./route-url.helpers";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import type { RouteChoice } from "./route.types";
@@ -7,19 +8,20 @@ import type { RouteChoice } from "./route.types";
 const hideout: RouteChoice = {
   place: { kind: "hideout", biomeId: "FOREST", quality: 6, level: 9 },
   buyMarketId: "Fort Sterling",
+  materialMarkets: everyMaterialIn("Fort Sterling"),
   sellMarketId: "Arthurs Rest Smugglers Network",
 };
 
 describe("searchWithRoute", () => {
   it("writes the whole route, even the default one", () => {
     expect(searchWithRoute("", DEFAULT_ROUTE_CHOICE)).toBe(
-      "?place=1000&buy=Lymhurst&sell=Lymhurst",
+      "?place=1000&buy=Lymhurst&bars=Thetford&planks=Fort+Sterling&cloth=Lymhurst&leather=Martlock&sell=Lymhurst",
     );
   });
 
   it("writes a hideout's biome, map quality and power level", () => {
     expect(searchWithRoute("", hideout)).toBe(
-      "?place=hideout&biome=FOREST&quality=6&level=9&buy=Fort+Sterling&sell=Arthurs+Rest+Smugglers+Network",
+      "?place=hideout&biome=FOREST&quality=6&level=9&buy=Fort+Sterling&bars=Fort+Sterling&planks=Fort+Sterling&cloth=Fort+Sterling&leather=Fort+Sterling&sell=Arthurs+Rest+Smugglers+Network",
     );
   });
 
@@ -29,7 +31,9 @@ describe("searchWithRoute", () => {
         "?tier=6&place=hideout&biome=SWAMP",
         DEFAULT_ROUTE_CHOICE,
       ),
-    ).toBe("?tier=6&place=1000&buy=Lymhurst&sell=Lymhurst");
+    ).toBe(
+      "?tier=6&place=1000&buy=Lymhurst&bars=Thetford&planks=Fort+Sterling&cloth=Lymhurst&leather=Martlock&sell=Lymhurst",
+    );
   });
 });
 
@@ -49,6 +53,15 @@ describe("routeFromSearch", () => {
     expect(routeFromSearch("?sell=Caerleon")).toEqual({
       ...DEFAULT_ROUTE_CHOICE,
       sellMarketId: "Caerleon",
+    });
+  });
+
+  it("reads each refined material's market, and keeps the preset of one it doesn't know", () => {
+    expect(
+      routeFromSearch("?bars=Caerleon&planks=Black+Market")?.materialMarkets,
+    ).toEqual({
+      ...DEFAULT_ROUTE_CHOICE.materialMarkets,
+      metalbars: "Caerleon",
     });
   });
 

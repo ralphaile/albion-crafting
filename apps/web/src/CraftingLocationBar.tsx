@@ -1,22 +1,33 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useId, useRef, useState } from "react";
 
 import { hideouts } from "@aoc/crafting-data";
 
 import styles from "./CraftingLocationBar.module.css";
 import { formatReturnRate } from "./format.helpers";
+import {
+  REFINED_MATERIALS,
+  REFINING_CITY_MARKETS,
+} from "./material-markets.constants";
+import { sameMaterialMarkets } from "./material-markets.helpers";
 import { placeReturnRates } from "./return-rates.helpers";
 import {
   BUY_MARKET_GROUPS,
   LOCATION_GROUPS,
   SELL_MARKET_GROUPS,
 } from "./route.constants";
-import { defaultHideoutFor, placeFromChoice } from "./route.helpers";
+import {
+  defaultHideoutFor,
+  marketName,
+  placeFromChoice,
+} from "./route.helpers";
 import type {
+  BuyMarkets,
   HideoutChoice,
   OptionGroup,
   PlaceChoice,
   RouteChoice,
 } from "./route.types";
+import { useDismiss } from "./useDismiss";
 
 const HIDEOUT = "hideout";
 
@@ -116,6 +127,102 @@ function HideoutFields({
   );
 }
 
+// The button names the market for everything else, and how many refined
+// materials are bought elsewhere.
+function BuyMarketsPicker({
+  markets,
+  onChange,
+}: {
+  markets: BuyMarkets;
+  onChange: (markets: BuyMarkets) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const labelId = useId();
+  const popoverId = useId();
+  useDismiss(
+    open,
+    () => {
+      setOpen(false);
+    },
+    wrapRef,
+    buttonRef,
+  );
+  const { buyMarketId, materialMarkets } = markets;
+  const elsewhere = REFINED_MATERIALS.filter(
+    ({ id }) => materialMarkets[id] !== buyMarketId,
+  ).length;
+  const presets = sameMaterialMarkets(materialMarkets, REFINING_CITY_MARKETS);
+
+  return (
+    <div ref={wrapRef} className={[styles.field, styles.buy].join(" ")}>
+      <span id={labelId} className={styles.label}>
+        Buy materials in
+      </span>
+      <button
+        ref={buttonRef}
+        type="button"
+        className={styles.select}
+        aria-labelledby={labelId}
+        aria-expanded={open}
+        aria-controls={open ? popoverId : undefined}
+        onClick={() => {
+          setOpen((was) => !was);
+        }}
+      >
+        {marketName(buyMarketId)}
+        {elsewhere > 0 && ` +${String(elsewhere)}`}
+      </button>
+      {open && (
+        <div
+          id={popoverId}
+          role="group"
+          aria-label="Where materials are bought"
+          className={styles.popover}
+        >
+          <Select
+            label="Everything else"
+            className={styles.everythingElse}
+            value={buyMarketId}
+            onChange={(marketId) => {
+              onChange({ ...markets, buyMarketId: marketId });
+            }}
+          >
+            <GroupedOptions groups={BUY_MARKET_GROUPS} />
+          </Select>
+          {REFINED_MATERIALS.map(({ id, label }) => (
+            <Select
+              key={id}
+              label={label}
+              className={undefined}
+              value={materialMarkets[id]}
+              onChange={(marketId) => {
+                onChange({
+                  ...markets,
+                  materialMarkets: { ...materialMarkets, [id]: marketId },
+                });
+              }}
+            >
+              <GroupedOptions groups={BUY_MARKET_GROUPS} />
+            </Select>
+          ))}
+          <button
+            type="button"
+            className={styles.reset}
+            disabled={presets}
+            onClick={() => {
+              onChange({ ...markets, materialMarkets: REFINING_CITY_MARKETS });
+            }}
+          >
+            Refining cities
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Rate({
   term,
   value,
@@ -206,16 +313,12 @@ export function CraftingLocationBar({
       {place.kind === "hideout" && (
         <HideoutFields hideout={place} onChange={choosePlace} />
       )}
-      <Select
-        label="Buy materials in"
-        className={styles.buy}
-        value={route.buyMarketId}
-        onChange={(buyMarketId) => {
-          onChange({ ...route, buyMarketId });
+      <BuyMarketsPicker
+        markets={route}
+        onChange={(markets) => {
+          onChange({ ...route, ...markets });
         }}
-      >
-        <GroupedOptions groups={BUY_MARKET_GROUPS} />
-      </Select>
+      />
       <Select
         label="Sell in"
         className={styles.sell}

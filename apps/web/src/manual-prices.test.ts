@@ -16,6 +16,8 @@ import {
   openManualPriceStore,
 } from "./manual-prices.store";
 import type { ManualPrice } from "./manual-prices.types";
+import { everyMaterialIn } from "./material-markets.helpers";
+import { NO_PINS } from "./material-pins.constants";
 
 const artifact: ManualPrice = {
   region: "west",
@@ -129,6 +131,8 @@ describe("withManualPrices", () => {
   const where = {
     region: "west" as const,
     buyMarketId: "Lymhurst",
+    materialMarkets: everyMaterialIn("Lymhurst"),
+    pins: NO_PINS,
     sellMarketId: "Caerleon",
     quality: 1,
     staleAfterMinutes: 12 * 60,

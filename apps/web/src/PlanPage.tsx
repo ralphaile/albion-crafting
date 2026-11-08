@@ -15,6 +15,8 @@ import { type FillBudget, FillFromFocus } from "./FillFromFocus";
 import { formatCount, formatSilver } from "./format.helpers";
 import { ItemIcon } from "./ItemIcon";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
+import { NO_PINS } from "./material-pins.constants";
+import type { MaterialPins, PinMaterialHandler } from "./material-pins.types";
 import { planMissingPrices } from "./missing-prices.helpers";
 import type { MissingPrice } from "./missing-prices.types";
 import { wholeNumber } from "./number-input.helpers";
@@ -623,6 +625,8 @@ export function PlanPage({
   specializations,
   onFill,
   fillUnavailable,
+  pins = NO_PINS,
+  onPinMaterial,
 }: {
   marketData: MarketData;
   plan: CraftingPlan;
@@ -636,6 +640,8 @@ export function PlanPage({
   specializations: SpecializationProfile;
   onFill?: (budget: FillBudget) => number;
   fillUnavailable?: string;
+  pins?: MaterialPins;
+  onPinMaterial?: PinMaterialHandler;
 }) {
   const state = usePlan(
     marketData,
@@ -643,6 +649,7 @@ export function PlanPage({
     settings,
     manualPrices,
     specializations,
+    pins,
   );
   // While prices are coming, the list keeps the last ones known.
   const missing = useMemo(
@@ -651,9 +658,10 @@ export function PlanPage({
         ? planMissingPrices(plan, state.result, {
             region: settings.server,
             quality: QUALITY,
+            pins,
           })
         : undefined,
-    [plan, state, settings.server],
+    [plan, state, pins, settings.server],
   );
   // Told only when the list changes, since each new plan state makes a new one.
   const reported = useRef<string>(undefined);
@@ -755,8 +763,11 @@ export function PlanPage({
       ))}
       {state.status === "ready" && (
         <ShoppingList
-          markets={shoppingList(plan, state.result)}
+          markets={shoppingList(plan, state.result, pins)}
           typing={typing}
+          {...(onPinMaterial && {
+            pinning: { pins, onPin: onPinMaterial },
+          })}
         />
       )}
     </section>
