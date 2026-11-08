@@ -442,7 +442,7 @@ describe("App", () => {
       const form = screen.getByRole("form", {
         name: "Add Adept's Broadsword 4.0 to plan",
       });
-      fireEvent.change(within(form).getByLabelText("How many"), {
+      fireEvent.change(within(form).getByLabelText("Quantity"), {
         target: { value: quantity },
       });
       fireEvent.click(within(form).getByRole("button", { name: "Add" }));

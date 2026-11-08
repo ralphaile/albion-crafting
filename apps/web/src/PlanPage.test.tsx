@@ -4,6 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ItemPrices, MarketData } from "@aoc/market-prices";
 
+import type { ManualPrice } from "./manual-prices.types";
+import type { MissingPrice } from "./missing-prices.types";
+import { MissingPricesPanel } from "./MissingPricesPanel";
 import { NO_PLAN } from "./plan.constants";
 import type { CraftingPlan } from "./plan.types";
 import { PlanPage } from "./PlanPage";
@@ -52,16 +55,39 @@ function Harness({
   settings: CraftingSettings;
 }) {
   const [plan, setPlan] = useState(initial);
+  const [manualPrices, setManualPrices] = useState<ManualPrice[]>([]);
+  const [missing, setMissing] = useState<readonly MissingPrice[]>([]);
   return (
-    <PlanPage
-      marketData={marketData}
-      plan={plan}
-      onChange={setPlan}
-      route={DEFAULT_ROUTE_CHOICE}
-      settings={settings}
-      manualPrices={[]}
-      specializations={NO_SPECIALIZATIONS}
-    />
+    <>
+      <MissingPricesPanel
+        missingPrices={missing}
+        onSave={(price) => {
+          setManualPrices((saved) => [...saved, price]);
+        }}
+        onRemove={() => undefined}
+      />
+      <PlanPage
+        marketData={marketData}
+        plan={plan}
+        onChange={setPlan}
+        route={DEFAULT_ROUTE_CHOICE}
+        settings={settings}
+        manualPrices={manualPrices}
+        onSaveManualPrice={(price) => {
+          setManualPrices((saved) => [
+            ...saved.filter(
+              (other) =>
+                other.itemId !== price.itemId ||
+                other.marketId !== price.marketId,
+            ),
+            price,
+          ]);
+        }}
+        onRemoveManualPrice={() => undefined}
+        onMissingPrices={setMissing}
+        specializations={NO_SPECIALIZATIONS}
+      />
+    </>
   );
 }
 
@@ -153,18 +179,71 @@ describe("PlanPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("says which prices an entry is missing once they've loaded, and marks the totals", async () => {
+  it("says which prices an entry is missing once they've loaded, and lists only the plan's", async () => {
     renderPlan(answering([lymhurst("T4_MAIN_SWORD", 5000)]));
     fireEvent.click(screen.getByRole("button", { name: "Add location" }));
     addBroadsword(screen.getByRole("region", { name: "Location 1" }));
     expect(screen.getByText("Loading prices…")).toBeInTheDocument();
 
+    expect(await screen.findByText("Prices missing")).toBeInTheDocument();
     expect(
-      await screen.findByText("Missing: Steel Bar 4.0, Worked Leather 4.0"),
+      await screen.findByRole("button", { name: "2 prices missing" }),
     ).toBeInTheDocument();
-    expect(total("Plan totals", "Missing prices")).toBe(
-      "Steel Bar 4.0, Worked Leather 4.0",
+  });
+
+  it("works the plan out again with the missing prices typed", async () => {
+    renderPlan(answering([lymhurst("T4_MAIN_SWORD", 5000)]));
+    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
+    addBroadsword(screen.getByRole("region", { name: "Location 1" }));
+    await screen.findByText("Prices missing");
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "2 prices missing" }),
     );
+    const panel = screen.getByRole("dialog", { name: "Missing prices" });
+    for (const [name, value] of [
+      ["Steel Bar 4.0, sell order in Lymhurst", "100"],
+      ["Worked Leather 4.0, sell order in Lymhurst", "50"],
+    ] as const) {
+      const field = within(panel).getByRole("textbox", { name });
+      fireEvent.change(field, { target: { value } });
+      fireEvent.keyDown(field, { key: "Enter" });
+    }
+
+    expect(total("Plan totals", "Profit")).toBe(
+      total("Location 1 totals", "Profit"),
+    );
+    expect(screen.queryByText("Prices missing")).not.toBeInTheDocument();
+  });
+
+  it("takes typed sell prices in its rows and material prices in its shopping list", async () => {
+    renderPlan(answering([lymhurst("T4_MAIN_SWORD", 5000)]));
+    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
+    addBroadsword(screen.getByRole("region", { name: "Location 1" }));
+    await screen.findByText("Prices missing");
+    const field = (name: string) => screen.getByRole("textbox", { name });
+
+    expect(field(`Sell price of ${BROADSWORD}`)).toHaveAttribute(
+      "placeholder",
+      "5,000",
+    );
+    for (const [name, value] of [
+      ["Unit price of Steel Bar 4.0 in Lymhurst", "100"],
+      ["Unit price of Worked Leather 4.0 in Lymhurst", "50"],
+    ] as const) {
+      fireEvent.change(field(name), { target: { value } });
+      fireEvent.keyDown(field(name), { key: "Enter" });
+    }
+    const profit = total("Plan totals", "Profit");
+
+    fireEvent.change(field(`Sell price of ${BROADSWORD}`), {
+      target: { value: "9000" },
+    });
+    fireEvent.blur(field(`Sell price of ${BROADSWORD}`));
+
+    expect(field(`Sell price of ${BROADSWORD}`)).toHaveValue("9000");
+    expect(total("Plan totals", "Profit")).not.toBe(profit);
+    expect(screen.queryByText("Prices missing")).not.toBeInTheDocument();
   });
 
   it("asks each market once for everything the plan needs there", async () => {
@@ -321,29 +400,9 @@ describe("PlanPage", () => {
     expect(
       within(location).getByRole("row", { name: new RegExp(BROADSWORD) }),
     ).not.toHaveTextContent("Missing");
-    expect(total("Plan totals", "Missing prices")).toBe(
-      "Fine Cloth 4.0, Adept's Bag 4.0",
-    );
-  });
-
-  it("says how many days of focus the plan takes with the focus you have", async () => {
-    renderPlan();
-    fireEvent.click(screen.getByRole("button", { name: "Add location" }));
-    addBroadsword(screen.getByRole("region", { name: "Location 1" }));
-    await screen.findByRole("list", { name: `Materials for ${BROADSWORD}` });
-
-    expect(total("Plan totals", "Days of focus")).toBe("Enough now");
-
-    fireEvent.change(screen.getByLabelText(`Quantity of ${BROADSWORD}`), {
-      target: { value: "40" },
-    });
-    expect(total("Plan totals", "Focus")).toBe("51,440");
-    expect(total("Plan totals", "Days of focus")).toBe("5 days");
-
-    fireEvent.change(screen.getByLabelText("Focus you have"), {
-      target: { value: "30000" },
-    });
-    expect(total("Plan totals", "Days of focus")).toBe("3 days");
+    expect(
+      await screen.findByRole("button", { name: "2 prices missing" }),
+    ).toBeInTheDocument();
   });
 
   it("lets a quantity be cleared and typed again, and keeps the last good one until then", async () => {

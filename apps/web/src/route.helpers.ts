@@ -94,3 +94,13 @@ export function settingsForRoute(
     ? { ...settings, sellMode: "blackMarket" }
     : settings;
 }
+
+// What the plan calls a crafting place, such as "Lymhurst" or
+// "Forest hideout, Q6, level 9".
+export function placeName(choice: PlaceChoice): string {
+  if (choice.kind === "location") {
+    return found(craftingLocations, ({ id }) => id === choice.locationId).name;
+  }
+  const biome = found(hideouts.biomes, ({ id }) => id === choice.biomeId);
+  return `${biome.name} hideout, Q${String(choice.quality)}, level ${String(choice.level)}`;
+}

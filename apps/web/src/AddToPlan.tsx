@@ -87,7 +87,7 @@ export function AddToPlan({
             }
           }}
         >
-          <label htmlFor={inputId}>How many</label>
+          <label htmlFor={inputId}>Quantity</label>
           <input
             id={inputId}
             type="number"

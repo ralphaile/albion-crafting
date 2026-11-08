@@ -21,7 +21,12 @@ export function shoppingList(
         const priced = entry.evaluation.materialCost.lines.find(
           (line) => line.itemId === itemId,
         );
-        const line = lines.get(itemId) ?? { itemId, expected: 0, toBuy: 0 };
+        const line = lines.get(itemId) ?? {
+          itemId,
+          source: priced?.source ?? "sellMin",
+          expected: 0,
+          toBuy: 0,
+        };
         line.expected += count;
         if (
           line.unitPrice === undefined &&

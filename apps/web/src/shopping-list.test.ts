@@ -89,6 +89,7 @@ describe("shoppingList", () => {
     ]);
     expect(markets[0]?.lines[0]).toEqual({
       itemId: "T4_METALBAR",
+      source: "sellMin",
       expected: bars,
       toBuy: Math.ceil(bars),
       unitPrice: 100,
@@ -162,6 +163,7 @@ describe("shoppingListText", () => {
           lines: [
             {
               itemId: "T4_METALBAR",
+              source: "sellMin",
               expected: 83.3,
               toBuy: 84,
               unitPrice: 100,
@@ -173,7 +175,14 @@ describe("shoppingListText", () => {
         },
         {
           marketId: "Martlock",
-          lines: [{ itemId: "T4_LEATHER", expected: 4.2, toBuy: 5 }],
+          lines: [
+            {
+              itemId: "T4_LEATHER",
+              source: "sellMin",
+              expected: 4.2,
+              toBuy: 5,
+            },
+          ],
           total: 0,
           complete: false,
         },
