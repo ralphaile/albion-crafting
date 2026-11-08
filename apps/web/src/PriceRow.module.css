@@ -2,7 +2,7 @@
   display: grid;
   grid-template-areas:
     "icon name input"
-    "icon status status"
+    "icon status input"
     ". detail detail"
     ". error error";
   grid-template-columns: 36px minmax(0, 1fr) 7.5em;
@@ -19,11 +19,46 @@
 }
 
 .name {
+  display: flex;
   grid-area: name;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nameText {
   overflow-wrap: anywhere;
 }
 
+.tier {
+  flex: none;
+  padding: 0 5px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.tier[data-enchant="1"] {
+  color: var(--enchant-1);
+}
+
+.tier[data-enchant="2"] {
+  color: var(--enchant-2);
+}
+
+.tier[data-enchant="3"] {
+  color: var(--enchant-3);
+}
+
+.tier[data-enchant="4"] {
+  color: var(--enchant-4);
+}
+
 .count {
+  flex: none;
   color: var(--text-muted);
   font-variant-numeric: lining-nums tabular-nums;
 }
@@ -44,19 +79,19 @@
   color: var(--loss);
 }
 
-/* Stays at the top right when the name wraps. */
 .input {
   grid-area: input;
-  align-self: start;
   width: 100%;
   height: 34px;
   padding-block: 0;
   background: var(--bg);
+  text-align: right;
   font-variant-numeric: lining-nums tabular-nums;
 }
 
 .input::placeholder {
   color: var(--text-faint);
+  text-align: right;
 }
 
 .input[aria-invalid="true"] {
@@ -69,4 +104,16 @@
   color: var(--loss);
   font-size: 14px;
   text-align: right;
+}
+
+@media (max-width: 480px) {
+  .line {
+    grid-template-columns: 32px minmax(0, 1fr) 6em;
+    column-gap: 10px;
+  }
+
+  .line img {
+    width: 32px;
+    height: 32px;
+  }
 }

@@ -15,8 +15,17 @@
   color: var(--text);
 }
 
+.wide {
+  width: min(480px, 100vw);
+}
+
 .panel[open] {
   animation: slide-in 160ms ease-out;
+}
+
+/* The page stays put behind it, so only the panel has a scroll bar. */
+:global(html):has(.panel[open]) {
+  overflow: hidden;
 }
 
 .panel::backdrop {
@@ -31,8 +40,8 @@
 }
 
 .sheet {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
   height: 100%;
 }
 
@@ -82,12 +91,21 @@
   stroke: var(--text);
 }
 
+.toolbar {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--rule);
+}
+
 .body {
   display: grid;
+  flex: 1;
   align-content: start;
   gap: 24px;
+  min-height: 0;
   overflow-y: auto;
   padding: 18px 20px 64px;
+  scrollbar-color: var(--rule) transparent;
+  scrollbar-width: thin;
 }
 
 .footer {

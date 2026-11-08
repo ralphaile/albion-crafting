@@ -1,7 +1,7 @@
 .shoppingList {
   display: grid;
-  gap: 10px;
-  padding: 12px;
+  gap: 12px;
+  padding: 14px;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--surface);
@@ -17,29 +17,67 @@
 .head h3 {
   margin: 0;
   font-family: var(--font-display);
+  font-size: 20px;
 }
 
 .market {
   width: 100%;
   border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
+  table-layout: fixed;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.countColumn {
+  width: 6em;
+}
+
+.numberColumn {
+  width: 8.5em;
 }
 
 .market caption {
-  padding-bottom: 4px;
+  padding-bottom: 6px;
+  color: var(--brass);
   font-family: var(--font-caps);
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-align: left;
 }
 
 .market th,
 .market td {
-  padding: 4px 8px;
+  padding: 6px 8px;
   border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
+  text-align: right;
+}
+
+.market thead th {
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.market th:first-child {
   text-align: left;
 }
 
-.market td {
-  text-align: right;
+.market tbody th {
+  font-weight: 400;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.item img {
+  flex: none;
+  width: 28px;
+  height: 28px;
 }
 
 .market tfoot th,
@@ -48,6 +86,30 @@
   font-weight: 700;
 }
 
+.market tfoot th {
+  text-align: right;
+}
+
 .missing {
   color: var(--price-missing);
+}
+
+@media (max-width: 600px) {
+  .countColumn {
+    width: 3.2em;
+  }
+
+  .numberColumn {
+    width: 5.2em;
+  }
+
+  .item img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .market th,
+  .market td {
+    padding-inline: 4px;
+  }
 }

@@ -126,6 +126,9 @@ export function App({
   const showSpecializations = (treeId: string) => {
     setSpecializationsShown({ open: true, treeId });
   };
+  // The plan page's, which the header lists while it's open.
+  const [planMissingPrices, setPlanMissingPrices] =
+    useState<readonly MissingPrice[]>(NO_MISSING_PRICES);
   const { manualPrices, saveManualPrice, removeManualPrice } = useManualPrices(
     manualPriceStore,
     savedManualPrices,
@@ -210,9 +213,11 @@ export function App({
         <div className={styles.actions}>
           <MissingPricesPanel
             missingPrices={
-              bestCrafts.status === "loading"
-                ? NO_MISSING_PRICES
-                : bestCrafts.missingPrices
+              page.kind === "plan"
+                ? planMissingPrices
+                : bestCrafts.status === "loading"
+                  ? NO_MISSING_PRICES
+                  : bestCrafts.missingPrices
             }
             onSave={saveManualPrice}
             onRemove={removeManualPrice}
@@ -246,6 +251,9 @@ export function App({
             route={routeChoice}
             settings={settings}
             manualPrices={manualPrices}
+            onSaveManualPrice={saveManualPrice}
+            onRemoveManualPrice={removeManualPrice}
+            onMissingPrices={setPlanMissingPrices}
             specializations={specializations}
             onFill={(budget) => {
               const crafts =

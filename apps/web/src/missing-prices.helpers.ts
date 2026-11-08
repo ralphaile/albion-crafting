@@ -1,8 +1,10 @@
+import type { PlanResult } from "@aoc/core";
 import type { Region } from "@aoc/market-prices";
 
 import type { Craft } from "./best-crafts.types";
 import type { ManualPriceKey } from "./manual-prices.types";
 import type { MissingPrice } from "./missing-prices.types";
+import type { CraftingPlan } from "./plan.types";
 
 interface PricesAt {
   region: Region;
@@ -11,8 +13,10 @@ interface PricesAt {
   quality: number;
 }
 
+type Priced = Pick<Craft, "itemId" | "materialCost" | "revenue">;
+
 function missingKeys(
-  craft: Craft,
+  craft: Priced,
   { region, buyMarketId, sellMarketId, quality }: PricesAt,
 ): ManualPriceKey[] {
   const key = (
@@ -36,10 +40,37 @@ export function missingPrices(
   crafts: readonly Craft[],
   at: PricesAt,
 ): MissingPrice[] {
+  return counted(crafts.map((craft) => missingKeys(craft, at)));
+}
+
+// The same for the plan, each entry in its own location's markets.
+export function planMissingPrices(
+  plan: CraftingPlan,
+  result: PlanResult,
+  at: Pick<PricesAt, "region" | "quality">,
+): MissingPrice[] {
+  return counted(
+    plan.locations.flatMap(({ route, entries }, index) =>
+      entries.flatMap((entry, entryIndex) => {
+        const planned = result.locations[index]?.entries[entryIndex];
+        return planned === undefined
+          ? []
+          : [
+              missingKeys(
+                { ...planned.evaluation, itemId: entry.itemId },
+                { ...at, ...route },
+              ),
+            ];
+      }),
+    ),
+  );
+}
+
+function counted(keyLists: readonly ManualPriceKey[][]): MissingPrice[] {
   const found = new Map<string, MissingPrice>();
-  for (const craft of crafts) {
+  for (const keyList of keyLists) {
     const keys = new Map(
-      missingKeys(craft, at).map((key) => [
+      keyList.map((key) => [
         `${key.itemId} ${key.marketId} ${key.source}`,
         key,
       ]),

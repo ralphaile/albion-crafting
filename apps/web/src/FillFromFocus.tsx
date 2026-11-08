@@ -2,6 +2,7 @@ import { useId, useState } from "react";
 
 import type { FocusBudget } from "@aoc/core";
 
+import controls from "./controls.module.css";
 import styles from "./FillFromFocus.module.css";
 import { formatCount } from "./format.helpers";
 import { wholeNumber } from "./number-input.helpers";
@@ -85,6 +86,7 @@ export function FillFromFocus({
       />
       <button
         type="submit"
+        className={controls.button}
         disabled={!valid || unavailable !== undefined}
         title={unavailable}
       >

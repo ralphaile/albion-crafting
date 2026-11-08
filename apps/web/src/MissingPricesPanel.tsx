@@ -101,6 +101,22 @@ export function MissingPricesPanel({
         onClose={() => {
           setOpen(false);
         }}
+        wide
+        toolbar={
+          total === 0 ? undefined : (
+            <input
+              className={styles.search}
+              type="search"
+              placeholder="Search"
+              aria-label="Search missing prices"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setChosenPage(0);
+              }}
+            />
+          )
+        }
         footer={
           pageCount > 1 ? (
             <Pager
@@ -116,21 +132,7 @@ export function MissingPricesPanel({
           ) : undefined
         }
       >
-        {total === 0 ? (
-          <p className={styles.none}>No prices missing</p>
-        ) : (
-          <input
-            className={styles.search}
-            type="search"
-            placeholder="Search"
-            aria-label="Search missing prices"
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setChosenPage(0);
-            }}
-          />
-        )}
+        {total === 0 && <p className={styles.none}>No prices missing</p>}
         {total > 0 && matching.length === 0 && (
           <p className={styles.none}>No missing prices match</p>
         )}

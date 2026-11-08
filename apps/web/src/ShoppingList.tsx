@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 
 import { itemName } from "@aoc/crafting-data";
 
+import controls from "./controls.module.css";
 import { formatCount, formatSilver } from "./format.helpers";
+import { ItemIcon } from "./ItemIcon";
+import { PriceField, type PriceTyping } from "./PriceField";
+import { QUALITY } from "./prices.constants";
 import { shoppingListText } from "./shopping-list.helpers";
 import type { ShoppingMarket } from "./shopping-list.types";
 import styles from "./ShoppingList.module.css";
@@ -17,10 +21,13 @@ const COPY_LABELS: Record<CopyState, string> = {
   failed: "Couldn’t copy",
 };
 
+// With `typing`, each unit price can be typed over.
 export function ShoppingList({
   markets,
+  typing,
 }: {
   markets: readonly ShoppingMarket[];
+  typing?: PriceTyping;
 }) {
   const [copy, setCopy] = useState<CopyState>("idle");
   useEffect(() => {
@@ -44,6 +51,7 @@ export function ShoppingList({
         <h3>Shopping list</h3>
         <button
           type="button"
+          className={controls.button}
           aria-live="polite"
           onClick={() => {
             // A page served over plain http has no clipboard at all.
@@ -67,6 +75,13 @@ export function ShoppingList({
       {markets.map(({ marketId, lines, total, complete }) => (
         <table key={marketId} className={styles.market}>
           <caption>{marketId}</caption>
+          {/* The same widths in every market, so their columns line up. */}
+          <colgroup>
+            <col />
+            <col className={styles.countColumn} />
+            <col className={styles.numberColumn} />
+            <col className={styles.numberColumn} />
+          </colgroup>
           <thead>
             <tr>
               <th scope="col">Item</th>
@@ -76,18 +91,36 @@ export function ShoppingList({
             </tr>
           </thead>
           <tbody>
-            {lines.map(({ itemId, toBuy, unitPrice, cost }) => (
+            {lines.map(({ itemId, source, toBuy, unitPrice, cost }) => (
               <tr key={itemId}>
-                <th scope="row">{itemName(itemId)}</th>
+                <th scope="row">
+                  <span className={styles.item}>
+                    <ItemIcon id={itemId} />
+                    {itemName(itemId)}
+                  </span>
+                </th>
                 <td>{formatCount(toBuy)}</td>
                 <td>
-                  {unitPrice === undefined ? (
+                  {typing !== undefined ? (
+                    <PriceField
+                      label={`Unit price of ${itemName(itemId)} in ${marketId}`}
+                      priceKey={{
+                        region: typing.region,
+                        itemId,
+                        marketId,
+                        quality: QUALITY,
+                        source,
+                      }}
+                      price={unitPrice}
+                      typing={typing}
+                    />
+                  ) : unitPrice === undefined ? (
                     <span className={styles.missing}>No price</span>
                   ) : (
                     formatSilver(unitPrice)
                   )}
                 </td>
-                <td>{cost === undefined ? "" : formatSilver(cost)}</td>
+                <td>{cost === undefined ? "—" : formatSilver(cost)}</td>
               </tr>
             ))}
           </tbody>

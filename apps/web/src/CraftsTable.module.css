@@ -33,7 +33,7 @@
 }
 
 .pricesColumn {
-  width: 192px;
+  width: 208px;
 }
 
 .table thead th {
@@ -269,11 +269,12 @@
   white-space: nowrap;
 }
 
+/* The buttons keep their place whatever the ages say. */
 .pricesInner {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  gap: 4px;
 }
 
 .edit {
@@ -322,7 +323,7 @@
    space after it. */
 .ageLabel {
   display: inline-block;
-  min-width: 70px;
+  min-width: 60px;
   white-space: pre;
   font-family: var(--font-caps);
 }

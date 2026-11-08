@@ -30,6 +30,8 @@ export interface PlanLocation {
 export type PlanSettings = Omit<EvaluateSettings, "focus" | "dailyBonuses">;
 
 // `count` is what you expect to buy, after the materials that come back.
+// `count` is what returns are expected to leave the crafts using, rounded up
+// to whole items to buy.
 export interface PlannedMaterial {
   itemId: string;
   count: number;

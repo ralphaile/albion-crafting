@@ -1,4 +1,4 @@
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useId } from "react";
 
 import type { OrderPrices } from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
@@ -7,23 +7,15 @@ import { markets } from "@aoc/market-prices";
 import { ItemIcon } from "./ItemIcon";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 import styles from "./PriceRow.module.css";
+import { usePriceDraft } from "./usePriceDraft";
 
 const ORDER_LABELS: Record<keyof OrderPrices, string> = {
   sellMin: "Sell order",
   buyMax: "Buy order",
 };
 
-const WHOLE_NUMBER = /^\d+$/;
-
 function marketName(id: string) {
   return markets.find((market) => market.id === id)?.name ?? id;
-}
-
-function parseSilver(text: string) {
-  const silver = Number(text);
-  return WHOLE_NUMBER.test(text) && silver > 0 && Number.isSafeInteger(silver)
-    ? silver
-    : undefined;
 }
 
 export function PriceRow({
@@ -52,72 +44,43 @@ export function PriceRow({
 }) {
   const statusId = useId();
   const errorId = useId();
-  const saved = manual === undefined ? "" : String(manual.value);
-  const [draft, setDraft] = useState({ text: saved, saved, invalid: false });
-  if (draft.saved !== saved) {
-    setDraft({ text: saved, saved, invalid: false });
-  }
+  const { invalid, inputProps } = usePriceDraft({
+    priceKey,
+    manual,
+    onSave,
+    onRemove,
+    onEntered,
+  });
   const name = itemName(priceKey.itemId);
+  // Shown as the table shows it: the name, then the tier in a chip.
+  const tier = /^(.*) (\d)\.(\d)$/.exec(name);
   const order = ORDER_LABELS[priceKey.source];
   const market = marketName(priceKey.marketId);
-
-  function commit() {
-    const text = draft.text.trim();
-    if (text === saved) {
-      return false;
-    }
-    if (text === "") {
-      onRemove(priceKey);
-      return true;
-    }
-    const value = parseSilver(text);
-    if (value === undefined) {
-      setDraft({ ...draft, invalid: true });
-      return false;
-    }
-    onSave({ ...priceKey, value, enteredAt: Date.now() });
-    return true;
-  }
 
   return (
     <li className={styles.line}>
       <ItemIcon id={priceKey.itemId} />
-      <span className={styles.name}>
-        {name}
-        {count !== undefined && <span className={styles.count}> ×{count}</span>}
+      <span className={styles.name} title={name}>
+        <span className={styles.nameText}>{tier?.[1] ?? name}</span>
+        {tier !== null && (
+          <span className={styles.tier} data-enchant={tier[3]}>
+            {tier[2]}.{tier[3]}
+          </span>
+        )}
+        {count !== undefined && <span className={styles.count}>×{count}</span>}
       </span>
       <input
+        {...inputProps}
         className={styles.input}
-        type="text"
-        inputMode="numeric"
-        autoComplete="off"
-        placeholder={placeholder}
-        value={draft.text}
+        placeholder={placeholder ?? "Silver"}
         aria-label={`${name}, ${order.toLowerCase()} in ${market}`}
-        aria-invalid={draft.invalid}
-        aria-describedby={draft.invalid ? `${statusId} ${errorId}` : statusId}
-        onChange={(event) => {
-          setDraft({ text: event.target.value, saved, invalid: false });
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            if (commit()) {
-              onEntered?.();
-            }
-          } else if (event.key === "Escape" && draft.text !== saved) {
-            // Cancels the typing; a second Escape closes the panel.
-            event.preventDefault();
-            setDraft({ text: saved, saved, invalid: false });
-          }
-        }}
-        onBlur={commit}
+        aria-describedby={invalid ? `${statusId} ${errorId}` : statusId}
       />
       <span id={statusId} className={styles.status} data-missing={missing}>
         {order} · {market} · {status}
       </span>
       {detail !== undefined && <span className={styles.detail}>{detail}</span>}
-      {draft.invalid && (
+      {invalid && (
         <p id={errorId} className={styles.error}>
           Whole silver above 0, like 1500
         </p>

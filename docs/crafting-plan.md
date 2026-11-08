@@ -6,18 +6,19 @@ A plan says what you'll craft where, and how many: "10 broadswords in Lymhurst, 
 
 `apps/web/src/PlanPage.tsx`:
 
-- **Add location** adds a location with the route chosen on the best-crafts page. Each location has its own route bar to change where it crafts, buys and sells, and a button to remove it.
-- **Add an item** searches items by name and adds one at quantity 1, with focus. Each entry's enchantment, recipe, quantity, focus and daily bonus can be changed in its row.
-- **Each row** shows the materials to buy after returns, the focus, the station fee and the profit. The materials and the profit carry the same price badges as the best-crafts table: fresh, stale, typed or missing. An entry without every price says which ones it's missing instead of a profit.
-- **Totals** for each location and for the plan: silver to invest, focus and profit, and the missing prices.
-- **Days of focus:** the plan's totals compare its focus with **Focus you have** (10,000 to start, at most the 30,000 a character stores) and say how many days of the 10,000 focus regained a day it takes, or "Enough now". `focusDays()` in `packages/core/src/focus.helpers.ts` counts them. The focus uses each item's focus cost efficiency from your specializations.
-- **Shopping list:** every material the plan needs, added up across entries and locations for each market it's bought in. Each line is the expected count after returns rounded up to whole items, its unit price and its cost, with a total per market. **Copy as text** copies it, for example to paste into Discord. `shoppingList()` in `apps/web/src/shopping-list.helpers.ts` builds it.
+- **Add location** adds a location with the route chosen on the best-crafts page, titled by its place, such as "Lymhurst" or "Forest hideout, Q6, level 9". Each location has its own route bar to change where it crafts, buys and sells, and × to remove it.
+- **Add an item** searches items by name. Each item found has a button per enchantment, 4.0 to 4.4, which adds one of it, with focus.
+- **Each row** has the item's icon and name, its enchantment, and its recipe when it has more than one, named by the materials that differ, such as the artifact. Then the quantity with − and +, a focus switch and the daily bonus: none, 10% or 20%. It shows the materials to buy, in whole items, the focus, the station fee, the sell price and the profit. The materials and the sell price carry the same price badges as the best-crafts table: fresh, stale, typed or missing. The sell price is a field showing the price in use; typing over it saves a [typed price](manual-prices.md). An entry without every price says **Prices missing** instead of a profit.
+- **Totals:** the plan's, and each location's in its heading: silver to invest, focus and profit. Silver to invest is the materials in whole items, the station fees and the recipes' silver.
+- **Missing prices:** while the plan page is open, the **prices missing** button at the top lists only the plan's missing prices, to type them.
+- **On a narrow screen** each row is a card, its fields labelled.
+- **Shopping list:** every material the plan needs, added up across entries and locations for each market it's bought in. Each line is the expected count after returns rounded up to whole items, its unit price and its cost, with a total per market. The unit price is a field like the sell price: typing over it saves a typed price for that material in that market. **Copy as text** copies it, for example to paste into Discord. `shoppingList()` in `apps/web/src/shopping-list.helpers.ts` builds it.
 
 `usePlan()` asks each market once for every item the plan needs there, so editing a quantity or focus needs no new request. Prices use the same settings as the best-crafts table: the server, when a price goes stale, and the typed prices.
 
 ## Adding from the ranking
 
-Each row of the best-crafts table has a **+** button, and the craft panel an **Add to plan** button. Both ask how many, then add the craft to the plan:
+Each row of the best-crafts table has a **+** button, and the craft panel an **Add to plan** button. Both ask for the quantity, then add the craft to the plan:
 
 - **Where:** the location with the route chosen above the table, made if the plan doesn't have it yet.
 - **Which recipe:** the one the table uses, chosen in the panel or the most profitable.
@@ -26,7 +27,7 @@ Each row of the best-crafts table has a **+** button, and the craft panel an **A
 
 ## Filling it from a focus budget
 
-**Fill from focus** on the plan page fills the plan with the best crafts for the focus you have. It spends **Focus you have**, and asks for the most of each item (100 to start) and, optionally, the silver to spend.
+**Fill from focus** on the plan page fills the plan with the best crafts for the focus you have. It spends **Focus you have** (10,000 to start, at most the 30,000 a character stores), and asks for the most of each item (100 to start) and, optionally, the silver to spend.
 
 - **Which crafts:** the ones the best-crafts table ranks for its route and filters, with every price. It needs **Focus** on in Settings, as only then do crafts have a focus cost.
 - **Greedy by silver per focus:** `fillFocusBudget()` in `packages/core/src/focus-budget.helpers.ts` takes the craft with the most silver per focus first, as many crafts as the focus, the silver and the item's cap allow, then the next. Crafts that lose silver are left out.
@@ -50,5 +51,5 @@ The plan is saved in IndexedDB with the other settings, as `PLAN_SETTING` in `ap
 `evaluatePlan()` in `packages/core/src/plan.helpers.ts` evaluates each entry at its own location, with that location's prices, and adds up each location and the whole plan. `planLocations()` in `apps/web/src/plan.helpers.ts` turns a saved plan into its input.
 
 - **Whole crafts:** the quantity is how many items you want. They're made in whole crafts, so a recipe that makes 4 at once makes 8 for a quantity of 5, and all 8 are sold.
-- **Each entry:** the crafts, the items made, the materials you expect to buy after [returns](glossary.md#return-rate-rrr), the focus, and with every price, the cost (materials, station fees and silver), the revenue and the profit.
+- **Each entry:** the crafts, the items made, the materials you expect to buy after [returns](glossary.md#return-rate-rrr), rounded up to whole items and priced that way, the focus, and with every price, the cost (materials, station fees and silver), the revenue and the profit.
 - **Totals**, per location and for the plan: focus, cost, revenue and profit, and the items with a missing price, once each. An entry with a missing price still counts its focus, but not its silver, and marks the totals incomplete.

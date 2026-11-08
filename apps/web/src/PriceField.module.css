@@ -1,0 +1,26 @@
+.price {
+  width: 9ch;
+  height: 28px;
+  padding: 0 6px;
+  background: var(--bg);
+  font-size: 14px;
+  text-align: right;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* The price in use is the hint, lighter than a typed one. */
+.price::placeholder {
+  color: var(--text-muted);
+}
+
+.price[data-missing="true"] {
+  border-color: var(--price-missing);
+}
+
+.price[data-missing="true"]::placeholder {
+  color: var(--text-faint);
+}
+
+.price[aria-invalid="true"] {
+  border-color: var(--loss);
+}

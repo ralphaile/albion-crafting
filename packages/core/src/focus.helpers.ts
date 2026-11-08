@@ -2,8 +2,6 @@ import {
   FCE_PER_MASTERY_LEVEL,
   FCE_PER_OTHER_SPEC_LEVEL,
   FCE_PER_SPEC_LEVEL,
-  FOCUS_PER_DAY,
-  MAX_STORED_FOCUS,
 } from "./focus.constants.js";
 import type { FceParts, SpecializationLevels } from "./focus.types.js";
 
@@ -44,11 +42,4 @@ export function specializationFce({
       FCE_PER_OTHER_SPEC_LEVEL,
   };
   return { ...parts, total: parts.mastery + parts.spec + parts.otherSpecs };
-}
-
-// The days of regained focus it takes to have `needed`, starting from `stored`,
-// which can't be above what a character stores. 0 when there's enough now.
-export function focusDays(needed: number, stored: number): number {
-  const missing = needed - Math.min(Math.max(stored, 0), MAX_STORED_FOCUS);
-  return missing <= 0 ? 0 : Math.ceil(missing / FOCUS_PER_DAY);
 }
