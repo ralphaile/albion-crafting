@@ -85,6 +85,32 @@ function aodpPriceRow(
   };
 }
 
+// The value this browser saved for the setting `id`, so a test can wait for
+// the save before it reloads.
+export function savedSetting(page: Page, id: string): Promise<unknown> {
+  return page.evaluate(
+    (settingId) =>
+      new Promise((resolve, reject) => {
+        const open = indexedDB.open("aoc-settings");
+        open.onerror = () => {
+          reject(new Error("Couldn't open the saved settings"));
+        };
+        open.onsuccess = () => {
+          const db = open.result;
+          const get = db
+            .transaction("settings")
+            .objectStore("settings")
+            .get(settingId);
+          get.onsuccess = () => {
+            db.close();
+            resolve((get.result as { value?: unknown } | undefined)?.value);
+          };
+        };
+      }),
+    id,
+  );
+}
+
 export async function answerPrices(page: Page, prices: readonly FakePrice[]) {
   await page.route(
     (url) => AODP_PRICES.test(url.origin + url.pathname),

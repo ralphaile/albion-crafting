@@ -4,8 +4,8 @@ test("a row opens its craft, and a material price changed there changes the prof
   page,
 }) => {
   await answerPrices(page, [
-    { itemId: "T4_METALBAR", marketId: "Lymhurst", sellMin: 100 },
-    { itemId: "T4_LEATHER", marketId: "Lymhurst", sellMin: 50 },
+    { itemId: "T4_METALBAR", marketId: "Thetford", sellMin: 100 },
+    { itemId: "T4_LEATHER", marketId: "Martlock", sellMin: 50 },
     { itemId: "T4_MAIN_SWORD", marketId: "Lymhurst", sellMin: 6000 },
   ]);
   await page.goto("./?tier=4&enchant=0&q=broadsword");
@@ -28,7 +28,7 @@ test("a row opens its craft, and a material price changed there changes the prof
 
   // Bars at 200 add another 16 × (1 − 0.92/1.92) × 100 = 833.33.
   const bars = panel.getByRole("textbox", {
-    name: "Steel Bar 4.0, sell order in Lymhurst",
+    name: "Steel Bar 4.0, sell order in Thetford",
   });
   await bars.fill("200");
   await bars.press("Enter");

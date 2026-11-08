@@ -4,8 +4,8 @@ test("typing a missing artifact price completes its craft, and it's still there 
   page,
 }) => {
   await answerPrices(page, [
-    { itemId: "T4_METALBAR", marketId: "Lymhurst", sellMin: 100 },
-    { itemId: "T4_LEATHER", marketId: "Lymhurst", sellMin: 50 },
+    { itemId: "T4_METALBAR", marketId: "Thetford", sellMin: 100 },
+    { itemId: "T4_LEATHER", marketId: "Martlock", sellMin: 50 },
     {
       itemId: "T4_MAIN_SCIMITAR_MORGANA",
       marketId: "Lymhurst",
@@ -70,13 +70,13 @@ test("a newer AODP price replaces a typed one, unless you always prefer yours", 
   const materials = [
     {
       itemId: "T4_METALBAR",
-      marketId: "Lymhurst",
+      marketId: "Thetford",
       sellMin: 100,
       ageMinutes: 3 * 60,
     },
     {
       itemId: "T4_LEATHER",
-      marketId: "Lymhurst",
+      marketId: "Martlock",
       sellMin: 50,
       ageMinutes: 3 * 60,
     },
