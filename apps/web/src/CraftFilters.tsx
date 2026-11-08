@@ -34,6 +34,7 @@ import type {
   Filters,
   Option,
 } from "./filters.types";
+import { useDismiss } from "./useDismiss";
 
 export type UpdateFilters = (update: (filters: Filters) => Filters) => void;
 
@@ -213,30 +214,14 @@ function CategoryPicker({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    const closeFromOutside = ({ target }: Event) => {
-      if (target instanceof Node && !pickerRef.current?.contains(target)) {
-        setOpen(false);
-      }
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        buttonRef.current?.focus();
-      }
-    };
-    document.addEventListener("pointerdown", closeFromOutside);
-    document.addEventListener("focusin", closeFromOutside);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeFromOutside);
-      document.removeEventListener("focusin", closeFromOutside);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [open]);
+  useDismiss(
+    open,
+    () => {
+      setOpen(false);
+    },
+    pickerRef,
+    buttonRef,
+  );
 
   useLayoutEffect(() => {
     const panel = panelRef.current;

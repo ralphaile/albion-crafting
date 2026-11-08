@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import styles from "./AddToPlan.module.css";
 import { MAX_PLAN_QUANTITY } from "./plan.constants";
+import { useDismiss } from "./useDismiss";
 
 // Asks how many to craft, then adds them to the plan. `name` is the item's.
 export function AddToPlan({
@@ -20,33 +21,14 @@ export function AddToPlan({
   const formId = useId();
   const inputId = useId();
 
-  useEffect(() => {
-    if (open === undefined) {
-      return;
-    }
-    const closeFromOutside = ({ target }: Event) => {
-      if (target instanceof Node && !wrapRef.current?.contains(target)) {
-        setOpen(undefined);
-      }
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      // Only the popover closes, not a panel it's in.
-      if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopPropagation();
-        setOpen(undefined);
-        buttonRef.current?.focus();
-      }
-    };
-    document.addEventListener("pointerdown", closeFromOutside);
-    document.addEventListener("focusin", closeFromOutside);
-    document.addEventListener("keydown", closeOnEscape, true);
-    return () => {
-      document.removeEventListener("pointerdown", closeFromOutside);
-      document.removeEventListener("focusin", closeFromOutside);
-      document.removeEventListener("keydown", closeOnEscape, true);
-    };
-  }, [open]);
+  useDismiss(
+    open !== undefined,
+    () => {
+      setOpen(undefined);
+    },
+    wrapRef,
+    buttonRef,
+  );
 
   const count = Number(quantity);
   const valid =
