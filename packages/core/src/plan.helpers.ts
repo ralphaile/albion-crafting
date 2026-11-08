@@ -9,6 +9,12 @@ import type {
   PlannedEntry,
 } from "./plan.types.js";
 
+// What returns are expected to leave you using, as whole items to buy.
+function wholeItems(expected: number): number {
+  return Math.ceil(expected - 1e-9);
+}
+
+// Materials are bought, and so priced, in whole items.
 function planEntry(
   entry: PlanEntry,
   place: CraftingPlace,
@@ -34,7 +40,7 @@ function planEntry(
     materials: evaluation.materialCost.lines.map(
       ({ itemId, effectiveCount }) => ({
         itemId,
-        count: effectiveCount * crafts,
+        count: wholeItems(effectiveCount * crafts),
       }),
     ),
     focus: (evaluation.focusCost ?? 0) * crafts,
@@ -47,11 +53,16 @@ function planEntry(
   ) {
     return { ...base, status: "incomplete" };
   }
+  const materialCost = evaluation.materialCost.lines.reduce(
+    (sum, line, index) =>
+      sum +
+      (line.status === "missing"
+        ? 0
+        : line.unitPrice * (base.materials[index]?.count ?? 0)),
+    0,
+  );
   const cost =
-    (evaluation.materialCost.total +
-      evaluation.stationFee +
-      evaluation.silverCost) *
-    crafts;
+    materialCost + (evaluation.stationFee + evaluation.silverCost) * crafts;
   const revenue = evaluation.revenue.net * base.made;
   return {
     ...base,

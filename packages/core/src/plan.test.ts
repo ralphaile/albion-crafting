@@ -109,22 +109,16 @@ describe("evaluatePlan", () => {
       settings,
     );
 
-    const cityCost = 10 * (1600 * (1 - CITY_RRR) + 72);
-    const hideoutCost = 5 * (1920 * (1 - HIDEOUT_RRR) + 72);
+    const cityCost = 2 * Math.ceil(80 * (1 - CITY_RRR)) * 100 + 10 * 72;
+    const hideoutCost = 2 * Math.ceil(40 * (1 - HIDEOUT_RRR)) * 120 + 5 * 72;
     const [atCity, atHideout] = result.locations;
     expect(atCity?.entries[0]).toMatchObject({
       status: "complete",
       crafts: 10,
       made: 10,
       materials: [
-        {
-          itemId: "T4_CLOTH",
-          count: expect.closeTo(80 * (1 - CITY_RRR), 9) as number,
-        },
-        {
-          itemId: "T4_LEATHER",
-          count: expect.closeTo(80 * (1 - CITY_RRR), 9) as number,
-        },
+        { itemId: "T4_CLOTH", count: Math.ceil(80 * (1 - CITY_RRR)) },
+        { itemId: "T4_LEATHER", count: Math.ceil(80 * (1 - CITY_RRR)) },
       ],
       focus: 0,
     });
