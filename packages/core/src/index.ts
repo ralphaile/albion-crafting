@@ -17,12 +17,10 @@ export {
   FCE_PER_MASTERY_LEVEL,
   FCE_PER_OTHER_SPEC_LEVEL,
   FCE_PER_SPEC_LEVEL,
-  FOCUS_PER_DAY,
   MAX_STORED_FOCUS,
 } from "./focus.constants.js";
 export {
   focusCost,
-  focusDays,
   silverPerFocus,
   specializationFce,
 } from "./focus.helpers.js";
