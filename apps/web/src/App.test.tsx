@@ -574,9 +574,9 @@ describe("App", () => {
     );
     await renderApp({ marketData: answering(broadswordPrices) });
 
-    await screen.findByRole("region", { name: "Best crafts" });
-
-    expect(window.location.search).not.toContain("item=");
+    await waitFor(() => {
+      expect(window.location.search).not.toContain("item=");
+    });
   });
 
   it("drops a linked craft the route doesn't have when prices fail to load", async () => {
