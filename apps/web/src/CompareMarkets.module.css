@@ -1,0 +1,130 @@
+.markets {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.markets th,
+.markets td {
+  padding: 6px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
+  font-weight: 400;
+  text-align: right;
+  vertical-align: top;
+}
+
+.markets th:first-child {
+  padding-left: 8px;
+  text-align: left;
+}
+
+.markets td:last-child {
+  padding-right: 0;
+  vertical-align: middle;
+}
+
+.markets thead th {
+  color: var(--text-muted);
+  font-family: var(--font-caps);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.markets tbody tr[data-best="true"] {
+  background: var(--surface-hover);
+  box-shadow: inset 2px 0 0 var(--brass);
+}
+
+.markets td[data-loss="true"] {
+  color: var(--loss);
+}
+
+.name {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.tag {
+  color: var(--brass);
+  font-family: var(--font-caps);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.price {
+  display: block;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.gain {
+  display: block;
+  color: var(--brass);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.sell {
+  padding: 3px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-size: 14px;
+  white-space: nowrap;
+  transition: border-color 120ms ease-out;
+}
+
+.sell:hover {
+  border-color: var(--text-faint);
+}
+
+.sell[aria-pressed="true"] {
+  border-color: var(--brass);
+  color: var(--brass);
+}
+
+.skeleton td {
+  height: 49px;
+  background:
+    linear-gradient(
+        100deg,
+        transparent 30%,
+        color-mix(in srgb, var(--brass) 9%, transparent) 50%,
+        transparent 70%
+      )
+      0 0 / 300% 100%,
+    linear-gradient(var(--surface-hover), var(--surface-hover)) 8px 50% / 40%
+      12px no-repeat;
+  animation: sheen 1.8s ease-in-out infinite;
+}
+
+@keyframes sheen {
+  from {
+    background-position:
+      100% 0,
+      8px 50%;
+  }
+
+  to {
+    background-position:
+      -100% 0,
+      8px 50%;
+  }
+}
+
+.problem {
+  margin: 0;
+  color: var(--loss);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

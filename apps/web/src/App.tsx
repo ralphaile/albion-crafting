@@ -312,6 +312,12 @@ export function App({
                   chooseRecipe(current, itemId, alternative),
                 );
               }}
+              sellMarkets={{
+                marketData,
+                onSellIn: (sellMarketId) => {
+                  setRouteChoice((current) => ({ ...current, sellMarketId }));
+                },
+              }}
               onAddToPlan={(itemId, alternative, quantity) => {
                 setPlan((current) =>
                   addToPlan(

@@ -1,4 +1,4 @@
-import { type ReactNode, useId } from "react";
+import { type KeyboardEvent, type ReactNode, useId, useState } from "react";
 
 import {
   FCE_PER_MASTERY_LEVEL,
@@ -46,6 +46,13 @@ import { fceParts, treeLevels } from "./specializations.helpers";
 import type { SpecializationProfile } from "./specializations.types";
 
 const MISSING: UsedPrice = { status: "missing", origin: "api" };
+
+const TABS = [
+  { id: "breakdown", label: "Breakdown" },
+  { id: "markets", label: "Compare markets" },
+] as const;
+
+type Tab = (typeof TABS)[number]["id"];
 
 function seen(price: UsedPrice) {
   if (price.status === "missing") {
@@ -220,6 +227,7 @@ export function CraftPanel({
   onEditSpecializations,
   onChooseRecipe,
   onAddToPlan,
+  compareMarkets,
   onClose,
 }: {
   craft: Craft | undefined;
@@ -235,8 +243,13 @@ export function CraftPanel({
   onEditSpecializations: (treeId: string) => void;
   onChooseRecipe: ChooseRecipeHandler;
   onAddToPlan?: AddToPlanHandler;
+  // Without it, the panel has no Compare markets tab.
+  compareMarkets?: (craft: Craft) => ReactNode;
   onClose: () => void;
 }) {
+  const [tab, setTab] = useState<Tab>("breakdown");
+  const tabsId = useId();
+
   // A recipe button is pressed when you chose it, and the tick is on the
   // recipe the table uses, chosen or the most profitable.
   function recipes(craft: Craft) {
@@ -508,7 +521,61 @@ export function CraftPanel({
     );
   }
 
+  // Arrow keys move between the tabs, as in a tab list.
+  function tabs() {
+    const moveWith = (event: KeyboardEvent) => {
+      const step =
+        event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+      if (step === 0) {
+        return;
+      }
+      event.preventDefault();
+      const at = TABS.findIndex(({ id }) => id === tab);
+      const next = TABS[(at + step + TABS.length) % TABS.length] ?? TABS[0];
+      setTab(next.id);
+      document.getElementById(`${tabsId}-${next.id}`)?.focus();
+    };
+    return (
+      <div className={styles.tabs} role="tablist" aria-label="Details">
+        {TABS.map(({ id, label }) => (
+          <button
+            key={id}
+            id={`${tabsId}-${id}`}
+            type="button"
+            role="tab"
+            className={styles.tab}
+            aria-selected={tab === id}
+            aria-controls={`${tabsId}-panel`}
+            tabIndex={tab === id ? 0 : -1}
+            onClick={() => {
+              setTab(id);
+            }}
+            onKeyDown={moveWith}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
   function shownFor(craft: Craft) {
+    if (compareMarkets !== undefined) {
+      return (
+        <div
+          id={`${tabsId}-panel`}
+          role="tabpanel"
+          className={styles.tabPanel}
+          aria-labelledby={`${tabsId}-${tab}`}
+        >
+          {tab === "markets" ? compareMarkets(craft) : breakdownFor(craft)}
+        </div>
+      );
+    }
+    return breakdownFor(craft);
+  }
+
+  function breakdownFor(craft: Craft) {
     return (
       <>
         {onAddToPlan && (
@@ -530,7 +597,12 @@ export function CraftPanel({
       heading={craft === undefined ? "" : itemName(craft.itemId)}
       closeLabel="Close details"
       open={craft !== undefined}
-      onClose={onClose}
+      onClose={() => {
+        setTab("breakdown");
+        onClose();
+      }}
+      {...(compareMarkets !== undefined &&
+        craft !== undefined && { toolbar: tabs() })}
     >
       {craft !== undefined && shownFor(craft)}
     </SidePanel>
