@@ -2,21 +2,17 @@ import { type ReactNode, useId } from "react";
 
 import type { OrderPrices } from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
-import { markets } from "@aoc/market-prices";
 
 import { ItemIcon } from "./ItemIcon";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 import styles from "./PriceRow.module.css";
+import { marketName } from "./route.helpers";
 import { usePriceDraft } from "./usePriceDraft";
 
 const ORDER_LABELS: Record<keyof OrderPrices, string> = {
   sellMin: "Sell order",
   buyMax: "Buy order",
 };
-
-function marketName(id: string) {
-  return markets.find((market) => market.id === id)?.name ?? id;
-}
 
 export function PriceRow({
   priceKey,
@@ -25,6 +21,7 @@ export function PriceRow({
   placeholder,
   status,
   detail,
+  action,
   missing,
   onSave,
   onRemove,
@@ -36,6 +33,8 @@ export function PriceRow({
   placeholder?: string | undefined;
   status: ReactNode;
   detail?: ReactNode;
+  // Shown after the status, such as a button to change the market.
+  action?: ReactNode;
   missing: boolean;
   onSave: (price: ManualPrice) => void;
   onRemove: (key: ManualPriceKey) => void;
@@ -76,8 +75,11 @@ export function PriceRow({
         aria-label={`${name}, ${order.toLowerCase()} in ${market}`}
         aria-describedby={invalid ? `${statusId} ${errorId}` : statusId}
       />
-      <span id={statusId} className={styles.status} data-missing={missing}>
-        {order} · {market} · {status}
+      <span className={styles.statusLine}>
+        <span id={statusId} className={styles.status} data-missing={missing}>
+          {order} · {market} · {status}
+        </span>
+        {action}
       </span>
       {detail !== undefined && <span className={styles.detail}>{detail}</span>}
       {invalid && (

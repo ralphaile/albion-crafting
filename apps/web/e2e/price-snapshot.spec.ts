@@ -16,21 +16,21 @@ test("AODP down on a first visit: the crafts are priced from the site's snapshot
   );
   const seen = seenAgo(3 * 60);
   const snapshots: string[] = [];
+  // The bars are bought in Thetford and the leather in Martlock, the cities
+  // that refine them with a bonus.
+  const rows: Record<string, unknown[][]> = {
+    thetford: [["T4_METALBAR", 100, seen, 0, NO_DATA_DATE]],
+    martlock: [["T4_LEATHER", 50, seen, 0, NO_DATA_DATE]],
+    lymhurst: [["T4_MAIN_SWORD", 5000, seen, 0, NO_DATA_DATE]],
+  };
   await page.route(/\/albion-crafting\/prices\//, (route) => {
     const path = new URL(route.request().url()).pathname;
     snapshots.push(path);
-    return path.endsWith("/west/lymhurst.json")
-      ? route.fulfill({
-          json: {
-            fetchedAt: Date.now(),
-            rows: [
-              ["T4_METALBAR", 100, seen, 0, NO_DATA_DATE],
-              ["T4_LEATHER", 50, seen, 0, NO_DATA_DATE],
-              ["T4_MAIN_SWORD", 5000, seen, 0, NO_DATA_DATE],
-            ],
-          },
-        })
-      : route.fulfill({ status: 404, body: "" });
+    const market = /\/west\/([a-z]+)\.json$/.exec(path)?.[1] ?? "";
+    const snapshot = rows[market];
+    return snapshot === undefined
+      ? route.fulfill({ status: 404, body: "" })
+      : route.fulfill({ json: { fetchedAt: Date.now(), rows: snapshot } });
   });
 
   await page.goto("./?tier=4&enchant=0&q=broadsword");
@@ -42,7 +42,11 @@ test("AODP down on a first visit: the crafts are priced from the site's snapshot
     .filter({ hasText: "Adept's Broadsword" });
   await expect(row.getByRole("cell").first()).toHaveText("3,417");
   await expect(row).toContainText("3 h");
-  expect(snapshots).toEqual(["/albion-crafting/prices/west/lymhurst.json"]);
+  expect(snapshots.toSorted()).toEqual(
+    ["lymhurst", "martlock", "thetford"].map(
+      (market) => `/albion-crafting/prices/west/${market}.json`,
+    ),
+  );
   // The browser logs each AODP request that failed.
   expect(new Set(problems)).toEqual(
     new Set([

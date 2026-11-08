@@ -1,0 +1,86 @@
+.wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.icon {
+  display: inline-grid;
+  place-items: center;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-faint);
+  transition:
+    border-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.icon:hover,
+.icon[aria-expanded="true"] {
+  border-color: var(--rule);
+  color: var(--text-muted);
+}
+
+.icon[data-pinned="true"] {
+  color: var(--brass);
+}
+
+.icon svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.icon[data-pinned="true"] svg {
+  fill: currentColor;
+}
+
+.popover {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  display: grid;
+  min-width: 13em;
+  padding: 4px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 12px 28px -14px rgb(0 0 0 / 50%);
+}
+
+.popover[data-opens="left"] {
+  right: 0;
+  left: auto;
+}
+
+.popover button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text);
+  font-size: 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.popover button:hover {
+  background: var(--bg);
+}
+
+.popover button[aria-pressed="true"] {
+  color: var(--brass);
+  font-weight: 700;
+}
+
+.popover .unpin {
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  color: var(--brass);
+}

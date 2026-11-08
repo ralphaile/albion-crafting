@@ -6,8 +6,8 @@ test("a filtered link prices only its items, and the filters are kept", async ({
   page,
 }) => {
   await answerPrices(page, [
-    { itemId: "T4_METALBAR", marketId: "Lymhurst", sellMin: 100 },
-    { itemId: "T4_LEATHER", marketId: "Lymhurst", sellMin: 50 },
+    { itemId: "T4_METALBAR", marketId: "Thetford", sellMin: 100 },
+    { itemId: "T4_LEATHER", marketId: "Martlock", sellMin: 50 },
     { itemId: "T4_MAIN_SWORD", marketId: "Lymhurst", sellMin: 5000 },
   ]);
   const requested = new Set<string>();
@@ -49,7 +49,7 @@ test("a filtered link prices only its items, and the filters are kept", async ({
     "No missing prices",
   ]);
   await expect(page).toHaveURL(
-    /\?place=1000&buy=Lymhurst&sell=Lymhurst&enchant=0&cat=sword&artifacts=exclude&complete=1$/,
+    /\?place=1000&buy=Lymhurst&bars=Thetford&planks=Fort\+Sterling&cloth=Lymhurst&leather=Martlock&sell=Lymhurst&enchant=0&cat=sword&artifacts=exclude&complete=1$/,
   );
   await expect(page.getByRole("button", { name: "T4" })).toHaveAttribute(
     "aria-pressed",
@@ -65,13 +65,13 @@ test("a filtered link prices only its items, and the filters are kept", async ({
     "No missing prices",
   ]);
   await expect(page).toHaveURL(
-    /\?place=1000&buy=Lymhurst&sell=Lymhurst&enchant=0&cat=sword&artifacts=exclude&complete=1$/,
+    /\?place=1000&buy=Lymhurst&bars=Thetford&planks=Fort\+Sterling&cloth=Lymhurst&leather=Martlock&sell=Lymhurst&enchant=0&cat=sword&artifacts=exclude&complete=1$/,
   );
 
   await page.getByRole("button", { name: "Clear all", exact: true }).click();
 
   await expect(chips).toBeHidden();
   await expect(page).toHaveURL(
-    /\/albion-crafting\/\?place=1000&buy=Lymhurst&sell=Lymhurst$/,
+    /\/albion-crafting\/\?place=1000&buy=Lymhurst&bars=Thetford&planks=Fort\+Sterling&cloth=Lymhurst&leather=Martlock&sell=Lymhurst$/,
   );
 });

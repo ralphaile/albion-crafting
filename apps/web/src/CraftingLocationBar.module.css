@@ -31,6 +31,7 @@
 }
 
 .buy {
+  position: relative;
   grid-area: buy;
 }
 
@@ -75,6 +76,53 @@
 
 .select:hover {
   border-color: var(--text-faint);
+}
+
+button.select {
+  overflow: hidden;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.popover {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 6px);
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 10em);
+  gap: 10px 14px;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 12px 28px -14px rgb(0 0 0 / 50%);
+}
+
+.everythingElse {
+  grid-column: 1 / -1;
+}
+
+.reset {
+  grid-column: 1 / -1;
+  justify-self: end;
+  padding: 4px 12px;
+  border: 1px solid var(--brass);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--brass);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.reset:hover:enabled {
+  background: var(--brass);
+  color: var(--bg);
+}
+
+.reset:disabled {
+  border-color: var(--rule);
+  color: var(--text-faint);
 }
 
 .rates {
@@ -131,6 +179,11 @@
       "rates rates rates rates";
     grid-template-columns: 11.5em 10em 5.5em 5em;
   }
+
+  .popover {
+    right: auto;
+    left: 0;
+  }
 }
 
 @media (max-width: 560px) {
@@ -150,6 +203,11 @@
   .buy,
   .sell {
     flex-basis: calc(50% - 10px);
+  }
+
+  .popover {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(22em, calc(100vw - 48px));
   }
 
   .rateList .focus {

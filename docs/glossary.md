@@ -77,7 +77,7 @@ A value the game gives every item, separate from its market price, worked out fr
 
 ## Market
 
-Where you buy and sell. You buy materials in one of the 7 cities, and sell in one of them, a [Rest](#rest) or the [Black Market](#black-market). A route has three parts: the market you buy the materials in, the [crafting location](#crafting-location), and the market you sell in ([where you craft, buy and sell](route.md)). In the code, a market is its AODP ID from `markets` in `@aoc/market-prices`, such as `Arthurs Rest Smugglers Network`, and its name is what the app shows, such as Arthur's Rest.
+Where you buy and sell. You buy materials in one of the 7 cities, and sell in one of them, a [Rest](#rest) or the [Black Market](#black-market). A route has three parts: the markets you buy the materials in, the [crafting location](#crafting-location), and the market you sell in ([where you craft, buy and sell](route.md)). In the code, a market is its AODP ID from `markets` in `@aoc/market-prices`, such as `Arthurs Rest Smugglers Network`, and its name is what the app shows, such as Arthur's Rest.
 
 ## Material cost
 
@@ -88,7 +88,7 @@ material cost = Σ returnable: count × (1 − RRR) × unit price
               + Σ others:     count × unit price
 ```
 
-The unit price depends on how you buy at the buy market:
+The unit price depends on how you buy, in the market the material is bought in:
 
 - **Instant buy:** the lowest sell order.
 - **Buy order:** the highest buy order, plus the [setup fee](#setup-fee).
@@ -109,7 +109,7 @@ The engine's version is `stationFee()` in `packages/core/src/station-fee.helpers
 
 ## Outliers
 
-An AODP price more than twice, or under half, the item's average sale price over the newest 7 days AODP has. **Outlier beyond** in [settings](settings.md) changes the 2. One odd listing, such as a T4_BAG at 17,999 in Caerleon against an average of about 4,400, can put a craft at the top of the list that isn't worth making. The price's badge turns into a warning, and its tooltip shows the price and the average. With **Use 7-day average for outliers**, crafts are worked out with the average instead, and the badge says so. That's only where the outlier makes a craft look better: a product price above its average, or a material price below it. The other way, such as a low buy order on a slow item, the price is likely what you'd really get or pay, so it stays. Materials are judged in the buy market and products in the sell market. Prices you typed, and items with no sales in those days, aren't judged.
+An AODP price more than twice, or under half, the item's average sale price over the newest 7 days AODP has. **Outlier beyond** in [settings](settings.md) changes the 2. One odd listing, such as a T4_BAG at 17,999 in Caerleon against an average of about 4,400, can put a craft at the top of the list that isn't worth making. The price's badge turns into a warning, and its tooltip shows the price and the average. With **Use 7-day average for outliers**, crafts are worked out with the average instead, and the badge says so. That's only where the outlier makes a craft look better: a product price above its average, or a material price below it. The other way, such as a low buy order on a slow item, the price is likely what you'd really get or pay, so it stays. Materials are judged in the market each is bought in, and products in the sell market. Prices you typed, and items with no sales in those days, aren't judged.
 
 `withOutliers()` in `apps/web/src/outliers.helpers.ts` does this, after picking between AODP's and [manual prices](manual-prices.md).
 

@@ -4,8 +4,8 @@ test("ranks the one craft with every price first, with its numbers worked out", 
   page,
 }) => {
   await answerPrices(page, [
-    { itemId: "T4_METALBAR", marketId: "Lymhurst", sellMin: 100 },
-    { itemId: "T4_LEATHER", marketId: "Lymhurst", sellMin: 50 },
+    { itemId: "T4_METALBAR", marketId: "Thetford", sellMin: 100 },
+    { itemId: "T4_LEATHER", marketId: "Martlock", sellMin: 50 },
     { itemId: "T4_MAIN_SWORD", marketId: "Lymhurst", sellMin: 5000 },
   ]);
   await answerHistory(page, [

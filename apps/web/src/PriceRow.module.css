@@ -63,8 +63,15 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 
-.status {
+.statusLine {
+  display: flex;
   grid-area: status;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.status {
   color: var(--text-muted);
   font-size: 14px;
 }

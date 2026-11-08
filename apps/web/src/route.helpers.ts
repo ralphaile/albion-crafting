@@ -23,6 +23,10 @@ function found<T>(rows: readonly T[], matches: (row: T) => boolean): T {
   return row;
 }
 
+export function marketName(id: string): string {
+  return markets.find((market) => market.id === id)?.name ?? id;
+}
+
 export function optionGroups(
   groups: readonly { label: string; names: readonly string[] }[],
   rows: readonly { id: string; name: string }[],
@@ -71,12 +75,8 @@ export function placeFromChoice(choice: PlaceChoice): CraftingPlace {
   };
 }
 
-export function routeFromChoice({
-  place,
-  buyMarketId,
-  sellMarketId,
-}: RouteChoice): Route {
-  return { place: placeFromChoice(place), buyMarketId, sellMarketId };
+export function routeFromChoice({ place, ...markets }: RouteChoice): Route {
+  return { ...markets, place: placeFromChoice(place) };
 }
 
 // A sell-only market like the Black Market has no sell orders, only buy orders.

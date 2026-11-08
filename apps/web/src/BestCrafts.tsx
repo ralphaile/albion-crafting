@@ -8,6 +8,8 @@ import { NO_FILTERS } from "./filters.constants";
 import { activeFilters } from "./filters.helpers";
 import type { Filters } from "./filters.types";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
+import { NO_PINS } from "./material-pins.constants";
+import type { MaterialPins, PinMaterialHandler } from "./material-pins.types";
 import type { AddToPlanHandler } from "./plan.types";
 import { PriceStatus } from "./PriceStatus";
 import type { ChooseRecipeHandler } from "./recipe-choices.types";
@@ -45,6 +47,8 @@ export function BestCrafts({
   specializations = NO_SPECIALIZATIONS,
   onEditSpecializations = IGNORE_EDIT_SPECIALIZATIONS,
   onChooseRecipe = IGNORE_RECIPE_CHOICE,
+  pins = NO_PINS,
+  onPinMaterial,
   onAddToPlan,
 }: {
   bestCrafts: BestCraftsResult;
@@ -62,6 +66,8 @@ export function BestCrafts({
   specializations?: SpecializationProfile;
   onEditSpecializations?: (treeId: string) => void;
   onChooseRecipe?: ChooseRecipeHandler;
+  pins?: MaterialPins;
+  onPinMaterial?: PinMaterialHandler;
   onAddToPlan?: AddToPlanHandler;
 }) {
   const filtered = activeFilters(filters).length > 0;
@@ -147,7 +153,8 @@ export function BestCrafts({
       <CraftPanel
         craft={shownCraft}
         region={settings.server}
-        buyMarketId={route.buyMarketId}
+        buyMarkets={{ ...route, pins }}
+        {...(onPinMaterial && { onPin: onPinMaterial })}
         sellMarketId={route.sellMarketId}
         manualPrices={manualPrices}
         onSave={onSaveManualPrice}

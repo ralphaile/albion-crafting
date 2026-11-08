@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { craftingLocations } from "@aoc/crafting-data";
 import { markets } from "@aoc/market-prices";
 
+import { everyMaterialIn } from "./material-markets.helpers";
 import {
   BUY_MARKET_GROUPS,
   DEFAULT_ROUTE_CHOICE,
@@ -22,6 +23,7 @@ import { DEFAULT_SETTINGS } from "./settings.constants";
 const hideout: RouteChoice = {
   place: { kind: "hideout", biomeId: "FOREST", quality: 6, level: 9 },
   buyMarketId: "Fort Sterling",
+  materialMarkets: everyMaterialIn("Fort Sterling"),
   sellMarketId: "Arthurs Rest Smugglers Network",
 };
 

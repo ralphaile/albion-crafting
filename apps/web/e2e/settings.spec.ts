@@ -4,8 +4,8 @@ test("turning focus off re-ranks without focus, and stays off next visit", async
   page,
 }) => {
   await answerPrices(page, [
-    { itemId: "T4_METALBAR", marketId: "Lymhurst", sellMin: 100 },
-    { itemId: "T4_LEATHER", marketId: "Lymhurst", sellMin: 50 },
+    { itemId: "T4_METALBAR", marketId: "Thetford", sellMin: 100 },
+    { itemId: "T4_LEATHER", marketId: "Martlock", sellMin: 50 },
     { itemId: "T4_MAIN_SWORD", marketId: "Lymhurst", sellMin: 5000 },
   ]);
   await page.goto("./");

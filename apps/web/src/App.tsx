@@ -12,6 +12,9 @@ import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 import { Footer, LegalPage } from "./LegalPages";
 import type { ManualPrice, ManualPriceStore } from "./manual-prices.types";
+import { NO_PINS } from "./material-pins.constants";
+import { pinMaterial } from "./material-pins.helpers";
+import type { MaterialPins, PinMaterialHandler } from "./material-pins.types";
 import type { MissingPrice } from "./missing-prices.types";
 import { MissingPricesPanel } from "./MissingPricesPanel";
 import { NO_PLAN } from "./plan.constants";
@@ -29,6 +32,7 @@ import {
   CRAFTING_SETTING,
   FILTERS_SETTING,
   PLAN_SETTING,
+  PINS_SETTING,
   RECIPE_CHOICES_SETTING,
   ROUTE_SETTING,
   SPECIALIZATIONS_SETTING,
@@ -58,6 +62,7 @@ export function App({
   savedSpecializations,
   savedPlan,
   savedRecipeChoices,
+  savedPins,
   savedManualPrices,
 }: {
   marketData: MarketData;
@@ -69,6 +74,7 @@ export function App({
   savedSpecializations: SpecializationProfile | undefined;
   savedPlan: CraftingPlan | undefined;
   savedRecipeChoices: RecipeChoices | undefined;
+  savedPins?: MaterialPins | undefined;
   savedManualPrices: readonly ManualPrice[];
 }) {
   const [page, setPage] = useState<{
@@ -119,6 +125,14 @@ export function App({
     RECIPE_CHOICES_SETTING,
     () => savedRecipeChoices ?? NO_RECIPE_CHOICES,
   );
+  const [pins, setPins] = useSavedSetting(
+    settingsStore,
+    PINS_SETTING,
+    () => savedPins ?? NO_PINS,
+  );
+  const pinMaterialTo: PinMaterialHandler = (itemId, marketId) => {
+    setPins((current) => pinMaterial(current, itemId, marketId));
+  };
   const [specializationsShown, setSpecializationsShown] = useState({
     open: false,
     treeId: FIRST_TREE_ID,
@@ -143,6 +157,7 @@ export function App({
     manualPrices,
     specializations,
     recipeChoices,
+    pins,
   );
 
   const [shownItemId, setShownItemId] = useState(() =>
@@ -255,6 +270,8 @@ export function App({
             onRemoveManualPrice={removeManualPrice}
             onMissingPrices={setPlanMissingPrices}
             specializations={specializations}
+            pins={pins}
+            onPinMaterial={pinMaterialTo}
             onFill={(budget) => {
               const crafts =
                 bestCrafts.status === "loading" ? [] : bestCrafts.crafts;
@@ -288,6 +305,8 @@ export function App({
               onRemoveManualPrice={removeManualPrice}
               specializations={specializations}
               onEditSpecializations={showSpecializations}
+              pins={pins}
+              onPinMaterial={pinMaterialTo}
               onChooseRecipe={(itemId, alternative) => {
                 setRecipeChoices((current) =>
                   chooseRecipe(current, itemId, alternative),

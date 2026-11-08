@@ -4,8 +4,8 @@ test("fills a Black Zone route's missing prices in one pass, and the crafts get 
   page,
 }) => {
   await answerPrices(page, [
-    { itemId: "T4_METALBAR", marketId: "Lymhurst", sellMin: 100 },
-    { itemId: "T4_LEATHER", marketId: "Lymhurst", sellMin: 50 },
+    { itemId: "T4_METALBAR", marketId: "Thetford", sellMin: 100 },
+    { itemId: "T4_LEATHER", marketId: "Martlock", sellMin: 50 },
   ]);
   await page.goto(
     "./?place=hideout&biome=FOREST&quality=6&level=9&buy=Lymhurst&sell=Arthurs+Rest+Smugglers+Network&tier=4&enchant=0&artifacts=exclude&cat=sword",

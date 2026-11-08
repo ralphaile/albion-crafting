@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { craftingLocations, hideouts } from "@aoc/crafting-data";
 
+import { REFINED_MATERIALS } from "./material-markets.constants";
 import {
   BUY_MARKET_GROUPS,
   DEFAULT_ROUTE_CHOICE,
@@ -34,15 +35,32 @@ function ids(groups: readonly OptionGroup[]) {
   return groups.flatMap(({ options }) => options.map(({ id }) => id));
 }
 
-const buyMarketIds = ids(BUY_MARKET_GROUPS);
+export const BUY_MARKET_IDS = ids(BUY_MARKET_GROUPS);
 const sellMarketIds = ids(SELL_MARKET_GROUPS);
+
+const buyMarket = (fallback: string) =>
+  z.string().refine(oneOf(BUY_MARKET_IDS)).catch(fallback);
+
+// Each material falls back on its own, so a route saved before one was added
+// keeps the others.
+const materialMarketsSchema = z.object(
+  Object.fromEntries(
+    REFINED_MATERIALS.map(({ id }) => [
+      id,
+      buyMarket(DEFAULT_ROUTE_CHOICE.materialMarkets[id]),
+    ]),
+  ) as Record<
+    keyof RouteChoice["materialMarkets"],
+    ReturnType<typeof buyMarket>
+  >,
+);
 
 const routeSchema = z.object({
   place: placeSchema.catch(DEFAULT_ROUTE_CHOICE.place),
-  buyMarketId: z
-    .string()
-    .refine(oneOf(buyMarketIds))
-    .catch(DEFAULT_ROUTE_CHOICE.buyMarketId),
+  buyMarketId: buyMarket(DEFAULT_ROUTE_CHOICE.buyMarketId),
+  materialMarkets: materialMarketsSchema.catch(
+    DEFAULT_ROUTE_CHOICE.materialMarkets,
+  ),
   sellMarketId: z
     .string()
     .refine(oneOf(sellMarketIds))

@@ -1,4 +1,4 @@
-import { expect, test } from "./test";
+import { expect, savedSetting, test } from "./test";
 
 test("a Forest Q6 level 9 hideout shows its return rates, and is there next visit", async ({
   page,
@@ -26,9 +26,14 @@ test("a Forest Q6 level 9 hideout shows its return rates, and is there next visi
     "58.51%",
   ]);
   await expect(page).toHaveURL(
-    /\?place=hideout&biome=FOREST&quality=6&level=9&buy=Lymhurst&sell=Lymhurst$/,
+    /\?place=hideout&biome=FOREST&quality=6&level=9&buy=Lymhurst&bars=Thetford&planks=Fort\+Sterling&cloth=Lymhurst&leather=Martlock&sell=Lymhurst$/,
   );
 
+  await expect
+    .poll(() => savedSetting(page, "route"), { timeout: 20_000 })
+    .toMatchObject({
+      place: { kind: "hideout", biomeId: "FOREST", quality: 6, level: 9 },
+    });
   await page.goto("./");
 
   await expect(field("Crafting location")).toHaveValue("hideout");

@@ -2,6 +2,8 @@ import type { PlanResult } from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
 
 import { formatCount, formatSilver } from "./format.helpers";
+import { materialMarketId } from "./material-markets.helpers";
+import type { MaterialPins } from "./material-pins.types";
 import type { CraftingPlan } from "./plan.types";
 import type { ShoppingLine, ShoppingMarket } from "./shopping-list.types";
 
@@ -10,14 +12,15 @@ import type { ShoppingLine, ShoppingMarket } from "./shopping-list.types";
 export function shoppingList(
   plan: CraftingPlan,
   result: PlanResult,
+  pins: MaterialPins,
 ): ShoppingMarket[] {
   const markets = new Map<string, Map<string, ShoppingLine>>();
   plan.locations.forEach(({ route }, index) => {
-    const lines =
-      markets.get(route.buyMarketId) ?? new Map<string, ShoppingLine>();
-    markets.set(route.buyMarketId, lines);
     for (const entry of result.locations[index]?.entries ?? []) {
       for (const { itemId, count } of entry.materials) {
+        const marketId = materialMarketId({ ...route, pins }, itemId);
+        const lines = markets.get(marketId) ?? new Map<string, ShoppingLine>();
+        markets.set(marketId, lines);
         const priced = entry.evaluation.materialCost.lines.find(
           (line) => line.itemId === itemId,
         );

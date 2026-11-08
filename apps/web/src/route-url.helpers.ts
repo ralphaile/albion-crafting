@@ -1,8 +1,17 @@
+import { REFINED_MATERIALS } from "./material-markets.constants";
 import { parseRoute } from "./route.schema";
 import type { RouteChoice } from "./route.types";
 import { wholeNumber } from "./search-params.helpers";
 
-const PARAMS = ["place", "biome", "quality", "level", "buy", "sell"];
+const PARAMS = [
+  "place",
+  "biome",
+  "quality",
+  "level",
+  "buy",
+  ...REFINED_MATERIALS.map(({ param }) => param),
+  "sell",
+];
 
 const HIDEOUT = "hideout";
 
@@ -24,6 +33,9 @@ export function routeFromSearch(search: string): RouteChoice | undefined {
           }
         : { kind: "location", locationId: place },
     buyMarketId: params.get("buy"),
+    materialMarkets: Object.fromEntries(
+      REFINED_MATERIALS.map(({ id, param }) => [id, params.get(param)]),
+    ),
     sellMarketId: params.get("sell"),
   });
 }
@@ -45,6 +57,9 @@ export function searchWithRoute(search: string, route: RouteChoice): string {
     params.set("place", place.locationId);
   }
   params.set("buy", route.buyMarketId);
+  for (const { id, param } of REFINED_MATERIALS) {
+    params.set(param, route.materialMarkets[id]);
+  }
   params.set("sell", route.sellMarketId);
   return `?${params.toString()}`;
 }

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
+import { everyMaterialIn } from "./material-markets.helpers";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
 import type { RouteChoice } from "./route.types";
 import { FILTERS_SETTING, ROUTE_SETTING } from "./saved-settings.constants";
@@ -20,6 +21,7 @@ const filters: Filters = {
 const route: RouteChoice = {
   place: { kind: "hideout", biomeId: "FOREST", quality: 6, level: 9 },
   buyMarketId: "Lymhurst",
+  materialMarkets: everyMaterialIn("Lymhurst"),
   sellMarketId: "Black Market",
 };
 

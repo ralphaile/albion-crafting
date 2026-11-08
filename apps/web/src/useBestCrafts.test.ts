@@ -11,6 +11,7 @@ import type {
 import { NO_FILTERS } from "./filters.constants";
 import type { Filters } from "./filters.types";
 import type { ManualPrice } from "./manual-prices.types";
+import { everyMaterialIn } from "./material-markets.helpers";
 import { DEFAULT_ROUTE } from "./route.constants";
 import type { Route } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
@@ -20,6 +21,7 @@ import { fakeMarketData } from "../test/fake-market-data";
 const route: Route = {
   place: DEFAULT_ROUTE.place,
   buyMarketId: "Martlock",
+  materialMarkets: everyMaterialIn("Martlock"),
   sellMarketId: "Caerleon",
 };
 
@@ -239,6 +241,67 @@ describe("useBestCrafts", () => {
     expect(
       getHistory.mock.calls.every(([, , , options]) => !options?.force),
     ).toBe(true);
+  });
+
+  it("fetches each material in its own market, a pinned one in its pinned market, and prices each craft across them", async () => {
+    const getPrices = vi.fn<MarketData["getPrices"]>((itemIds, marketIds) =>
+      Promise.resolve({
+        prices: [
+          priced("T4_METALBAR", "Thetford", 90),
+          priced("T4_LEATHER", "Caerleon", 40),
+          priced("T4_MAIN_SWORD", "Caerleon", 5000),
+        ].filter(
+          ({ itemId, marketId }) =>
+            itemIds.includes(itemId) && marketIds.includes(marketId),
+        ),
+        failures: [],
+        fetchedAt: 0,
+      }),
+    );
+    const marketData = fakeMarketData({ getPrices });
+    const barsInThetford = {
+      ...route,
+      materialMarkets: { ...route.materialMarkets, metalbars: "Thetford" },
+    };
+    const pins = { T4_LEATHER: "Caerleon" };
+    const { result } = renderHook(() =>
+      useBestCrafts(
+        marketData,
+        barsInThetford,
+        DEFAULT_SETTINGS,
+        swords,
+        NO_MANUAL_PRICES,
+        undefined,
+        undefined,
+        pins,
+      ),
+    );
+
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ updating: false });
+    });
+    const asked = (marketId: string) =>
+      getPrices.mock.calls
+        .filter(([, marketIds]) => marketIds.join() === marketId)
+        .flatMap(([itemIds]) => itemIds);
+    expect(asked("Thetford")).toContain("T4_METALBAR");
+    expect(asked("Thetford")).not.toContain("T4_LEATHER");
+    expect(asked("Martlock")).not.toContain("T4_METALBAR");
+    expect(asked("Martlock")).not.toContain("T4_LEATHER");
+    expect(asked("Caerleon")).toContain("T4_LEATHER");
+    const sword =
+      result.current.status === "ready"
+        ? result.current.allCrafts.find(
+            ({ itemId }) => itemId === "T4_MAIN_SWORD",
+          )
+        : undefined;
+    expect(sword?.status).toBe("complete");
+    expect(sword?.materialPrices.get("T4_METALBAR")).toMatchObject({
+      value: 90,
+    });
+    expect(sword?.materialPrices.get("T4_LEATHER")).toMatchObject({
+      value: 40,
+    });
   });
 
   it("adds up the batches of prices and history, and says until when it waits for the rate limit", async () => {

@@ -2,13 +2,20 @@ import { describe, expect, it } from "vitest";
 
 import { type EvaluatePrices, type OrderPrices, evaluatePlan } from "@aoc/core";
 
+import { everyMaterialIn } from "./material-markets.helpers";
+import { NO_PINS } from "./material-pins.constants";
 import { planLocations } from "./plan.helpers";
 import type { CraftingPlan, PlanEntry } from "./plan.types";
 import type { RouteChoice } from "./route.types";
 import { shoppingList, shoppingListText } from "./shopping-list.helpers";
 
 function route(place: RouteChoice["place"], buyMarketId: string): RouteChoice {
-  return { place, buyMarketId, sellMarketId: buyMarketId };
+  return {
+    place,
+    buyMarketId,
+    materialMarkets: everyMaterialIn(buyMarketId),
+    sellMarketId: buyMarketId,
+  };
 }
 
 const lymhurst = { kind: "location", locationId: "1000" } as const;
@@ -60,7 +67,7 @@ function listFor(plan: CraftingPlan) {
       .flatMap(({ materials }) => materials)
       .filter((material) => material.itemId === itemId)
       .reduce((sum, { count }) => sum + count, 0);
-  return { markets: shoppingList(plan, result), expected };
+  return { markets: shoppingList(plan, result, NO_PINS), expected };
 }
 
 describe("shoppingList", () => {

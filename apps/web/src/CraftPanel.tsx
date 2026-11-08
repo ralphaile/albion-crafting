@@ -32,11 +32,15 @@ import {
 import { ItemIcon } from "./ItemIcon";
 import { sameManualPrice } from "./manual-prices.helpers";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
+import { materialMarketId } from "./material-markets.helpers";
+import type { PinMaterialHandler } from "./material-pins.types";
+import { MaterialMarket } from "./MaterialMarket";
 import type { AddToPlanHandler } from "./plan.types";
 import { PriceBadge } from "./PriceBadge";
 import { PriceRow } from "./PriceRow";
 import { QUALITY } from "./prices.constants";
 import type { ChooseRecipeHandler } from "./recipe-choices.types";
+import type { MarketChoice } from "./route.types";
 import { SidePanel } from "./SidePanel";
 import { fceParts, treeLevels } from "./specializations.helpers";
 import type { SpecializationProfile } from "./specializations.types";
@@ -206,7 +210,8 @@ function bonusParts(
 export function CraftPanel({
   craft,
   region,
-  buyMarketId,
+  buyMarkets,
+  onPin,
   sellMarketId,
   manualPrices,
   onSave,
@@ -219,7 +224,9 @@ export function CraftPanel({
 }: {
   craft: Craft | undefined;
   region: Region;
-  buyMarketId: string;
+  buyMarkets: MarketChoice;
+  // Without it, a material's market can't be changed.
+  onPin?: PinMaterialHandler;
   sellMarketId: string;
   manualPrices: readonly ManualPrice[];
   onSave: (price: ManualPrice) => void;
@@ -308,7 +315,11 @@ export function CraftPanel({
     marketId: string,
     source: keyof OrderPrices,
     price: UsedPrice,
-    { count, detail }: { count?: number; detail?: ReactNode } = {},
+    {
+      count,
+      detail,
+      action,
+    }: { count?: number; detail?: ReactNode; action?: ReactNode } = {},
   ) {
     const key: ManualPriceKey = {
       region,
@@ -331,6 +342,7 @@ export function CraftPanel({
         }
         status={<PriceBadge price={price}>{seen(price)}</PriceBadge>}
         detail={detail}
+        action={action}
         missing={price.status === "missing"}
         onSave={onSave}
         onRemove={onRemove}
@@ -354,15 +366,28 @@ export function CraftPanel({
       <>
         <Section title="Materials" help="rrr">
           <ul className={styles.lines}>
-            {materialCost.lines.map((line) =>
-              priceRow(
+            {materialCost.lines.map((line) => {
+              const marketId = materialMarketId(buyMarkets, line.itemId);
+              return priceRow(
                 line.itemId,
-                buyMarketId,
+                marketId,
                 line.source,
                 shown.materialPrices.get(line.itemId) ?? MISSING,
-                { count: line.count, detail: lineDetail(line) },
-              ),
-            )}
+                {
+                  count: line.count,
+                  detail: lineDetail(line),
+                  action: onPin && (
+                    <MaterialMarket
+                      itemId={line.itemId}
+                      marketId={marketId}
+                      pinned={buyMarkets.pins[line.itemId] !== undefined}
+                      opens="left"
+                      onPin={onPin}
+                    />
+                  ),
+                },
+              );
+            })}
           </ul>
         </Section>
         <Section title="Return rate" help="production-bonus">

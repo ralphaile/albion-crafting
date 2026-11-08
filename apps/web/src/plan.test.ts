@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { type EvaluatePrices, type OrderPrices, evaluatePlan } from "@aoc/core";
 
+import { everyMaterialIn } from "./material-markets.helpers";
 import { NO_PLAN } from "./plan.constants";
 import { addToPlan, newEntry, planLocations } from "./plan.helpers";
 import { parsePlan } from "./plan.schema";
@@ -17,12 +18,14 @@ import { openSettingsStore } from "./saved-settings.store";
 const lymhurst: RouteChoice = {
   place: { kind: "location", locationId: "1000" },
   buyMarketId: "Lymhurst",
+  materialMarkets: everyMaterialIn("Lymhurst"),
   sellMarketId: "Lymhurst",
 };
 
 const forestHideout: RouteChoice = {
   place: { kind: "hideout", biomeId: "FOREST", quality: 6, level: 9 },
   buyMarketId: "Lymhurst",
+  materialMarkets: everyMaterialIn("Lymhurst"),
   sellMarketId: "Black Market",
 };
 
