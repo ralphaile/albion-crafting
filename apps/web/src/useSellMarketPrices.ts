@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { HIGHER_QUALITIES } from "@aoc/core";
 import type {
   HistorySummary,
   ItemPrices,
@@ -19,13 +20,24 @@ export type SellMarketPrices =
     };
 
 // One item's prices and history in every market given, in one request each.
+// Quality-weighted, the prices have qualities 2 to 5 too.
 export function useSellMarketPrices(
   marketData: MarketData,
   itemId: string,
   marketIds: readonly string[],
-  { server, staleAfterHours }: { server: Region; staleAfterHours: number },
+  {
+    server,
+    staleAfterHours,
+    qualityWeighted,
+  }: { server: Region; staleAfterHours: number; qualityWeighted: boolean },
 ): SellMarketPrices {
-  const key = JSON.stringify([itemId, marketIds, server, staleAfterHours]);
+  const key = JSON.stringify([
+    itemId,
+    marketIds,
+    server,
+    staleAfterHours,
+    qualityWeighted,
+  ]);
   const [answer, setAnswer] = useState<{
     key: string;
     prices: SellMarketPrices;
@@ -34,10 +46,15 @@ export function useSellMarketPrices(
   useEffect(() => {
     let active = true;
     Promise.all([
-      marketData.getPrices([itemId], marketIds, [QUALITY], {
-        region: server,
-        staleAfterMinutes: staleAfterHours * 60,
-      }),
+      marketData.getPrices(
+        [itemId],
+        marketIds,
+        qualityWeighted ? [QUALITY, ...HIGHER_QUALITIES] : [QUALITY],
+        {
+          region: server,
+          staleAfterMinutes: staleAfterHours * 60,
+        },
+      ),
       // Without history, prices are only not judged as outliers.
       marketData
         .getHistory([itemId], marketIds, [QUALITY], { region: server })
@@ -66,7 +83,15 @@ export function useSellMarketPrices(
     return () => {
       active = false;
     };
-  }, [marketData, key, itemId, marketIds, server, staleAfterHours]);
+  }, [
+    marketData,
+    key,
+    itemId,
+    marketIds,
+    server,
+    staleAfterHours,
+    qualityWeighted,
+  ]);
 
   return answer?.key === key ? answer.prices : { status: "loading" };
 }
