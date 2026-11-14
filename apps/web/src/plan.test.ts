@@ -6,8 +6,14 @@ import { afterEach, describe, expect, it } from "vitest";
 import { type EvaluatePrices, type OrderPrices, evaluatePlan } from "@aoc/core";
 
 import { everyMaterialIn } from "./material-markets.helpers";
+import { NO_PINS } from "./material-pins.constants";
 import { NO_PLAN } from "./plan.constants";
-import { addToPlan, newEntry, planLocations } from "./plan.helpers";
+import {
+  addToPlan,
+  newEntry,
+  planLocations,
+  planMarkets,
+} from "./plan.helpers";
 import { parsePlan } from "./plan.schema";
 import type { CraftingPlan, PlanEntry } from "./plan.types";
 import { DEFAULT_ROUTE_CHOICE } from "./route.constants";
@@ -159,6 +165,32 @@ describe("planLocations", () => {
       6,
     );
     expect(result.totals.focus).toBe(10 * 1286);
+  });
+});
+
+describe("planMarkets", () => {
+  it("asks for the journals' prices only with journals: empty where materials are bought, full where the item sells", () => {
+    expect(planMarkets(plan, NO_PINS)).toEqual(
+      new Map([
+        ["Lymhurst", ["T4_LEATHER", "T4_MAIN_SWORD", "T4_METALBAR"]],
+        ["Black Market", ["T4_MAIN_SWORD"]],
+      ]),
+    );
+    expect(planMarkets(plan, NO_PINS, { journals: true })).toEqual(
+      new Map([
+        [
+          "Lymhurst",
+          [
+            "T4_JOURNAL_WARRIOR_EMPTY",
+            "T4_JOURNAL_WARRIOR_FULL",
+            "T4_LEATHER",
+            "T4_MAIN_SWORD",
+            "T4_METALBAR",
+          ],
+        ],
+        ["Black Market", ["T4_JOURNAL_WARRIOR_FULL", "T4_MAIN_SWORD"]],
+      ]),
+    );
   });
 });
 

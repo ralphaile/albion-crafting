@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import {
+  fullJournalId,
   MAX_STORED_FOCUS,
   type PlanTotals,
   type PlannedEntry,
@@ -12,7 +13,7 @@ import type { UsedPrice, UsedPrices } from "./best-crafts.types";
 import controls from "./controls.module.css";
 import { CraftingLocationBar } from "./CraftingLocationBar";
 import { type FillBudget, FillFromFocus } from "./FillFromFocus";
-import { formatCount, formatSilver } from "./format.helpers";
+import { formatCount, formatQuantity, formatSilver } from "./format.helpers";
 import { ItemIcon } from "./ItemIcon";
 import type { ManualPrice, ManualPriceKey } from "./manual-prices.types";
 import { NO_PINS } from "./material-pins.constants";
@@ -97,6 +98,11 @@ function recipeNames(recipe: GameRecipe): string[] {
   );
 }
 
+// Such as "Expert Blacksmith's Journal", for any of its kinds.
+function journalName(journalId: string): string {
+  return baseName(fullJournalId(journalId)).replace(/ \(Full\)$/, "");
+}
+
 function Totals({
   totals,
   label,
@@ -119,6 +125,18 @@ function Totals({
         <dt>Focus</dt>
         <dd>{formatCount(totals.focus)}</dd>
       </div>
+      {totals.journals.map(({ id, filled }) => (
+        <div key={id}>
+          <dt>{journalName(id)}</dt>
+          <dd>{formatQuantity(filled)} filled</dd>
+        </div>
+      ))}
+      {totals.journals.length > 0 && (
+        <div>
+          <dt>Journal value</dt>
+          <dd>{formatSilver(totals.journalValue)}</dd>
+        </div>
+      )}
       <div>
         <dt>Profit</dt>
         <dd className={totals.profit < 0 ? styles.loss : styles.profit}>
@@ -424,6 +442,13 @@ function EntryRow({
                 </li>
               );
             })}
+            {planned.journal && (
+              <li>
+                <ItemIcon id={fullJournalId(planned.journal.id)} />
+                Fills {formatQuantity(planned.journal.filled)} ×{" "}
+                {journalName(planned.journal.id)}
+              </li>
+            )}
           </ul>
         )}
       </td>

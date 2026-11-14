@@ -207,3 +207,58 @@ describe("shoppingListText", () => {
     );
   });
 });
+
+describe("shoppingList with journals", () => {
+  it("adds the empty journals the plan fills, added up and rounded to whole journals", () => {
+    // A T4 broadsword fills 15% of a T4 Blacksmith's journal, a claymore 20%,
+    // and a bow 20% of a Fletcher's.
+    const plan: CraftingPlan = {
+      locations: [
+        {
+          id: "city",
+          route: route(lymhurst, "Lymhurst"),
+          entries: [
+            entry("T4_MAIN_SWORD", 10),
+            entry("T4_2H_CLAYMORE", 3),
+            entry("T4_2H_BOW", 4),
+          ],
+        },
+      ],
+    };
+    const prices = pricesFor("Lymhurst");
+    const result = evaluatePlan(
+      planLocations(plan, () => ({
+        materials: new Map([
+          ...prices.materials,
+          ["T4_JOURNAL_WARRIOR_EMPTY", fresh(2000)],
+        ]),
+        products: prices.products,
+      })),
+      {
+        premium: true,
+        buyMode: "instant",
+        sellMode: "order",
+        stationFee: 0,
+        journals: true,
+      },
+    );
+
+    const lines = shoppingList(plan, result, NO_PINS)[0]?.lines ?? [];
+    expect(
+      lines.filter(({ itemId }) => itemId.includes("_JOURNAL_")),
+    ).toMatchObject([
+      {
+        itemId: "T4_JOURNAL_WARRIOR_EMPTY",
+        expected: expect.closeTo(2.1, 9) as number,
+        toBuy: 3,
+        unitPrice: 2000,
+        cost: 6000,
+      },
+      {
+        itemId: "T4_JOURNAL_HUNTER_EMPTY",
+        expected: expect.closeTo(0.8, 9) as number,
+        toBuy: 1,
+      },
+    ]);
+  });
+});

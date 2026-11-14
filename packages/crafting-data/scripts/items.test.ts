@@ -38,6 +38,46 @@ describe("extractItems", () => {
     expect(items.find((item) => item.id === id)?.name).toBe(name);
   });
 
+  it("names the empty and full journal a recipe fills", async () => {
+    const dumps = await validate(fixtures);
+    const [sword] = extractRecipes(dumps["items.json"].items).filter(
+      ({ itemId }) => itemId === "T4_MAIN_SWORD",
+    );
+    if (sword === undefined) {
+      throw new Error("No T4_MAIN_SWORD in the fixture");
+    }
+    const { items } = extractItems(
+      [
+        {
+          ...sword,
+          journal: { id: "T4_JOURNAL_WARRIOR", capacity: 3600, fame: 540 },
+        },
+      ],
+      [
+        ...dumps["formatted/items.json"],
+        {
+          UniqueName: "T4_JOURNAL_WARRIOR_EMPTY",
+          LocalizedNames: { "EN-US": "Adept Blacksmith's Journal (Empty)" },
+        },
+        {
+          UniqueName: "T4_JOURNAL_WARRIOR_FULL",
+          LocalizedNames: { "EN-US": "Adept Blacksmith's Journal (Full)" },
+        },
+      ],
+    );
+
+    expect(items.filter(({ id }) => id.includes("_JOURNAL_"))).toEqual([
+      {
+        id: "T4_JOURNAL_WARRIOR_EMPTY",
+        name: "Adept Blacksmith's Journal (Empty) 4.0",
+      },
+      {
+        id: "T4_JOURNAL_WARRIOR_FULL",
+        name: "Adept Blacksmith's Journal (Full) 4.0",
+      },
+    ]);
+  });
+
   it("sorts the items by ID", async () => {
     const { items } = await fixtureItems();
 

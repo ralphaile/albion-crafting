@@ -37,6 +37,14 @@ export interface PlannedMaterial {
   count: number;
 }
 
+// `filled` is how many journals the crafts fill, such as 2.7: the empty ones
+// to bring round it up. `value` is what filling them adds to the profit, while
+// the journals' prices are known.
+export interface PlannedJournal {
+  id: string;
+  filled: number;
+}
+
 // Silver sums only count the entries with every price. `missingPrices` lists
 // the items with none, once each.
 export interface PlanTotals {
@@ -45,6 +53,8 @@ export interface PlanTotals {
   cost: number;
   revenue: number;
   profit: number;
+  journalValue: number;
+  journals: PlannedJournal[];
   missingPrices: string[];
 }
 
@@ -54,6 +64,7 @@ interface PlannedEntryBase {
   made: number;
   materials: PlannedMaterial[];
   focus: number;
+  journal?: PlannedJournal & { value: number | undefined };
 }
 
 export type PlannedEntry =
@@ -62,6 +73,7 @@ export type PlannedEntry =
       status: "complete";
       cost: number;
       revenue: number;
+      journalValue: number;
       profit: number;
     });
 

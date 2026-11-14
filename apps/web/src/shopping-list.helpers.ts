@@ -1,4 +1,4 @@
-import type { PlanResult } from "@aoc/core";
+import { emptyJournalId, type PlanResult } from "@aoc/core";
 import { itemName } from "@aoc/crafting-data";
 
 import { formatCount, formatSilver } from "./format.helpers";
@@ -8,7 +8,8 @@ import type { CraftingPlan } from "./plan.types";
 import type { ShoppingLine, ShoppingMarket } from "./shopping-list.types";
 
 // Every material in the plan, added up per market it's bought in, in the
-// order the plan first needs them.
+// order the plan first needs them. The empty journals the plan fills are
+// bought there too, added up before they're rounded to whole journals.
 export function shoppingList(
   plan: CraftingPlan,
   result: PlanResult,
@@ -37,6 +38,24 @@ export function shoppingList(
           priced.status !== "missing"
         ) {
           line.unitPrice = priced.unitPrice;
+        }
+        lines.set(itemId, line);
+      }
+      if (entry.journal) {
+        const itemId = emptyJournalId(entry.journal.id);
+        const marketId = materialMarketId({ ...route, pins }, itemId);
+        const lines = markets.get(marketId) ?? new Map<string, ShoppingLine>();
+        markets.set(marketId, lines);
+        const line = lines.get(itemId) ?? {
+          itemId,
+          source: entry.evaluation.materialCost.lines[0]?.source ?? "sellMin",
+          expected: 0,
+          toBuy: 0,
+        };
+        line.expected += entry.journal.filled;
+        const emptyCost = entry.evaluation.journal?.emptyCost;
+        if (line.unitPrice === undefined && emptyCost !== undefined) {
+          line.unitPrice = emptyCost;
         }
         lines.set(itemId, line);
       }
