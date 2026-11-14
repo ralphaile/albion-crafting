@@ -15,6 +15,7 @@ export function fakeMarketData(overrides: Partial<MarketData> = {}) {
     getHistory: vi.fn<MarketData["getHistory"]>(() =>
       Promise.resolve({ history: [], failures: [], fetchedAt: undefined }),
     ),
+    getSeries: vi.fn<MarketData["getSeries"]>(() => Promise.resolve([])),
     clear: vi.fn<MarketData["clear"]>(() => Promise.resolve()),
     ...overrides,
   };

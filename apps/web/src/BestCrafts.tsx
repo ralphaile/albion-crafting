@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 
 import type { MarketData } from "@aoc/market-prices";
 
@@ -21,6 +21,13 @@ import type { CraftingSettings } from "./settings.types";
 import { NO_SPECIALIZATIONS } from "./specializations.constants";
 import type { SpecializationProfile } from "./specializations.types";
 import type { BestCraftsResult } from "./useBestCrafts";
+
+// Loaded when the History tab first opens, to keep it out of the main bundle.
+const PriceHistory = lazy(() =>
+  import("./PriceHistory").then(({ PriceHistory: Component }) => ({
+    default: Component,
+  })),
+);
 
 const SKELETON_ROWS = 8;
 
@@ -193,6 +200,17 @@ export function BestCrafts({
               sellMarketId={route.sellMarketId}
               onSellIn={sellMarkets.onSellIn}
             />
+          ),
+          priceHistory: (craft) => (
+            <Suspense fallback={<p>Loading…</p>}>
+              <PriceHistory
+                craft={craft}
+                marketData={sellMarkets.marketData}
+                region={settings.server}
+                buyMarkets={{ ...route, pins }}
+                sellMarketId={route.sellMarketId}
+              />
+            </Suspense>
           ),
         })}
         onClose={() => {

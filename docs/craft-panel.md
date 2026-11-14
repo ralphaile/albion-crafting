@@ -2,7 +2,7 @@
 
 A click anywhere on a row opens that craft in a panel over the right of the page, and so do the row's pencil and its **N prices missing**. The panel shows how the table got its numbers, and every price in it can be typed over ([manual prices](manual-prices.md)). The table and the panel change as soon as a price is saved. In the code, it's `apps/web/src/CraftPanel.tsx`.
 
-It has two tabs: **Breakdown**, which it opens on, and **Compare markets**. The arrow keys move between them.
+It has three tabs: **Breakdown**, which it opens on, **Compare markets** and **History**. The arrow keys move between them.
 
 ## What it shows
 
@@ -19,6 +19,16 @@ It has two tabs: **Breakdown**, which it opens on, and **Compare markets**. The 
 - **Result:** profit and margin, and silver per focus when the recipe costs focus. A recipe that makes several, such as 10 stews, also shows the profit of one craft. With **Include journal value** on, **+ journals** above them is the [journal value](glossary.md#laborers-journal) the profit includes.
 
 A figure a missing price keeps from being worked out shows **—**.
+
+## History
+
+A chart of the price history of the item, in the sell market, or of one of its materials, in the market it's bought in. Buttons above it pick the item and the range:
+
+- **24h** uses AODP's hourly history, and **7d** and **30d** its daily history. Each range ends at the newest point AODP has, as it can be hours or days behind.
+- **The chart:** the average price as a line, how many sold as bars, and the price in use as a dashed line.
+- **Reading it:** pointing at a bar, or focusing the chart and using the arrow keys, Home and End, shows that hour's or day's time, average price and how many sold under it. A screen reader hears a summary instead: where the price went, its range and how many sold.
+- **No history** when AODP has none there.
+- **Loaded when needed:** the tab's code (`PriceHistory.tsx`, an SVG with no chart library) is a chunk of its own, loaded when the tab first opens. Each series is asked for once every 15 minutes, and not saved.
 
 ## Compare markets
 

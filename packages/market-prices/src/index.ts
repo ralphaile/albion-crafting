@@ -3,7 +3,7 @@ export {
   type BatchFailure,
   type Region,
 } from "./aodp.types.js";
-export { type HistorySummary } from "./history.types.js";
+export { type HistorySummary, type PricePoint } from "./history.types.js";
 export { openMarketData } from "./market-data.client.js";
 export {
   type HistoryOptions,
@@ -12,6 +12,7 @@ export {
   type PartialHistory,
   type PartialPrices,
   type PricesOptions,
+  type SeriesOptions,
   type PricesResult,
 } from "./market-data.types.js";
 export { markets } from "./markets.constants.js";

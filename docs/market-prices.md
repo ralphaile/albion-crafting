@@ -87,6 +87,17 @@ const { history } = await marketData.getHistory(["T4_BAG"], ["Caerleon"], [1]);
 - **The newest 7 days, not the last 7:** AODP only learns a market's history when a player opens it in the game, so it can be days behind. On 2026-10-26, the newest day for T4_BAG in Caerleon was 10-18. Counting back from today would read that as nothing sold. Compare `newestDay` with today to tell how old the history is.
 - **Up to about 3 weeks:** AODP keeps about 30 days of history, counted back from today rather than from the newest day. A longer window can reach past what AODP still has, and those days would count as none sold.
 
+### One series, for a chart
+
+```ts
+const points = await marketData.getSeries("T4_BAG", "Caerleon", 1, {
+  hourly: true,
+});
+// [{ time: 1792281600000, averagePrice: 4441.15, volume: 12 }, …]
+```
+
+One item in one market, oldest first, by the hour (`time-scale=1`) or by the day (`time-scale=24`), leaving out hours and days with no sales. It's kept in memory for 15 minutes and not saved, and it throws when AODP fails.
+
 ## Behind `openMarketData`
 
 ### Batches
