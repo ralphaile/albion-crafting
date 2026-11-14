@@ -1,4 +1,5 @@
 import type { Hideout, HideoutProductionBonus } from "./hideout-bonus.types.js";
+import type { JournalValue, RecipeJournal } from "./journal.types.js";
 import type { OrderPrices } from "./market.types.js";
 import type { BuyMode, Material, MaterialCost } from "./material-cost.types.js";
 import type {
@@ -21,6 +22,7 @@ export interface Recipe extends RecipeAlternative {
   refining?: boolean;
   craftingCategory?: string;
   itemValue?: number;
+  journal?: RecipeJournal;
   alternatives: readonly RecipeAlternative[];
 }
 
@@ -36,6 +38,7 @@ export interface EvaluateSettings {
   stationFee: number;
   dailyBonuses?: readonly DailyBonus[];
   fce?: (itemId: string) => number;
+  journals?: boolean;
 }
 
 export interface EvaluatePrices {
@@ -54,6 +57,7 @@ interface EvaluationBase {
   silverCost: number;
   revenue: Revenue;
   focusCost?: number;
+  journal?: JournalValue;
 }
 
 export type Evaluation =

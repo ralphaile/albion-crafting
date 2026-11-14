@@ -8,6 +8,7 @@ import type {
   RecipeAlternative,
 } from "./evaluate.types.js";
 import { focusCost, silverPerFocus } from "./focus.helpers.js";
+import { journalValue } from "./journal.helpers.js";
 import { materialCost } from "./material-cost.helpers.js";
 import { placeProductionBonus } from "./place-bonus.helpers.js";
 import { returnRate } from "./return-rate.helpers.js";
@@ -55,6 +56,15 @@ export function evaluateEach(
       });
     const cost = costAt(rrr);
     const costWithoutFocus = settings.focus ? costAt(rrrWithoutFocus) : cost;
+    const journal =
+      settings.journals === true && recipe.journal !== undefined
+        ? journalValue(
+            recipe.journal,
+            alternative.amountCrafted,
+            settings,
+            prices,
+          )
+        : undefined;
     const focusSpent = settings.focus
       ? focusCost(alternative.focus, settings.fce?.(recipe.itemId) ?? 0)
       : undefined;
@@ -74,6 +84,7 @@ export function evaluateEach(
       silverCost: alternative.silver,
       revenue: sale,
       ...(focusSpent === undefined ? {} : { focusCost: focusSpent }),
+      ...(journal === undefined ? {} : { journal }),
     };
     if (
       cost.status === "incomplete" ||
@@ -86,15 +97,17 @@ export function evaluateEach(
 
     const spentPerItem = (materials: number) =>
       (materials + fee + alternative.silver) / alternative.amountCrafted;
+    // Without both journal prices, the journal adds nothing.
+    const earned = sale.net + (journal?.value ?? 0);
     const spent = spentPerItem(cost.total);
-    const profit = sale.net - spent;
+    const profit = earned - spent;
     // The focus pays for the whole craft, which can make several items.
     const perFocus =
       focusSpent === undefined
         ? undefined
         : silverPerFocus(
             profit * alternative.amountCrafted,
-            (sale.net - spentPerItem(costWithoutFocus.total)) *
+            (earned - spentPerItem(costWithoutFocus.total)) *
               alternative.amountCrafted,
             focusSpent,
           );
