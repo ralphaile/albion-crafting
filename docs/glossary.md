@@ -30,6 +30,8 @@ How many of an item sold a day in the sell [market](#market), on average over th
 
 Levels .1 to .4 of an item, written after its tier: 5.1 is a tier 5 item at enchantment 1. Each level is made from materials of the same level and costs more [focus](#focus). Market IDs add the level after an `@`: `T5_MAIN_SWORD@1` is made from `T5_METALBAR_LEVEL1@1`. Level .0 has no suffix.
 
+Gear can also be enchanted by upgrading: crafted at a lower level, then raised one level at a time with runes (.0 → .1), souls (.1 → .2) and relics (.2 → .3), 288 of them for a T5 one-handed weapon. There are no upgrade materials for .4. The craft panel's **Enchant paths** compares the silver per item of crafting directly with the cheapest way of crafting lower and upgrading, and the cheaper one is the total. `enchantPaths()` in `packages/core/src/enchant-path.helpers.ts` works it out. Upgrading costs no focus and returns nothing.
+
 ## FCE
 
 Focus cost efficiency, which grows as you specialize in crafting an item. Every 10,000 FCE halves the [focus](#focus) a craft costs:

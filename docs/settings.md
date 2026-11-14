@@ -2,23 +2,24 @@
 
 The **Settings** button at the top right, just its icon on phones, opens a panel over the right of the page. It closes on Escape, a click outside it, or ×. Each setting has a **?** that explains it. In the code, the settings are `CraftingSettings` in `apps/web/src/settings.types.ts`, and the panel is `apps/web/src/SettingsPanel.tsx`.
 
-| Setting                        | What it changes                                                                                                                                | Default             |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| Use focus                      | Prices each craft with [focus](glossary.md#focus), and shows silver per focus                                                                  | On                  |
-| Premium                        | The market [tax](glossary.md#tax-and-premium): 4% with premium, 8% without                                                                     | On                  |
-| Station fee                    | Silver per 100 [nutrition](glossary.md#nutrition-and-station-fee), 0 to 100,000                                                                | 500                 |
-| Include journal value          | Adds the [laborer's journal](glossary.md#laborers-journal) each craft fills to its profit                                                      | Off                 |
-| Daily bonuses                  | Up to two [daily bonuses](glossary.md#daily-bonus), each a crafting or refining category and +10% or +20%                                      | None                |
-| Buy materials by               | Instant buy or buy order, for the [material cost](glossary.md#material-cost)                                                                   | Instant buy         |
-| Sell by                        | Sell order or instant sell, for the [revenue](glossary.md#revenue). Selling in the [Black Market](glossary.md#black-market) is always instant. | Sell order          |
-| Value items at                 | Normal quality only, or quality-weighted: the [expected price](glossary.md#quality) over the five qualities                                    | Normal quality only |
-| Stale after                    | Hours until an AODP price counts as [stale](glossary.md#fresh-stale-and-missing-prices), 1 to 168                                              | 12                  |
-| Manual prices stale after      | Days until a [price you typed](manual-prices.md) counts as stale, and a fresh AODP price replaces it, 1 to 30                                  | 3                   |
-| Always prefer my manual prices | Uses a price you typed whenever there is one, even when AODP's is newer                                                                        | Off                 |
-| Outlier beyond                 | An AODP price this many times above or below its 7-day average is an [outlier](glossary.md#outliers), 2 to 100                                 | 2                   |
-| Use 7-day average for outliers | Works out crafts with the 7-day average in place of an outlier that flatters them: a product price above it, or a material price below it      | Off                 |
-| Server                         | The game server whose prices to fetch: Americas, Europe or Asia                                                                                | Americas            |
-| Low volume under               | Crafts that sell fewer than this a day in the sell market are marked Low, the [daily volume](glossary.md#daily-volume), 0 to 10,000            | 5                   |
+| Setting                          | What it changes                                                                                                                                | Default             |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| Use focus                        | Prices each craft with [focus](glossary.md#focus), and shows silver per focus                                                                  | On                  |
+| Premium                          | The market [tax](glossary.md#tax-and-premium): 4% with premium, 8% without                                                                     | On                  |
+| Station fee                      | Silver per 100 [nutrition](glossary.md#nutrition-and-station-fee), 0 to 100,000                                                                | 500                 |
+| Include journal value            | Adds the [laborer's journal](glossary.md#laborers-journal) each craft fills to its profit                                                      | Off                 |
+| Rank by the cheaper enchant path | Ranks an enchanted item by the cheaper of crafting it directly or [upgrading](glossary.md#enchantment) a lower one                             | Off                 |
+| Daily bonuses                    | Up to two [daily bonuses](glossary.md#daily-bonus), each a crafting or refining category and +10% or +20%                                      | None                |
+| Buy materials by                 | Instant buy or buy order, for the [material cost](glossary.md#material-cost)                                                                   | Instant buy         |
+| Sell by                          | Sell order or instant sell, for the [revenue](glossary.md#revenue). Selling in the [Black Market](glossary.md#black-market) is always instant. | Sell order          |
+| Value items at                   | Normal quality only, or quality-weighted: the [expected price](glossary.md#quality) over the five qualities                                    | Normal quality only |
+| Stale after                      | Hours until an AODP price counts as [stale](glossary.md#fresh-stale-and-missing-prices), 1 to 168                                              | 12                  |
+| Manual prices stale after        | Days until a [price you typed](manual-prices.md) counts as stale, and a fresh AODP price replaces it, 1 to 30                                  | 3                   |
+| Always prefer my manual prices   | Uses a price you typed whenever there is one, even when AODP's is newer                                                                        | Off                 |
+| Outlier beyond                   | An AODP price this many times above or below its 7-day average is an [outlier](glossary.md#outliers), 2 to 100                                 | 2                   |
+| Use 7-day average for outliers   | Works out crafts with the 7-day average in place of an outlier that flatters them: a product price above it, or a material price below it      | Off                 |
+| Server                           | The game server whose prices to fetch: Americas, Europe or Asia                                                                                | Americas            |
+| Low volume under                 | Crafts that sell fewer than this a day in the sell market are marked Low, the [daily volume](glossary.md#daily-volume), 0 to 10,000            | 5                   |
 
 A change applies straight away. A new server or **Stale after** time asks for prices again, and the browser's [cache](market-prices.md) answers with any it fetched in the last 15 minutes. Every other setting re-ranks the prices already fetched.
 
