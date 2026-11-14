@@ -74,13 +74,18 @@ function isIncluded(item: GearItem): boolean {
 
 export function toRecipes(item: GearItem): GameRecipe[] {
   const levels = [
-    { enchant: 0, requirements: item.craftingrequirements ?? [] },
+    {
+      enchant: 0,
+      requirements: item.craftingrequirements ?? [],
+      upgrade: undefined,
+    },
     ...(item.enchantments?.enchantment ?? []).map((enchantment) => ({
       enchant: enchantment["@enchantmentlevel"],
       requirements: enchantment.craftingrequirements,
+      upgrade: enchantment.upgraderequirements?.upgraderesource,
     })),
   ];
-  return levels.flatMap(({ enchant, requirements }) => {
+  return levels.flatMap(({ enchant, requirements, upgrade }) => {
     const [recipe, ...alternatives] = requirements.map(toAlternative);
     if (!recipe) {
       return [];
@@ -96,6 +101,9 @@ export function toRecipes(item: GearItem): GameRecipe[] {
       shopCategory: item["@shopcategory"],
       shopSubcategory: item["@shopsubcategory1"],
       isArtifact: recipe.materials.some(({ id }) => id.includes("_ARTEFACT_")),
+      ...(upgrade && {
+        upgrade: { id: upgrade["@uniquename"], count: upgrade["@count"] },
+      }),
       ...recipe,
       alternatives,
     };

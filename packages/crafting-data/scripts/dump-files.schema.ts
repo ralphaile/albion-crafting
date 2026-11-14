@@ -52,6 +52,14 @@ const gearItem = z.object({
         z.object({
           "@enchantmentlevel": number,
           craftingrequirements: oneOrMany(craftingRequirements),
+          upgraderequirements: z
+            .object({
+              upgraderesource: z.object({
+                "@uniquename": z.string(),
+                "@count": number,
+              }),
+            })
+            .optional(),
         }),
       ),
     })

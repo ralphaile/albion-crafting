@@ -144,7 +144,7 @@ describe("validate", () => {
     expect(sword).not.toHaveProperty("@weight");
     expect(sword).not.toHaveProperty("SocketPreset");
     expect(sword?.enchantments?.enchantment[0]).not.toHaveProperty(
-      "upgraderequirements",
+      "@itempower",
     );
   });
 

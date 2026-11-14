@@ -229,7 +229,7 @@ describe("update", () => {
     ]);
     expect(JSON.parse(text)).toHaveLength(6);
     expect(warnings).toContainEqual(
-      expect.stringMatching(/^Warning: No EN-US name for 42 item IDs, /),
+      expect.stringMatching(/^Warning: No EN-US name for 46 item IDs, /),
     );
   });
 
