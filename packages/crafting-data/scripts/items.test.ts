@@ -112,7 +112,7 @@ describe("extractItems", () => {
     expect(items.map(({ id }) => id)).not.toContain("T4_MAIN_SWORD@2");
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toMatch(
-      /^No EN-US name for 36 item IDs, so the app shows the IDs: T3_ALCHEMY_RARE_PANTHER, .*T4_MAIN_SWORD@2, /,
+      /^No EN-US name for 40 item IDs, so the app shows the IDs: T3_ALCHEMY_RARE_PANTHER, .*T4_MAIN_SWORD@2, /,
     );
   });
 

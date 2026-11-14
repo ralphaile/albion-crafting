@@ -20,6 +20,12 @@ import type {
 
 import { evaluateCrafts, withDailyVolumes } from "./best-crafts.helpers";
 import type { Craft, CraftHistory, CraftPrices } from "./best-crafts.types";
+import {
+  lowerChoices,
+  lowerEnchants,
+  upgradeMaterials,
+  withEnchantPaths,
+} from "./enchant-paths.helpers";
 import { NO_FILTERS } from "./filters.constants";
 import { craftFilter, recipeFilter } from "./filters.helpers";
 import type { CraftMode, Filters } from "./filters.types";
@@ -508,10 +514,20 @@ export function useBestCrafts(
   const cancelRef = useRef<() => void>(undefined);
   const { journals } = settings;
   const selected = useSelectedRecipes(filters, place);
-  const needed = useMemo(
-    () => pricesNeeded(selected, { journals }),
-    [selected, journals],
-  );
+  const lower = useMemo(() => lowerEnchants(selected), [selected]);
+  const needed = useMemo(() => {
+    const { products, materials } = pricesNeeded(selected, { journals });
+    return {
+      products,
+      materials: [
+        ...new Set([
+          ...materials,
+          ...pricesNeeded(lower).materials,
+          ...upgradeMaterials(selected),
+        ]),
+      ],
+    };
+  }, [selected, lower, journals]);
 
   // An earlier attempt's answer stays on screen while the next one comes in.
   // So does the last answer before a new pin, while its market is asked.
@@ -794,9 +810,38 @@ export function useBestCrafts(
           ),
     [priced, place, routeSettings, prices, qualityPrices, recipeChoices],
   );
+  const lowerCrafts = useMemo(
+    () =>
+      prices === undefined
+        ? []
+        : evaluateCrafts(
+            lower,
+            place,
+            routeSettings,
+            prices,
+            lowerChoices(selected, recipeChoices),
+          ),
+    [lower, place, routeSettings, prices, selected, recipeChoices],
+  );
+  const withPaths = useMemo(
+    () =>
+      prices === undefined
+        ? evaluated
+        : withEnchantPaths(evaluated, lowerCrafts, prices.materials, {
+            buyMode: settings.buyMode,
+            rank: settings.rankByCheaperEnchant,
+          }),
+    [
+      evaluated,
+      lowerCrafts,
+      prices,
+      settings.buyMode,
+      settings.rankByCheaperEnchant,
+    ],
+  );
   const withVolumes = useMemo(
-    () => withDailyVolumes(evaluated, history.products),
-    [evaluated, history],
+    () => withDailyVolumes(withPaths, history.products),
+    [withPaths, history],
   );
   const crafts = useMemo(
     () => withVolumes.filter(craftFilter(filters)),

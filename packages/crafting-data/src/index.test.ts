@@ -58,6 +58,7 @@ describe("recipes", () => {
         ],
         alternatives: [],
         itemValue: 1536,
+        upgrade: { id: "T5_RUNE", count: 288 },
         journal: { id: "T5_JOURNAL_WARRIOR", capacity: 7200, fame: 4320 },
       },
     ],

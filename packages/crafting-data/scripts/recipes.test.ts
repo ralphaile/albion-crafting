@@ -64,6 +64,7 @@ describe("extractRecipes", () => {
       itemId: "T4_MAIN_SWORD@1",
       baseId: "T4_MAIN_SWORD",
       tier: 4,
+      upgrade: { id: "T4_RUNE", count: 288 },
       enchant: 1,
       craftingCategory: "sword",
       shopCategory: "weapons",

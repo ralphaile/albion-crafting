@@ -33,6 +33,7 @@ export function extractItems(
     ...recipes.flatMap(({ journal }) =>
       journal ? [emptyJournalId(journal.id), fullJournalId(journal.id)] : [],
     ),
+    ...recipes.flatMap(({ upgrade }) => (upgrade ? [upgrade.id] : [])),
   ]);
 
   const items: Item[] = [];

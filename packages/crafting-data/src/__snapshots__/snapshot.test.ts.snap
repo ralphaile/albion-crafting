@@ -621,6 +621,10 @@ exports[`the generated data > has the same recipe for T5_2H_SHAPESHIFTER_SET1@1 
   "shopSubcategory": "shapeshifterstaff",
   "silver": 0,
   "tier": 5,
+  "upgrade": {
+    "count": 384,
+    "id": "T5_RUNE",
+  },
 }
 `;
 
@@ -686,6 +690,10 @@ exports[`the generated data > has the same recipe for T5_CAPE@1 1`] = `
   "shopSubcategory": "accessoires_capes_capes",
   "silver": 0,
   "tier": 5,
+  "upgrade": {
+    "count": 96,
+    "id": "T5_RUNE",
+  },
 }
 `;
 
@@ -725,6 +733,10 @@ exports[`the generated data > has the same recipe for T6_BAG_INSIGHT@2 1`] = `
   "shopSubcategory": "satchels",
   "silver": 0,
   "tier": 6,
+  "upgrade": {
+    "count": 192,
+    "id": "T6_SOUL",
+  },
 }
 `;
 
@@ -755,6 +767,10 @@ exports[`the generated data > has the same recipe for T6_HEAD_CLOTH_SET2@1 1`] =
   "shopSubcategory": "cloth_helmet",
   "silver": 0,
   "tier": 6,
+  "upgrade": {
+    "count": 96,
+    "id": "T6_RUNE",
+  },
 }
 `;
 
@@ -818,6 +834,10 @@ exports[`the generated data > has the same recipe for T6_MAIN_SCIMITAR_MORGANA@2
   "shopSubcategory": "sword",
   "silver": 0,
   "tier": 6,
+  "upgrade": {
+    "count": 288,
+    "id": "T6_SOUL",
+  },
 }
 `;
 
@@ -848,6 +868,10 @@ exports[`the generated data > has the same recipe for T7_SHOES_LEATHER_SET3@3 1`
   "shopSubcategory": "leather_shoes",
   "silver": 0,
   "tier": 7,
+  "upgrade": {
+    "count": 96,
+    "id": "T7_RELIC",
+  },
 }
 `;
 

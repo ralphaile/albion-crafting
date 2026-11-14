@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS: CraftingSettings = {
   stationFee: 500,
   journals: false,
   qualityWeighted: false,
+  rankByCheaperEnchant: false,
   buyMode: "instant",
   sellMode: "order",
   dailyBonuses: [],

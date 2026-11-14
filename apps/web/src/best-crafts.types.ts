@@ -1,4 +1,10 @@
-import type { EvaluatePrices, Evaluation, PriceOrigin } from "@aoc/core";
+import type {
+  EnchantPaths,
+  EvaluatePrices,
+  Evaluation,
+  OrderPrices,
+  PriceOrigin,
+} from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
 import type {
   HistorySummary,
@@ -69,4 +75,18 @@ export type Craft = CraftAlternative & {
   specialty: boolean;
   dailyVolume: DailyVolume;
   alternatives: readonly [CraftAlternative, ...CraftAlternative[]];
+  // Only on an enchanted item that can be upgraded from the level below,
+  // with the runes, souls or relics each level takes.
+  enchantPaths?: EnchantPaths;
+  upgradeMaterials?: readonly UpgradeMaterial[];
+  // Its profit and margin are those of crafting lower and upgrading. Its
+  // materials, station fee and silver stay those of crafting it directly.
+  rankedByUpgrade?: true;
 };
+
+export interface UpgradeMaterial {
+  itemId: string;
+  count: number;
+  source: keyof OrderPrices;
+  price: UsedPrice;
+}

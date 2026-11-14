@@ -433,6 +433,14 @@ export function SettingsPanel({
             }}
             help="Adds the crafting fame each craft puts in a laborer’s journal to its profit: the share of a journal it fills, times what a full one sells for less an empty one."
           />
+          <Check
+            label="Rank by the cheaper enchant path"
+            checked={settings.rankByCheaperEnchant}
+            onChange={(rankByCheaperEnchant) => {
+              set("rankByCheaperEnchant", rankByCheaperEnchant);
+            }}
+            help="An enchanted item can also be crafted at a lower level and upgraded with runes, souls and relics. When that costs less, its profit counts that way."
+          />
           <DailyBonuses
             bonuses={settings.dailyBonuses}
             onChange={(dailyBonuses) => {

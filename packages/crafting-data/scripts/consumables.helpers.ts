@@ -13,10 +13,19 @@ const MAX_TIER = 8;
 // T4_POTION_HEAL@1. A recipe makes several at once, such as 5 potions or 10
 // stews. Event items, which have no crafting category, are left out.
 export function extractConsumableRecipes(items: Items): GameRecipe[] {
-  return items.consumableitem
-    .filter(isIncluded)
-    .flatMap(toRecipes)
-    .sort((a, b) => (a.itemId < b.itemId ? -1 : 1));
+  return (
+    items.consumableitem
+      .filter(isIncluded)
+      .flatMap(toRecipes)
+      // The game files upgrade food with fish sauce, which isn't how it's
+      // enchanted in game, so only gear keeps its upgrade.
+      .map((recipe) => {
+        const kept = { ...recipe };
+        delete kept.upgrade;
+        return kept;
+      })
+      .sort((a, b) => (a.itemId < b.itemId ? -1 : 1))
+  );
 }
 
 function isIncluded(item: ConsumableItem): boolean {
