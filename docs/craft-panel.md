@@ -15,13 +15,13 @@ It has two tabs: **Breakdown**, which it opens on, and **Compare markets**. The 
 - **Costs:** materials, station fee and silver for one craft. A recipe that makes several items also shows the cost of each.
 - **Revenue:** the item's price where you sell, less tax and the setup fee.
 - **Focus:** only while focus is on, and only for a recipe that costs focus. A royal item costs none, so it has no focus section. Otherwise: mastery, the item's own specialization and the tree's other specializations, each times its [FCE](glossary.md#fce) amount, then the total FCE, the base focus and the focus the craft costs. When that FCE is 0, **Fill in specializations** opens the [specializations](specializations.md) panel on this craft's tree.
-- **Result:** profit and margin, and silver per focus when the recipe costs focus.
+- **Result:** profit and margin, and silver per focus when the recipe costs focus. With **Include journal value** on, **+ journals** above them is the [journal value](glossary.md#laborers-journal) the profit includes.
 
 A figure a missing price keeps from being worked out shows **—**.
 
 ## Compare markets
 
-The item's price, net revenue and profit in every market you can sell in: the cities, the [Black Market](glossary.md#black-market) and the Black Zone's Rests. The materials and costs are the route's, so only the revenue changes from one market to the next.
+The item's price, net revenue and profit in every market you can sell in: the cities, the [Black Market](glossary.md#black-market) and the Black Zone's Rests. The materials and costs are the route's, and so is the journal value, so only the revenue changes from one market to the next.
 
 - **Order:** the highest net first, then the markets without a price.
 - **Best:** the first market is highlighted, with how much more an item nets there than in the current sell market, such as `+1,122 vs Lymhurst`.

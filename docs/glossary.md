@@ -75,6 +75,18 @@ The quality of the Black Zone map a hideout stands on, from Q1 to Q6. It adds 0.
 
 A value the game gives every item, separate from its market price, worked out from the item values of its materials. Refined materials are worth 16 at T4 and double with each tier and enchantment level. [Artifacts](#artifact) count too. The [station fee](#nutrition-and-station-fee) is based on it.
 
+## Laborer's journal
+
+An item that fills with the crafting fame of the items its tree makes, such as the Blacksmith's journal with the warrior gear of its tier. A full one goes to a laborer, so it sells for more than an empty one. The crafting trees' journals are the Blacksmith's (`WARRIOR`), Fletcher's (`HUNTER`), Imbuer's (`MAGE`) and Tinker's (`TOOLMAKER`), and the market sells each as `_EMPTY` and `_FULL`, such as `T5_JOURNAL_WARRIOR_FULL`.
+
+With **Include journal value** on, each craft's [profit](#profit-and-margin) counts what it adds to a journal:
+
+```text
+journal value = fame per craft / journal capacity × (full journal net − empty journal cost) / amount crafted
+```
+
+An empty journal is bought in the buy market, like a [material](#material-cost), and a full one sold in the sell market, like the item, with its [tax](#tax-and-premium) and [setup fee](#setup-fee). Until both have a price, the journal adds nothing. [Game data](game-data.md#recipes) explains the fame per craft.
+
 ## Market
 
 Where you buy and sell. You buy materials in one of the 7 cities, and sell in one of them, a [Rest](#rest) or the [Black Market](#black-market). A route has three parts: the markets you buy the materials in, the [crafting location](#crafting-location), and the market you sell in ([where you craft, buy and sell](route.md)). In the code, a market is its AODP ID from `markets` in `@aoc/market-prices`, such as `Arthurs Rest Smugglers Network`, and its name is what the app shows, such as Arthur's Rest.
@@ -148,6 +160,7 @@ The engine's version is `evaluate()` in `packages/core/src/evaluate.helpers.ts`.
 - An item with alternative recipes, such as a token instead of its [artifact](#artifact) or another base piece for a royal item, is evaluated with each, and the most profitable one with all its prices is kept, unless you chose one in the [craft panel](craft-panel.md).
 - A missing price, or a missing [item value](#item-value) at a paid station, makes the result incomplete. It lists the missing prices and has no profit.
 - With focus on, it also gives the focus cost and [silver per focus](#focus).
+- With **Include journal value** on, the profit adds the [journal value](#laborers-journal).
 
 `rank()` in `packages/core/src/rank.helpers.ts` sorts the results by profit, margin or silver per focus, or by a value it's given such as the [daily volume](#daily-volume), highest first, with incomplete ones last.
 
