@@ -462,6 +462,9 @@ export function CraftPanel({
           focus(focusSpent, chosenRecipe.focus, recipe)}
         <Section title="Result" help="formulas">
           <dl className={styles.figures}>
+            {shown.journal && (
+              <Figure label="+ journals" value={shown.journal.value} />
+            )}
             <Figure label="Profit" value={result?.profit} total />
             <Figure
               label="Margin"

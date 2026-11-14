@@ -24,6 +24,7 @@ import { DEFAULT_ROUTE } from "./route.constants";
 import { placeFromChoice } from "./route.helpers";
 import type { Route } from "./route.types";
 import { DEFAULT_SETTINGS } from "./settings.constants";
+import type { CraftingSettings } from "./settings.types";
 import { NO_SPECIALIZATIONS } from "./specializations.constants";
 import type { SpecializationProfile } from "./specializations.types";
 import { useBestCrafts } from "./useBestCrafts";
@@ -86,6 +87,7 @@ function Crafts({
   route,
   filters,
   specializations,
+  settings,
   onEditSpecializations,
 }: {
   marketData: MarketData;
@@ -94,6 +96,7 @@ function Crafts({
   route: Route;
   filters: Filters;
   specializations: SpecializationProfile;
+  settings: CraftingSettings;
   onEditSpecializations: (treeId: string) => void;
 }) {
   const { manualPrices, saveManualPrice, removeManualPrice } = useManualPrices(
@@ -107,7 +110,7 @@ function Crafts({
   const bestCrafts = useBestCrafts(
     marketData,
     shownRoute,
-    DEFAULT_SETTINGS,
+    settings,
     filters,
     manualPrices,
     specializations,
@@ -120,7 +123,7 @@ function Crafts({
       shownItemId={shownItemId}
       onShowItem={setShownItemId}
       route={shownRoute}
-      settings={DEFAULT_SETTINGS}
+      settings={settings}
       filters={filters}
       manualPrices={manualPrices}
       onSaveManualPrice={saveManualPrice}
@@ -153,6 +156,7 @@ function renderCrafts({
   initial = [],
   route = lymhurst,
   specializations = NO_SPECIALIZATIONS,
+  settings = DEFAULT_SETTINGS,
 }: {
   filters: Filters;
   materials: ItemPrices[];
@@ -160,6 +164,7 @@ function renderCrafts({
   initial?: readonly ManualPrice[];
   route?: Route;
   specializations?: SpecializationProfile;
+  settings?: CraftingSettings;
 }) {
   const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
     Promise.resolve({
@@ -180,6 +185,7 @@ function renderCrafts({
       route={route}
       filters={filters}
       specializations={specializations}
+      settings={settings}
       onEditSpecializations={onEditSpecializations}
     />,
   );
@@ -349,6 +355,34 @@ describe("CraftPanel", () => {
       Profit: "3,417",
       Margin: "271.7%",
       "Silver per focus": "0.4",
+    });
+  });
+
+  it("adds the share of a laborer's journal the craft fills to its profit", async () => {
+    renderCrafts({
+      filters: broadswordOnly,
+      materials: [
+        priced("T4_METALBAR", "Martlock", 100),
+        priced("T4_JOURNAL_WARRIOR_EMPTY", "Martlock", 2000),
+      ],
+      products: [
+        priced("T4_MAIN_SWORD", "Caerleon", 5000),
+        priced("T4_JOURNAL_WARRIOR_FULL", "Caerleon", 6000),
+      ],
+      initial: [typedLeather],
+      settings: { ...DEFAULT_SETTINGS, journals: true },
+    });
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Broadsword 4.0",
+      }),
+    );
+
+    // Its 24 materials give 540 fame, 15% of a T4 journal's 3,600. A full one
+    // nets 5,610 after tax and the setup fee, and an empty one costs 2,000.
+    expect(figures("Result")).toMatchObject({
+      "+ journals": "542",
+      Profit: "3,959",
     });
   });
 

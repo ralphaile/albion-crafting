@@ -6,6 +6,7 @@ import { validate } from "./dumps.schema.ts";
 import { extractHideouts } from "./hideouts.helpers.ts";
 import { addItemValues } from "./item-value.helpers.ts";
 import { extractItems } from "./items.helpers.ts";
+import { addJournals } from "./journals.helpers.ts";
 import { extractLocations } from "./locations.helpers.ts";
 import { SHOP_CATEGORIES } from "./recipes.constants.ts";
 import { extractRecipes, findUnreadGear } from "./recipes.helpers.ts";
@@ -97,10 +98,9 @@ export async function update({
     `Extracted the hideout bonuses for ${count(hideouts.biomes.length, "biomes")} (${biomeNames}), ${count(hideouts.mapQualities.length, "map qualities")} and ${count(hideouts.powerLevels.length, "power levels")}`,
   );
 
-  const { recipes, warnings } = addItemValues(
-    extractRecipes(items),
-    items.simpleitem,
-  );
+  const valued = addItemValues(extractRecipes(items), items.simpleitem);
+  const { warnings } = valued;
+  const recipes = addJournals(valued.recipes, items);
   for (const warning of [...findUnreadGear(items), ...warnings]) {
     warn(`Warning: ${warning}`);
   }
@@ -124,6 +124,13 @@ export async function update({
     ]
       .map(([category, baseIds]) => count(baseIds.size, category))
       .join(", ")}`,
+  );
+
+  log(
+    `Gave ${count(
+      recipes.filter((recipe) => recipe.journal !== undefined).length,
+      "recipes",
+    )} the laborer's journal they fill`,
   );
 
   const refining = extractRefiningRecipes(items);

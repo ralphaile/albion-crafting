@@ -35,6 +35,7 @@ describe("recipes", () => {
         ],
         alternatives: [],
         itemValue: 768,
+        journal: { id: "T5_JOURNAL_WARRIOR", capacity: 7200, fame: 2160 },
       },
     ],
     [
@@ -57,6 +58,7 @@ describe("recipes", () => {
         ],
         alternatives: [],
         itemValue: 1536,
+        journal: { id: "T5_JOURNAL_WARRIOR", capacity: 7200, fame: 4320 },
       },
     ],
     [
@@ -95,6 +97,7 @@ describe("recipes", () => {
           },
         ],
         itemValue: 1920,
+        journal: { id: "T6_JOURNAL_WARRIOR", capacity: 14400, fame: 7128 },
       },
     ],
   ])("has the known recipe for the %s", (_, expected) => {

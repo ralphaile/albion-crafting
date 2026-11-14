@@ -11,6 +11,7 @@ describe("parseSettings", () => {
       focus: false,
       premium: false,
       stationFee: 1200,
+      journals: true,
       buyMode: "order",
       sellMode: "instant",
       dailyBonuses: [

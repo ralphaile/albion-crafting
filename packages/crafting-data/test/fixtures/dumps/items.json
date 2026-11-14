@@ -784,6 +784,38 @@
           ]
         }
       }
+    ],
+    "journalitem": [
+      {
+        "@uniquename": "T4_JOURNAL_WARRIOR",
+        "@tier": "4",
+        "@maxfame": "3600",
+        "famefillingmissions": {
+          "craftitemfame": {
+            "@mintier": "4",
+            "@value": "1200",
+            "validitem": [
+              {
+                "@id": "T4_MAIN_SWORD"
+              },
+              {
+                "@id": "T4_HEAD_PLATE_SET1"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "@uniquename": "T4_JOURNAL_ORE",
+        "@tier": "4",
+        "@maxfame": "3600",
+        "famefillingmissions": {
+          "gatherfame": {
+            "@mintier": "4",
+            "@value": "1200"
+          }
+        }
+      }
     ]
   }
 }

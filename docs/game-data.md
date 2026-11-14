@@ -74,6 +74,10 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
   - A royal item's base piece has no `@itemvalue`, so it takes the item value of its own recipe.
   - An artifact counts too: the Master's Clarent Blade is 16 × 64 + 8 × 64 + 384 for its artifact = 1,920.
   - If a material has no `@itemvalue`, `pnpm data:update` prints a warning and the recipe has no `itemValue`, rather than counting the material as 0. The shapeshifter staffs are like this, because their `ALCHEMY_RARE` materials have no value, and so are the satchels of insight, because the Tome of Insight they need has none.
+- **Journal:** `journal` is the [laborer's journal](glossary.md#laborers-journal) the craft fills, its capacity and the fame one craft puts in it, from `scripts/journals.helpers.ts`.
+  - **Which journal:** each crafting journal in `items.json`'s `journalitem` list, such as `T5_JOURNAL_WARRIOR`, names the base items of its tier that fill it, in `famefillingmissions.craftitemfame.validitem`. Its `@maxfame` is its capacity: 3,600 at T4, 7,200 at T5, 14,400 at T6, 28,380 at T7 and 58,590 at T8.
+  - **Fame:** the materials that come back × the fame per material at the item's tier × 2 for each enchantment level × the item's `@destinyandjournalcraftfamefactor`, which only artifact items have, from 1.1 to 1.4. The fame per material isn't in the game files: `FAME_PER_MATERIAL` in `scripts/journals.constants.ts` holds the community's table, 22.5 at T4, 90 at T5, 270 at T6, 645 at T7 and 1,395 at T8. So the Expert's Broadsword (`T5_MAIN_SWORD`) gives 24 × 90 = 2,160.
+  - A royal item has no journal: none of its materials come back.
 
 ## Names, icons and search
 

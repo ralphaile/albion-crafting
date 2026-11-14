@@ -90,7 +90,7 @@ export function compareSellMarkets(
       profit:
         sale.status === "missing" || cost === undefined
           ? undefined
-          : sale.net - cost,
+          : sale.net + (craft.journal?.value ?? 0) - cost,
     };
   });
   const sorted = offers.toSorted((a, b) => {

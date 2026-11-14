@@ -44,6 +44,7 @@ const gearItem = z.object({
   "@shopsubcategory1": z.string(),
   "@craftingcategory": z.string().optional(),
   "@showinmarketplace": boolean.optional(),
+  "@destinyandjournalcraftfamefactor": number.optional(),
   craftingrequirements: oneOrMany(craftingRequirements).optional(),
   enchantments: z
     .object({
@@ -70,6 +71,21 @@ const simpleItem = z.object({
   craftingrequirements: oneOrMany(
     craftingRequirements.extend({ "@craftingfocus": number.optional() }),
   ).optional(),
+});
+
+// A crafting laborer's journal names the items whose crafting fame fills it.
+// The gatherers' journals fill from gathering, so they have no craftitemfame.
+const journalItem = z.object({
+  "@uniquename": z.string(),
+  "@tier": number,
+  "@maxfame": number,
+  famefillingmissions: z
+    .object({
+      craftitemfame: z
+        .object({ validitem: oneOrMany(z.object({ "@id": z.string() })) })
+        .optional(),
+    })
+    .optional(),
 });
 
 const bonus = z.object({
@@ -110,6 +126,7 @@ export const dumpSchemas = {
         equipmentitem: z.array(gearItem),
         transformationweapon: z.array(gearItem),
         simpleitem: z.array(simpleItem),
+        journalitem: z.array(journalItem),
       })
       .catchall(z.unknown()),
   }),

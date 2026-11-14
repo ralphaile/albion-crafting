@@ -44,6 +44,7 @@ function refined(...simpleitem: SimpleItem[]) {
     transformationweapon: [],
     equipmentitem: [],
     simpleitem,
+    journalitem: [],
   });
 }
 

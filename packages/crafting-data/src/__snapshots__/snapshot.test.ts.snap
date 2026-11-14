@@ -421,6 +421,11 @@ exports[`the generated data > has the same recipe for T4_BAG 1`] = `
   "isArtifact": false,
   "itemId": "T4_BAG",
   "itemValue": 256,
+  "journal": {
+    "capacity": 3600,
+    "fame": 360,
+    "id": "T4_JOURNAL_TOOLMAKER",
+  },
   "materials": [
     {
       "count": 8,
@@ -451,6 +456,11 @@ exports[`the generated data > has the same recipe for T4_MAIN_SWORD 1`] = `
   "isArtifact": false,
   "itemId": "T4_MAIN_SWORD",
   "itemValue": 384,
+  "journal": {
+    "capacity": 3600,
+    "fame": 540,
+    "id": "T4_JOURNAL_WARRIOR",
+  },
   "materials": [
     {
       "count": 16,
@@ -481,6 +491,11 @@ exports[`the generated data > has the same recipe for T4_OFF_SHIELD 1`] = `
   "isArtifact": false,
   "itemId": "T4_OFF_SHIELD",
   "itemValue": 128,
+  "journal": {
+    "capacity": 3600,
+    "fame": 180,
+    "id": "T4_JOURNAL_WARRIOR",
+  },
   "materials": [
     {
       "count": 4,
@@ -510,6 +525,11 @@ exports[`the generated data > has the same recipe for T5_2H_SHAPESHIFTER_SET1@1 
   "focus": 5252,
   "isArtifact": false,
   "itemId": "T5_2H_SHAPESHIFTER_SET1@1",
+  "journal": {
+    "capacity": 7200,
+    "fame": 5760,
+    "id": "T5_JOURNAL_HUNTER",
+  },
   "materials": [
     {
       "count": 20,
@@ -545,6 +565,11 @@ exports[`the generated data > has the same recipe for T5_ARMOR_PLATE_SET1 1`] = 
   "isArtifact": false,
   "itemId": "T5_ARMOR_PLATE_SET1",
   "itemValue": 512,
+  "journal": {
+    "capacity": 7200,
+    "fame": 1440,
+    "id": "T5_JOURNAL_WARRIOR",
+  },
   "materials": [
     {
       "count": 16,
@@ -570,6 +595,11 @@ exports[`the generated data > has the same recipe for T5_CAPE@1 1`] = `
   "isArtifact": false,
   "itemId": "T5_CAPE@1",
   "itemValue": 512,
+  "journal": {
+    "capacity": 7200,
+    "fame": 1440,
+    "id": "T5_JOURNAL_TOOLMAKER",
+  },
   "materials": [
     {
       "count": 4,
@@ -599,6 +629,11 @@ exports[`the generated data > has the same recipe for T6_BAG_INSIGHT@2 1`] = `
   "focus": 8042,
   "isArtifact": false,
   "itemId": "T6_BAG_INSIGHT@2",
+  "journal": {
+    "capacity": 14400,
+    "fame": 17280,
+    "id": "T6_JOURNAL_TOOLMAKER",
+  },
   "materials": [
     {
       "count": 8,
@@ -634,6 +669,11 @@ exports[`the generated data > has the same recipe for T6_HEAD_CLOTH_SET2@1 1`] =
   "isArtifact": false,
   "itemId": "T6_HEAD_CLOTH_SET2@1",
   "itemValue": 1024,
+  "journal": {
+    "capacity": 14400,
+    "fame": 4320,
+    "id": "T6_JOURNAL_MAGE",
+  },
   "materials": [
     {
       "count": 8,
@@ -682,6 +722,11 @@ exports[`the generated data > has the same recipe for T6_MAIN_SCIMITAR_MORGANA@2
   "isArtifact": true,
   "itemId": "T6_MAIN_SCIMITAR_MORGANA@2",
   "itemValue": 6528,
+  "journal": {
+    "capacity": 14400,
+    "fame": 28512,
+    "id": "T6_JOURNAL_WARRIOR",
+  },
   "materials": [
     {
       "count": 16,
@@ -717,6 +762,11 @@ exports[`the generated data > has the same recipe for T7_SHOES_LEATHER_SET3@3 1`
   "isArtifact": false,
   "itemId": "T7_SHOES_LEATHER_SET3@3",
   "itemValue": 8192,
+  "journal": {
+    "capacity": 28380,
+    "fame": 41280,
+    "id": "T7_JOURNAL_HUNTER",
+  },
   "materials": [
     {
       "count": 8,
@@ -742,6 +792,11 @@ exports[`the generated data > has the same recipe for T8_2H_BOW@4 1`] = `
   "isArtifact": false,
   "itemId": "T8_2H_BOW@4",
   "itemValue": 131072,
+  "journal": {
+    "capacity": 58590,
+    "fame": 714240,
+    "id": "T8_JOURNAL_HUNTER",
+  },
   "materials": [
     {
       "count": 32,
