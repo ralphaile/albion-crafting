@@ -535,7 +535,15 @@ export function CraftPanel({
             {shown.journal && (
               <Figure label="+ journals" value={shown.journal.value} />
             )}
-            <Figure label="Profit" value={result?.profit} total />
+            <Figure
+              label={
+                craft?.rankedByUpgrade && craft.enchantPaths?.upgraded
+                  ? `Profit, crafting .${String(craft.enchantPaths.upgraded.from)} and upgrading`
+                  : "Profit"
+              }
+              value={result?.profit}
+              total
+            />
             {madeAtOnce > 1 && (
               <Figure
                 label={`Per craft of ${formatCount(madeAtOnce)}`}

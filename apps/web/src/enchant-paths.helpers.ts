@@ -106,6 +106,7 @@ function rankedBy(
         silverPerFocus: start.silverPerFocus,
       }),
     enchantPaths: paths,
+    rankedByUpgrade: true,
     profit,
     margin: upgraded.total > 0 ? profit / upgraded.total : undefined,
   };
@@ -181,7 +182,9 @@ export function withEnchantPaths(
     });
     const source = buyMode === "instant" ? "sellMin" : "buyMax";
     const upgrades: UpgradeMaterial[] = [];
-    for (let level = 1; level <= craft.recipe.enchant; level += 1) {
+    // Only the steps of the upgrade path, from the level it starts at.
+    const from = paths.upgraded?.from ?? 0;
+    for (let level = from + 1; level <= craft.recipe.enchant; level += 1) {
       const upgrade = atLevel(craft.recipe, level)?.upgrade;
       if (upgrade !== undefined) {
         upgrades.push({

@@ -424,6 +424,29 @@ describe("CraftPanel", () => {
     expect(upgraded).toBeGreaterThan(288 * 10);
   });
 
+  it("says a profit is that of upgrading when it ranks by that path", async () => {
+    renderCrafts({
+      filters: { ...broadswordOnly, tiers: [5], enchants: [1] },
+      materials: [
+        priced("T5_METALBAR", "Martlock", 100),
+        priced("T5_LEATHER", "Martlock", 100),
+        priced("T5_METALBAR_LEVEL1@1", "Martlock", 1000),
+        priced("T5_LEATHER_LEVEL1@1", "Martlock", 1000),
+        priced("T5_RUNE", "Martlock", 10),
+      ],
+      products: [priced("T5_MAIN_SWORD@1", "Caerleon", 100_000)],
+      settings: { ...DEFAULT_SETTINGS, rankByCheaperEnchant: true },
+    });
+    const name = "Expert's Broadsword 5.1";
+    fireEvent.click(
+      await screen.findByRole("button", { name: `Prices for ${name}` }),
+    );
+
+    expect(figures("Result", name)).toHaveProperty(
+      "Profit, crafting .0 and upgrading",
+    );
+  });
+
   it("asks for the higher qualities only when quality-weighted", async () => {
     const { getPrices } = renderBroadsword();
     await screen.findByRole("button", {
