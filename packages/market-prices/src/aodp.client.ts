@@ -23,6 +23,8 @@ const MINUTE_MS = 60_000;
 const CLOCK_MARGIN_MS = 1000;
 
 interface Endpoint<T> {
+  // Where to send a batch: before the item IDs, and after them.
+  url?: (region: string, query: string) => [string, string];
   path: string;
   extraQuery: string;
   label: string;
@@ -52,8 +54,22 @@ const hourlyHistoryEndpoint: Endpoint<AodpHistory> = {
 };
 
 // One limiter for every server, because AODP counts requests per IP address.
-export function createAodpClient(): AodpClient {
+// With `pricesUrl`, prices come from a price server that answers like AODP:
+// `${pricesUrl}/prices?region=west&items=T4_BAG,T5_BAG&locations=…`.
+export function createAodpClient({
+  pricesUrl,
+}: { pricesUrl?: string } = {}): AodpClient {
   const limiter = createLimiter();
+  const prices: Endpoint<AodpPrice> =
+    pricesUrl === undefined
+      ? pricesEndpoint
+      : {
+          ...pricesEndpoint,
+          url: (region, query) => [
+            `${pricesUrl.replace(/\/$/, "")}/prices?region=${region}&items=`,
+            `&${query}`,
+          ],
+        };
 
   async function getRows<T>(
     endpoint: Endpoint<T>,
@@ -79,11 +95,11 @@ export function createAodpClient(): AodpClient {
       .join(",")}&qualities=${qualities.join(",")}${endpoint.extraQuery}`;
     const asked = new Set(marketIds.map((marketId) => marketId.toLowerCase()));
 
-    const batches = splitIntoBatches(
+    const [prefix, suffix] = endpoint.url?.(region, query) ?? [
       `https://${region}.albion-online-data.com/api/v2/stats/${endpoint.path}/`,
-      itemIds,
       `.json?${query}`,
-    );
+    ];
+    const batches = splitIntoBatches(prefix, itemIds, suffix);
     const failures: BatchFailure[] = [];
     let done = 0;
     onEvent({ type: "progress", done, total: batches.length });
@@ -117,7 +133,7 @@ export function createAodpClient(): AodpClient {
   return {
     async getPrices(itemIds, marketIds, qualities, options = {}) {
       const { rows, failures } = await getRows(
-        pricesEndpoint,
+        prices,
         itemIds,
         marketIds,
         qualities,
