@@ -25,7 +25,9 @@ export function byQuality(prices: readonly ItemPrices[]): QualityPrices {
 // `enabled`, so normal-quality ranking costs no extra requests. Until they
 // come, or if they fail, there are none and each quality takes the normal
 // price, marked estimated. A new `attempt` asks again, with `force` as
-// Refresh prices does for the normal prices.
+// Refresh prices does for the normal prices. While a new answer for the same
+// server and market is on its way, the last one is kept, as the normal prices
+// are.
 export function useQualityPrices(
   marketData: MarketData,
   itemIds: readonly string[],
@@ -57,8 +59,9 @@ export function useQualityPrices(
         : undefined,
     [enabled, region, staleAfterHours, sellMarketId, attempt, itemIds],
   );
+  const market = JSON.stringify([region, sellMarketId]);
   const [fetched, setFetched] = useState<{
-    key: string;
+    market: string;
     prices: QualityPrices;
   }>();
 
@@ -76,7 +79,7 @@ export function useQualityPrices(
       .then(
         ({ prices }) => {
           if (active) {
-            setFetched({ key, prices: byQuality(prices) });
+            setFetched({ market, prices: byQuality(prices) });
           }
         },
         () => undefined,
@@ -88,7 +91,7 @@ export function useQualityPrices(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marketData, key]);
 
-  return fetched !== undefined && fetched.key === key
+  return key !== undefined && fetched?.market === market
     ? fetched.prices
     : NO_QUALITY_PRICES;
 }
