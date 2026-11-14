@@ -1,4 +1,4 @@
-import { revenue } from "@aoc/core";
+import { qualityWeightedRevenue, revenue } from "@aoc/core";
 import type { HistorySummary, ItemPrices } from "@aoc/market-prices";
 
 import type { Craft, UsedPrice } from "./best-crafts.types";
@@ -14,6 +14,7 @@ import type {
   SellMarketOffer,
 } from "./sell-markets.types";
 import type { CraftingSettings } from "./settings.types";
+import { byQuality } from "./useQualityPrices";
 
 const MISSING: UsedPrice = { status: "missing", origin: "api" };
 
@@ -53,8 +54,12 @@ export function compareSellMarkets(
   const offers = marketIds.map((marketId): SellMarketOffer => {
     const here = <Row extends { marketId: string }>(rows: readonly Row[]) =>
       rows.filter((row) => row.marketId === marketId);
+    const atQuality = (normal: boolean) =>
+      here(fetched.prices).filter(
+        ({ quality }) => (quality === QUALITY) === normal,
+      );
     const chosen = withManualPrices(
-      { materials: [], products: here(fetched.prices) },
+      { materials: [], products: atQuality(true) },
       manualPrices,
       {
         region: settings.server,
@@ -77,12 +82,21 @@ export function compareSellMarkets(
         useAverage: settings.useAverageForOutliers,
       },
     ).products.filter(({ itemId }) => itemId === craft.itemId);
-    const sale = revenue(prices, {
+    const options = {
       sellMode: sellsOnlyToBuyOrders(marketId)
-        ? "blackMarket"
+        ? ("blackMarket" as const)
         : settings.sellMode,
       premium: settings.premium,
-    });
+    };
+    const normalSale = revenue(prices, options);
+    const sale =
+      settings.qualityWeighted && craft.recipe.keepsQuality !== true
+        ? qualityWeightedRevenue(
+            normalSale,
+            byQuality(atQuality(false)).get(craft.itemId),
+            options,
+          )
+        : normalSale;
     return {
       marketId,
       price: prices?.[sale.source] ?? MISSING,
