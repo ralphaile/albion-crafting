@@ -167,6 +167,25 @@ describe("recipeFilter", () => {
     );
   });
 
+  it("takes gathering gear and tools by their crafting category, as Caerleon's specialties", () => {
+    const caerleon = craftingLocations.find(({ name }) => name === "Caerleon");
+    const t4 = (filters: Partial<Filters>) =>
+      recipes
+        .filter(({ tier, enchant }) => tier === 4 && enchant === 0)
+        .filter(
+          recipeFilter({ ...NO_FILTERS, ...filters }, { location: caerleon! }),
+        )
+        .map(({ itemId }) => itemId);
+
+    expect(t4({ categories: ["tools"] })).toContain("T4_2H_TOOL_PICK");
+    expect(t4({ categories: ["gatherergear"] })).toContain(
+      "T4_HEAD_GATHERER_ORE",
+    );
+    expect(t4({ specialtyOnly: true })).toEqual(
+      expect.arrayContaining(["T4_2H_TOOL_PICK", "T4_HEAD_GATHERER_ORE"]),
+    );
+  });
+
   it("keeps bags and capes as Brecilien's specialties", () => {
     const brecilien = craftingLocations.find(
       ({ name }) => name === "Brecilien",

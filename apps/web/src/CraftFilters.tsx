@@ -13,6 +13,7 @@ import {
   ARMOR_MATERIALS,
   ARMOR_SLOTS,
   ACCESSORY_TYPES,
+  GATHERING_TYPES,
   ALL_CATEGORIES,
   CONSUMABLE_TYPES,
   ENCHANTS,
@@ -304,6 +305,13 @@ function CategoryPicker({
                 <CategoryGroup
                   label="Accessory"
                   options={ACCESSORY_TYPES}
+                  chosen={chosen}
+                  onSet={onSet}
+                  className={styles.inline}
+                />
+                <CategoryGroup
+                  label="Gathering"
+                  options={GATHERING_TYPES}
                   chosen={chosen}
                   onSet={onSet}
                   className={styles.inline}
