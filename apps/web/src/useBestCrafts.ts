@@ -793,6 +793,8 @@ export function useBestCrafts(
     enabled: settings.qualityWeighted,
     region: server,
     staleAfterHours,
+    attempt,
+    force,
   });
   const evaluated = useMemo(
     () =>
