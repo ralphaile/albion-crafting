@@ -1,12 +1,13 @@
 import { emptyJournalId, fullJournalId } from "@aoc/core";
+
 import {
   consumableRecipes,
   recipes,
   refiningRecipes,
-} from "@aoc/crafting-data";
+} from "./game-data.constants.js";
 
-// Every item a recipe makes or uses, alternatives included, and the empty and
-// full journals it fills.
+// Every item a recipe makes or uses, alternatives included, the empty and full
+// journals it fills, and what upgrades it: everything the app prices.
 export function shownItemIds(): string[] {
   const itemIds = new Set<string>();
   for (const recipe of [...recipes, ...refiningRecipes, ...consumableRecipes]) {

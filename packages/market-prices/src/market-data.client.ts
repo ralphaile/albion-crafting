@@ -77,15 +77,17 @@ async function withSnapshot(
 }
 
 // `snapshotUrl` is where the site publishes its price snapshot, such as
-// `/albion-crafting/prices/`.
+// `/albion-crafting/prices/`. With `pricesUrl`, prices come from the app's
+// price server rather than straight from AODP.
 export async function openMarketData({
   snapshotUrl,
-}: { snapshotUrl?: string } = {}): Promise<MarketData> {
+  pricesUrl,
+}: { snapshotUrl?: string; pricesUrl?: string } = {}): Promise<MarketData> {
   const readSnapshot =
     snapshotUrl === undefined ? undefined : snapshotReader(snapshotUrl);
   const store = await openCacheStore();
   // One client, so that prices and history share its rate limiter.
-  const client = createAodpClient();
+  const client = createAodpClient(pricesUrl === undefined ? {} : { pricesUrl });
   const series = new Map<string, { at: number; points: PricePoint[] }>();
 
   const cachedPrices = cachedRows<AodpPrice>({

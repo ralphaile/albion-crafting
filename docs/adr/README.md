@@ -10,6 +10,7 @@ An architecture decision record (ADR) is a short note about one design decision:
 | [004](004-core-owns-the-shared-types.md) | Core owns the types it shares with the data packages                                              | Accepted                                    |
 | [005](005-css-modules.md)                | Components are styled with CSS Modules and shared theme variables                                 | Accepted                                    |
 | [006](006-newer-price-wins.md)           | Between an API price and a manual one, the fresh or newer one wins, and a manual price goes stale | Accepted                                    |
+| [007](007-price-server.md)               | A price server fetches AODP's prices on a schedule into Postgres and serves them                  | Proposed                                    |
 
 ## Adding one
 

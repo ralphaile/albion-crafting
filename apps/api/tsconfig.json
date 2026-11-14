@@ -1,0 +1,7 @@
+{
+  "extends": "@aoc/typescript-config/library.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src", "test", "vitest.config.ts", "drizzle.config.ts"]
+}

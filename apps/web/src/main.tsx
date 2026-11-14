@@ -36,8 +36,15 @@ if (!root) {
   throw new Error("Missing #root element in index.html");
 }
 
+// Set at build time to take prices from the app's own price server, apps/api,
+// rather than from AODP.
+const pricesUrl: unknown = import.meta.env.VITE_PRICES_URL;
+
 const [marketData, settingsStore, manualPriceStore] = await Promise.all([
-  openMarketData({ snapshotUrl: `${import.meta.env.BASE_URL}prices/` }),
+  openMarketData({
+    snapshotUrl: `${import.meta.env.BASE_URL}prices/`,
+    ...(typeof pricesUrl === "string" && pricesUrl !== "" && { pricesUrl }),
+  }),
   openSettingsStore(),
   openManualPriceStore(),
 ]);

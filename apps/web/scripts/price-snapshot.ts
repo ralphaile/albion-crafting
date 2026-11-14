@@ -2,14 +2,13 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { parseArgs } from "node:util";
 
+import { shownItemIds } from "@aoc/crafting-data";
 import {
   type Region,
   fetchPriceSnapshots,
   snapshotPath,
   snapshotReader,
 } from "@aoc/market-prices";
-
-import { shownItemIds } from "./item-ids.ts";
 
 const REGIONS: readonly Region[] = ["west", "europe", "east"];
 const PUBLISHED_URL = "https://ralphaile.github.io/albion-crafting/prices/";

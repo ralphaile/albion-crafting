@@ -95,6 +95,29 @@ describe("getPrices", () => {
     },
   );
 
+  it("asks a price server instead, in batches, when given one", async () => {
+    const requested: string[] = [];
+    server.use(
+      http.get("https://prices.example/prices", ({ request }) => {
+        requested.push(request.url);
+        return HttpResponse.json(prices.body);
+      }),
+    );
+
+    await expect(
+      createAodpClient({ pricesUrl: "https://prices.example/" }).getPrices(
+        ["T4_BAG", "T5_BAG@1"],
+        ["Caerleon"],
+        [1],
+        { region: "europe" },
+      ),
+    ).resolves.toMatchObject({ failures: [] });
+
+    expect(requested).toEqual([
+      "https://prices.example/prices?region=europe&items=T4_BAG,T5_BAG@1&locations=Caerleon&qualities=1",
+    ]);
+  });
+
   it("keeps the @ of enchanted items and accepts prices with no data", async () => {
     const requested = serve(pricesNoData.body);
 

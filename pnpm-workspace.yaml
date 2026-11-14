@@ -3,6 +3,12 @@ packages:
   - packages/*
 
 allowBuilds:
+  # Optional native speedups and binary checks that the API's dev tools
+  # (Testcontainers, drizzle-kit) work without.
+  cpu-features: false
+  esbuild: false
+  protobufjs: false
+  ssh2: false
   unrs-resolver: false
 
 engineStrict: true
