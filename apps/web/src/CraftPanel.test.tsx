@@ -463,6 +463,7 @@ describe("CraftPanel", () => {
 
     expect(figures("Return rate", name)).toEqual({
       Refining: "15.0%",
+      Specialty: "0.0%",
       "Daily bonus": "0.0%",
       Focus: "59.0%",
       "Production bonus": "74.0%",

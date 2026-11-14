@@ -85,10 +85,13 @@ const CAERLEON_AND_BRECILIEN = [
 ];
 
 describe("CraftingLocationBar", () => {
-  it("lists a hideout, then every crafting location in its group", () => {
+  it("lists the two kinds of hideout, then every crafting location in its group", () => {
     renderBar();
 
-    expect(options(select("Crafting location"))[0]).toBe("Hideout");
+    expect(options(select("Crafting location")).slice(0, 2)).toEqual([
+      "Black Zone hideout",
+      "Roads hideout",
+    ]);
     expect(groups("Crafting location")).toEqual([
       ROYAL_CITIES,
       CAERLEON_AND_BRECILIEN,
@@ -184,6 +187,39 @@ describe("CraftingLocationBar", () => {
       "Specialty 45.05%",
       "With focus 45.95%",
       "Specialty 58.51%",
+    ]);
+  });
+
+  it("sets up a Roads hideout from its zone, grouped by the resource it refines, and its power level", () => {
+    const latest = renderBar();
+
+    choose("Crafting location", "roads");
+
+    expect(groups("Zone").map(([label]) => label)).toEqual([
+      "Fiber",
+      "Hide",
+      "Ore",
+      "Stone",
+      "Wood",
+    ]);
+    expect(groups("Zone").map(([, zones]) => zones?.length)).toEqual([
+      20, 20, 20, 20, 20,
+    ]);
+    expect(screen.queryByRole("combobox", { name: "Map quality" })).toBeNull();
+
+    choose("Zone", "TNL-154");
+    choose("Power level", "9");
+
+    expect(latest()?.place).toEqual({
+      kind: "roads",
+      zoneId: "TNL-154",
+      level: 9,
+    });
+    expect(returnRates()).toEqual([
+      "Return rate 20.63%",
+      "Specialty 36.31%",
+      "With focus 45.95%",
+      "Specialty 53.70%",
     ]);
   });
 

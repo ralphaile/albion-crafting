@@ -205,7 +205,11 @@ function bonusParts(
     return [["Base", bonus.base], ["Specialty", bonus.specialty], ...common];
   }
   return refining
-    ? [["Refining", bonus.refining], ...common]
+    ? [
+        ["Refining", bonus.refining],
+        ["Specialty", bonus.refiningSpecialty],
+        ...common,
+      ]
     : [
         ["Map quality", bonus.mapQuality],
         ["Power level", bonus.powerGeneral],

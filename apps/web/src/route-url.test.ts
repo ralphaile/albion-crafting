@@ -40,6 +40,14 @@ describe("searchWithRoute", () => {
 describe("routeFromSearch", () => {
   it("reads back every route it wrote", () => {
     expect(routeFromSearch(searchWithRoute("", hideout))).toEqual(hideout);
+    const roads: RouteChoice = {
+      ...hideout,
+      place: { kind: "roads", zoneId: "TNL-154", level: 4 },
+    };
+    expect(searchWithRoute("", roads)).toContain(
+      "place=roads&zone=TNL-154&level=4",
+    );
+    expect(routeFromSearch(searchWithRoute("", roads))).toEqual(roads);
     expect(routeFromSearch(searchWithRoute("", DEFAULT_ROUTE_CHOICE))).toEqual(
       DEFAULT_ROUTE_CHOICE,
     );
