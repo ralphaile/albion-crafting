@@ -93,6 +93,7 @@ describe("update", () => {
       "Extracted 3 crafting locations: Thetford, Arthur's Rest, Island",
       "Extracted the hideout bonuses for 1 biomes (Swamp), 2 map qualities and 3 power levels",
       "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands, 0 bags, 0 capes",
+      "Gave 6 recipes the laborer's journal they fill",
       "Extracted 0 refining recipes: 0 metalbars, 0 planks, 0 cloth, 0 leather, 0 stoneblock",
       "Named 6 item IDs: 4 crafted, which the search covers, and 2 materials",
     ]);

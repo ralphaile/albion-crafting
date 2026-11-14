@@ -27,6 +27,7 @@ function only(item: GearItem): Items {
     transformationweapon: [],
     equipmentitem: [item],
     simpleitem: [],
+    journalitem: [],
   };
 }
 
