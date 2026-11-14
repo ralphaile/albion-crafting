@@ -8,9 +8,9 @@ export const SHOP_CATEGORIES = new Set([
   "capes",
 ]);
 
-// Only the regular capes: each faction's capes, and the artifact capes made
-// from them, have a subcategory of their own.
-export const ONLY_SUBCATEGORIES: ReadonlyMap<
+// Vanity capes and arena banners: the faction capes each have a subcategory
+// of their own, such as accessoires_capes_martlock.
+export const SKIPPED_SUBCATEGORIES: ReadonlyMap<
   string,
   ReadonlySet<string>
-> = new Map([["capes", new Set(["accessoires_capes_capes"])]]);
+> = new Map([["capes", new Set(["other"])]]);

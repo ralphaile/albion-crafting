@@ -33,6 +33,7 @@ const craftingRequirements = z.object({
       "@count": number,
       "@maxreturnamount": number.optional(),
       "@enchantmentlevel": number.optional(),
+      "@preservequality": boolean.optional(),
     }),
   ).optional(),
 });

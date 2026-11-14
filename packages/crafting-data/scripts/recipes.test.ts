@@ -131,10 +131,14 @@ describe("extractRecipes", () => {
     });
   });
 
-  it("keeps the three recipes of a royal item, which has no crafting category", async () => {
+  it("keeps the three recipes of a royal item, which has no crafting category and keeps its material's quality", async () => {
     const royal = find(await fixtureRecipes(), "T4_HEAD_CLOTH_ROYAL@1");
 
     expect(royal).not.toHaveProperty("craftingCategory");
+    expect(royal?.keepsQuality).toBe(true);
+    expect(find(await fixtureRecipes(), "T4_MAIN_SWORD")).not.toHaveProperty(
+      "keepsQuality",
+    );
     expect(royal?.materials).toEqual([
       { id: "T4_HEAD_CLOTH_SET1@1", count: 1, returnable: false },
       { id: "QUESTITEM_TOKEN_ROYAL_T4", count: 2, returnable: false },
@@ -148,6 +152,7 @@ describe("extractRecipes", () => {
     ["a bag", "bags", "bags"],
     ["a satchel of insight", "bags", "satchels"],
     ["a regular cape", "capes", "accessoires_capes_capes"],
+    ["a faction cape", "capes", "accessoires_capes_martlock"],
   ])("takes %s", async (_, category, subcategory) => {
     const { equipmentitem } = (await validate(fixtures))["items.json"].items;
     const helmet = equipmentitem[0]!;
@@ -167,11 +172,11 @@ describe("extractRecipes", () => {
     ["a T3 item", (item) => ({ ...item, "@tier": 3 })],
     ["a mount", (item) => ({ ...item, "@shopcategory": "mounts" })],
     [
-      "a faction cape",
+      "a vanity cape",
       (item) => ({
         ...item,
         "@shopcategory": "capes",
-        "@shopsubcategory1": "accessoires_capes_martlock",
+        "@shopsubcategory1": "other",
       }),
     ],
     [
