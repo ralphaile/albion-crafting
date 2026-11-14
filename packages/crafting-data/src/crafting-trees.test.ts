@@ -12,8 +12,27 @@ function tree(id: string) {
 }
 
 describe("craftingTrees", () => {
-  it("has a tree for each weapon type, armor piece and offhand type, bags, capes, each refined resource, food and potions", () => {
-    expect(craftingTrees).toHaveLength(38);
+  it("has a tree for each weapon type, armor piece and offhand type, bags, capes, gathering gear, tools, each refined resource, food and potions", () => {
+    expect(craftingTrees).toHaveLength(40);
+  });
+
+  it("puts all gathering gear in one tree and all tools in another", () => {
+    expect(tree("gatherergear")?.specializations).toHaveLength(24);
+    expect(tree("tools")?.specializations.map(({ name }) => name)).toEqual([
+      "Avalonian Axe",
+      "Avalonian Fishing Rod",
+      "Avalonian Pickaxe",
+      "Avalonian Sickle",
+      "Avalonian Skinning Knife",
+      "Avalonian Stone Hammer",
+      "Axe",
+      "Fishing Rod",
+      "Pickaxe",
+      "Sickle",
+      "Skinning Knife",
+      "Stone Hammer",
+      "Tracking Toolkit",
+    ]);
   });
 
   it("makes each tier of a refined resource a specialization, lowest first", () => {

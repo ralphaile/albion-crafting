@@ -302,6 +302,10 @@ exports[`the generated data > has the same number of items and recipes in each c
     "items": 40,
     "recipes": 200,
   },
+  "gatherergear": {
+    "items": 120,
+    "recipes": 600,
+  },
   "hammer": {
     "items": 40,
     "recipes": 200,
@@ -370,6 +374,10 @@ exports[`the generated data > has the same number of items and recipes in each c
     "items": 40,
     "recipes": 200,
   },
+  "tools": {
+    "items": 65,
+    "recipes": 65,
+  },
 }
 `;
 
@@ -386,6 +394,10 @@ exports[`the generated data > has the same number of items and recipes in each s
   "capes": {
     "items": 75,
     "recipes": 375,
+  },
+  "gathering": {
+    "items": 185,
+    "recipes": 665,
   },
   "head": {
     "items": 140,
@@ -734,6 +746,75 @@ exports[`the generated data > has the same recipe for T5_CAPE@1 1`] = `
     "count": 96,
     "id": "T5_RUNE",
   },
+}
+`;
+
+exports[`the generated data > has the same recipe for T5_HEAD_GATHERER_ORE@1 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T5_HEAD_GATHERER_ORE",
+  "craftingCategory": "gatherergear",
+  "enchant": 1,
+  "focus": 1313,
+  "isArtifact": false,
+  "itemId": "T5_HEAD_GATHERER_ORE@1",
+  "itemValue": 512,
+  "journal": {
+    "capacity": 7200,
+    "fame": 1440,
+    "id": "T5_JOURNAL_TOOLMAKER",
+  },
+  "materials": [
+    {
+      "count": 8,
+      "id": "T5_METALBAR_LEVEL1@1",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "gathering",
+  "shopSubcategory": "ore",
+  "silver": 0,
+  "tier": 5,
+  "upgrade": {
+    "count": 96,
+    "id": "T5_RUNE",
+  },
+}
+`;
+
+exports[`the generated data > has the same recipe for T6_2H_TOOL_PICK 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T6_2H_TOOL_PICK",
+  "craftingCategory": "tools",
+  "enchant": 0,
+  "focus": 1313,
+  "isArtifact": false,
+  "itemId": "T6_2H_TOOL_PICK",
+  "itemValue": 512,
+  "journal": {
+    "capacity": 14400,
+    "fame": 2160,
+    "id": "T6_JOURNAL_TOOLMAKER",
+  },
+  "materials": [
+    {
+      "count": 6,
+      "id": "T6_PLANKS",
+      "returnable": true,
+    },
+    {
+      "count": 2,
+      "id": "T6_METALBAR",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "gathering",
+  "shopSubcategory": "ore",
+  "silver": 0,
+  "tier": 6,
 }
 `;
 

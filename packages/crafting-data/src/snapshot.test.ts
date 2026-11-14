@@ -46,6 +46,8 @@ describe("the generated data", () => {
     "T6_BAG_INSIGHT@2",
     "T5_CAPE@1",
     "T4_CAPEITEM_FW_MARTLOCK@1",
+    "T5_HEAD_GATHERER_ORE@1",
+    "T6_2H_TOOL_PICK",
   ])("has the same recipe for %s", (itemId) => {
     expect(
       recipes.find((recipe) => recipe.itemId === itemId),

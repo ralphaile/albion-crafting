@@ -49,6 +49,7 @@ function consumables(...consumableitem: ConsumableItem[]) {
   return extractConsumableRecipes({
     weapon: [],
     transformationweapon: [],
+    trackingitem: [],
     equipmentitem: [],
     simpleitem: [],
     journalitem: [],
