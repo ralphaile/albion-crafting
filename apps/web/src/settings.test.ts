@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { recipes, refiningRecipes } from "@aoc/crafting-data";
+import {
+  consumableRecipes,
+  recipes,
+  refiningRecipes,
+} from "@aoc/crafting-data";
 
 import { DAILY_BONUS_GROUPS, DEFAULT_SETTINGS } from "./settings.constants";
 import { parseSettings } from "./settings.schema";
@@ -81,13 +85,14 @@ describe("parseSettings", () => {
 });
 
 describe("the daily bonus list", () => {
-  it("offers every crafting and refining category the recipes have", () => {
+  it("offers every crafting, refining, food and potion category the recipes have", () => {
     const offered = DAILY_BONUS_GROUPS.flatMap(({ options }) =>
       options.map(({ id }) => id),
     );
     const crafted = new Set(
-      [...recipes, ...refiningRecipes].flatMap(({ craftingCategory }) =>
-        craftingCategory === undefined ? [] : [craftingCategory],
+      [...recipes, ...refiningRecipes, ...consumableRecipes].flatMap(
+        ({ craftingCategory }) =>
+          craftingCategory === undefined ? [] : [craftingCategory],
       ),
     );
 

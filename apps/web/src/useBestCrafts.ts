@@ -1,7 +1,12 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { type CraftingPlace, pricesNeeded, type PricesNeeded } from "@aoc/core";
-import { recipes, refiningRecipes } from "@aoc/crafting-data";
+import {
+  consumableRecipes,
+  type GameRecipe,
+  recipes,
+  refiningRecipes,
+} from "@aoc/crafting-data";
 import type {
   AodpEvent,
   BatchFailure,
@@ -17,7 +22,7 @@ import { evaluateCrafts, withDailyVolumes } from "./best-crafts.helpers";
 import type { Craft, CraftHistory, CraftPrices } from "./best-crafts.types";
 import { NO_FILTERS } from "./filters.constants";
 import { craftFilter, recipeFilter } from "./filters.helpers";
-import type { Filters } from "./filters.types";
+import type { CraftMode, Filters } from "./filters.types";
 import { withManualPrices } from "./manual-prices.helpers";
 import type { ManualPrice } from "./manual-prices.types";
 import {
@@ -434,13 +439,19 @@ async function fetchPrices(
 }
 
 // Only the filters that need no prices, so a new minimum doesn't refetch.
+const RECIPES_BY_MODE: Readonly<Record<CraftMode, readonly GameRecipe[]>> = {
+  crafting: recipes,
+  refining: refiningRecipes,
+  consumables: consumableRecipes,
+};
+
 function useSelectedRecipes(filters: Filters, place: CraftingPlace) {
   const { mode, tiers, enchants, categories, artifacts, specialtyOnly } =
     filters;
   const search = filters.search.trim();
   return useMemo(
     () =>
-      (mode === "refining" ? refiningRecipes : recipes).filter(
+      RECIPES_BY_MODE[mode].filter(
         recipeFilter(
           {
             ...NO_FILTERS,

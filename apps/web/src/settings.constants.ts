@@ -52,6 +52,13 @@ export const DAILY_BONUS_GROUPS: readonly OptionGroup[] = [
     ],
   },
   {
+    label: "Consumable",
+    options: [
+      { id: "food", label: "Food" },
+      { id: "potion", label: "Potion" },
+    ],
+  },
+  {
     label: "Refining",
     options: [
       { id: "ore", label: "Ore" },

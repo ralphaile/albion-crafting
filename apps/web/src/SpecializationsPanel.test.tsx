@@ -130,6 +130,7 @@ describe("SpecializationsPanel", () => {
       "Mage's Tower",
       "Toolmaker",
       "Refining",
+      "Cook and alchemist",
     ]);
   });
 

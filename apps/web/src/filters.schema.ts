@@ -2,16 +2,15 @@ import { z } from "zod";
 
 import {
   ALL_CATEGORIES,
-  CATEGORIES,
+  CONSUMABLE_TIERS,
   ENCHANTS,
   MAX_DAILY_VOLUME,
   MAX_MARGIN_PERCENT,
   MAX_PROFIT,
   MAX_SEARCH_LENGTH,
+  MODE_CATEGORIES,
+  MODE_TIERS,
   NO_FILTERS,
-  REFINED_TYPES,
-  REFINING_TIERS,
-  TIERS,
 } from "./filters.constants";
 import type { Filters } from "./filters.types";
 
@@ -24,8 +23,8 @@ function choices<T>(allowed: readonly T[]) {
 }
 
 const filtersSchema = z.object({
-  mode: z.enum(["crafting", "refining"]).catch("crafting"),
-  tiers: choices(REFINING_TIERS),
+  mode: z.enum(["crafting", "refining", "consumables"]).catch("crafting"),
+  tiers: choices(CONSUMABLE_TIERS),
   enchants: choices(ENCHANTS),
   categories: choices(ALL_CATEGORIES.map(({ id }) => id)),
   artifacts: z.enum(["include", "exclude", "only"]).catch("include"),
@@ -56,18 +55,16 @@ const filtersSchema = z.object({
     .catch(""),
 });
 
-// Keeps the tiers and categories the mode has. Refining has no artifacts.
+// Keeps the tiers and categories the mode has. Only crafting has artifacts.
 export function inMode(filters: Filters): Filters {
-  const refining = filters.mode === "refining";
-  const tiers = refining ? REFINING_TIERS : TIERS;
-  const categories = (refining ? REFINED_TYPES : CATEGORIES).map(
-    ({ id }) => id,
-  );
+  const tiers = MODE_TIERS[filters.mode];
+  const categories = MODE_CATEGORIES[filters.mode].map(({ id }) => id);
   return {
     ...filters,
     tiers: filters.tiers.filter((tier) => tiers.includes(tier)),
     categories: filters.categories.filter((id) => categories.includes(id)),
-    artifacts: refining ? NO_FILTERS.artifacts : filters.artifacts,
+    artifacts:
+      filters.mode === "crafting" ? filters.artifacts : NO_FILTERS.artifacts,
   };
 }
 

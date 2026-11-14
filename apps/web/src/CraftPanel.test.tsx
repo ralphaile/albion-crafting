@@ -386,6 +386,35 @@ describe("CraftPanel", () => {
     });
   });
 
+  it("shows a stew's profit per item and per craft of 10", async () => {
+    renderCrafts({
+      filters: {
+        ...NO_FILTERS,
+        mode: "consumables",
+        tiers: [4],
+        enchants: [0],
+        search: "goat stew",
+      },
+      materials: [
+        priced("T4_TURNIP", "Martlock", 20),
+        priced("T4_BREAD", "Martlock", 30),
+        priced("T4_MEAT", "Martlock", 40),
+      ],
+      products: [priced("T4_MEAL_STEW", "Caerleon", 100)],
+    });
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Prices for Goat Stew 4.0" }),
+    );
+
+    const result = figures("Result", "Goat Stew 4.0");
+    const perItem = Number(result.Profit?.replace(/,/g, ""));
+    expect(perItem).toBeGreaterThan(0);
+    expect(Number(result["Per craft of 10"]?.replace(/,/g, ""))).toBeCloseTo(
+      perItem * 10,
+      -1,
+    );
+  });
+
   it("builds a hideout's return rate from its map quality and power level", async () => {
     renderBroadsword([typedLeather], forestHideout);
     fireEvent.click(
