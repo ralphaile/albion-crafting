@@ -26,3 +26,4 @@ export {
   searchItems,
 } from "./items.helpers.js";
 export type { GameRecipe } from "./recipe.types.js";
+export { shownItemIds } from "./shown-items.helpers.js";

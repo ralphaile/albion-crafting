@@ -2,9 +2,7 @@ import { copyFile, mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 
-import { iconUrl } from "@aoc/crafting-data";
-
-import { shownItemIds } from "./item-ids.ts";
+import { iconUrl, shownItemIds } from "@aoc/crafting-data";
 
 // The render service draws icons on demand and turns away bursts, so a few at
 // a time, each tried again after a pause.
