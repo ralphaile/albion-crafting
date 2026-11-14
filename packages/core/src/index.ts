@@ -93,3 +93,9 @@ export {
 } from "./revenue.types.js";
 export { hasSpecialty } from "./specialty.helpers.js";
 export { stationFee } from "./station-fee.helpers.js";
+export { enchantPaths } from "./enchant-path.helpers.js";
+export type {
+  EnchantLevelCosts,
+  EnchantPaths,
+  UpgradeStep,
+} from "./enchant-path.types.js";
