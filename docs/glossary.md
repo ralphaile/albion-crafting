@@ -117,7 +117,7 @@ Crafting stations run on nutrition. A craft uses `item value × 0.1125` nutritio
 station fee = item value × 0.1125 × fee per 100 nutrition / 100
 ```
 
-The engine's version is `stationFee()` in `packages/core/src/station-fee.helpers.ts`. It gives the fee for one craft, and every recipe crafts one item. A fee of 0, such as on your own island, costs nothing. The shapeshifter staffs have no [item value](#item-value), so at a paid station their fee is unknown. The fee is a [setting](settings.md), 500 by default, because station owners set anything from 0 to about 1,000.
+The engine's version is `stationFee()` in `packages/core/src/station-fee.helpers.ts`. It gives the fee for one craft, on the value of every item it makes, such as 10 stews. A fee of 0, such as on your own island, costs nothing. The shapeshifter staffs have no [item value](#item-value), so at a paid station their fee is unknown. The fee is a [setting](settings.md), 500 by default, because station owners set anything from 0 to about 1,000.
 
 ## Outliers
 
@@ -153,7 +153,7 @@ profit = revenue − (material cost + station fee + silver) / amount crafted
 margin = profit / ((material cost + station fee + silver) / amount crafted)
 ```
 
-Every recipe crafts one item, so the amount crafted is always 1 for now. The [revenue](#revenue), [material cost](#material-cost) and [station fee](#nutrition-and-station-fee) are the entries above.
+Gear crafts one item at a time, while food and potions make several, such as 10 stews, so their costs are split over them. The [revenue](#revenue), [material cost](#material-cost) and [station fee](#nutrition-and-station-fee) are the entries above.
 
 The engine's version is `evaluate()` in `packages/core/src/evaluate.helpers.ts`. It works out a recipe for where you craft, your settings, and the prices at your buy and sell markets:
 
