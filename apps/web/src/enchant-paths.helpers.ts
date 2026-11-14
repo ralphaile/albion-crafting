@@ -57,7 +57,7 @@ export function upgradeMaterials(recipes: readonly GameRecipe[]): string[] {
 }
 
 // Silver per item, without the sale: the materials, station fee and silver.
-function craftCost(craft: Craft): number | undefined {
+export function craftCost(craft: Craft): number | undefined {
   const { materialCost: cost, stationFee, silverCost, recipe } = craft;
   if (cost.status === "incomplete" || stationFee === undefined) {
     return undefined;

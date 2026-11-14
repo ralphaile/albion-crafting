@@ -63,7 +63,12 @@ function seen(price: UsedPrice) {
   if (price.outlier?.usingAverage === true) {
     return "using 7-day average";
   }
-  const how = price.origin === "manual" ? "typed" : "seen";
+  const how =
+    price.crafted === true
+      ? "crafted, from prices seen"
+      : price.origin === "manual"
+        ? "typed"
+        : "seen";
   const notes = [
     ...(price.status === "stale" ? ["stale"] : []),
     ...(price.outlier === undefined ? [] : ["outlier"]),

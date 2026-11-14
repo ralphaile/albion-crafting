@@ -43,6 +43,9 @@ const settingsSchema = z.object({
   rankByCheaperEnchant: z
     .boolean()
     .catch(DEFAULT_SETTINGS.rankByCheaperEnchant),
+  baseItemsAtCraftCost: z
+    .boolean()
+    .catch(DEFAULT_SETTINGS.baseItemsAtCraftCost),
   buyMode: z.enum(["instant", "order"]).catch(DEFAULT_SETTINGS.buyMode),
   sellMode: z.enum(["order", "instant"]).catch(DEFAULT_SETTINGS.sellMode),
   dailyBonuses: z

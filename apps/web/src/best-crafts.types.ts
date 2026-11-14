@@ -43,6 +43,8 @@ interface Outlier {
 // used.
 export type UsedPrice = ObservedPrice & {
   origin: PriceOrigin;
+  // A base item priced at what crafting it costs.
+  crafted?: boolean;
   passedOver?: SeenPrice;
   outlier?: Outlier;
 };

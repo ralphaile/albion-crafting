@@ -55,10 +55,13 @@ function nameOf(price: UsedPrice) {
 }
 
 function described(
-  price: SeenPrice & Pick<UsedPrice, "outlier">,
+  price: SeenPrice & Pick<UsedPrice, "outlier" | "crafted">,
   origin: PriceOrigin,
 ) {
   const ago = formatAgo(price.ageMinutes);
+  if (price.crafted === true) {
+    return `Craft cost ${formatSilver(price.value)}, from prices seen ${ago}`;
+  }
   const { outlier } = price;
   if (outlier !== undefined) {
     const seen = `${formatSilver(outlier.seen)}, seen ${ago}`;

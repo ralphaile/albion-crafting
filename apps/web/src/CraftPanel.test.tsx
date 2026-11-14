@@ -474,6 +474,45 @@ describe("CraftPanel", () => {
     });
   });
 
+  it("prices a Martlock cape's cape at its craft cost when asked", async () => {
+    renderCrafts({
+      filters: {
+        ...NO_FILTERS,
+        tiers: [4],
+        enchants: [0],
+        search: "martlock cape",
+      },
+      materials: [
+        priced("T4_CAPE", "Martlock", 9000),
+        priced("T4_CAPEITEM_FW_MARTLOCK_BP", "Martlock", 500),
+        priced("T1_FACTION_HIGHLAND_TOKEN_1", "Martlock", 2000),
+        priced("T4_CLOTH", "Martlock", 100),
+        priced("T4_LEATHER", "Martlock", 100),
+      ],
+      products: [priced("T4_CAPEITEM_FW_MARTLOCK", "Caerleon", 20_000)],
+      settings: { ...DEFAULT_SETTINGS, baseItemsAtCraftCost: true },
+    });
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Martlock Cape 4.0",
+      }),
+    );
+    const cape = () =>
+      within(panel("Adept's Martlock Cape 4.0")).getByRole("textbox", {
+        name: "Adept's Cape 4.0, sell order in Martlock",
+      });
+
+    // 4 cloth and 4 leather at 100, less the returns, and a small station fee.
+    await waitFor(() => {
+      expect(
+        Number(cape().getAttribute("placeholder")?.replace(/,/g, "")),
+      ).toBeLessThan(800);
+    });
+    expect(cape()).toHaveAccessibleDescription(
+      "Sell order · Martlock · crafted, from prices seen 30 min ago",
+    );
+  });
+
   it("shows a stew's profit per item and per craft of 10", async () => {
     renderCrafts({
       filters: {

@@ -441,6 +441,14 @@ export function SettingsPanel({
             }}
             help="An enchanted item can also be crafted at a lower level and upgraded with runes, souls and relics. When that costs less, its profit counts that way."
           />
+          <Check
+            label="Price base items at their craft cost"
+            checked={settings.baseItemsAtCraftCost}
+            onChange={(baseItemsAtCraftCost) => {
+              set("baseItemsAtCraftCost", baseItemsAtCraftCost);
+            }}
+            help="A faction cape is made from a cape, and a royal item from a plain one. Prices that base item at what crafting it here costs, rather than at the market."
+          />
           <DailyBonuses
             bonuses={settings.dailyBonuses}
             onChange={(dailyBonuses) => {
