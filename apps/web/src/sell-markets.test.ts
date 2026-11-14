@@ -143,6 +143,26 @@ describe("compareSellMarkets", () => {
     expect(gain).toBeCloseTo(6200 * 0.935 - 5000 * 0.935);
   });
 
+  it("values each market over the qualities when quality-weighted, with only Normal prices picked as usual", () => {
+    const { offers } = compare({
+      prices: {
+        ...fetched,
+        prices: [
+          ...fetched.prices,
+          { ...sword("Lymhurst", { sellMin: seen(10_000) }), quality: 2 },
+        ],
+      },
+      settings: { ...DEFAULT_SETTINGS, qualityWeighted: true },
+    });
+
+    const lymhurst = offers.find(({ marketId }) => marketId === "Lymhurst");
+    expect(lymhurst?.price).toMatchObject({ value: 5000 });
+    // Good is 25%, and the higher qualities without a price take Good's.
+    expect(lymhurst?.revenue).toMatchObject({
+      price: 0.689 * 5000 + 0.311 * 10_000,
+    });
+  });
+
   it("has no gain when the current market is the best, or has no price", () => {
     expect(compare({ sellMarketId: "Caerleon" }).gain).toBeUndefined();
     expect(compare({ sellMarketId: "Martlock" }).gain).toBeUndefined();
