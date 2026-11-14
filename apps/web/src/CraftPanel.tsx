@@ -8,6 +8,7 @@ import {
   type MaterialLine,
   type OrderPrices,
   type ProductionBonus,
+  QUALITY_ODDS,
 } from "@aoc/core";
 import {
   craftingTrees,
@@ -38,7 +39,7 @@ import { MaterialMarket } from "./MaterialMarket";
 import type { AddToPlanHandler } from "./plan.types";
 import { PriceBadge } from "./PriceBadge";
 import { PriceRow } from "./PriceRow";
-import { QUALITY } from "./prices.constants";
+import { QUALITY, QUALITY_NAMES } from "./prices.constants";
 import type { ChooseRecipeHandler } from "./recipe-choices.types";
 import type { MarketChoice } from "./route.types";
 import { SidePanel } from "./SidePanel";
@@ -167,6 +168,13 @@ function Figure({
       </dd>
     </div>
   );
+}
+
+// "Good 25%", or "Good 25% est." when it has no price of its own.
+function qualityLabel(quality: number, estimated: boolean): string {
+  const odds = QUALITY_ODDS[quality - 1] ?? 0;
+  const percent = `${(odds * 100).toLocaleString("en", { maximumFractionDigits: 1 })}%`;
+  return `${QUALITY_NAMES[quality - 1] ?? String(quality)} ${percent}${estimated ? " est." : ""}`;
 }
 
 // The materials that tell a recipe apart from the item's other ones, such as
@@ -457,6 +465,16 @@ export function CraftPanel({
             )}
           </ul>
           <dl className={styles.figures}>
+            {sold?.byQuality?.map(({ quality, price, estimated }) => (
+              <Figure
+                key={quality}
+                label={qualityLabel(quality, estimated)}
+                value={price}
+              />
+            ))}
+            {sold?.byQuality && (
+              <Figure label="Expected price" value={sold.price} />
+            )}
             <Figure label="Tax" value={sold && -sold.tax} />
             <Figure label="Setup fee" value={sold && -sold.setupFee} />
             <Figure label="Net" value={sold?.net} total />

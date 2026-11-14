@@ -45,6 +45,7 @@ import { NO_SPECIALIZATIONS } from "./specializations.constants";
 import { fceFor } from "./specializations.helpers";
 import type { SpecializationProfile } from "./specializations.types";
 import { useMinute } from "./useMinute";
+import { useQualityPrices } from "./useQualityPrices";
 
 // How far a fetch has got, in batches, and until when it waits for the rate
 // limit, if it does.
@@ -769,12 +770,27 @@ export function useBestCrafts(
     }),
     [settings, route, specializations],
   );
+  const productIds = useMemo(
+    () => selected.map(({ itemId }) => itemId),
+    [selected],
+  );
+  const qualityPrices = useQualityPrices(marketData, productIds, sellMarketId, {
+    enabled: settings.qualityWeighted,
+    region: server,
+    staleAfterHours,
+  });
   const evaluated = useMemo(
     () =>
       prices === undefined
         ? []
-        : evaluateCrafts(priced, place, routeSettings, prices, recipeChoices),
-    [priced, place, routeSettings, prices, recipeChoices],
+        : evaluateCrafts(
+            priced,
+            place,
+            routeSettings,
+            { ...prices, productQualities: qualityPrices },
+            recipeChoices,
+          ),
+    [priced, place, routeSettings, prices, qualityPrices, recipeChoices],
   );
   const withVolumes = useMemo(
     () => withDailyVolumes(evaluated, history.products),

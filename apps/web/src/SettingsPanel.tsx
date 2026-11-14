@@ -466,6 +466,18 @@ export function SettingsPanel({
             }}
             help="A sell order lists at the cheapest sell order and adds a 2.5% setup fee. Instant sell takes the best buy order. Selling to the Black Market is always instant."
           />
+          <Choice
+            label="Value items at"
+            value={settings.qualityWeighted ? "weighted" : "normal"}
+            options={[
+              { id: "normal", label: "Normal quality only" },
+              { id: "weighted", label: "Quality-weighted" },
+            ]}
+            onChange={(value) => {
+              set("qualityWeighted", value === "weighted");
+            }}
+            help="Quality-weighted averages the price of each quality by its odds: Normal 68.9%, Good 25%, Outstanding 5%, Excellent 1%, Masterpiece 0.1%. It asks for the four higher qualities' prices too. A quality without a price takes the next lower one's."
+          />
           <WholeNumber
             label="Stale after"
             unit="hours"

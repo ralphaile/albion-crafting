@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS: CraftingSettings = {
   premium: true,
   stationFee: 500,
   journals: false,
+  qualityWeighted: false,
   buyMode: "instant",
   sellMode: "order",
   dailyBonuses: [],

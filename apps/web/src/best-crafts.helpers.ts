@@ -30,6 +30,7 @@ export function evaluateCrafts(
 ): Craft[] {
   const materials = byItem(prices.materials);
   const products = byItem(prices.products);
+  const { productQualities } = prices;
 
   function withPrices(evaluation: Evaluation): CraftAlternative {
     const materialPrices = new Map(
@@ -51,6 +52,7 @@ export function evaluateCrafts(
     const [first, ...others] = evaluateEach(recipe, place, settings, {
       materials,
       products,
+      ...(productQualities && { productQualities }),
     });
     const alternatives: Craft["alternatives"] = [
       withPrices(first),

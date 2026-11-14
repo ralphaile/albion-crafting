@@ -1,4 +1,4 @@
-import type { Evaluation, PriceOrigin } from "@aoc/core";
+import type { EvaluatePrices, Evaluation, PriceOrigin } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
 import type {
   HistorySummary,
@@ -49,6 +49,8 @@ export interface UsedItemPrices extends Omit<ItemPrices, "sellMin" | "buyMax"> {
 export interface UsedPrices {
   materials: readonly UsedItemPrices[];
   products: readonly UsedItemPrices[];
+  // Qualities 2 to 5, only when quality-weighted.
+  productQualities?: EvaluatePrices["productQualities"];
 }
 
 // One recipe's result, with the prices it used.
