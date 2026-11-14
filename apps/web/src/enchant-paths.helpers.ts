@@ -71,7 +71,13 @@ function craftCost(craft: Craft): number | undefined {
   );
 }
 
-function rankedBy(craft: Craft, paths: EnchantPaths): Craft {
+// Upgrading earns no crafting fame, so the upgraded path's journal value is
+// the lower craft's, `startJournal` per item.
+function rankedBy(
+  craft: Craft,
+  paths: EnchantPaths,
+  startJournal: number,
+): Craft {
   const { direct, upgraded } = paths;
   if (
     craft.status !== "complete" ||
@@ -82,7 +88,8 @@ function rankedBy(craft: Craft, paths: EnchantPaths): Craft {
     return { ...craft, enchantPaths: paths };
   }
   const saved = direct - upgraded.total;
-  const profit = craft.profit + saved;
+  const profit =
+    craft.profit + saved - (craft.journal?.value ?? 0) + startJournal;
   return {
     ...craft,
     enchantPaths: paths,
@@ -107,6 +114,13 @@ export function withEnchantPaths(
     if (!upgradable(craft.recipe)) {
       return craft;
     }
+    const startJournal = ({ upgraded }: EnchantPaths) => {
+      const start =
+        upgraded === undefined
+          ? undefined
+          : atLevel(craft.recipe, upgraded.from);
+      return (start && byId.get(start.itemId)?.journal?.value) ?? 0;
+    };
     const paths = enchantPaths(craft.recipe.enchant, {
       craft: (level) => {
         const sibling = atLevel(craft.recipe, level);
@@ -145,7 +159,7 @@ export function withEnchantPaths(
     }
     const withPaths = { ...craft, upgradeMaterials: upgrades };
     return rank
-      ? rankedBy(withPaths, paths)
+      ? rankedBy(withPaths, paths, startJournal(paths))
       : { ...withPaths, enchantPaths: paths };
   });
 }

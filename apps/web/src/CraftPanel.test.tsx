@@ -435,8 +435,8 @@ describe("CraftPanel", () => {
     ).not.toContainEqual([2, 3, 4, 5]);
   });
 
-  it("values a quality-weighted sword over its qualities, estimating those without a price", async () => {
-    renderCrafts({
+  it("values a quality-weighted sword over its qualities, estimating those without a price, and refreshes them", async () => {
+    const { getPrices } = renderCrafts({
       filters: broadswordOnly,
       materials: [priced("T4_METALBAR", "Martlock", 100)],
       products: [
@@ -460,6 +460,17 @@ describe("CraftPanel", () => {
         "Masterpiece 0.1% est.": "10,000",
         "Expected price": "5,305",
       });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
+
+    await waitFor(() => {
+      expect(
+        getPrices.mock.calls.filter(
+          ([, , qualities, options]) =>
+            qualities.includes(2) && options?.force === true,
+        ),
+      ).toHaveLength(1);
     });
   });
 
