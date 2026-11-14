@@ -168,6 +168,16 @@ The engine's version is `evaluate()` in `packages/core/src/evaluate.helpers.ts`.
 
 How well a crafted item came out, from 1 to 5: Normal, Good, Outstanding, Excellent or Masterpiece. Crafting gives a random quality, and each quality has its own market price, so AODP prices are asked for per quality. Not the same as [hideout map quality](#hideout-map-quality).
 
+By default every item is valued at its Normal price. With **Value items at: Quality-weighted** in [settings](settings.md), the [revenue](#revenue) is the expected price over the five qualities:
+
+```text
+expected net = Σ odds(quality) × net price(quality)
+```
+
+The base odds are Normal 68.9%, Good 25%, Outstanding 5%, Excellent 1% and Masterpiece 0.1%, `QUALITY_ODDS` in `packages/core/src/quality.constants.ts`. A quality without a price takes the next lower quality's, and the craft panel marks it `est.`. The prices of qualities 2 to 5 are only asked for in this mode, for the items being ranked, in the sell market. `qualityWeightedRevenue()` in `packages/core/src/quality.helpers.ts` works it out.
+
+Known simplification: a specialization's quality bonus raises the odds of the higher qualities, which isn't counted, so the expected price is a little low for a specialized crafter.
+
 ## Roads of Avalon zone
 
 A zone of the Roads of Avalon, the shifting tunnels between the other maps, such as Quatun-Nusas. The game files name them `TNL-…`, 100 in all. A hideout there gets the [power level](#power-level)'s bonuses like a Black Zone one, and +0.01 on the zone's 5 crafting categories in place of a [map quality](#hideout-map-quality) bonus. Refining there gets a flat 0.10, plus 0.10 more for the one resource the zone specializes in, such as hide in Quatun-Nusas.
