@@ -232,6 +232,9 @@ export async function openMarketData({
       series.set(key, { at: Date.now(), points });
       return points;
     },
-    clear: () => store.clear(),
+    clear: () => {
+      series.clear();
+      return store.clear();
+    },
   };
 }
