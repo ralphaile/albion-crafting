@@ -1,0 +1,115 @@
+{
+  "id": "2fa35171-56da-4a15-a6b8-a56383f7fffa",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.prices": {
+      "name": "prices",
+      "schema": "",
+      "columns": {
+        "region": {
+          "name": "region",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "market_id": {
+          "name": "market_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quality": {
+          "name": "quality",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sell_price_min": {
+          "name": "sell_price_min",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sell_price_min_date": {
+          "name": "sell_price_min_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sell_price_max": {
+          "name": "sell_price_max",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sell_price_max_date": {
+          "name": "sell_price_max_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "buy_price_min": {
+          "name": "buy_price_min",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "buy_price_min_date": {
+          "name": "buy_price_min_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "buy_price_max": {
+          "name": "buy_price_max",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "buy_price_max_date": {
+          "name": "buy_price_max_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fetched_at": {
+          "name": "fetched_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "prices_region_item_id_market_id_quality_pk": {
+          "name": "prices_region_item_id_market_id_quality_pk",
+          "columns": ["region", "item_id", "market_id", "quality"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

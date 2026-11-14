@@ -1,0 +1,6 @@
+{
+  "extends": "@aoc/typescript-config/library-build.json",
+  "compilerOptions": {
+    "types": ["node"]
+  }
+}

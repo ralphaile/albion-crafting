@@ -11,6 +11,7 @@ export default defineConfig({
       ],
       reporter: ["text", "html", "json-summary"],
       exclude: [
+        "apps/api/src/main.ts",
         "apps/web/src/main.tsx",
         "packages/crafting-data/scripts/data-diff.ts",
         "packages/crafting-data/scripts/data-update.ts",

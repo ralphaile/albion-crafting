@@ -1,0 +1,34 @@
+{
+  "name": "@aoc/api",
+  "version": "0.0.0",
+  "description": "Price server: fetches AODP prices on a schedule into Postgres and serves them, and the best crafts, from there.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "db:generate": "drizzle-kit generate",
+    "lint": "eslint . --max-warnings 0",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aoc/core": "workspace:*",
+    "@aoc/crafting-data": "workspace:*",
+    "@aoc/market-prices": "workspace:*",
+    "@fastify/etag": "6.2.2",
+    "drizzle-orm": "0.45.4",
+    "fastify": "5.12.8",
+    "postgres": "4.1.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@aoc/eslint-config": "workspace:*",
+    "@aoc/typescript-config": "workspace:*",
+    "@testcontainers/postgresql": "12.2.1",
+    "@types/node": "24.19.2",
+    "drizzle-kit": "0.31.11",
+    "eslint": "10.13.0",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}
