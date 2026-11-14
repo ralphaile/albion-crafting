@@ -7,6 +7,7 @@ import type {
   PlanSettings,
   PlanTotals,
   PlannedEntry,
+  PlannedJournal,
 } from "./plan.types.js";
 
 // What returns are expected to leave you using, as whole items to buy.
@@ -44,6 +45,17 @@ function planEntry(
       }),
     ),
     focus: (evaluation.focusCost ?? 0) * crafts,
+    ...(evaluation.journal && {
+      journal: {
+        id: evaluation.journal.id,
+        filled:
+          (evaluation.journal.fame * crafts) / evaluation.journal.capacity,
+        value:
+          evaluation.journal.value === undefined
+            ? undefined
+            : evaluation.journal.value * crafts * recipe.amountCrafted,
+      },
+    }),
   };
   if (
     evaluation.status === "incomplete" ||
@@ -64,13 +76,24 @@ function planEntry(
   const cost =
     materialCost + (evaluation.stationFee + evaluation.silverCost) * crafts;
   const revenue = evaluation.revenue.net * base.made;
+  const journalValue = base.journal?.value ?? 0;
   return {
     ...base,
     status: "complete",
     cost,
     revenue,
-    profit: revenue - cost,
+    journalValue,
+    profit: revenue + journalValue - cost,
   };
+}
+
+// Each journal type once, in the order the plan first fills it.
+function addJournals(journals: readonly PlannedJournal[]): PlannedJournal[] {
+  const filled = new Map<string, number>();
+  for (const { id, filled: count } of journals) {
+    filled.set(id, (filled.get(id) ?? 0) + count);
+  }
+  return [...filled].map(([id, count]) => ({ id, filled: count }));
 }
 
 function totalsOf(results: readonly PlannedEntry[]): PlanTotals {
@@ -80,6 +103,12 @@ function totalsOf(results: readonly PlannedEntry[]): PlanTotals {
     cost: 0,
     revenue: 0,
     profit: 0,
+    journalValue: 0,
+    journals: addJournals(
+      results.flatMap(({ journal }) =>
+        journal ? [{ id: journal.id, filled: journal.filled }] : [],
+      ),
+    ),
     missingPrices: [
       ...new Set(results.flatMap(({ evaluation }) => evaluation.missingPrices)),
     ],
@@ -91,6 +120,7 @@ function totalsOf(results: readonly PlannedEntry[]): PlanTotals {
     } else {
       totals.cost += result.cost;
       totals.revenue += result.revenue;
+      totals.journalValue += result.journalValue;
       totals.profit += result.profit;
     }
   }
@@ -106,6 +136,11 @@ function sumTotals(totals: readonly PlanTotals[]): PlanTotals {
     cost: totals.reduce((sum, { cost }) => sum + cost, 0),
     revenue: totals.reduce((sum, { revenue }) => sum + revenue, 0),
     profit: totals.reduce((sum, { profit }) => sum + profit, 0),
+    journalValue: totals.reduce(
+      (sum, { journalValue }) => sum + journalValue,
+      0,
+    ),
+    journals: addJournals(totals.flatMap(({ journals }) => journals)),
     missingPrices: [
       ...new Set(totals.flatMap(({ missingPrices }) => missingPrices)),
     ],
