@@ -46,6 +46,7 @@ const data: GeneratedData = {
     },
   ],
   hideouts: {
+    roadsZones: [],
     biomes: [
       {
         id: "SWAMP",
@@ -166,6 +167,7 @@ describe("diffData", () => {
         },
       ],
       hideouts: {
+        roadsZones: [],
         biomes: [
           { id: "SWAMP", name: "Swamp", cityId: "1000", specialties: ["mace"] },
         ],

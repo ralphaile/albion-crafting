@@ -127,6 +127,16 @@ function bonusFacts({ locations, hideouts }: GeneratedData): Facts {
     );
   }
   facts.set("Hideout refining", String(hideouts.refiningBonus));
+  for (const zone of hideouts.roadsZones) {
+    facts.set(
+      `${zone.name}, categories`,
+      `${zone.specialties.join(", ")} +${String(zone.specialtyBonus)}`,
+    );
+    facts.set(`${zone.name}, refining`, String(zone.refiningBonus));
+    for (const [resource, bonus] of Object.entries(zone.refiningSpecialties)) {
+      facts.set(`${zone.name}, ${resource}`, String(bonus));
+    }
+  }
   return facts;
 }
 

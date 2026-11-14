@@ -15,6 +15,7 @@ export {
 export type {
   Biome,
   Hideouts,
+  RoadsZone,
   MapQuality,
   PowerLevel,
 } from "./hideout.types.js";

@@ -77,6 +77,7 @@ export async function update({
     dumps["craftingmodifiers.json"].craftingmodifiers,
     dumps["hideouts.json"].hideouts.hideout.powerlevels.powerlevel,
     located.locations,
+    dumps["formatted/world.json"],
   );
   for (const warning of located.warnings) {
     warn(`Warning: ${warning}`);
@@ -96,7 +97,7 @@ export async function update({
   );
   const biomeNames = hideouts.biomes.map(({ name }) => name).join(", ");
   log(
-    `Extracted the hideout bonuses for ${count(hideouts.biomes.length, "biomes")} (${biomeNames}), ${count(hideouts.mapQualities.length, "map qualities")} and ${count(hideouts.powerLevels.length, "power levels")}`,
+    `Extracted the hideout bonuses for ${count(hideouts.biomes.length, "biomes")} (${biomeNames}), ${count(hideouts.mapQualities.length, "map qualities")} and ${count(hideouts.powerLevels.length, "power levels")}, and ${count(hideouts.roadsZones.length, "Roads of Avalon zones")}`,
   );
 
   const valued = addItemValues(extractRecipes(items), items.simpleitem);
