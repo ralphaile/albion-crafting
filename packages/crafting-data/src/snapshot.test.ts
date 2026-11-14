@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { craftingLocations, recipes, refiningRecipes } from "./index.js";
+import {
+  consumableRecipes,
+  craftingLocations,
+  recipes,
+  refiningRecipes,
+} from "./index.js";
 
 function countBy(key: (recipe: (typeof recipes)[number]) => string) {
   const counts: Record<string, { items: number; recipes: number }> = {};
@@ -63,6 +68,21 @@ describe("the generated data", () => {
     expect(
       refiningRecipes.find((recipe) => recipe.itemId === itemId),
     ).toMatchSnapshot();
+  });
+
+  it.each(["T4_MEAL_STEW", "T4_POTION_HEAL@1"])(
+    "has the same food or potion recipe for %s, which makes several at once",
+    (itemId) => {
+      const recipe = consumableRecipes.find(
+        (consumable) => consumable.itemId === itemId,
+      );
+      expect(recipe?.amountCrafted).toBeGreaterThan(1);
+      expect(recipe).toMatchSnapshot();
+    },
+  );
+
+  it("has the same number of food and potion recipes", () => {
+    expect(consumableRecipes).toHaveLength(391);
   });
 
   it("has the same crafting locations", () => {

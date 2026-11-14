@@ -816,6 +816,40 @@
           }
         }
       }
+    ],
+    "consumableitem": [
+      {
+        "@uniquename": "T4_MEAL_STEW",
+        "@shopcategory": "consumables",
+        "@shopsubcategory1": "food",
+        "@craftingcategory": "food",
+        "@tier": "4",
+        "craftingrequirements": {
+          "@silver": "0",
+          "@amountcrafted": "10",
+          "@craftingfocus": "61",
+          "craftresource": [
+            {
+              "@uniquename": "T4_TURNIP",
+              "@count": "4"
+            },
+            {
+              "@uniquename": "T4_BREAD",
+              "@count": "4"
+            },
+            {
+              "@uniquename": "T4_MEAT",
+              "@count": "8"
+            }
+          ]
+        }
+      },
+      {
+        "@uniquename": "T1_FISHSAUCE_LEVEL1",
+        "@shopcategory": "crafting",
+        "@shopsubcategory1": "fish",
+        "@tier": "1"
+      }
     ]
   }
 }

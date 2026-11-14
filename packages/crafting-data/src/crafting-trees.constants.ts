@@ -3,7 +3,11 @@ import {
   specializationName,
   specializationOf,
 } from "./crafting-trees.helpers.js";
-import { recipes, refiningRecipes } from "./game-data.constants.js";
+import {
+  consumableRecipes,
+  recipes,
+  refiningRecipes,
+} from "./game-data.constants.js";
 import { itemName } from "./items.helpers.js";
 
 interface Entry extends Specialization {
@@ -24,9 +28,11 @@ function byPlainThenName(a: Entry, b: Entry) {
 function trees(): CraftingTree[] {
   const entries = new Map<string, Map<string, Entry>>();
   // Royal items cost no focus, so no FCE applies to them.
-  for (const recipe of [...recipes, ...refiningRecipes].filter(
-    ({ focus }) => focus > 0,
-  )) {
+  for (const recipe of [
+    ...recipes,
+    ...refiningRecipes,
+    ...consumableRecipes,
+  ].filter(({ focus }) => focus > 0)) {
     const { treeId, specializationId } = specializationOf(recipe);
     const tree = entries.get(treeId) ?? new Map<string, Entry>();
     entries.set(treeId, tree);

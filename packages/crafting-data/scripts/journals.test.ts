@@ -37,6 +37,7 @@ const items: Items = {
   equipmentitem: [],
   transformationweapon: [],
   simpleitem: [],
+  consumableitem: [],
   journalitem: [
     warriorJournal,
     // A gatherer's journal fills from gathering, not crafting.

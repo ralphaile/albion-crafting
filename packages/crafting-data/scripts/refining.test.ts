@@ -45,6 +45,7 @@ function refined(...simpleitem: SimpleItem[]) {
     equipmentitem: [],
     simpleitem,
     journalitem: [],
+    consumableitem: [],
   });
 }
 

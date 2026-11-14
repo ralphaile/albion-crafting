@@ -28,6 +28,7 @@ function only(item: GearItem): Items {
     equipmentitem: [item],
     simpleitem: [],
     journalitem: [],
+    consumableitem: [],
   };
 }
 

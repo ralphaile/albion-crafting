@@ -72,7 +72,7 @@ function isIncluded(item: GearItem): boolean {
   );
 }
 
-function toRecipes(item: GearItem): GameRecipe[] {
+export function toRecipes(item: GearItem): GameRecipe[] {
   const levels = [
     { enchant: 0, requirements: item.craftingrequirements ?? [] },
     ...(item.enchantments?.enchantment ?? []).map((enchantment) => ({
