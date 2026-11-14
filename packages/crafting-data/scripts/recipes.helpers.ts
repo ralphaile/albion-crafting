@@ -11,7 +11,12 @@ type CraftingRequirements = NonNullable<
 >[number];
 type CraftResource = NonNullable<CraftingRequirements["craftresource"]>[number];
 
-const GEAR_LISTS = ["weapon", "transformationweapon", "equipmentitem"] as const;
+const GEAR_LISTS = [
+  "weapon",
+  "transformationweapon",
+  "equipmentitem",
+  "trackingitem",
+] as const;
 const MIN_TIER = 4;
 const MAX_TIER = 8;
 const UNRELEASED_SUFFIX = "_PROTOTYPE";
@@ -47,12 +52,16 @@ function gearId(entry: unknown): string[] {
   if (typeof entry !== "object" || entry === null) {
     return [];
   }
-  const { "@uniquename": id, "@shopcategory": category } = entry as Record<
-    string,
-    unknown
-  >;
+  // Only what can be worn or held: fishing bait is in the gathering category
+  // too.
+  const {
+    "@uniquename": id,
+    "@shopcategory": category,
+    "@slottype": slot,
+  } = entry as Record<string, unknown>;
   return typeof id === "string" &&
     typeof category === "string" &&
+    typeof slot === "string" &&
     SHOP_CATEGORIES.has(category)
     ? [id]
     : [];

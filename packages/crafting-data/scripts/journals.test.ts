@@ -36,6 +36,7 @@ const items: Items = {
   weapon: [gear("T5_MAIN_SWORD"), gear("T5_MAIN_SCIMITAR_MORGANA", 1.1)],
   equipmentitem: [],
   transformationweapon: [],
+  trackingitem: [],
   simpleitem: [],
   consumableitem: [],
   journalitem: [

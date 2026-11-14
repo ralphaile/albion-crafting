@@ -92,7 +92,7 @@ describe("update", () => {
       "Valid: 3 weapons, 1 shapeshifter staffs, 2 equipment items, 19 simple items, 7 names, 5 clusters, 5 crafting locations, 3 power levels",
       "Extracted 3 crafting locations: Thetford, Arthur's Rest, Island",
       "Extracted the hideout bonuses for 1 biomes (Swamp), 2 map qualities and 3 power levels, and 1 Roads of Avalon zones",
-      "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands, 0 bags, 0 capes",
+      "Extracted 17 recipes for 6 items: 4 weapons, 0 armors, 2 head, 0 shoes, 0 offhands, 0 bags, 0 capes, 0 gathering",
       "Gave 6 recipes the laborer's journal they fill",
       "Extracted 0 refining recipes: 0 metalbars, 0 planks, 0 cloth, 0 leather, 0 stoneblock",
       "Extracted 1 food and potion recipes: 1 food, 0 potions",

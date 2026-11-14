@@ -25,6 +25,7 @@ function only(item: GearItem): Items {
   return {
     weapon: [],
     transformationweapon: [],
+    trackingitem: [],
     equipmentitem: [item],
     simpleitem: [],
     journalitem: [],
@@ -219,12 +220,33 @@ describe("findUnreadGear", () => {
       findUnreadGear({
         ...items,
         whipitem: [
-          { "@uniquename": "T4_MAIN_WHIP", "@shopcategory": "weapons" },
-          { "@uniquename": "T5_MAIN_WHIP", "@shopcategory": "weapons" },
+          {
+            "@uniquename": "T4_MAIN_WHIP",
+            "@shopcategory": "weapons",
+            "@slottype": "mainhand",
+          },
+          {
+            "@uniquename": "T5_MAIN_WHIP",
+            "@shopcategory": "weapons",
+            "@slottype": "mainhand",
+          },
         ],
-        mount: { "@uniquename": "T3_MOUNT_HORSE", "@shopcategory": "mounts" },
-        cape: { "@uniquename": "T4_CAPE", "@shopcategory": "accessories" },
-        gloves: { "@uniquename": "T4_GLOVES", "@shopcategory": "armors" },
+        mount: {
+          "@uniquename": "T3_MOUNT_HORSE",
+          "@shopcategory": "mounts",
+          "@slottype": "mount",
+        },
+        cape: {
+          "@uniquename": "T4_CAPE",
+          "@shopcategory": "accessories",
+          "@slottype": "cape",
+        },
+        gloves: {
+          "@uniquename": "T4_GLOVES",
+          "@shopcategory": "armors",
+          "@slottype": "gloves",
+        },
+        bait: { "@uniquename": "T1_FISHINGBAIT", "@shopcategory": "gathering" },
       }),
     ).toEqual([
       "items.json has 3 gear items in lists the app doesn't take recipes from: whipitem (2), gloves (1), such as T4_MAIN_WHIP",

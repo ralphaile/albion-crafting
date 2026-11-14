@@ -2,7 +2,7 @@
 
 The **Specializations** button at the top right, just its icon on phones, opens a panel over the right of the page. It closes on Escape, a click outside it, or ×. In the code, the profile is `SpecializationProfile` in `apps/web/src/specializations.types.ts`, and the panel is `apps/web/src/SpecializationsPanel.tsx`.
 
-A crafting tree is one destiny-board node, such as Swords or Plate Armor: a mastery, then one specialization per item line. The trees are grouped by the building that crafts them: Warrior's Forge, Hunter's Lodge, Mage's Tower and Toolmaker, which makes bags and capes. Bags and satchels of insight share one tree. Offhands sit with that building, so shields are under the forge, torches under the lodge and tomes under the tower. Royal items cost no focus, so they have no specialization here.
+A crafting tree is one destiny-board node, such as Swords or Plate Armor: a mastery, then one specialization per item line. The trees are grouped by the building that crafts them: Warrior's Forge, Hunter's Lodge, Mage's Tower and Toolmaker, which makes bags, capes, gathering gear and tools. Bags and satchels of insight share one tree. All gathering gear is one tree here, and so are all tools, though the game splits gathering gear by resource. Offhands sit with that building, so shields are under the forge, torches under the lodge and tomes under the tower. Royal items cost no focus, so they have no specialization here.
 
 Refining has a tree for each refined resource: metal bar, plank, cloth, leather and stone block. Each tier is a specialization of its own, from T2 to T8, so a T5 bar's FCE is the mastery × 30, plus the T5 specialization × 250, plus the other tiers × 30.
 

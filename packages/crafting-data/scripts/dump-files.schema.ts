@@ -152,6 +152,7 @@ export const dumpSchemas = {
         weapon: z.array(gearItem),
         equipmentitem: z.array(gearItem),
         transformationweapon: z.array(gearItem),
+        trackingitem: z.array(gearItem).default([]),
         simpleitem: z.array(simpleItem),
         consumableitem: z.preprocess(
           (entries: unknown): unknown[] =>

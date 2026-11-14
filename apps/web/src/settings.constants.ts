@@ -1,4 +1,8 @@
-import { ARMOR_PIECES, WEAPON_TYPES } from "./filters.constants";
+import {
+  ARMOR_PIECES,
+  GATHERING_TYPES,
+  WEAPON_TYPES,
+} from "./filters.constants";
 import type { OptionGroup } from "./route.types";
 import type { CraftingSettings, ServerOption } from "./settings.types";
 
@@ -54,6 +58,7 @@ export const DAILY_BONUS_GROUPS: readonly OptionGroup[] = [
       { id: "cape", label: "Cape" },
     ],
   },
+  { label: "Gathering", options: GATHERING_TYPES },
   {
     label: "Consumable",
     options: [

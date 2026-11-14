@@ -52,7 +52,7 @@ export const TREE_GROUPS: readonly OptionGroup[] = [
     "cloth_shoes",
     "booktype",
   ]),
-  trees("Toolmaker", ["bags", "capes"]),
+  trees("Toolmaker", ["bags", "capes", "gatherergear", "tools"]),
   trees("Refining", ["metalbars", "planks", "cloth", "leather", "stoneblock"]),
   trees("Cook and alchemist", ["food", "potions"]),
 ];

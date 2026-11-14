@@ -6,6 +6,7 @@ export const SHOP_CATEGORIES = new Set([
   "offhands",
   "bags",
   "capes",
+  "gathering",
 ]);
 
 // Vanity capes and arena banners: the faction capes each have a subcategory

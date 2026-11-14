@@ -67,11 +67,17 @@ export const ACCESSORY_TYPES: readonly Option[] = [
   { id: "capes", label: "Cape" },
 ];
 
+export const GATHERING_TYPES: readonly Option[] = [
+  { id: "gatherergear", label: "Gathering gear" },
+  { id: "tools", label: "Tools" },
+];
+
 export const CATEGORIES: readonly Option[] = [
   ...WEAPON_TYPES,
   ...ARMOR_PIECES,
   ...OFFHAND_TYPES,
   ...ACCESSORY_TYPES,
+  ...GATHERING_TYPES,
 ];
 
 export const REFINED_TYPES: readonly Option[] = [

@@ -42,6 +42,7 @@ function refined(...simpleitem: SimpleItem[]) {
   return extractRefiningRecipes({
     weapon: [],
     transformationweapon: [],
+    trackingitem: [],
     equipmentitem: [],
     simpleitem,
     journalitem: [],
