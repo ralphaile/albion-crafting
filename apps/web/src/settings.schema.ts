@@ -40,6 +40,9 @@ const settingsSchema = z.object({
     .catch(DEFAULT_SETTINGS.stationFee),
   journals: z.boolean().catch(DEFAULT_SETTINGS.journals),
   qualityWeighted: z.boolean().catch(DEFAULT_SETTINGS.qualityWeighted),
+  rankByCheaperEnchant: z
+    .boolean()
+    .catch(DEFAULT_SETTINGS.rankByCheaperEnchant),
   buyMode: z.enum(["instant", "order"]).catch(DEFAULT_SETTINGS.buyMode),
   sellMode: z.enum(["order", "instant"]).catch(DEFAULT_SETTINGS.sellMode),
   dailyBonuses: z

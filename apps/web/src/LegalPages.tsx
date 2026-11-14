@@ -101,6 +101,11 @@ const GLOSSARY = [
     "A hideout level from 1 to 9 that adds general and biome-specialist production bonuses.",
   ],
   [
+    "enchant-paths",
+    "Enchant paths",
+    "An enchanted item can be crafted with enchanted materials, or crafted a level or more lower and upgraded with runes (.1), souls (.2) and relics (.3). The silver per item of each path is shown, and the cheaper one is the total. Rank by the cheaper enchant path in Settings ranks by it.",
+  ],
+  [
     "artifact",
     "Artifact",
     "A special material used by some recipes. It is not returned by crafting and can sometimes be replaced by a token.",

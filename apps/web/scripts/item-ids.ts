@@ -15,6 +15,9 @@ export function shownItemIds(): string[] {
       itemIds.add(emptyJournalId(recipe.journal.id));
       itemIds.add(fullJournalId(recipe.journal.id));
     }
+    if (recipe.upgrade) {
+      itemIds.add(recipe.upgrade.id);
+    }
     for (const { materials } of [recipe, ...recipe.alternatives]) {
       for (const { id } of materials) {
         itemIds.add(id);

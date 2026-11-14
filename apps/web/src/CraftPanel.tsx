@@ -335,6 +335,42 @@ export function CraftPanel({
     );
   }
 
+  // The cheaper path is the total.
+  function enchantPaths(craft: Craft) {
+    const { level, direct, upgraded, cheaper } = craft.enchantPaths ?? {};
+    return (
+      <Section title="Enchant paths" help="enchant-paths">
+        <ul className={styles.lines}>
+          {craft.upgradeMaterials?.map((material) =>
+            priceRow(
+              material.itemId,
+              materialMarketId(buyMarkets, material.itemId),
+              material.source,
+              material.price,
+              { count: material.count },
+            ),
+          )}
+        </ul>
+        <dl className={styles.figures}>
+          <Figure
+            label={`Craft .${String(level)}`}
+            value={direct}
+            total={cheaper === "direct"}
+          />
+          <Figure
+            label={
+              upgraded
+                ? `Craft .${String(upgraded.from)} and upgrade`
+                : "Craft lower and upgrade"
+            }
+            value={upgraded?.total}
+            total={cheaper === "upgraded"}
+          />
+        </dl>
+      </Section>
+    );
+  }
+
   function priceRow(
     itemId: string,
     marketId: string,
@@ -482,6 +518,7 @@ export function CraftPanel({
         </Section>
         {focusSpent !== undefined &&
           focus(focusSpent, chosenRecipe.focus, recipe)}
+        {craft?.enchantPaths && enchantPaths(craft)}
         <Section title="Result" help="formulas">
           <dl className={styles.figures}>
             {shown.journal && (

@@ -17,6 +17,7 @@ describe("parseSettings", () => {
       stationFee: 1200,
       journals: true,
       qualityWeighted: true,
+      rankByCheaperEnchant: true,
       buyMode: "order",
       sellMode: "instant",
       dailyBonuses: [

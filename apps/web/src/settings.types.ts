@@ -7,6 +7,7 @@ export interface CraftingSettings {
   stationFee: number;
   journals: boolean;
   qualityWeighted: boolean;
+  rankByCheaperEnchant: boolean;
   buyMode: BuyMode;
   // The Black Market is picked as the sell market, not as a way of selling.
   sellMode: Exclude<SellMode, "blackMarket">;

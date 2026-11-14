@@ -388,6 +388,42 @@ describe("CraftPanel", () => {
     });
   });
 
+  it("compares crafting a T5 sword .1 directly with crafting .0 and upgrading it with runes", async () => {
+    renderCrafts({
+      filters: { ...broadswordOnly, tiers: [5], enchants: [1] },
+      materials: [
+        priced("T5_METALBAR", "Martlock", 100),
+        priced("T5_LEATHER", "Martlock", 100),
+        priced("T5_METALBAR_LEVEL1@1", "Martlock", 1000),
+        priced("T5_LEATHER_LEVEL1@1", "Martlock", 1000),
+        priced("T5_RUNE", "Martlock", 10),
+      ],
+      products: [priced("T5_MAIN_SWORD@1", "Caerleon", 100_000)],
+    });
+    const name = "Expert's Broadsword 5.1";
+    fireEvent.click(
+      await screen.findByRole("button", { name: `Prices for ${name}` }),
+    );
+
+    const paths = within(panel(name)).getByRole("region", {
+      name: "Enchant paths",
+    });
+    expect(
+      within(paths).getByRole("textbox", {
+        name: "Expert's Rune 5.0, sell order in Martlock",
+      }),
+    ).toBeInTheDocument();
+    const total = (label: string) =>
+      within(paths).getByText(label).closest("div")?.dataset.total;
+    expect(total("Craft .0 and upgrade")).toBe("true");
+    expect(total("Craft .1")).toBe("false");
+    const shown = figures("Enchant paths", name);
+    const direct = Number(shown["Craft .1"]?.replace(/,/g, ""));
+    const upgraded = Number(shown["Craft .0 and upgrade"]?.replace(/,/g, ""));
+    expect(upgraded).toBeLessThan(direct);
+    expect(upgraded).toBeGreaterThan(288 * 10);
+  });
+
   it("asks for the higher qualities only when quality-weighted", async () => {
     const { getPrices } = renderBroadsword();
     await screen.findByRole("button", {
