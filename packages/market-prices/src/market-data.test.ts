@@ -53,8 +53,9 @@ function fakeAodp() {
       const qualities = (url.searchParams.get("qualities") ?? "")
         .split(",")
         .map(Number);
+      const hourly = url.searchParams.get("time-scale") === "1";
       requests.push(
-        `${url.hostname.split(".")[0] ?? ""} ${endpoint} ${itemIds.join(",")}`,
+        `${url.hostname.split(".")[0] ?? ""} ${endpoint} ${itemIds.join(",")}${hourly ? " hourly" : ""}`,
       );
       if (itemIds.some((itemId) => failing.has(itemId))) {
         return new HttpResponse(null, { status: 404 });
@@ -717,6 +718,54 @@ describe.each([
 
       expect(result.prices).toEqual([]);
       expect(result.fetchedAt).toBeUndefined();
+    });
+  });
+
+  describe("getSeries", () => {
+    it("gives one item's points by the hour or the day, and asks again only after 15 minutes", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+
+      const hourly = await marketData.getSeries("T4_BAG", "Caerleon", 1, {
+        hourly: true,
+      });
+      await marketData.getSeries("T4_BAG", "caerleon", 1, { hourly: true });
+      await marketData.getSeries("T4_BAG", "Caerleon", 1, { hourly: false });
+      minutesLater(15);
+      await marketData.getSeries("T4_BAG", "Caerleon", 1, { hourly: true });
+
+      expect(hourly).toEqual([
+        {
+          time: Date.UTC(2026, 9, 25),
+          averagePrice: 1000,
+          volume: 70,
+        },
+      ]);
+      expect(requests).toEqual([
+        "west history T4_BAG hourly",
+        "west history T4_BAG",
+        "west history T4_BAG hourly",
+      ]);
+    });
+
+    it("fails when AODP does", async () => {
+      const { failing } = fakeAodp();
+      failing.add("T4_BAG");
+      const marketData = await openMarketData();
+
+      await expect(
+        marketData.getSeries("T4_BAG", "Caerleon", 1, { hourly: false }),
+      ).rejects.toThrow();
+    });
+
+    it("has no points for an item AODP doesn't answer for", async () => {
+      const { unanswered } = fakeAodp();
+      unanswered.add("T4_BAG");
+      const marketData = await openMarketData();
+
+      await expect(
+        marketData.getSeries("T4_BAG", "Caerleon", 1, { hourly: false }),
+      ).resolves.toEqual([]);
     });
   });
 

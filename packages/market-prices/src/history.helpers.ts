@@ -1,8 +1,24 @@
 import { parseAodpDate } from "./aodp.helpers.js";
 import type { AodpHistory } from "./aodp.schema.js";
-import type { HistorySummary, SummarizeOptions } from "./history.types.js";
+import type {
+  HistorySummary,
+  PricePoint,
+  SummarizeOptions,
+} from "./history.types.js";
 
 const DAY_MS = 24 * 60 * 60_000;
+
+// Oldest first, leaving out hours or days with nothing sold.
+export function pricePoints(series: AodpHistory | undefined): PricePoint[] {
+  return (series?.data ?? [])
+    .filter((point) => point.item_count > 0)
+    .map((point) => ({
+      time: parseAodpDate(point.timestamp),
+      averagePrice: point.avg_price,
+      volume: point.item_count,
+    }))
+    .sort((a, b) => a.time - b.time);
+}
 
 export function summarizeHistory(
   series: readonly AodpHistory[],

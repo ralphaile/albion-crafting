@@ -1,6 +1,10 @@
-import type { BatchFailure } from "./aodp.types.js";
+import type { BatchFailure, Region } from "./aodp.types.js";
 import type { CachedFetchOptions } from "./cached-rows.types.js";
-import type { HistorySummary, SummarizeOptions } from "./history.types.js";
+import type {
+  HistorySummary,
+  PricePoint,
+  SummarizeOptions,
+} from "./history.types.js";
 import type { ItemPrices } from "./prices.types.js";
 
 // `onPartial` is called as prices arrive. `read` gets the prices known by
@@ -46,5 +50,19 @@ export interface MarketData {
     qualities: readonly number[],
     options?: HistoryOptions,
   ): Promise<HistoryResult>;
+  // One item's history in one market, by the hour or by the day, for a chart.
+  // Not saved, so each is asked for again after a reload.
+  getSeries(
+    itemId: string,
+    marketId: string,
+    quality: number,
+    options: SeriesOptions,
+  ): Promise<PricePoint[]>;
   clear(): Promise<void>;
+}
+
+export interface SeriesOptions {
+  hourly: boolean;
+  region?: Region;
+  signal?: AbortSignal;
 }

@@ -44,6 +44,6 @@ export interface AodpClient {
     itemIds: readonly string[],
     marketIds: readonly string[],
     qualities: readonly number[],
-    options?: BatchOptions<AodpHistory>,
+    options?: BatchOptions<AodpHistory> & { hourly?: boolean },
   ): Promise<FetchedHistory>;
 }

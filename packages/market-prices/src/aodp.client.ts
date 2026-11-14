@@ -46,6 +46,11 @@ const historyEndpoint: Endpoint<AodpHistory> = {
   marketIdOf: (row) => row.location,
 };
 
+const hourlyHistoryEndpoint: Endpoint<AodpHistory> = {
+  ...historyEndpoint,
+  extraQuery: "&time-scale=1",
+};
+
 // One limiter for every server, because AODP counts requests per IP address.
 export function createAodpClient(): AodpClient {
   const limiter = createLimiter();
@@ -122,7 +127,7 @@ export function createAodpClient(): AodpClient {
     },
     async getHistory(itemIds, marketIds, qualities, options = {}) {
       const { rows, failures } = await getRows(
-        historyEndpoint,
+        options.hourly === true ? hourlyHistoryEndpoint : historyEndpoint,
         itemIds,
         marketIds,
         qualities,

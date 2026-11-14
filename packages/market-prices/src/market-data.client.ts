@@ -4,8 +4,8 @@ import type { AodpHistory, AodpPrice } from "./aodp.schema.js";
 import type { Region } from "./aodp.types.js";
 import { openCacheStore } from "./cache.store.js";
 import { cachedRows } from "./cached-rows.helpers.js";
-import { summarizeSeries } from "./history.helpers.js";
-import type { HistorySummary } from "./history.types.js";
+import { pricePoints, summarizeSeries } from "./history.helpers.js";
+import type { HistorySummary, PricePoint } from "./history.types.js";
 import type { MarketData } from "./market-data.types.js";
 import { normalizePrices } from "./prices.helpers.js";
 import { type ReadSnapshot, snapshotReader } from "./snapshot.client.js";
@@ -15,6 +15,8 @@ import {
   withSnapshotRow,
 } from "./snapshot.helpers.js";
 import type { MarkedPrice } from "./snapshot.types.js";
+
+const SERIES_TTL_MS = 15 * 60_000;
 
 // AODP matches market names in any case.
 function priceKey(itemId: string, marketId: string, quality: number) {
@@ -84,6 +86,7 @@ export async function openMarketData({
   const store = await openCacheStore();
   // One client, so that prices and history share its rate limiter.
   const client = createAodpClient();
+  const series = new Map<string, { at: number; points: PricePoint[] }>();
 
   const cachedPrices = cachedRows<AodpPrice>({
     rows: store.prices,
@@ -195,6 +198,39 @@ export async function openMarketData({
         },
       );
       return { history: summarize(rows), failures, fetchedAt };
+    },
+    async getSeries(itemId, marketId, quality, options) {
+      const key = JSON.stringify([
+        options.region ?? DEFAULT_REGION,
+        itemId,
+        marketId.toLowerCase(),
+        quality,
+        options.hourly,
+      ]);
+      const known = series.get(key);
+      if (known !== undefined && Date.now() - known.at < SERIES_TTL_MS) {
+        return known.points;
+      }
+      const { history, failures } = await client.getHistory(
+        [itemId],
+        [marketId],
+        [quality],
+        options,
+      );
+      const [failure] = failures;
+      if (failure !== undefined) {
+        throw failure.error;
+      }
+      const points = pricePoints(
+        history.find(
+          (row) =>
+            row.item_id === itemId &&
+            row.location.toLowerCase() === marketId.toLowerCase() &&
+            row.quality === quality,
+        ),
+      );
+      series.set(key, { at: Date.now(), points });
+      return points;
     },
     clear: () => store.clear(),
   };
