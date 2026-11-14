@@ -78,8 +78,15 @@ export { type PricesNeeded } from "./prices-needed.types.js";
 export { rank } from "./rank.helpers.js";
 export { type SortDirection, type SortKey } from "./rank.types.js";
 export { bonusForReturnRate, returnRate } from "./return-rate.helpers.js";
+export {
+  HIGHER_QUALITIES,
+  NORMAL_QUALITY,
+  QUALITY_ODDS,
+} from "./quality.constants.js";
+export { qualityWeightedRevenue } from "./quality.helpers.js";
 export { revenue } from "./revenue.helpers.js";
 export {
+  type QualitySale,
   type Revenue,
   type RevenueOptions,
   type SellMode,

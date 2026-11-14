@@ -39,6 +39,7 @@ const settingsSchema = z.object({
     .max(MAX_STATION_FEE)
     .catch(DEFAULT_SETTINGS.stationFee),
   journals: z.boolean().catch(DEFAULT_SETTINGS.journals),
+  qualityWeighted: z.boolean().catch(DEFAULT_SETTINGS.qualityWeighted),
   buyMode: z.enum(["instant", "order"]).catch(DEFAULT_SETTINGS.buyMode),
   sellMode: z.enum(["order", "instant"]).catch(DEFAULT_SETTINGS.sellMode),
   dailyBonuses: z

@@ -166,14 +166,16 @@ function renderCrafts({
   specializations?: SpecializationProfile;
   settings?: CraftingSettings;
 }) {
-  const getPrices = vi.fn<MarketData["getPrices"]>((_itemIds, marketIds) =>
-    Promise.resolve({
-      prices: [...materials, ...products].filter(({ marketId }) =>
-        marketIds.includes(marketId),
-      ),
-      failures: [],
-      fetchedAt: 0,
-    }),
+  const getPrices = vi.fn<MarketData["getPrices"]>(
+    (_itemIds, marketIds, qualities) =>
+      Promise.resolve({
+        prices: [...materials, ...products].filter(
+          ({ marketId, quality }) =>
+            marketIds.includes(marketId) && qualities.includes(quality),
+        ),
+        failures: [],
+        fetchedAt: 0,
+      }),
   );
   const store = memoryManualPriceStore();
   const onEditSpecializations = vi.fn<(treeId: string) => void>();
@@ -383,6 +385,56 @@ describe("CraftPanel", () => {
     expect(figures("Result")).toMatchObject({
       "+ journals": "542",
       Profit: "3,959",
+    });
+  });
+
+  it("asks for the higher qualities only when quality-weighted", async () => {
+    const { getPrices } = renderBroadsword();
+    await screen.findByRole("button", {
+      name: "Prices for Adept's Broadsword 4.0",
+    });
+
+    expect(
+      getPrices.mock.calls.map(([, , qualities]) => qualities),
+    ).not.toContainEqual([2, 3, 4, 5]);
+  });
+
+  it("values a quality-weighted sword over its qualities, estimating those without a price, and refreshes them", async () => {
+    const { getPrices } = renderCrafts({
+      filters: broadswordOnly,
+      materials: [priced("T4_METALBAR", "Martlock", 100)],
+      products: [
+        priced("T4_MAIN_SWORD", "Caerleon", 5000),
+        { ...priced("T4_MAIN_SWORD", "Caerleon", 10_000), quality: 3 },
+      ],
+      settings: { ...DEFAULT_SETTINGS, qualityWeighted: true },
+    });
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Prices for Adept's Broadsword 4.0",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(figures("Revenue")).toMatchObject({
+        "Normal 68.9%": "5,000",
+        "Good 25% est.": "5,000",
+        "Outstanding 5%": "10,000",
+        "Excellent 1% est.": "10,000",
+        "Masterpiece 0.1% est.": "10,000",
+        "Expected price": "5,305",
+      });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
+
+    await waitFor(() => {
+      expect(
+        getPrices.mock.calls.filter(
+          ([, , qualities, options]) =>
+            qualities.includes(2) && options?.force === true,
+        ),
+      ).toHaveLength(1);
     });
   });
 

@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -44,15 +50,18 @@ function lymhurst(
 }
 
 function answering(prices: readonly ItemPrices[]) {
-  const getPrices = vi.fn<MarketData["getPrices"]>((itemIds, marketIds) =>
-    Promise.resolve({
-      prices: prices.filter(
-        ({ itemId, marketId }) =>
-          itemIds.includes(itemId) && marketIds.includes(marketId),
-      ),
-      failures: [],
-      fetchedAt: 0,
-    }),
+  const getPrices = vi.fn<MarketData["getPrices"]>(
+    (itemIds, marketIds, qualities) =>
+      Promise.resolve({
+        prices: prices.filter(
+          ({ itemId, marketId, quality }) =>
+            itemIds.includes(itemId) &&
+            marketIds.includes(marketId) &&
+            qualities.includes(quality),
+        ),
+        failures: [],
+        fetchedAt: 0,
+      }),
   );
   return { ...fakeMarketData(), getPrices };
 }
@@ -119,7 +128,7 @@ function renderPlan(
   initial: CraftingPlan = NO_PLAN,
   settings: CraftingSettings = DEFAULT_SETTINGS,
 ) {
-  render(
+  return render(
     <Harness marketData={marketData} initial={initial} settings={settings} />,
   );
 }
@@ -316,6 +325,51 @@ describe("PlanPage", () => {
       ["T4_LEATHER", "T4_MAIN_SWORD", "T4_METALBAR"],
       ["Lymhurst"],
     ]);
+  });
+
+  it("values its items over their qualities when quality-weighted, asking only for what it sells", async () => {
+    const plan: CraftingPlan = {
+      locations: [
+        {
+          id: "city",
+          route: ROUTE,
+          entries: [
+            {
+              id: "a",
+              itemId: "T4_MAIN_SWORD",
+              alternative: 0,
+              quantity: 1,
+              focus: false,
+              dailyBonus: 0,
+            },
+          ],
+        },
+      ],
+    };
+    const prices = [
+      ...broadswordPrices,
+      { ...lymhurst("T4_MAIN_SWORD", 10_000), quality: 3 },
+    ];
+    const normal = answering(prices);
+    const { unmount } = renderPlan(normal, plan);
+    await screen.findAllByRole("list", { name: `Materials for ${BROADSWORD}` });
+    const normalProfit = total("Plan totals", "Profit");
+    unmount();
+
+    const weighted = answering(prices);
+    renderPlan(weighted, plan, {
+      ...DEFAULT_SETTINGS,
+      qualityWeighted: true,
+    });
+
+    await waitFor(() => {
+      expect(total("Plan totals", "Profit")).not.toBe(normalProfit);
+    });
+    expect(
+      weighted.getPrices.mock.calls
+        .filter(([, , qualities]) => qualities.includes(2))
+        .map(([itemIds]) => itemIds),
+    ).toEqual([["T4_MAIN_SWORD"]]);
   });
 
   it("lists what to buy in each market, and copies it as text", async () => {
