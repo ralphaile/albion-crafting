@@ -107,6 +107,7 @@ describe("hideoutProductionBonus", () => {
       powerGeneral: 0.26,
       powerSpecialist: 0.3,
       refining: 0,
+      refiningSpecialty: 0,
       daily: 0.1,
       focus: 0.59,
       total: bonus.total,
@@ -119,6 +120,7 @@ describe("hideoutProductionBonus", () => {
       powerGeneral: 0.26,
       powerSpecialist: 0,
       refining: 0,
+      refiningSpecialty: 0,
       daily: 0,
       focus: 0,
       total: 0.26,
@@ -135,6 +137,7 @@ describe("hideoutProductionBonus", () => {
       powerGeneral: 0.26,
       powerSpecialist: 0.3,
       refining: 0,
+      refiningSpecialty: 0,
       daily: 0,
       focus: 0,
       override: 0.9,
@@ -154,6 +157,7 @@ describe("hideoutProductionBonus", () => {
       powerGeneral: 0,
       powerSpecialist: 0,
       refining: 0.15,
+      refiningSpecialty: 0,
       daily: 0.1,
       focus: 0.59,
       total: 0.15 + 0.1 + 0.59,
@@ -174,5 +178,54 @@ describe("hideoutProductionBonus", () => {
         override: { productionBonus: -0.1 },
       }),
     ).toThrow(RangeError);
+  });
+
+  describe("in a Roads of Avalon hideout", () => {
+    // Quatun-Nusas (TNL-154): hide +0.10 for refining, +0.01 on five
+    // categories for crafting.
+    const quatunNusas: Hideout = {
+      biome: {
+        specialties: [
+          "leather_helmet",
+          "leather_shoes",
+          "mace",
+          "naturestaff",
+          "firestaff",
+        ],
+      },
+      mapQuality: { specialtyBonus: 0.01 },
+      powerLevel: { generalBonus: 0.26, specialistBonus: 0.3 },
+      refiningBonus: 0.1,
+      refiningSpecialties: { hide: 0.1 },
+    };
+
+    it("refines its resource with the zone's refining bonus and specialty", () => {
+      const hide = hideoutProductionBonus(quatunNusas, "hide", {
+        refining: true,
+      });
+
+      expect(hide).toMatchObject({
+        mapQuality: 0,
+        powerGeneral: 0,
+        powerSpecialist: 0,
+        refining: 0.1,
+        refiningSpecialty: 0.1,
+      });
+      expect(hide.total).toBeCloseTo(0.2, 10);
+      expect(
+        hideoutProductionBonus(quatunNusas, "ore", { refining: true }).total,
+      ).toBeCloseTo(0.1, 10);
+    });
+
+    it("crafts its categories with the zone's +0.01 and the power level", () => {
+      expect(hideoutProductionBonus(quatunNusas, "mace").total).toBeCloseTo(
+        0.01 + 0.26 + 0.3,
+        10,
+      );
+      expect(hideoutProductionBonus(quatunNusas, "sword").total).toBeCloseTo(
+        0.26,
+        10,
+      );
+    });
   });
 });

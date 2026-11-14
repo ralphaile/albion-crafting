@@ -1,9 +1,12 @@
 import type { CraftingLocation } from "@aoc/core";
 
 import type { Dumps } from "./dumps.schema.ts";
-import type { Hideouts } from "../src/hideout.types.ts";
+import type { Hideouts, RoadsZone } from "../src/hideout.types.ts";
 
 type CraftingModifiers = Dumps["craftingmodifiers.json"]["craftingmodifiers"];
+type Clusters = Dumps["formatted/world.json"];
+
+const ROADS_PREFIX = "TNL-";
 type PowerLevels =
   Dumps["hideouts.json"]["hideouts"]["hideout"]["powerlevels"]["powerlevel"];
 
@@ -16,10 +19,12 @@ const BIOME_CITIES: Record<string, string> = {
 };
 
 export function extractHideouts(
-  { craftinglocation }: CraftingModifiers,
+  modifiers: CraftingModifiers,
   powerlevel: PowerLevels,
   craftingLocations: CraftingLocation[],
+  clusters: Clusters,
 ): Hideouts {
+  const { craftinglocation } = modifiers;
   const zones = craftinglocation.flatMap((location) => {
     const biome = location["@biome"];
     const quality = location["@clusterquality"];
@@ -52,6 +57,7 @@ export function extractHideouts(
         `list of specialties in ${id}`,
       ).split(", "),
     })),
+    roadsZones: extractRoadsZones(modifiers, clusters),
     mapQualities: unique(zones.map(({ quality }) => quality))
       .sort((a, b) => a - b)
       .map((quality) => ({
@@ -73,6 +79,46 @@ export function extractHideouts(
       "hideout refining bonus",
     ),
   };
+}
+
+function extractRoadsZones(
+  { refiningcategory, craftinglocation }: CraftingModifiers,
+  clusters: Clusters,
+): RoadsZone[] {
+  const refining = new Set(
+    refiningcategory.item.map((item) => item["@category"]),
+  );
+  const names = new Map(
+    clusters.map(({ Index, UniqueName }) => [Index, UniqueName]),
+  );
+  return craftinglocation
+    .flatMap((location) => {
+      const id = location["@clusterid"];
+      if (id?.startsWith(ROADS_PREFIX) !== true) {
+        return [];
+      }
+      const crafting = location.craftingmodifier.filter(
+        (modifier) => !refining.has(modifier["@name"]),
+      );
+      return [
+        {
+          id,
+          name: names.get(id) ?? id,
+          specialties: crafting.map((modifier) => modifier["@name"]),
+          specialtyBonus: single(
+            crafting.map((modifier) => modifier["@value"]),
+            `specialty bonus in ${id}`,
+          ),
+          refiningBonus: location.refiningbonus["@value"],
+          refiningSpecialties: Object.fromEntries(
+            location.craftingmodifier
+              .filter((modifier) => refining.has(modifier["@name"]))
+              .map((modifier) => [modifier["@name"], modifier["@value"]]),
+          ),
+        },
+      ];
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function royalCityId(

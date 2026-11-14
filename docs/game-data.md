@@ -121,7 +121,7 @@ The render service draws each icon when it's asked for, so icons load slowly fro
 `src/generated/locations.json` has the crafting bonuses of the 7 cities, the 3 Rests and the island. The app imports it as `craftingLocations` from `@aoc/crafting-data`, and its type is `CraftingLocation` from `@aoc/core`.
 
 - **Which locations:** the entries in `craftingmodifiers.json` with a cluster ID and a `craftingbonus`. The `id` is the cluster ID, and the `name` comes from `formatted/world.json`: `4300` is "Arthur's Rest". A cluster with no name prints a warning and keeps its ID as its name.
-- **Left out:** the 100 `TNL-…` clusters, Roads of Avalon zones such as Quatun-Nusas, which have no crafting bonus. The hideout entries, by biome and map quality, go into [Hideouts](#hideouts).
+- **Left out:** the 100 `TNL-…` clusters, Roads of Avalon zones such as Quatun-Nusas, which have no crafting bonus, and the hideout entries, by biome and map quality. Both go into [Hideouts](#hideouts).
 - **`craftingBonus`** is the base bonus, 0.18 in every city and Rest.
 - **`specialties`** maps a crafting category to its bonus, such as `{ "sword": 0.15 }`, so a recipe's specialty bonus is `specialties[recipe.craftingCategory] ?? 0`.
   - The refining bonuses, such as `ore` 0.40, go in `refiningSpecialties` instead. The file lists their categories in `refiningcategory`.
@@ -133,7 +133,7 @@ The render service draws each icon when it's asked for, so icons load slowly fro
 
 ## Hideouts
 
-`src/generated/hideouts.json` has the bonuses for crafting in a Black Zone hideout, as three small tables. The app imports it as `hideouts` from `@aoc/crafting-data`, and `src/hideout.types.ts` has its type.
+`src/generated/hideouts.json` has the bonuses for crafting in a Black Zone hideout, as three small tables, and the Roads of Avalon zones. The app imports it as `hideouts` from `@aoc/crafting-data`, and `src/hideout.types.ts` has its type.
 
 - **`biomes`:** Swamp, Forest, Steppe, Highland and Mountain, each with its 5 crafting categories and `cityId`, the cluster ID of its royal city. A biome's categories are exactly that city's gear specialties.
   - The game files don't link a biome to its city, so `scripts/hideouts.helpers.ts` has that table: Swamp is Thetford, Forest Lymhurst, Steppe Bridgewatch, Highland Martlock and Mountain Fort Sterling.
@@ -142,7 +142,7 @@ The render service draws each icon when it's asked for, so icons load slowly fro
 - **`powerLevels`:** levels 1 to 9, from `hideouts.json`. The general bonus counts for everything crafted there, and the specialist bonus only for the biome's 5 categories. The file leaves both out at level 1, which means 0.
 - **`refiningBonus`:** 0.15 in every hideout. Refining there gets this flat bonus in place of the power level and map quality.
 - **Why tables:** `craftingmodifiers.json` has 30 hideout entries, one per biome and map quality, with the same numbers in every biome. If one ever differs, such as a single biome getting another bonus at Q3, `pnpm data:update` fails before writing anything and names the difference.
-- **Left out:** Roads of Avalon hideouts, which come in a later release.
+- **`roadsZones`:** the 100 `TNL-…` clusters in `craftingmodifiers.json`, sorted by name from `formatted/world.json`. Each has its 5 crafting categories and their `specialtyBonus`, 0.01 in every zone, its `refiningBonus`, 0.10, and `refiningSpecialties`, the one resource it refines with 0.10 more, such as `{ "hide": 0.1 }`. A Roads hideout uses the same `powerLevels`.
 
 A hideout's production bonus for a crafting category:
 

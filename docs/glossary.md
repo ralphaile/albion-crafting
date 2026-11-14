@@ -136,7 +136,7 @@ The total crafting bonus where you craft, written as a fraction (0.18 is 18%). C
 - **City or [Rest](#rest):** a base of 0.18, plus 0.15 for its [specialty](#specialty-bonus), plus any [daily bonus](#daily-bonus), plus 0.59 with [focus](#focus).
 - **Island:** a base of 0, with no specialty.
 - **Hideout:** the [power level](#power-level)'s general bonus, plus, for its [biome](#biome)'s 5 categories, the [map quality](#hideout-map-quality) bonus and the power level's specialist bonus. Then any daily bonus, and 0.59 with focus.
-- **Refining**, such as metal bars: a base of 0.18 in a city and 0.15 in a Rest, plus 0.40 in the royal city that specializes in it, such as Thetford for ore. In a hideout it's a flat 0.15, without the power level or map quality. Then any daily bonus, and 0.59 with focus. A T5 metal bar in Thetford returns 36.71% without focus and 53.92% with it.
+- **Refining**, such as metal bars: a base of 0.18 in a city and 0.15 in a Rest, plus 0.40 in the royal city that specializes in it, such as Thetford for ore. In a Black Zone hideout it's a flat 0.15, without the power level or map quality, and in a [Roads hideout](#roads-of-avalon-zone) 0.10, plus 0.10 for the zone's resource. Then any daily bonus, and 0.59 with focus. A T5 metal bar in Thetford returns 36.71% without focus and 53.92% with it.
 
 The engine's version for cities, Rests and islands is `productionBonus()` in `packages/core/src/production-bonus.helpers.ts`. It returns each part on its own.
 
@@ -167,6 +167,10 @@ The engine's version is `evaluate()` in `packages/core/src/evaluate.helpers.ts`.
 ## Quality
 
 How well a crafted item came out, from 1 to 5: Normal, Good, Outstanding, Excellent or Masterpiece. Crafting gives a random quality, and each quality has its own market price, so AODP prices are asked for per quality. Not the same as [hideout map quality](#hideout-map-quality).
+
+## Roads of Avalon zone
+
+A zone of the Roads of Avalon, the shifting tunnels between the other maps, such as Quatun-Nusas. The game files name them `TNL-…`, 100 in all. A hideout there gets the [power level](#power-level)'s bonuses like a Black Zone one, and +0.01 on the zone's 5 crafting categories in place of a [map quality](#hideout-map-quality) bonus. Refining there gets a flat 0.10, plus 0.10 more for the one resource the zone specializes in, such as hide in Quatun-Nusas.
 
 ## Rest
 

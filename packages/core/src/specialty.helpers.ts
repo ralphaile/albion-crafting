@@ -8,12 +8,9 @@ export function hasSpecialty(
   { refining = false }: { refining?: boolean } = {},
 ): boolean {
   if ("hideout" in place) {
-    const { mapQuality, powerSpecialist } = hideoutProductionBonus(
-      place.hideout,
-      craftingCategory,
-      { refining },
-    );
-    return mapQuality + powerSpecialist > 0;
+    const { mapQuality, powerSpecialist, refiningSpecialty } =
+      hideoutProductionBonus(place.hideout, craftingCategory, { refining });
+    return mapQuality + powerSpecialist + refiningSpecialty > 0;
   }
   return (
     productionBonus(place.location, craftingCategory, { refining }).specialty >

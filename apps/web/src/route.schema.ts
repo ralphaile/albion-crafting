@@ -29,6 +29,13 @@ const placeSchema = z.discriminatedUnion("kind", [
       .int()
       .refine(oneOf(hideouts.powerLevels.map(({ level }) => level))),
   }),
+  z.object({
+    kind: z.literal("roads"),
+    zoneId: z.string().refine(oneOf(hideouts.roadsZones.map(({ id }) => id))),
+    level: z
+      .int()
+      .refine(oneOf(hideouts.powerLevels.map(({ level }) => level))),
+  }),
 ]);
 
 function ids(groups: readonly OptionGroup[]) {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { placeProductionBonus } from "@aoc/core";
 import { craftingLocations } from "@aoc/crafting-data";
 import { markets } from "@aoc/market-prices";
 
@@ -13,6 +14,7 @@ import {
 import {
   defaultHideoutFor,
   optionGroups,
+  placeName,
   routeFromChoice,
   settingsForRoute,
 } from "./route.helpers";
@@ -50,6 +52,24 @@ describe("routeFromChoice", () => {
       "Fort Sterling",
       "Arthurs Rest Smugglers Network",
     ]);
+  });
+
+  it("builds a Roads hideout from its zone and power level", () => {
+    const roads = { kind: "roads", zoneId: "TNL-154", level: 9 } as const;
+    const { place } = routeFromChoice({
+      ...DEFAULT_ROUTE_CHOICE,
+      place: roads,
+    });
+
+    expect(placeName(roads)).toBe("Quatun-Nusas hideout, level 9");
+    expect(
+      placeProductionBonus(place, "hide", { refining: true }).total,
+    ).toBeCloseTo(0.2, 10);
+    expect(
+      placeProductionBonus(place, "ore", { refining: true }).total,
+    ).toBeCloseTo(0.1, 10);
+    expect(placeProductionBonus(place, "mace").total).toBeCloseTo(0.57, 10);
+    expect(placeProductionBonus(place, "sword").total).toBeCloseTo(0.26, 10);
   });
 
   it("refuses a place the game data doesn't have", () => {

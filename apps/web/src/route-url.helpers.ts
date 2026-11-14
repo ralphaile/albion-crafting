@@ -6,6 +6,7 @@ import { wholeNumber } from "./search-params.helpers";
 const PARAMS = [
   "place",
   "biome",
+  "zone",
   "quality",
   "level",
   "buy",
@@ -14,6 +15,27 @@ const PARAMS = [
 ];
 
 const HIDEOUT = "hideout";
+const ROADS = "roads";
+
+function placeFromParams(params: URLSearchParams) {
+  const place = params.get("place");
+  if (place === HIDEOUT) {
+    return {
+      kind: "hideout",
+      biomeId: params.get("biome"),
+      quality: wholeNumber(params, "quality"),
+      level: wholeNumber(params, "level"),
+    };
+  }
+  if (place === ROADS) {
+    return {
+      kind: "roads",
+      zoneId: params.get("zone"),
+      level: wholeNumber(params, "level"),
+    };
+  }
+  return { kind: "location", locationId: place };
+}
 
 // Undefined when the link carries no route, so the saved one can apply.
 export function routeFromSearch(search: string): RouteChoice | undefined {
@@ -21,17 +43,8 @@ export function routeFromSearch(search: string): RouteChoice | undefined {
   if (!PARAMS.some((name) => params.has(name))) {
     return undefined;
   }
-  const place = params.get("place");
   return parseRoute({
-    place:
-      place === HIDEOUT
-        ? {
-            kind: "hideout",
-            biomeId: params.get("biome"),
-            quality: wholeNumber(params, "quality"),
-            level: wholeNumber(params, "level"),
-          }
-        : { kind: "location", locationId: place },
+    place: placeFromParams(params),
     buyMarketId: params.get("buy"),
     materialMarkets: Object.fromEntries(
       REFINED_MATERIALS.map(({ id, param }) => [id, params.get(param)]),
@@ -52,6 +65,10 @@ export function searchWithRoute(search: string, route: RouteChoice): string {
     params.set("place", HIDEOUT);
     params.set("biome", place.biomeId);
     params.set("quality", String(place.quality));
+    params.set("level", String(place.level));
+  } else if (place.kind === "roads") {
+    params.set("place", ROADS);
+    params.set("zone", place.zoneId);
     params.set("level", String(place.level));
   } else {
     params.set("place", place.locationId);

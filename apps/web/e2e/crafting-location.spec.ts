@@ -9,7 +9,7 @@ test("a Forest Q6 level 9 hideout shows its return rates, and is there next visi
   });
   const field = (name: string) => bar.getByRole("combobox", { name });
 
-  await field("Crafting location").selectOption("Hideout");
+  await field("Crafting location").selectOption("Black Zone hideout");
   await field("Biome").selectOption("Forest");
   await field("Map quality").selectOption("Q6");
   await field("Power level").selectOption("9");

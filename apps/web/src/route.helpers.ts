@@ -4,9 +4,9 @@ import { markets } from "@aoc/market-prices";
 
 import type {
   HideoutChoice,
-  LocationChoice,
   OptionGroup,
   PlaceChoice,
+  RoadsChoice,
   Route,
   RouteChoice,
 } from "./route.types";
@@ -40,9 +40,9 @@ export function optionGroups(
   }));
 }
 
-export function defaultHideoutFor({
-  locationId,
-}: LocationChoice): HideoutChoice {
+// The biome of the royal city you were crafting in, if any.
+export function defaultHideoutFor(place: PlaceChoice): HideoutChoice {
+  const locationId = place.kind === "location" ? place.locationId : undefined;
   return {
     kind: "hideout",
     biomeId:
@@ -53,10 +53,40 @@ export function defaultHideoutFor({
   };
 }
 
+export function defaultRoadsHideout(): RoadsChoice {
+  return {
+    kind: "roads",
+    zoneId: found(hideouts.roadsZones, () => true).id,
+    level: BEST_POWER_LEVEL,
+  };
+}
+
+function powerLevel(level: number) {
+  return found(hideouts.powerLevels, (row) => row.level === level);
+}
+
+function roadsZone(zoneId: string) {
+  return found(hideouts.roadsZones, ({ id }) => id === zoneId);
+}
+
+// A Roads zone works like a Black Zone biome at a map quality of its own,
+// with a refining bonus and a refined resource of its own.
 export function placeFromChoice(choice: PlaceChoice): CraftingPlace {
   if (choice.kind === "location") {
     return {
       location: found(craftingLocations, ({ id }) => id === choice.locationId),
+    };
+  }
+  if (choice.kind === "roads") {
+    const zone = roadsZone(choice.zoneId);
+    return {
+      hideout: {
+        biome: { specialties: zone.specialties },
+        mapQuality: { specialtyBonus: zone.specialtyBonus },
+        powerLevel: powerLevel(choice.level),
+        refiningBonus: zone.refiningBonus,
+        refiningSpecialties: zone.refiningSpecialties,
+      },
     };
   }
   return {
@@ -66,10 +96,7 @@ export function placeFromChoice(choice: PlaceChoice): CraftingPlace {
         hideouts.mapQualities,
         ({ quality }) => quality === choice.quality,
       ),
-      powerLevel: found(
-        hideouts.powerLevels,
-        ({ level }) => level === choice.level,
-      ),
+      powerLevel: powerLevel(choice.level),
       refiningBonus: hideouts.refiningBonus,
     },
   };
@@ -96,10 +123,13 @@ export function settingsForRoute(
 }
 
 // What the plan calls a crafting place, such as "Lymhurst" or
-// "Forest hideout, Q6, level 9".
+// "Forest hideout, Q6, level 9" or "Quatun-Nusas hideout, level 9".
 export function placeName(choice: PlaceChoice): string {
   if (choice.kind === "location") {
     return found(craftingLocations, ({ id }) => id === choice.locationId).name;
+  }
+  if (choice.kind === "roads") {
+    return `${roadsZone(choice.zoneId).name} hideout, level ${String(choice.level)}`;
   }
   const biome = found(hideouts.biomes, ({ id }) => id === choice.biomeId);
   return `${biome.name} hideout, Q${String(choice.quality)}, level ${String(choice.level)}`;

@@ -17,6 +17,7 @@ import {
 } from "./route.constants";
 import {
   defaultHideoutFor,
+  defaultRoadsHideout,
   marketName,
   placeFromChoice,
 } from "./route.helpers";
@@ -25,11 +26,31 @@ import type {
   HideoutChoice,
   OptionGroup,
   PlaceChoice,
+  RoadsChoice,
   RouteChoice,
 } from "./route.types";
 import { useDismiss } from "./useDismiss";
 
 const HIDEOUT = "hideout";
+const ROADS = "roads";
+
+// The zones grouped by the resource they refine best, which tells them apart
+// more than their names do.
+const RESOURCE_NAMES: Record<string, string> = {
+  fiber: "Fiber",
+  hide: "Hide",
+  ore: "Ore",
+  rock: "Stone",
+  wood: "Wood",
+};
+const ROADS_ZONE_GROUPS: OptionGroup[] = Object.entries(RESOURCE_NAMES).map(
+  ([resource, label]) => ({
+    label,
+    options: hideouts.roadsZones
+      .filter((zone) => resource in zone.refiningSpecialties)
+      .map(({ id, name }) => ({ id, label: name })),
+  }),
+);
 
 function Select({
   label,
@@ -109,20 +130,66 @@ function HideoutFields({
           </option>
         ))}
       </Select>
-      <Select
-        label="Power level"
-        className={styles.level}
-        value={hideout.level}
+      <PowerLevelSelect
+        level={hideout.level}
         onChange={(level) => {
-          onChange({ ...hideout, level: Number(level) });
+          onChange({ ...hideout, level });
+        }}
+      />
+    </>
+  );
+}
+
+function PowerLevelSelect({
+  level,
+  onChange,
+}: {
+  level: number;
+  onChange: (level: number) => void;
+}) {
+  return (
+    <Select
+      label="Power level"
+      className={styles.level}
+      value={level}
+      onChange={(value) => {
+        onChange(Number(value));
+      }}
+    >
+      {hideouts.powerLevels.map((row) => (
+        <option key={row.level} value={row.level}>
+          {row.level}
+        </option>
+      ))}
+    </Select>
+  );
+}
+
+function RoadsFields({
+  hideout,
+  onChange,
+}: {
+  hideout: RoadsChoice;
+  onChange: (hideout: RoadsChoice) => void;
+}) {
+  return (
+    <>
+      <Select
+        label="Zone"
+        className={styles.biome}
+        value={hideout.zoneId}
+        onChange={(zoneId) => {
+          onChange({ ...hideout, zoneId });
         }}
       >
-        {hideouts.powerLevels.map(({ level }) => (
-          <option key={level} value={level}>
-            {level}
-          </option>
-        ))}
+        <GroupedOptions groups={ROADS_ZONE_GROUPS} />
       </Select>
+      <PowerLevelSelect
+        level={hideout.level}
+        onChange={(level) => {
+          onChange({ ...hideout, level });
+        }}
+      />
     </>
   );
 }
@@ -284,18 +351,23 @@ export function CraftingLocationBar({
 }) {
   const { place } = route;
   const [lastHideout, setLastHideout] = useState<HideoutChoice>();
+  const [lastRoads, setLastRoads] = useState<RoadsChoice>();
 
   const choosePlace = (next: PlaceChoice) => {
     onChange({ ...route, place: next });
   };
-  const chooseLocation = (locationId: string) => {
-    if (locationId !== HIDEOUT) {
-      if (place.kind === "hideout") {
-        setLastHideout(place);
-      }
-      choosePlace({ kind: "location", locationId });
-    } else if (place.kind === "location") {
+  const chooseLocation = (value: string) => {
+    if (place.kind === "hideout") {
+      setLastHideout(place);
+    } else if (place.kind === "roads") {
+      setLastRoads(place);
+    }
+    if (value === HIDEOUT) {
       choosePlace(lastHideout ?? defaultHideoutFor(place));
+    } else if (value === ROADS) {
+      choosePlace(lastRoads ?? defaultRoadsHideout());
+    } else {
+      choosePlace({ kind: "location", locationId: value });
     }
   };
 
@@ -304,14 +376,24 @@ export function CraftingLocationBar({
       <Select
         label="Crafting location"
         className={styles.location}
-        value={place.kind === "hideout" ? HIDEOUT : place.locationId}
+        value={
+          place.kind === "hideout"
+            ? HIDEOUT
+            : place.kind === "roads"
+              ? ROADS
+              : place.locationId
+        }
         onChange={chooseLocation}
       >
-        <option value={HIDEOUT}>Hideout</option>
+        <option value={HIDEOUT}>Black Zone hideout</option>
+        <option value={ROADS}>Roads hideout</option>
         <GroupedOptions groups={LOCATION_GROUPS} />
       </Select>
       {place.kind === "hideout" && (
         <HideoutFields hideout={place} onChange={choosePlace} />
+      )}
+      {place.kind === "roads" && (
+        <RoadsFields hideout={place} onChange={choosePlace} />
       )}
       <BuyMarketsPicker
         markets={route}

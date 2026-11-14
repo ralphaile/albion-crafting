@@ -3,7 +3,7 @@ import type { CraftingPlace } from "@aoc/core";
 import type { Option } from "./filters.types";
 import type { MaterialPins } from "./material-pins.types";
 
-export interface LocationChoice {
+interface LocationChoice {
   kind: "location";
   locationId: string;
 }
@@ -15,7 +15,14 @@ export interface HideoutChoice {
   level: number;
 }
 
-export type PlaceChoice = LocationChoice | HideoutChoice;
+// A hideout in a Roads of Avalon zone, such as TNL-154, Quatun-Nusas.
+export interface RoadsChoice {
+  kind: "roads";
+  zoneId: string;
+  level: number;
+}
+
+export type PlaceChoice = LocationChoice | HideoutChoice | RoadsChoice;
 
 // The refined materials bought in a market of their own, by their shop
 // subcategory in the game files.

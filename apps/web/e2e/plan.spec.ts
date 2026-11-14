@@ -32,7 +32,7 @@ test("a plan with broadswords in Lymhurst and a Forest hideout shows each place'
   await page.getByRole("button", { name: "Add location" }).click();
   const hideout = page.getByRole("region", { name: "Location 2" });
   const field = (name: string) => hideout.getByRole("combobox", { name });
-  await field("Crafting location").selectOption("Hideout");
+  await field("Crafting location").selectOption("Black Zone hideout");
   await field("Biome").selectOption("Forest");
   await field("Map quality").selectOption("Q6");
   await field("Power level").selectOption("9");

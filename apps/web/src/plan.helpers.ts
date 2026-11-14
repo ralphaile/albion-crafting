@@ -124,6 +124,9 @@ function samePlace(a: PlaceChoice, b: PlaceChoice): boolean {
   if (a.kind === "location") {
     return b.kind === "location" && a.locationId === b.locationId;
   }
+  if (a.kind === "roads") {
+    return b.kind === "roads" && a.zoneId === b.zoneId && a.level === b.level;
+  }
   return (
     b.kind === "hideout" &&
     a.biomeId === b.biomeId &&

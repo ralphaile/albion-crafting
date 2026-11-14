@@ -56,6 +56,7 @@ function hideoutsOf(...craftinglocation: Location[]) {
     { refiningcategory: { item: [] }, craftinglocation },
     [],
     cities,
+    [],
   );
 }
 
@@ -69,6 +70,7 @@ describe("extractHideouts", () => {
         modifiers,
         dumps["hideouts.json"].hideouts.hideout.powerlevels.powerlevel,
         extractLocations(modifiers, dumps["formatted/world.json"]).locations,
+        dumps["formatted/world.json"],
       ),
     ).toEqual({
       biomes: [
@@ -83,6 +85,22 @@ describe("extractHideouts", () => {
             "leather_armor",
             "cloth_helmet",
           ],
+        },
+      ],
+      roadsZones: [
+        {
+          id: "TNL-154",
+          name: "Quatun-Nusas",
+          specialties: [
+            "leather_helmet",
+            "leather_shoes",
+            "mace",
+            "naturestaff",
+            "firestaff",
+          ],
+          specialtyBonus: 0.01,
+          refiningBonus: 0.1,
+          refiningSpecialties: { hide: 0.1 },
         },
       ],
       mapQualities: [
