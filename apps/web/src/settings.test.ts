@@ -18,6 +18,7 @@ describe("parseSettings", () => {
       journals: true,
       qualityWeighted: true,
       rankByCheaperEnchant: true,
+      baseItemsAtCraftCost: true,
       buyMode: "order",
       sellMode: "instant",
       dailyBonuses: [

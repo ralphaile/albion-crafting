@@ -245,6 +245,28 @@ describe("evaluate", () => {
     );
   });
 
+  it("sells an item that keeps its material's quality at Normal, even when quality-weighted", () => {
+    const qualities = {
+      ...prices,
+      productQualities: new Map([
+        ["T4_2H_ARCANESTAFF_CRYSTAL", new Map([[2, instantOnly(100_000)]])],
+      ]),
+    };
+    const normal = complete(evaluate(astralStaff, rrr25, settings, prices));
+
+    const kept = complete(
+      evaluate(
+        { ...astralStaff, keepsQuality: true },
+        rrr25,
+        { ...settings, qualityWeighted: true },
+        qualities,
+      ),
+    );
+
+    expect(kept.revenue).not.toHaveProperty("byQuality");
+    expect(kept.profit).toBeCloseTo(normal.profit, 6);
+  });
+
   it("sells 1 silver under the lowest sell order when undercutting", () => {
     expect(
       evaluate(astralStaff, rrr25, { ...settings, undercut: true }, prices)

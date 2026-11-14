@@ -23,6 +23,9 @@ export interface Recipe extends RecipeAlternative {
   craftingCategory?: string;
   itemValue?: number;
   journal?: RecipeJournal;
+  // Made from an item it takes the quality of, such as a faction cape from a
+  // cape: bought at Normal quality, it comes out Normal.
+  keepsQuality?: boolean;
   alternatives: readonly RecipeAlternative[];
 }
 

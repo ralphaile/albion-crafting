@@ -18,6 +18,7 @@ import type {
   Region,
 } from "@aoc/market-prices";
 
+import { atCraftCost, baseItems } from "./base-items.helpers";
 import { evaluateCrafts, withDailyVolumes } from "./best-crafts.helpers";
 import type { Craft, CraftHistory, CraftPrices } from "./best-crafts.types";
 import {
@@ -515,6 +516,7 @@ export function useBestCrafts(
   const { journals } = settings;
   const selected = useSelectedRecipes(filters, place);
   const lower = useMemo(() => lowerEnchants(selected), [selected]);
+  const bases = useMemo(() => baseItems(selected), [selected]);
   const needed = useMemo(() => {
     const { products, materials } = pricesNeeded(selected, { journals });
     return {
@@ -523,11 +525,12 @@ export function useBestCrafts(
         ...new Set([
           ...materials,
           ...pricesNeeded(lower).materials,
+          ...pricesNeeded(bases).materials,
           ...upgradeMaterials(selected),
         ]),
       ],
     };
-  }, [selected, lower, journals]);
+  }, [selected, lower, bases, journals]);
 
   // An earlier attempt's answer stays on screen while the next one comes in.
   // So does the last answer before a new pin, while its market is asked.
@@ -790,6 +793,17 @@ export function useBestCrafts(
     () => selected.map(({ itemId }) => itemId),
     [selected],
   );
+  const { baseItemsAtCraftCost } = settings;
+  const craftPrices = useMemo(
+    () =>
+      prices === undefined || !baseItemsAtCraftCost
+        ? prices
+        : atCraftCost(
+            prices,
+            evaluateCrafts(bases, place, routeSettings, prices),
+          ),
+    [prices, baseItemsAtCraftCost, bases, place, routeSettings],
+  );
   const qualityPrices = useQualityPrices(marketData, productIds, sellMarketId, {
     enabled: settings.qualityWeighted,
     region: server,
@@ -799,42 +813,42 @@ export function useBestCrafts(
   });
   const evaluated = useMemo(
     () =>
-      prices === undefined
+      craftPrices === undefined
         ? []
         : evaluateCrafts(
             priced,
             place,
             routeSettings,
-            { ...prices, productQualities: qualityPrices },
+            { ...craftPrices, productQualities: qualityPrices },
             recipeChoices,
           ),
-    [priced, place, routeSettings, prices, qualityPrices, recipeChoices],
+    [priced, place, routeSettings, craftPrices, qualityPrices, recipeChoices],
   );
   const lowerCrafts = useMemo(
     () =>
-      prices === undefined
+      craftPrices === undefined
         ? []
         : evaluateCrafts(
             lower,
             place,
             routeSettings,
-            prices,
+            craftPrices,
             lowerChoices(selected, recipeChoices),
           ),
-    [lower, place, routeSettings, prices, selected, recipeChoices],
+    [lower, place, routeSettings, craftPrices, selected, recipeChoices],
   );
   const withPaths = useMemo(
     () =>
-      prices === undefined
+      craftPrices === undefined
         ? evaluated
-        : withEnchantPaths(evaluated, lowerCrafts, prices.materials, {
+        : withEnchantPaths(evaluated, lowerCrafts, craftPrices.materials, {
             buyMode: settings.buyMode,
             rank: settings.rankByCheaperEnchant,
           }),
     [
       evaluated,
       lowerCrafts,
-      prices,
+      craftPrices,
       settings.buyMode,
       settings.rankByCheaperEnchant,
     ],

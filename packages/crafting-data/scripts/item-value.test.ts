@@ -84,6 +84,28 @@ describe("addItemValues", () => {
     );
   });
 
+  it("counts a heart, bought only with faction points, as worth 0", () => {
+    const { recipes, warnings } = addItemValues(
+      [
+        recipe("T4_CAPEITEM_FW_MARTLOCK", [
+          { id: "T4_CLOTH", count: 1 },
+          { id: "T1_FACTION_HIGHLAND_TOKEN_1", count: 1 },
+        ]),
+      ],
+      [
+        ...simpleItems,
+        {
+          "@uniquename": "T1_FACTION_HIGHLAND_TOKEN_1",
+          "@tier": 1,
+          craftingrequirements: [{ "@craftingfocus": 0 }],
+        },
+      ],
+    );
+
+    expect(valueOf(recipes, "T4_CAPEITEM_FW_MARTLOCK")).toBe(16);
+    expect(warnings).toEqual([]);
+  });
+
   it("divides by the amount crafted", () => {
     const { recipes } = addItemValues(
       [recipe("T4_HEAD_CLOTH_SET1", [{ id: "T4_CLOTH", count: 6 }], 2)],

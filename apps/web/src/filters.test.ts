@@ -153,13 +153,18 @@ describe("recipeFilter", () => {
     expect(passing(filters)).toEqual(expected.map(({ itemId }) => itemId));
   });
 
-  it("takes bags and satchels of insight as bags, and capes as capes", () => {
+  it("takes bags and satchels of insight as bags, and every cape as capes", () => {
     expect(
       passing({ categories: ["bags"], tiers: [4], enchants: [0] }, recipes),
     ).toEqual(["T4_BAG", "T4_BAG_INSIGHT"]);
-    expect(
-      passing({ categories: ["capes"], tiers: [4], enchants: [0] }, recipes),
-    ).toEqual(["T4_CAPE"]);
+    const capes = passing(
+      { categories: ["capes"], tiers: [4], enchants: [0] },
+      recipes,
+    );
+    expect(capes).toHaveLength(15);
+    expect(capes).toEqual(
+      expect.arrayContaining(["T4_CAPE", "T4_CAPEITEM_FW_MARTLOCK"]),
+    );
   });
 
   it("keeps bags and capes as Brecilien's specialties", () => {

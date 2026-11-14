@@ -54,7 +54,7 @@ export function evaluateEach(
   };
   const normalSale = revenue(prices.products.get(recipe.itemId), saleOptions);
   const sale =
-    settings.qualityWeighted === true
+    settings.qualityWeighted === true && recipe.keepsQuality !== true
       ? qualityWeightedRevenue(
           normalSale,
           prices.productQualities?.get(recipe.itemId),

@@ -89,13 +89,14 @@ export function compareSellMarkets(
       premium: settings.premium,
     };
     const normalSale = revenue(prices, options);
-    const sale = settings.qualityWeighted
-      ? qualityWeightedRevenue(
-          normalSale,
-          byQuality(atQuality(false)).get(craft.itemId),
-          options,
-        )
-      : normalSale;
+    const sale =
+      settings.qualityWeighted && craft.recipe.keepsQuality !== true
+        ? qualityWeightedRevenue(
+            normalSale,
+            byQuality(atQuality(false)).get(craft.itemId),
+            options,
+          )
+        : normalSale;
     return {
       marketId,
       price: prices?.[sale.source] ?? MISSING,

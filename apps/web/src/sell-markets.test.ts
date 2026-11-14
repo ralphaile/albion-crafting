@@ -163,6 +163,25 @@ describe("compareSellMarkets", () => {
     });
   });
 
+  it("values an item that keeps its material's quality at Normal, even quality-weighted", () => {
+    const craft = broadsword();
+    const { offers } = compare({
+      craft: { ...craft, recipe: { ...craft.recipe, keepsQuality: true } },
+      prices: {
+        ...fetched,
+        prices: [
+          ...fetched.prices,
+          { ...sword("Lymhurst", { sellMin: seen(10_000) }), quality: 2 },
+        ],
+      },
+      settings: { ...DEFAULT_SETTINGS, qualityWeighted: true },
+    });
+
+    expect(
+      offers.find(({ marketId }) => marketId === "Lymhurst")?.revenue,
+    ).toMatchObject({ price: 5000 });
+  });
+
   it("has no gain when the current market is the best, or has no price", () => {
     expect(compare({ sellMarketId: "Caerleon" }).gain).toBeUndefined();
     expect(compare({ sellMarketId: "Martlock" }).gain).toBeUndefined();

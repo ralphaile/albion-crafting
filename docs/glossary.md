@@ -178,6 +178,8 @@ expected net = Σ odds(quality) × net price(quality)
 
 The base odds are Normal 68.9%, Good 25%, Outstanding 5%, Excellent 1% and Masterpiece 0.1%, `QUALITY_ODDS` in `packages/core/src/quality.constants.ts`. A quality without a price takes the next lower quality's, and the craft panel marks it `est.`. The prices of qualities 2 to 5 are only asked for in this mode, for the items being ranked, in the sell market. `qualityWeightedRevenue()` in `packages/core/src/quality.helpers.ts` works it out.
 
+An item that [keeps its material's quality](game-data.md#recipes), such as a faction cape or a royal item, is valued at Normal even then: bought at Normal, the cape comes out Normal.
+
 Known simplification: a specialization's quality bonus raises the odds of the higher qualities, which isn't counted, so the expected price is a little low for a specialized crafter.
 
 ## Roads of Avalon zone

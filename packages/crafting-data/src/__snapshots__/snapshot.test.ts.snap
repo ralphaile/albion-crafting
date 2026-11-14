@@ -335,8 +335,8 @@ exports[`the generated data > has the same number of items and recipes in each c
     "recipes": 200,
   },
   "none": {
-    "items": 45,
-    "recipes": 225,
+    "items": 115,
+    "recipes": 575,
   },
   "offhand": {
     "items": 90,
@@ -384,8 +384,8 @@ exports[`the generated data > has the same number of items and recipes in each s
     "recipes": 50,
   },
   "capes": {
-    "items": 5,
-    "recipes": 25,
+    "items": 75,
+    "recipes": 375,
   },
   "head": {
     "items": 140,
@@ -461,6 +461,7 @@ exports[`the generated data > has the same recipe for T4_ARMOR_LEATHER_ROYAL 1`]
   "isArtifact": false,
   "itemId": "T4_ARMOR_LEATHER_ROYAL",
   "itemValue": 320,
+  "keepsQuality": true,
   "materials": [
     {
       "count": 1,
@@ -512,6 +513,45 @@ exports[`the generated data > has the same recipe for T4_BAG 1`] = `
   "shopSubcategory": "bags",
   "silver": 0,
   "tier": 4,
+}
+`;
+
+exports[`the generated data > has the same recipe for T4_CAPEITEM_FW_MARTLOCK@1 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 1,
+  "baseId": "T4_CAPEITEM_FW_MARTLOCK",
+  "enchant": 1,
+  "focus": 0,
+  "isArtifact": false,
+  "itemId": "T4_CAPEITEM_FW_MARTLOCK@1",
+  "itemValue": 288,
+  "keepsQuality": true,
+  "materials": [
+    {
+      "count": 1,
+      "id": "T4_CAPE@1",
+      "returnable": false,
+    },
+    {
+      "count": 1,
+      "id": "T4_CAPEITEM_FW_MARTLOCK_BP",
+      "returnable": false,
+    },
+    {
+      "count": 1,
+      "id": "T1_FACTION_HIGHLAND_TOKEN_1",
+      "returnable": false,
+    },
+  ],
+  "shopCategory": "capes",
+  "shopSubcategory": "accessoires_capes_martlock",
+  "silver": 0,
+  "tier": 4,
+  "upgrade": {
+    "count": 96,
+    "id": "T4_RUNE",
+  },
 }
 `;
 

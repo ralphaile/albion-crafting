@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS: CraftingSettings = {
   journals: false,
   qualityWeighted: false,
   rankByCheaperEnchant: false,
+  baseItemsAtCraftCost: false,
   buyMode: "instant",
   sellMode: "order",
   dailyBonuses: [],

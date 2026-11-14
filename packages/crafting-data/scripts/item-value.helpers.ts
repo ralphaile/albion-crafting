@@ -85,6 +85,11 @@ export function addItemValues(
     if (requirements === undefined) {
       return undefined;
     }
+    // Bought only with faction points, as the hearts are: no material adds to
+    // its value.
+    if (requirements.craftresource === undefined) {
+      return 0;
+    }
     if (!simpleValues.has(id)) {
       // Marked first, so a recipe that leads back to itself has no value.
       simpleValues.set(id, undefined);
