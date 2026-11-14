@@ -13,7 +13,7 @@ The modes offer different tiers and categories: refining has T2 to T8 and the 5 
 Different filters combine with AND: a craft has to pass every one of them. Inside one filter, the choices add up:
 
 - **Tier** (T4 to T8) and **Enchant** (.0 to .4): any of the chosen ones. None chosen means all.
-- **Category**: a dropdown of weapon types, armor pieces, offhand types, bags and capes that opens over the page. **Bag** covers satchels of insight too. Any of the chosen ones count, so **Sword**, **Plate helmet** and **Leather shoes** gives you all three. Armor is a grid of materials and slots: tick single pieces, or click a material or slot to tick its whole row or column, such as every plate piece or all shoes.
+- **Category**: a dropdown of weapon types, armor pieces, offhand types, bags, capes, gathering gear and tools that opens over the page. **Bag** covers satchels of insight too, and **Gathering gear** every gatherer's cap, garment, workboots and backpack. Any of the chosen ones count, so **Sword**, **Plate helmet** and **Leather shoes** gives you all three. Armor is a grid of materials and slots: tick single pieces, or click a material or slot to tick its whole row or column, such as every plate piece or all shoes.
 - **Artifacts**: include them, exclude them, or show only them.
 - **Specialty only**: items that get the crafting location's [specialty bonus](glossary.md#specialty-bonus), or in a hideout, its biome's categories.
 - **Filter by name**: the item's name or ID, in any case. It applies once you stop typing for a moment.
