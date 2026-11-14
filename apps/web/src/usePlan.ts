@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { type PlanResult, evaluatePlan } from "@aoc/core";
+import { HIGHER_QUALITIES, type PlanResult, evaluatePlan } from "@aoc/core";
 import type {
   HistorySummary,
   ItemPrices,
@@ -20,6 +20,11 @@ import type { CraftingSettings } from "./settings.types";
 import { fceFor } from "./specializations.helpers";
 import type { SpecializationProfile } from "./specializations.types";
 import { useMinute } from "./useMinute";
+import {
+  NO_QUALITY_PRICES,
+  type QualityPrices,
+  byQuality,
+} from "./useQualityPrices";
 
 // `prices` has each location's prices, in the plan's order, with the typed
 // ones chosen where they win. While `updating`, a price the plan has only just
@@ -36,10 +41,12 @@ export type PlanState =
       failed: boolean;
     };
 
-// Each market's prices, and their 7-day history to judge outliers by.
+// Each market's prices, their 7-day history to judge outliers by, and when
+// quality-weighted, qualities 2 to 5 of what the plan sells there.
 interface MarketAnswer {
   prices: readonly ItemPrices[];
   history: readonly HistorySummary[];
+  qualities: QualityPrices;
 }
 
 type Fetched =
@@ -50,7 +57,11 @@ type Fetched =
       failed: boolean;
     };
 
-const NO_ANSWER: MarketAnswer = { prices: [], history: [] };
+const NO_ANSWER: MarketAnswer = {
+  prices: [],
+  history: [],
+  qualities: NO_QUALITY_PRICES,
+};
 
 function byItem(prices: readonly UsedItemPrices[]) {
   return new Map(prices.map((price) => [price.itemId, price]));
@@ -62,22 +73,43 @@ function usePlanPrices(
   marketData: MarketData,
   plan: CraftingPlan,
   pins: MaterialPins,
-  { server, staleAfterHours, journals }: CraftingSettings,
+  { server, staleAfterHours, journals, qualityWeighted }: CraftingSettings,
 ): { fetched: Fetched; current: boolean } | undefined {
   const neededKey = useMemo(
     () => JSON.stringify([...planMarkets(plan, pins, { journals })]),
     [plan, pins, journals],
   );
+  const soldKey = useMemo(
+    () =>
+      JSON.stringify(
+        qualityWeighted
+          ? plan.locations.map(({ route, entries }) => [
+              route.sellMarketId,
+              entries.map(({ itemId }) => itemId),
+            ])
+          : [],
+      ),
+    [plan, qualityWeighted],
+  );
   const [fetched, setFetched] = useState<{ key: string; fetched: Fetched }>();
-  const key = `${server} ${String(staleAfterHours)} ${neededKey}`;
+  const key = `${server} ${String(staleAfterHours)} ${neededKey} ${soldKey}`;
 
   useEffect(() => {
     let active = true;
     const needed = JSON.parse(neededKey) as [string, string[]][];
+    const sold = new Map<string, Set<string>>();
+    for (const [marketId, itemIds] of JSON.parse(soldKey) as [
+      string,
+      string[],
+    ][]) {
+      sold.set(marketId, new Set([...(sold.get(marketId) ?? []), ...itemIds]));
+    }
     Promise.all(
       needed.map(async ([marketId, itemIds]) => {
-        // Without history, prices are only not judged as outliers.
-        const [{ prices }, history] = await Promise.all([
+        const soldHere = [...(sold.get(marketId) ?? [])];
+        // Without history, prices are only not judged as outliers, and without
+        // the higher qualities, they take the Normal price.
+        const [{ prices }, history, qualities] = await Promise.all([
           marketData.getPrices(itemIds, [marketId], [QUALITY], {
             region: server,
             staleAfterMinutes: staleAfterHours * 60,
@@ -88,8 +120,19 @@ function usePlanPrices(
               (result) => result.history,
               () => [],
             ),
+          soldHere.length === 0
+            ? NO_QUALITY_PRICES
+            : marketData
+                .getPrices(soldHere, [marketId], HIGHER_QUALITIES, {
+                  region: server,
+                  staleAfterMinutes: staleAfterHours * 60,
+                })
+                .then(
+                  (result) => byQuality(result.prices),
+                  () => NO_QUALITY_PRICES,
+                ),
         ]);
-        return [marketId, { prices, history }] as const;
+        return [marketId, { prices, history, qualities }] as const;
       }),
     ).then(
       (entries) => {
@@ -123,7 +166,7 @@ function usePlanPrices(
     return () => {
       active = false;
     };
-  }, [marketData, key, neededKey, server, staleAfterHours]);
+  }, [marketData, key, neededKey, soldKey, server, staleAfterHours]);
 
   // The last prices stay on screen while new ones come in.
   return fetched && { fetched: fetched.fetched, current: fetched.key === key };
@@ -186,9 +229,12 @@ export function usePlan(
       );
     });
     const result = evaluatePlan(
-      planLocations(plan, (_route, index) => ({
+      planLocations(plan, (route, index) => ({
         materials: byItem(prices[index]?.materials ?? []),
         products: byItem(prices[index]?.products ?? []),
+        productQualities: (
+          fetched.byMarket.get(route.sellMarketId) ?? NO_ANSWER
+        ).qualities,
       })),
       { ...settings, fce: fceFor(specializations) },
     );

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Craft, UsedItemPrices } from "./best-crafts.types";
-import { withEnchantPaths } from "./enchant-paths.helpers";
+import { lowerChoices, withEnchantPaths } from "./enchant-paths.helpers";
 import { RECIPES_BY_ID } from "./recipes.constants";
 
 // Only what the paths read: the cost of each level and its journal value.
@@ -25,6 +25,8 @@ function craftOf(
     stationFee: 0,
     silverCost: 0,
     journal: { value: journal },
+    focusCost: materials / 10,
+    silverPerFocus: profit / 100,
   } as unknown as Craft;
 }
 
@@ -75,5 +77,23 @@ describe("withEnchantPaths", () => {
 
     const saved = 20_000 - (1000 + 288 * 10);
     expect(profitOf(craft)).toBe(5000 + saved - 400 + 100);
+    expect(craft).toMatchObject({ focusCost: 100, silverPerFocus: 0 });
+  });
+});
+
+describe("lowerChoices", () => {
+  it("uses a recipe chosen at .2 at .1 and .0 too, unless they have their own", () => {
+    const at2 = RECIPES_BY_ID.get("T5_MAIN_SWORD@2");
+
+    expect(
+      lowerChoices(at2 ? [at2] : [], {
+        "T5_MAIN_SWORD@2": 1,
+        T5_MAIN_SWORD: 0,
+      }),
+    ).toEqual({
+      "T5_MAIN_SWORD@2": 1,
+      "T5_MAIN_SWORD@1": 1,
+      T5_MAIN_SWORD: 0,
+    });
   });
 });
