@@ -99,6 +99,8 @@ interface Answer extends MarketChoice {
   sellMarketId: string;
   server: Region;
   staleAfterHours: number;
+  // An answer with the journals' prices also does without them.
+  journals: boolean;
   attempt: number;
   products: ReadonlySet<string>;
   fetched: Fetched;
@@ -492,8 +494,12 @@ export function useBestCrafts(
   const [answer, setAnswer] = useState<Answer>();
   const [progress, setProgress] = useState<Progress>();
   const cancelRef = useRef<() => void>(undefined);
+  const { journals } = settings;
   const selected = useSelectedRecipes(filters, place);
-  const needed = useMemo(() => pricesNeeded(selected), [selected]);
+  const needed = useMemo(
+    () => pricesNeeded(selected, { journals }),
+    [selected, journals],
+  );
 
   // An earlier attempt's answer stays on screen while the next one comes in.
   // So does the last answer before a new pin, while its market is asked.
@@ -502,7 +508,8 @@ export function useBestCrafts(
     sameBuyMarkets(answer, route) &&
     answer.sellMarketId === sellMarketId &&
     answer.server === server &&
-    answer.staleAfterHours === staleAfterHours
+    answer.staleAfterHours === staleAfterHours &&
+    (answer.journals || !journals)
       ? answer
       : undefined;
   // The selected recipes the last answer has prices for. When that's all of
@@ -541,6 +548,7 @@ export function useBestCrafts(
         sellMarketId,
         server,
         staleAfterHours,
+        journals,
         attempt,
         products: new Set(
           done || fetched.status === "error"
@@ -659,6 +667,7 @@ export function useBestCrafts(
     sellMarketId,
     server,
     staleAfterHours,
+    journals,
     attempt,
     force,
     refetch,

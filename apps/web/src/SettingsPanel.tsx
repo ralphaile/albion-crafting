@@ -425,6 +425,14 @@ export function SettingsPanel({
             }}
             help="Each station’s owner sets it, often between 0 and 1,000. Your own island costs 0."
           />
+          <Check
+            label="Include journal value"
+            checked={settings.journals}
+            onChange={(journals) => {
+              set("journals", journals);
+            }}
+            help="Adds the crafting fame each craft puts in a laborer’s journal to its profit: the share of a journal it fills, times what a full one sells for less an empty one."
+          />
           <DailyBonuses
             bonuses={settings.dailyBonuses}
             onChange={(dailyBonuses) => {
