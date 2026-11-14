@@ -12,6 +12,7 @@ import type {
   UsedItemPrices,
   UsedPrice,
 } from "./best-crafts.types";
+import type { RecipeChoices } from "./recipe-choices.types";
 import { RECIPES_BY_ID } from "./recipes.constants";
 
 const MISSING: UsedPrice = { status: "missing", origin: "api" };
@@ -71,12 +72,13 @@ function craftCost(craft: Craft): number | undefined {
   );
 }
 
-// Upgrading earns no crafting fame, so the upgraded path's journal value is
-// the lower craft's, `startJournal` per item.
+// Upgrading earns no crafting fame and takes no focus, so the upgraded path's
+// journal value, focus cost and silver per focus are those of the craft it
+// starts from.
 function rankedBy(
   craft: Craft,
   paths: EnchantPaths,
-  startJournal: number,
+  start: Craft | undefined,
 ): Craft {
   const { direct, upgraded } = paths;
   if (
@@ -89,13 +91,46 @@ function rankedBy(
   }
   const saved = direct - upgraded.total;
   const profit =
-    craft.profit + saved - (craft.journal?.value ?? 0) + startJournal;
+    craft.profit +
+    saved -
+    (craft.journal?.value ?? 0) +
+    (start?.journal?.value ?? 0);
+  const ranked: Craft = { ...craft };
+  delete ranked.focusCost;
+  delete ranked.silverPerFocus;
   return {
-    ...craft,
+    ...ranked,
+    ...(start?.focusCost !== undefined && { focusCost: start.focusCost }),
+    ...(start?.status === "complete" &&
+      start.silverPerFocus !== undefined && {
+        silverPerFocus: start.silverPerFocus,
+      }),
     enchantPaths: paths,
     profit,
     margin: upgraded.total > 0 ? profit / upgraded.total : undefined,
   };
+}
+
+// A recipe chosen at one enchantment level is used at the lower levels it can
+// be upgraded from too, unless they have their own choice.
+export function lowerChoices(
+  recipes: readonly GameRecipe[],
+  choices: RecipeChoices,
+): RecipeChoices {
+  const lower: Record<string, number> = {};
+  for (const recipe of recipes) {
+    const choice = choices[recipe.itemId];
+    if (choice === undefined) {
+      continue;
+    }
+    for (let level = 0; level < recipe.enchant; level += 1) {
+      const sibling = atLevel(recipe, level);
+      if (sibling !== undefined) {
+        lower[sibling.itemId] ??= choice;
+      }
+    }
+  }
+  return { ...lower, ...choices };
 }
 
 // Gives each upgradable craft both paths. With `rank`, a craft that's cheaper
@@ -114,12 +149,12 @@ export function withEnchantPaths(
     if (!upgradable(craft.recipe)) {
       return craft;
     }
-    const startJournal = ({ upgraded }: EnchantPaths) => {
+    const startOf = ({ upgraded }: EnchantPaths) => {
       const start =
         upgraded === undefined
           ? undefined
           : atLevel(craft.recipe, upgraded.from);
-      return (start && byId.get(start.itemId)?.journal?.value) ?? 0;
+      return start && byId.get(start.itemId);
     };
     const paths = enchantPaths(craft.recipe.enchant, {
       craft: (level) => {
@@ -159,7 +194,7 @@ export function withEnchantPaths(
     }
     const withPaths = { ...craft, upgradeMaterials: upgrades };
     return rank
-      ? rankedBy(withPaths, paths, startJournal(paths))
+      ? rankedBy(withPaths, paths, startOf(paths))
       : { ...withPaths, enchantPaths: paths };
   });
 }
