@@ -40,7 +40,7 @@ Each row of the best-crafts table has a **+** button, and the craft panel an **A
 `apps/web/src/plan.types.ts`:
 
 - **`CraftingPlan`:** a list of locations.
-- **A location:** a route, the same as the one above the table: the crafting place (a city, Rest, island, or a hideout with its biome, map quality and power level), and the markets it buys materials in and sells items in. A location selling at the Black Market sells to its buy orders.
+- **A location:** a route, the same as the one above the table: the crafting place (a city, Rest, island, a Black Zone hideout with its biome, map quality and power level, or a Roads hideout with its zone and power level), and the markets it buys materials in and sells items in. A location selling at the Black Market sells to its buy orders.
 - **An entry:** an item with its enchantment, as a market ID such as `T5_MAIN_SWORD@1`, which recipe (`alternative` 0 is the usual one, 1 on its alternatives), the quantity, whether to use focus, and its daily bonus: 0, 0.1 or 0.2 for the item's own crafting category.
 
 ## Saved in the browser
