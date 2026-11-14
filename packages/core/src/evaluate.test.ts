@@ -211,6 +211,40 @@ describe("evaluate", () => {
     expect(result.rrr).toBeCloseTo((1 / 3 + 0.2) / (4 / 3 + 0.2), 10);
   });
 
+  it("sells at the expected price over the qualities when quality-weighted", () => {
+    const normal = complete(evaluate(astralStaff, rrr25, settings, prices));
+    const weighted = complete(
+      evaluate(
+        astralStaff,
+        rrr25,
+        { ...settings, qualityWeighted: true },
+        {
+          ...prices,
+          productQualities: new Map([
+            ["T4_2H_ARCANESTAFF_CRYSTAL", new Map([[2, instantOnly(100_000)]])],
+          ]),
+        },
+      ),
+    );
+
+    const withoutHigher = complete(
+      evaluate(
+        astralStaff,
+        rrr25,
+        { ...settings, qualityWeighted: true },
+        prices,
+      ),
+    );
+    expect(withoutHigher.profit).toBeCloseTo(normal.profit, 6);
+
+    const expected = 0.689 * 70_000 + 0.311 * 100_000;
+    expect(weighted.revenue).toMatchObject({ price: expected });
+    expect(weighted.profit - normal.profit).toBeCloseTo(
+      (expected - 70_000) * 0.935,
+      6,
+    );
+  });
+
   it("sells 1 silver under the lowest sell order when undercutting", () => {
     expect(
       evaluate(astralStaff, rrr25, { ...settings, undercut: true }, prices)
