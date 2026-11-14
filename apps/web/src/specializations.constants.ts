@@ -54,6 +54,7 @@ export const TREE_GROUPS: readonly OptionGroup[] = [
   ]),
   trees("Toolmaker", ["bags", "capes"]),
   trees("Refining", ["metalbars", "planks", "cloth", "leather", "stoneblock"]),
+  trees("Cook and alchemist", ["food", "potions"]),
 ];
 
 export const FIRST_TREE_ID: string = TREE_GROUPS[0]?.options[0]?.id ?? "";

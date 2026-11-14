@@ -178,6 +178,76 @@ exports[`the generated data > has the same crafting locations 1`] = `
 ]
 `;
 
+exports[`the generated data > has the same food or potion recipe for T4_MEAL_STEW, which makes several at once 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 10,
+  "baseId": "T4_MEAL_STEW",
+  "craftingCategory": "food",
+  "enchant": 0,
+  "focus": 61,
+  "isArtifact": false,
+  "itemId": "T4_MEAL_STEW",
+  "itemValue": 64,
+  "materials": [
+    {
+      "count": 4,
+      "id": "T4_TURNIP",
+      "returnable": true,
+    },
+    {
+      "count": 4,
+      "id": "T4_BREAD",
+      "returnable": true,
+    },
+    {
+      "count": 8,
+      "id": "T4_MEAT",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "consumables",
+  "shopSubcategory": "food",
+  "silver": 0,
+  "tier": 4,
+}
+`;
+
+exports[`the generated data > has the same food or potion recipe for T4_POTION_HEAL@1, which makes several at once 1`] = `
+{
+  "alternatives": [],
+  "amountCrafted": 5,
+  "baseId": "T4_POTION_HEAL",
+  "craftingCategory": "potion",
+  "enchant": 1,
+  "focus": 277,
+  "isArtifact": false,
+  "itemId": "T4_POTION_HEAL@1",
+  "itemValue": 240,
+  "materials": [
+    {
+      "count": 24,
+      "id": "T4_BURDOCK",
+      "returnable": true,
+    },
+    {
+      "count": 6,
+      "id": "T3_EGG",
+      "returnable": true,
+    },
+    {
+      "count": 15,
+      "id": "T1_ALCHEMY_EXTRACT_LEVEL1",
+      "returnable": true,
+    },
+  ],
+  "shopCategory": "consumables",
+  "shopSubcategory": "potions",
+  "silver": 0,
+  "tier": 4,
+}
+`;
+
 exports[`the generated data > has the same number of items and recipes in each crafting category 1`] = `
 {
   "arcanestaff": {

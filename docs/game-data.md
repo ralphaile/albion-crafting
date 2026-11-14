@@ -70,7 +70,7 @@ The workflow opens PRs as a GitHub App, because GitHub doesn't run CI on a PR op
   - An artifact item's first recipe uses the artifact, and its alternative uses a token such as `T6_ARTEFACT_TOKEN_FAVOR_1`.
   - A royal item is made from a regular SET1, SET2 or SET3 piece plus royal sigils. It has no crafting category and costs no focus.
 - **Returned or not:** a material with `@maxreturnamount="0"` is never returned. An item whose default recipe uses an `_ARTEFACT_` material is an artifact item.
-- **Item value:** `itemValue`, which the station fee is based on, is Σ(count × the material's `@itemvalue`) ÷ the amount crafted, from the default recipe. Refined materials are worth 16 at T4 and double with each tier and enchantment level, so Adept's Broadsword (`T4_MAIN_SWORD`) is 16 × 16 + 8 × 16 = 384.
+- **Item value:** `itemValue`, which the station fee is based on, is Σ(count × the material's `@itemvalue`) ÷ the amount crafted, from the default recipe: each item's value. Refined materials are worth 16 at T4 and double with each tier and enchantment level, so Adept's Broadsword (`T4_MAIN_SWORD`) is 16 × 16 + 8 × 16 = 384.
   - A royal item's base piece has no `@itemvalue`, so it takes the item value of its own recipe.
   - An artifact counts too: the Master's Clarent Blade is 16 × 64 + 8 × 64 + 384 for its artifact = 1,920.
   - If a material has no `@itemvalue`, `pnpm data:update` prints a warning and the recipe has no `itemValue`, rather than counting the material as 0. The shapeshifter staffs are like this, because their `ALCHEMY_RARE` materials have no value, and so are the satchels of insight, because the Tome of Insight they need has none.
@@ -106,6 +106,15 @@ The render service draws each icon when it's asked for, so icons load slowly fro
 - **One item per enchantment level:** the game files list `T5_METALBAR_LEVEL1` as an item of its own. Its market ID is `T5_METALBAR_LEVEL1@1`, and its `baseId` is the plain `T5_METALBAR`.
 - **Recipe:** the raw resource plus one of the tier below, such as 3 T5 ore and a T4 bar. T2 takes the raw resource alone. The others are kept in `alternatives`: one with a faction token in place of a raw resource, and for stone blocks, enchanted stone that makes 2, 4 or 8 blocks at once. Stone blocks have no enchantment levels of their own.
 - **Item value:** the item's own `@itemvalue`, such as 32 for a T5 bar.
+
+## Food and potions
+
+`src/generated/consumables.json` has a recipe for every food and potion, T1 to T8 at each enchantment level, from the `consumableitem` list in `items.json`. The app imports it as `consumableRecipes` from `@aoc/crafting-data`.
+
+- **Which items:** shop category `consumables` with subcategory `food` or `potions` and a crafting category, `food` or `potion`, which the specialties of Caerleon and Brecilien are for. Event items (`UNIQUE_…`) are left out, and so is the rest of the list, such as fish and fish sauce, which the schema doesn't read.
+- **Several at once:** a recipe makes `@amountcrafted` items, such as 10 stews or 5 potions. Profit is per item, and the craft panel also shows it per craft.
+- **Enchanted:** `T4_POTION_HEAL@1` adds 15 arcane extract (`T1_ALCHEMY_EXTRACT_LEVEL1`), and enchanted food adds fish sauce.
+- **Item value:** per item, from the materials like gear. An ingredient with no `@itemvalue` takes the value of its own recipe, such as bread from flour from wheat. One with neither, such as arcane extract or beast remains, counts as 0, since the game gives fish sauce an explicit 0. The station fee is paid on every item a craft makes.
 
 ## Crafting locations
 

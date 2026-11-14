@@ -12,8 +12,8 @@ function tree(id: string) {
 }
 
 describe("craftingTrees", () => {
-  it("has a tree for each weapon type, armor piece and offhand type, bags, capes and each refined resource", () => {
-    expect(craftingTrees).toHaveLength(36);
+  it("has a tree for each weapon type, armor piece and offhand type, bags, capes, each refined resource, food and potions", () => {
+    expect(craftingTrees).toHaveLength(38);
   });
 
   it("makes each tier of a refined resource a specialization, lowest first", () => {

@@ -38,7 +38,14 @@ export function evaluateEach(
         }).total,
       )
     : rrr;
-  const fee = stationFee(recipe.itemValue, settings.stationFee);
+  // The item value is each item's, and a craft that makes several pays for
+  // all of them.
+  const fee = stationFee(
+    recipe.itemValue === undefined
+      ? undefined
+      : recipe.itemValue * recipe.amountCrafted,
+    settings.stationFee,
+  );
   const sale = revenue(prices.products.get(recipe.itemId), {
     sellMode: settings.sellMode,
     premium: settings.premium,

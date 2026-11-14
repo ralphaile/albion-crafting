@@ -13,17 +13,17 @@ import {
   ARMOR_MATERIALS,
   ARMOR_SLOTS,
   ACCESSORY_TYPES,
-  CATEGORIES,
+  ALL_CATEGORIES,
+  CONSUMABLE_TYPES,
   ENCHANTS,
   MAX_DAILY_VOLUME,
   MAX_MARGIN_PERCENT,
   MAX_PROFIT,
   MAX_SEARCH_LENGTH,
+  MODE_TIERS,
   NO_FILTERS,
   OFFHAND_TYPES,
   REFINED_TYPES,
-  REFINING_TIERS,
-  TIERS,
   WEAPON_TYPES,
 } from "./filters.constants";
 import { activeFilters, categoryLabel } from "./filters.helpers";
@@ -49,11 +49,12 @@ const ARTIFACT_CHOICES: readonly { id: ArtifactFilter; label: string }[] = [
 
 type SetCategories = (ids: readonly string[], on: boolean) => void;
 
-const CATEGORY_ORDER = [...CATEGORIES, ...REFINED_TYPES].map(({ id }) => id);
+const CATEGORY_ORDER = ALL_CATEGORIES.map(({ id }) => id);
 
 const MODES: readonly { id: CraftMode; label: string }[] = [
   { id: "crafting", label: "Crafting" },
   { id: "refining", label: "Refining" },
+  { id: "consumables", label: "Food & potions" },
 ];
 
 function toggled<T>(values: readonly T[], value: T, order: readonly T[]) {
@@ -199,11 +200,11 @@ function categorySummary(chosen: readonly string[]) {
 
 function CategoryPicker({
   chosen,
-  refining,
+  mode,
   onSet,
 }: {
   chosen: readonly string[];
-  refining: boolean;
+  mode: CraftMode;
   onSet: SetCategories;
 }) {
   const labelId = useId();
@@ -266,10 +267,18 @@ function CategoryPicker({
           role="group"
           aria-labelledby={labelId}
         >
-          {refining ? (
+          {mode === "refining" ? (
             <CategoryGroup
               label="Refined"
               options={REFINED_TYPES}
+              chosen={chosen}
+              onSet={onSet}
+              className={styles.inline}
+            />
+          ) : mode === "consumables" ? (
+            <CategoryGroup
+              label="Consumable"
+              options={CONSUMABLE_TYPES}
               chosen={chosen}
               onSet={onSet}
               className={styles.inline}
@@ -469,8 +478,7 @@ export function CraftFilters({
 }) {
   const artifactsName = useId();
   const modeName = useId();
-  const refining = filters.mode === "refining";
-  const tiers = refining ? REFINING_TIERS : TIERS;
+  const tiers = MODE_TIERS[filters.mode];
   const chips = activeFilters(filters);
   const setMode = (mode: CraftMode) => {
     onChange((current) => inMode({ ...current, mode }));
@@ -567,7 +575,7 @@ export function CraftFilters({
                   type="radio"
                   name={artifactsName}
                   value={choice.id}
-                  disabled={refining}
+                  disabled={filters.mode !== "crafting"}
                   checked={filters.artifacts === choice.id}
                   onChange={() => {
                     set("artifacts")(choice.id);
@@ -580,7 +588,7 @@ export function CraftFilters({
         </div>
         <CategoryPicker
           chosen={filters.categories}
-          refining={refining}
+          mode={filters.mode}
           onSet={setCategories}
         />
       </div>

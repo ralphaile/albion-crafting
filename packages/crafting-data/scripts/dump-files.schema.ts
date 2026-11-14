@@ -88,6 +88,24 @@ const journalItem = z.object({
     .optional(),
 });
 
+// Only the food and potions are read: fish, fish sauce, event items and
+// unreleased ones in the same list don't fit a recipe.
+function isCraftedConsumable(entry: unknown): boolean {
+  if (typeof entry !== "object" || entry === null) {
+    return false;
+  }
+  const item = entry as Record<string, unknown>;
+  const id = item["@uniquename"];
+  return (
+    typeof id === "string" &&
+    !id.startsWith("UNIQUE_") &&
+    item["@shopcategory"] === "consumables" &&
+    (item["@shopsubcategory1"] === "food" ||
+      item["@shopsubcategory1"] === "potions") &&
+    item["@craftingcategory"] !== undefined
+  );
+}
+
 const bonus = z.object({
   "@value": number,
   "@islandvalue": number.optional(),
@@ -126,6 +144,13 @@ export const dumpSchemas = {
         equipmentitem: z.array(gearItem),
         transformationweapon: z.array(gearItem),
         simpleitem: z.array(simpleItem),
+        consumableitem: z.preprocess(
+          (entries: unknown): unknown[] =>
+            Array.isArray(entries)
+              ? (entries as unknown[]).filter(isCraftedConsumable)
+              : [],
+          z.array(gearItem),
+        ),
         journalitem: z.array(journalItem),
       })
       .catchall(z.unknown()),

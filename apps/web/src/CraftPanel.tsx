@@ -466,6 +466,12 @@ export function CraftPanel({
               <Figure label="+ journals" value={shown.journal.value} />
             )}
             <Figure label="Profit" value={result?.profit} total />
+            {madeAtOnce > 1 && (
+              <Figure
+                label={`Per craft of ${formatCount(madeAtOnce)}`}
+                value={result && result.profit * madeAtOnce}
+              />
+            )}
             <Figure
               label="Margin"
               value={result?.margin}

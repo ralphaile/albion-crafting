@@ -262,9 +262,10 @@ describe("evaluate", () => {
   it("works out the profit per item when a craft makes several", () => {
     const twoAtOnce: Recipe = { ...astralStaff, amountCrafted: 2 };
 
+    // The station fee is paid on both items' value: 2 × 1,368.
     expect(
       complete(evaluate(twoAtOnce, rrr25, settings, prices)).profit,
-    ).toBeCloseTo(65_450 - 49_868 / 2, 6);
+    ).toBeCloseTo(65_450 - (48_500 + 2 * 1368) / 2, 6);
   });
 
   it("has no margin when the craft costs nothing", () => {

@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
+import { extractConsumableRecipes } from "./consumables.helpers.ts";
 import { download } from "./download.client.ts";
 import { validate } from "./dumps.schema.ts";
 import { extractHideouts } from "./hideouts.helpers.ts";
@@ -155,8 +156,30 @@ export async function update({
       .join(", ")}`,
   );
 
+  const consumables = addItemValues(
+    extractConsumableRecipes(items),
+    items.simpleitem,
+    { unvalued: "zero" },
+  );
+  for (const warning of consumables.warnings) {
+    warn(`Warning: ${warning}`);
+  }
+  await writeJson(
+    join(packageDir, "src", "generated", "consumables.json"),
+    consumables.recipes,
+  );
+  const consumableBaseIds = (subcategory: string) =>
+    new Set(
+      consumables.recipes
+        .filter((recipe) => recipe.shopSubcategory === subcategory)
+        .map(({ baseId }) => baseId),
+    ).size;
+  log(
+    `Extracted ${count(consumables.recipes.length, "food and potion recipes")}: ${count(consumableBaseIds("food"), "food")}, ${count(consumableBaseIds("potions"), "potions")}`,
+  );
+
   const named = extractItems(
-    [...recipes, ...refining],
+    [...recipes, ...refining, ...consumables.recipes],
     dumps["formatted/items.json"],
   );
   for (const warning of named.warnings) {

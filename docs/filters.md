@@ -2,11 +2,11 @@
 
 The filters above the best-crafts table narrow it to what you can and want to craft. Every active filter shows as a chip below them: click a chip to remove that filter, or **Clear all** to remove them all.
 
-## Crafting or refining
+## Crafting, refining, or food and potions
 
-**Mode** picks what the table ranks: **Crafting** ranks gear, and **Refining** ranks metal bars, planks, cloth, leather and stone blocks, with each place's [refining bonus](glossary.md#production-bonus). It isn't a filter, so it has no chip and **Clear all** keeps it.
+**Mode** picks what the table ranks: **Crafting** ranks gear, **Refining** ranks metal bars, planks, cloth, leather and stone blocks, with each place's [refining bonus](glossary.md#production-bonus), and **Food & potions** ranks food and potions, with Caerleon's food specialty and Brecilien's potion specialty. It isn't a filter, so it has no chip and **Clear all** keeps it.
 
-The two modes offer different tiers and categories: refining has T2 and T3, its categories are the 5 refined resources, and it has no artifacts. Switching keeps the tiers both modes have and drops the categories the new mode doesn't have.
+The modes offer different tiers and categories: refining has T2 to T8 and the 5 refined resources, food and potions have T1 to T8 and the categories Food and Potion, and only crafting has artifacts. Switching keeps the tiers both modes have and drops the categories the new mode doesn't have.
 
 ## How they combine
 
@@ -30,7 +30,7 @@ The filters are in the page's link, so you can bookmark or share it. Only filter
 
 | Parameter   | Filter                                                                                                                                                  | Example                                |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `mode`      | `refining`; crafting is left out                                                                                                                        | `mode=refining`                        |
+| `mode`      | `refining` or `consumables`; crafting is left out                                                                                                       | `mode=refining`                        |
 | `tier`      | Tiers                                                                                                                                                   | `tier=6,7`                             |
 | `enchant`   | Enchantment levels                                                                                                                                      | `enchant=0,1`                          |
 | `cat`       | Categories, as the game files name them: weapon types such as `sword`, armor pieces such as `plate_helmet`, and `booktype`, `shieldtype` or `torchtype` | `cat=sword,plate_helmet,leather_shoes` |

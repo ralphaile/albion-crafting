@@ -1,5 +1,5 @@
 import { armorPiece } from "./armor.helpers";
-import type { Filters, Option } from "./filters.types";
+import type { CraftMode, Filters, Option } from "./filters.types";
 
 export const NO_FILTERS: Filters = {
   mode: "crafting",
@@ -15,8 +15,9 @@ export const NO_FILTERS: Filters = {
   search: "",
 };
 
-export const TIERS: readonly number[] = [4, 5, 6, 7, 8];
-export const REFINING_TIERS: readonly number[] = [2, 3, 4, 5, 6, 7, 8];
+const TIERS: readonly number[] = [4, 5, 6, 7, 8];
+const REFINING_TIERS: readonly number[] = [2, 3, 4, 5, 6, 7, 8];
+export const CONSUMABLE_TIERS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8];
 export const ENCHANTS: readonly number[] = [0, 1, 2, 3, 4];
 
 export const WEAPON_TYPES: readonly Option[] = [
@@ -81,10 +82,28 @@ export const REFINED_TYPES: readonly Option[] = [
   { id: "stoneblock", label: "Stone block" },
 ];
 
+export const CONSUMABLE_TYPES: readonly Option[] = [
+  { id: "food", label: "Food" },
+  { id: "potions", label: "Potion" },
+];
+
 export const ALL_CATEGORIES: readonly Option[] = [
   ...CATEGORIES,
   ...REFINED_TYPES,
+  ...CONSUMABLE_TYPES,
 ];
+
+export const MODE_TIERS: Readonly<Record<CraftMode, readonly number[]>> = {
+  crafting: TIERS,
+  refining: REFINING_TIERS,
+  consumables: CONSUMABLE_TIERS,
+};
+
+export const MODE_CATEGORIES: Readonly<Record<CraftMode, readonly Option[]>> = {
+  crafting: CATEGORIES,
+  refining: REFINED_TYPES,
+  consumables: CONSUMABLE_TYPES,
+};
 
 export const MAX_SEARCH_LENGTH = 100;
 
