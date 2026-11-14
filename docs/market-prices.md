@@ -22,6 +22,7 @@ const marketData = await openMarketData({
 ```
 
 - **`snapshotUrl`:** where the site publishes its [price snapshot](#price-snapshot). Without it, there's no fallback.
+- **`pricesUrl`:** the app's [price server](api.md). Prices come from there instead of AODP, in the same shape. History still comes from AODP.
 
 - **One at a time:** prices and history share one AODP client, so they share its request limits, on every server. Open market data once and pass it around. A second one, such as in another browser tab, has limits of its own.
 - **Saved in the browser:** prices and history go in IndexedDB, in a database of their own called `aoc-price-cache`, so clearing it can't touch anything else the app saves. [ADR-002](adr/002-local-first-storage.md) explains why.
