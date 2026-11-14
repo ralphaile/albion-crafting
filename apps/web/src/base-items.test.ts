@@ -74,7 +74,8 @@ describe("atCraftCost", () => {
       origin: "api",
       crafted: true,
     });
-    expect(capePrice?.buyMax).toEqual(capePrice?.sellMin);
+    // With a buy order's 2.5% setup fee, it comes back to the craft cost.
+    expect(capePrice?.buyMax).toMatchObject({ value: 2050 / 1.025 });
     expect(cloth).toEqual(row("T4_CLOTH", 100));
   });
 
