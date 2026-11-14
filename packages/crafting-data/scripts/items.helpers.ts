@@ -1,3 +1,5 @@
+import { emptyJournalId, fullJournalId } from "@aoc/core";
+
 import type { Dumps } from "./dumps.schema.ts";
 import type { Item } from "../src/item.types.ts";
 import type { GameRecipe } from "../src/recipe.types.ts";
@@ -27,6 +29,9 @@ export function extractItems(
       [recipe, ...recipe.alternatives].flatMap(({ materials }) =>
         materials.map(({ id }) => id),
       ),
+    ),
+    ...recipes.flatMap(({ journal }) =>
+      journal ? [emptyJournalId(journal.id), fullJournalId(journal.id)] : [],
     ),
   ]);
 
