@@ -1,3 +1,4 @@
+import { SETUP_FEE } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
 
 import type { Craft, UsedPrice, UsedPrices } from "./best-crafts.types";
@@ -18,13 +19,34 @@ export function baseItems(recipes: readonly GameRecipe[]): GameRecipe[] {
 
 // Each base item priced at what crafting one costs, in place of its market
 // price, as old as the oldest price that went into it. One that can't be
-// worked out keeps its market price.
+// worked out keeps its market price. The craft cost already has its own
+// materials' setup fees, so its buy-order price is set to come back to the
+// craft cost once a setup fee is added to it.
+interface OrderPrices<Price> {
+  sellMin: Price;
+  buyMax: Price;
+}
+
+function craftedPrice(
+  value: number,
+  seen: NonNullable<Craft["oldestMaterialPrice"]>,
+): UsedPrice {
+  return {
+    status: seen.status,
+    value,
+    observedAt: seen.observedAt,
+    ageMinutes: seen.ageMinutes,
+    origin: "api",
+    crafted: true,
+  };
+}
+
 export function atCraftCost(
   prices: UsedPrices,
   baseCrafts: readonly Craft[],
 ): UsedPrices {
   const crafted = new Map(
-    baseCrafts.flatMap((craft): [string, UsedPrice][] => {
+    baseCrafts.flatMap((craft): [string, OrderPrices<UsedPrice>][] => {
       const cost = craftCost(craft);
       const seen = craft.oldestMaterialPrice;
       return cost === undefined || seen === undefined
@@ -33,12 +55,8 @@ export function atCraftCost(
             [
               craft.itemId,
               {
-                status: seen.status,
-                value: Math.round(cost),
-                observedAt: seen.observedAt,
-                ageMinutes: seen.ageMinutes,
-                origin: "api",
-                crafted: true,
+                sellMin: craftedPrice(Math.round(cost), seen),
+                buyMax: craftedPrice(Math.round(cost) / (1 + SETUP_FEE), seen),
               },
             ],
           ];
@@ -48,9 +66,7 @@ export function atCraftCost(
     ...prices,
     materials: prices.materials.map((row) => {
       const price = crafted.get(row.itemId);
-      return price === undefined
-        ? row
-        : { ...row, sellMin: price, buyMax: price };
+      return price === undefined ? row : { ...row, ...price };
     }),
   };
 }

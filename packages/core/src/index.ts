@@ -62,6 +62,7 @@ export {
   type PriceChoiceOptions,
   type PriceOrigin,
 } from "./price-choice.types.js";
+export { SETUP_FEE } from "./market.constants.js";
 export { evaluatePlan } from "./plan.helpers.js";
 export {
   type PlanEntry,

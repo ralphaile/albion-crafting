@@ -748,6 +748,17 @@ describe.each([
       ]);
     });
 
+    it("asks again after clear()", async () => {
+      const { requests } = fakeAodp();
+      const marketData = await openMarketData();
+
+      await marketData.getSeries("T4_BAG", "Caerleon", 1, { hourly: false });
+      await marketData.clear();
+      await marketData.getSeries("T4_BAG", "Caerleon", 1, { hourly: false });
+
+      expect(requests).toEqual(["west history T4_BAG", "west history T4_BAG"]);
+    });
+
     it("fails when AODP does", async () => {
       const { failing } = fakeAodp();
       failing.add("T4_BAG");

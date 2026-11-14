@@ -22,6 +22,7 @@ import { atCraftCost, baseItems } from "./base-items.helpers";
 import { evaluateCrafts, withDailyVolumes } from "./best-crafts.helpers";
 import type { Craft, CraftHistory, CraftPrices } from "./best-crafts.types";
 import {
+  lowerChoices,
   lowerEnchants,
   upgradeMaterials,
   withEnchantPaths,
@@ -827,8 +828,14 @@ export function useBestCrafts(
     () =>
       craftPrices === undefined
         ? []
-        : evaluateCrafts(lower, place, routeSettings, craftPrices),
-    [lower, place, routeSettings, craftPrices],
+        : evaluateCrafts(
+            lower,
+            place,
+            routeSettings,
+            craftPrices,
+            lowerChoices(selected, recipeChoices),
+          ),
+    [lower, place, routeSettings, craftPrices, selected, recipeChoices],
   );
   const withPaths = useMemo(
     () =>
