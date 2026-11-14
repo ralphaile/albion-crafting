@@ -83,6 +83,25 @@ describe("focusCandidates", () => {
     ).toBe(7);
   });
 
+  it("costs a craft ranked by upgrading at what that path spends", () => {
+    const [craft] = crafts(5000);
+    if (craft === undefined) {
+      throw new Error("No craft");
+    }
+    const upgraded = {
+      ...craft,
+      rankedByUpgrade: true as const,
+      enchantPaths: {
+        level: 1,
+        direct: 9000,
+        upgraded: { from: 0, craftCost: 1000, total: 1234, steps: [] },
+        cheaper: "upgraded" as const,
+      },
+    };
+
+    expect(focusCandidates([upgraded], 100)[0]?.costPerCraft).toBe(1234);
+  });
+
   it("counts what a craft makes with the recipe it ranks, such as 8 stone blocks", () => {
     const recipe = RECIPES_BY_ID.get("T4_STONEBLOCK");
     if (recipe === undefined) {
