@@ -77,7 +77,37 @@ describe("withEnchantPaths", () => {
 
     const saved = 20_000 - (1000 + 288 * 10);
     expect(profitOf(craft)).toBe(5000 + saved - 400 + 100);
-    expect(craft).toMatchObject({ focusCost: 100, silverPerFocus: 0 });
+    expect(craft).toMatchObject({
+      focusCost: 100,
+      silverPerFocus: 0,
+      rankedByUpgrade: true,
+    });
+  });
+
+  it("lists only the upgrades from the level the cheaper path starts at", () => {
+    const swordAt2 = craftOf("T5_MAIN_SWORD@2", {
+      materials: 90_000,
+      profit: 5000,
+      journal: 400,
+    });
+    const swordAt1Cheap = craftOf("T5_MAIN_SWORD@1", {
+      materials: 1000,
+      profit: 0,
+      journal: 400,
+    });
+    const souls = { ...runes, itemId: "T5_SOUL" };
+
+    const [craft] = withEnchantPaths(
+      [swordAt2],
+      [swordAt0, swordAt1Cheap],
+      [runes, souls],
+      { buyMode: "instant", rank: true },
+    );
+
+    expect(craft?.enchantPaths?.upgraded?.from).toBe(1);
+    expect(craft?.upgradeMaterials?.map(({ itemId }) => itemId)).toEqual([
+      "T5_SOUL",
+    ]);
   });
 });
 
