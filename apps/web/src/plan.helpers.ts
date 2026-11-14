@@ -1,8 +1,10 @@
-import type {
-  EvaluatePrices,
-  PlanEntry as CorePlanEntry,
-  PlanLocation as CorePlanLocation,
-  RecipeAlternative,
+import {
+  emptyJournalId,
+  type EvaluatePrices,
+  fullJournalId,
+  type PlanEntry as CorePlanEntry,
+  type PlanLocation as CorePlanLocation,
+  type RecipeAlternative,
 } from "@aoc/core";
 import type { GameRecipe } from "@aoc/crafting-data";
 
@@ -26,10 +28,13 @@ export function chosenRecipe(
 }
 
 // The items each market needs prices for: the entries' materials where they're
-// bought, and the items where they're sold. Each list is sorted, once each.
+// bought, and the items where they're sold. With journals, the empty ones are
+// bought like a material and the full ones sold like the item. Each list is
+// sorted, once each.
 export function planMarkets(
   plan: CraftingPlan,
   pins: MaterialPins,
+  { journals = false }: { journals?: boolean } = {},
 ): Map<string, string[]> {
   const needed = new Map<string, Set<string>>();
   const add = (marketId: string, itemId: string) => {
@@ -47,6 +52,11 @@ export function planMarkets(
         add(materialMarketId({ ...route, pins }, id), id);
       }
       add(route.sellMarketId, entry.itemId);
+      if (journals && recipe.journal) {
+        const empty = emptyJournalId(recipe.journal.id);
+        add(materialMarketId({ ...route, pins }, empty), empty);
+        add(route.sellMarketId, fullJournalId(recipe.journal.id));
+      }
     }
   }
   return new Map(

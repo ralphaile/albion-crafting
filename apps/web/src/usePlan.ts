@@ -62,11 +62,11 @@ function usePlanPrices(
   marketData: MarketData,
   plan: CraftingPlan,
   pins: MaterialPins,
-  { server, staleAfterHours }: CraftingSettings,
+  { server, staleAfterHours, journals }: CraftingSettings,
 ): { fetched: Fetched; current: boolean } | undefined {
   const neededKey = useMemo(
-    () => JSON.stringify([...planMarkets(plan, pins)]),
-    [plan, pins],
+    () => JSON.stringify([...planMarkets(plan, pins, { journals })]),
+    [plan, pins, journals],
   );
   const [fetched, setFetched] = useState<{ key: string; fetched: Fetched }>();
   const key = `${server} ${String(staleAfterHours)} ${neededKey}`;
