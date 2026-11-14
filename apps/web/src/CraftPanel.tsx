@@ -51,6 +51,7 @@ const MISSING: UsedPrice = { status: "missing", origin: "api" };
 const TABS = [
   { id: "breakdown", label: "Breakdown" },
   { id: "markets", label: "Compare markets" },
+  { id: "history", label: "History" },
 ] as const;
 
 type Tab = (typeof TABS)[number]["id"];
@@ -240,6 +241,7 @@ export function CraftPanel({
   onChooseRecipe,
   onAddToPlan,
   compareMarkets,
+  priceHistory,
   onClose,
 }: {
   craft: Craft | undefined;
@@ -257,9 +259,18 @@ export function CraftPanel({
   onAddToPlan?: AddToPlanHandler;
   // Without it, the panel has no Compare markets tab.
   compareMarkets?: (craft: Craft) => ReactNode;
+  // Without it, the panel has no History tab.
+  priceHistory?: (craft: Craft) => ReactNode;
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("breakdown");
+  const tabViews: Partial<Record<Tab, (craft: Craft) => ReactNode>> = {
+    ...(compareMarkets && { markets: compareMarkets }),
+    ...(priceHistory && { history: priceHistory }),
+  };
+  const shownTabs = TABS.filter(
+    ({ id }) => id === "breakdown" || tabViews[id] !== undefined,
+  );
   const tabsId = useId();
 
   // A recipe button is pressed when you chose it, and the tick is on the
@@ -598,14 +609,15 @@ export function CraftPanel({
         return;
       }
       event.preventDefault();
-      const at = TABS.findIndex(({ id }) => id === tab);
-      const next = TABS[(at + step + TABS.length) % TABS.length] ?? TABS[0];
+      const at = shownTabs.findIndex(({ id }) => id === tab);
+      const next =
+        shownTabs[(at + step + shownTabs.length) % shownTabs.length] ?? TABS[0];
       setTab(next.id);
       document.getElementById(`${tabsId}-${next.id}`)?.focus();
     };
     return (
       <div className={styles.tabs} role="tablist" aria-label="Details">
-        {TABS.map(({ id, label }) => (
+        {shownTabs.map(({ id, label }) => (
           <button
             key={id}
             id={`${tabsId}-${id}`}
@@ -628,7 +640,8 @@ export function CraftPanel({
   }
 
   function shownFor(craft: Craft) {
-    if (compareMarkets !== undefined) {
+    if (shownTabs.length > 1) {
+      const view = tabViews[tab];
       return (
         <div
           id={`${tabsId}-panel`}
@@ -636,7 +649,7 @@ export function CraftPanel({
           className={styles.tabPanel}
           aria-labelledby={`${tabsId}-${tab}`}
         >
-          {tab === "markets" ? compareMarkets(craft) : breakdownFor(craft)}
+          {view ? view(craft) : breakdownFor(craft)}
         </div>
       );
     }
@@ -669,8 +682,7 @@ export function CraftPanel({
         setTab("breakdown");
         onClose();
       }}
-      {...(compareMarkets !== undefined &&
-        craft !== undefined && { toolbar: tabs() })}
+      {...(shownTabs.length > 1 && craft !== undefined && { toolbar: tabs() })}
     >
       {craft !== undefined && shownFor(craft)}
     </SidePanel>

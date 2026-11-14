@@ -771,6 +771,12 @@ describe("CraftPanel", () => {
         name: "Adept's Broadsword 4.0, sell order in Lymhurst",
       }),
     ).toHaveAttribute("placeholder", "6,000");
+
+    fireEvent.click(tab("History"));
+
+    expect(
+      await within(panel()).findByText("No history", {}, { timeout: 5000 }),
+    ).toBeInTheDocument();
   });
 
   it("closes with its close button", async () => {
