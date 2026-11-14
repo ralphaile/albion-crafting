@@ -81,6 +81,9 @@ export type Craft = CraftAlternative & {
   // with the runes, souls or relics each level takes.
   enchantPaths?: EnchantPaths;
   upgradeMaterials?: readonly UpgradeMaterial[];
+  // Its profit and margin are those of crafting lower and upgrading. Its
+  // materials, station fee and silver stay those of crafting it directly.
+  rankedByUpgrade?: true;
 };
 
 export interface UpgradeMaterial {

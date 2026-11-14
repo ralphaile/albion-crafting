@@ -32,8 +32,10 @@ export function focusCandidates(
     ) {
       return [];
     }
-    const { dailyVolume } = craft;
+    const { dailyVolume, enchantPaths } = craft;
     const { amountCrafted } = chosenRecipe(craft.recipe, craft.alternative);
+    const upgraded =
+      craft.rankedByUpgrade === true ? enchantPaths?.upgraded : undefined;
     return [
       {
         itemId: craft.itemId,
@@ -41,7 +43,11 @@ export function focusCandidates(
         amountCrafted,
         focusPerCraft: craft.focusCost,
         costPerCraft:
-          craft.materialCost.total + (craft.stationFee ?? 0) + craft.silverCost,
+          upgraded === undefined
+            ? craft.materialCost.total +
+              (craft.stationFee ?? 0) +
+              craft.silverCost
+            : upgraded.total * amountCrafted,
         profitPerCraft: craft.profit * amountCrafted,
         silverPerFocus: craft.silverPerFocus,
         maxQuantity:
