@@ -39,11 +39,14 @@ export interface EvaluateSettings {
   dailyBonuses?: readonly DailyBonus[];
   fce?: (itemId: string) => number;
   journals?: boolean;
+  qualityWeighted?: boolean;
 }
 
 export interface EvaluatePrices {
   materials: ReadonlyMap<string, OrderPrices>;
   products: ReadonlyMap<string, OrderPrices>;
+  // Qualities 2 to 5 of the products, by item and quality.
+  productQualities?: ReadonlyMap<string, ReadonlyMap<number, OrderPrices>>;
 }
 
 interface EvaluationBase {

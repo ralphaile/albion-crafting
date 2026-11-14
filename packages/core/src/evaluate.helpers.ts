@@ -11,6 +11,7 @@ import { focusCost, silverPerFocus } from "./focus.helpers.js";
 import { journalValue } from "./journal.helpers.js";
 import { materialCost } from "./material-cost.helpers.js";
 import { placeProductionBonus } from "./place-bonus.helpers.js";
+import { qualityWeightedRevenue } from "./quality.helpers.js";
 import { returnRate } from "./return-rate.helpers.js";
 import { revenue } from "./revenue.helpers.js";
 import { stationFee } from "./station-fee.helpers.js";
@@ -46,11 +47,20 @@ export function evaluateEach(
       : recipe.itemValue * recipe.amountCrafted,
     settings.stationFee,
   );
-  const sale = revenue(prices.products.get(recipe.itemId), {
+  const saleOptions = {
     sellMode: settings.sellMode,
     premium: settings.premium,
     undercut: settings.undercut ?? false,
-  });
+  };
+  const normalSale = revenue(prices.products.get(recipe.itemId), saleOptions);
+  const sale =
+    settings.qualityWeighted === true
+      ? qualityWeightedRevenue(
+          normalSale,
+          prices.productQualities?.get(recipe.itemId),
+          saleOptions,
+        )
+      : normalSale;
 
   function evaluateAlternative(
     alternative: RecipeAlternative,
